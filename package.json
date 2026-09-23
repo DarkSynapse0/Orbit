@@ -1,0 +1,13 @@
+{
+  "name": "orbit",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Orbit — a self-driving savings app on Solana: sets aside a slice of daily spending and grows it via on-chain USDC yield.",
+  "scripts": {
+    "dev": "pnpm --parallel --filter app --filter server dev",
+    "dev:app": "pnpm --filter app dev",
+    "dev:server": "pnpm --filter server dev",
+    "build": "pnpm -r build"
+  },
+  "packageManager": "pnpm@11.26.0"
+}

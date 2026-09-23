@@ -1,0 +1,41 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# next.js
+.next/
+out/
+next-env.d.ts
+
+# builds
+dist/
+build/
+
+# anchor / solana
+target/
+test-ledger/
+.anchor/
+**/*.rs.bk
+
+# env & secrets
+.env
+.env*.local
+*.pem
+wallet-keypair.json
+id.json
+**/.devnet.json
+**/.plaid.json
+
+# generated research export
+*.pdf
+
+# logs
+*.log
+npm-debug.log*
+
+# os / editor
+.DS_Store
+.directory
+.idea/
+.vscode/

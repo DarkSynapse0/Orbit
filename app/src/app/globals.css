@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+/* Orbit is a dark-first product; force the dark palette. */
+:root {
+  --background: #08080c;
+  --foreground: #ececf1;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  /* Subtle depth: indigo glow top, violet glow bottom-right. */
+  background-image:
+    radial-gradient(55rem 40rem at 50% -12%, rgba(99, 102, 241, 0.13), transparent 60%),
+    radial-gradient(45rem 38rem at 92% 108%, rgba(168, 85, 247, 0.08), transparent 60%);
+  background-attachment: fixed;
+}
+
+/* Honor reduced-motion globally. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
