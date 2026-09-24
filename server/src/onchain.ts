@@ -5,21 +5,27 @@ import { Connection, Keypair, PublicKey, SystemProgram } from '@solana/web3.js';
 import { createMint, getOrCreateAssociatedTokenAccount, mintTo, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { config } from './config.js';
 
-// Real on-chain client for the orbit-vault program on devnet. The server acts as the
-// *funder* — it stands in for Stripe's fiat->USDC settlement: it mints test USDC into its
-// own token account and deposits it into each user's OWN vault (the user is the owner).
-// Only the user's key can ever withdraw, so the server never takes custody of savings.
+// Real on-chain client for the orbit-vault program on devnet.
+// - The server is the *funder* (mock Stripe): it mints test USDC and deposits into each
+//   user's OWN vault. Only the user (owner) can withdraw — the server never holds custody.
+// - Deposits are routed into a shared *yield reserve* (the on-chain "venue", a lending pool
+//   standing in for Kamino on devnet). The reserve holds pooled USDC + a prefunded interest
+//   buffer and pays real interest on withdrawal, so users receive more than they deposited.
 
 const USDC_DECIMALS = 6;
+const APY_BPS = 600; // 6%
+const RESERVE_BUFFER_USD = 1_000_000; // prefunded so the reserve can always pay interest
 const toBase = (usd: number) => Math.round(usd * 10 ** USDC_DECIMALS);
 const fromBase = (b: number) => b / 10 ** USDC_DECIMALS;
 
 type Ctx = {
   connection: Connection;
-  wallet: Keypair; // the funder / rent payer (Orbit backend dev wallet)
+  wallet: Keypair; // funder / rent payer / reserve admin (Orbit backend dev wallet)
   program: anchor.Program;
   mint: PublicKey;
-  funderAta: PublicKey; // server's USDC token account — the source of pipeline deposits
+  funderAta: PublicKey; // server's USDC token account — source of pipeline deposits
+  reserve: PublicKey;
+  reserveVault: PublicKey;
 };
 
 let ctxPromise: Promise<Ctx> | null = null;
@@ -42,14 +48,18 @@ async function loadOrCreateMint(connection: Connection, wallet: Keypair): Promis
   return mint;
 }
 
-/** Deterministic PDAs for a given vault owner (user wallet). */
-function vaultPdas(program: anchor.Program, owner: PublicKey) {
+function vaultPda(program: anchor.Program, owner: PublicKey) {
   const [vault] = PublicKey.findProgramAddressSync([Buffer.from('vault'), owner.toBuffer()], program.programId);
-  const [vaultToken] = PublicKey.findProgramAddressSync(
-    [Buffer.from('vault_token'), owner.toBuffer()],
+  return vault;
+}
+
+function reservePdas(program: anchor.Program, mint: PublicKey) {
+  const [reserve] = PublicKey.findProgramAddressSync([Buffer.from('reserve'), mint.toBuffer()], program.programId);
+  const [reserveVault] = PublicKey.findProgramAddressSync(
+    [Buffer.from('reserve_vault'), mint.toBuffer()],
     program.programId,
   );
-  return { vault, vaultToken };
+  return { reserve, reserveVault };
 }
 
 async function build(): Promise<Ctx> {
@@ -62,17 +72,39 @@ async function build(): Promise<Ctx> {
   const program = new anchor.Program(idl, provider);
   const mint = await loadOrCreateMint(connection, wallet);
   const ata = await getOrCreateAssociatedTokenAccount(connection, wallet, mint, wallet.publicKey);
-  return { connection, wallet, program, mint, funderAta: ata.address };
+  const { reserve, reserveVault } = reservePdas(program, mint);
+  const ctx: Ctx = { connection, wallet, program, mint, funderAta: ata.address, reserve, reserveVault };
+  await ensureReserve(ctx);
+  return ctx;
 }
 
-function ctx(): Promise<Ctx> {
-  if (!ctxPromise) ctxPromise = build();
-  return ctxPromise;
+/** Ensure the shared yield reserve exists and is funded with an interest buffer. */
+async function ensureReserve(c: Ctx) {
+  try {
+    await c.program.account.reserve.fetch(c.reserve);
+    return;
+  } catch {
+    /* not created yet */
+  }
+  await c.program.methods
+    .initializeReserve(APY_BPS)
+    .accounts({
+      admin: c.wallet.publicKey,
+      reserve: c.reserve,
+      mint: c.mint,
+      reserveVault: c.reserveVault,
+      tokenProgram: TOKEN_PROGRAM_ID,
+      systemProgram: SystemProgram.programId,
+    })
+    .rpc();
+  // Prefund the interest buffer (server is the mint authority) so the reserve can always
+  // pay out more than principal — this is the yield source on devnet.
+  await mintTo(c.connection, c.wallet, c.mint, c.reserveVault, c.wallet, toBase(RESERVE_BUFFER_USD));
 }
 
 /** Ensure a user's vault exists; if not, the server opens it (server pays rent, user owns it). */
 async function ensureVault(c: Ctx, owner: PublicKey) {
-  const { vault, vaultToken } = vaultPdas(c.program, owner);
+  const vault = vaultPda(c.program, owner);
   try {
     await c.program.account.vault.fetch(vault);
   } catch {
@@ -83,12 +115,15 @@ async function ensureVault(c: Ctx, owner: PublicKey) {
         owner,
         vault,
         mint: c.mint,
-        vaultTokenAccount: vaultToken,
-        tokenProgram: TOKEN_PROGRAM_ID,
         systemProgram: SystemProgram.programId,
       })
       .rpc();
   }
+}
+
+function ctx(): Promise<Ctx> {
+  if (!ctxPromise) ctxPromise = build();
+  return ctxPromise;
 }
 
 /** Mock Stripe hop: mint test USDC into the server's (funder's) token account. */
@@ -97,19 +132,22 @@ export async function deliverUsdc(usd: number): Promise<void> {
   await mintTo(c.connection, c.wallet, c.mint, c.funderAta, c.wallet, toBase(usd));
 }
 
-/** Deposit USDC from the server (funder) into the user's OWN vault. Returns the tx signature. */
+/** Deposit USDC from the server (funder) into the user's OWN vault, routed into the yield
+ *  reserve. Returns the tx signature. */
 export async function depositOnChain(ownerAddress: string, usd: number): Promise<string> {
   const c = await ctx();
   const owner = new PublicKey(ownerAddress);
   await ensureVault(c, owner);
-  const { vault, vaultToken } = vaultPdas(c.program, owner);
+  const vault = vaultPda(c.program, owner);
   return c.program.methods
     .deposit(new anchor.BN(toBase(usd)))
     .accounts({
       funder: c.wallet.publicKey,
       owner,
       vault,
-      vaultTokenAccount: vaultToken,
+      reserve: c.reserve,
+      reserveVault: c.reserveVault,
+      mint: c.mint,
       funderTokenAccount: c.funderAta,
       tokenProgram: TOKEN_PROGRAM_ID,
     })
@@ -120,7 +158,7 @@ export async function depositOnChain(ownerAddress: string, usd: number): Promise
 export async function getVaultOnChain(ownerAddress: string) {
   const c = await ctx();
   const owner = new PublicKey(ownerAddress);
-  const { vault, vaultToken } = vaultPdas(c.program, owner);
+  const vault = vaultPda(c.program, owner);
   let principalUsd = 0;
   let accruedYieldUsd = 0;
   let lastUpdateTs = 0;
@@ -139,9 +177,10 @@ export async function getVaultOnChain(ownerAddress: string) {
     principalUsd,
     accruedYieldUsd,
     lastUpdateTs,
+    apyBps: APY_BPS,
     programId: c.program.programId.toBase58(),
     vaultAccount: vault.toBase58(),
-    vaultTokenAccount: vaultToken.toBase58(),
+    reserveVault: c.reserveVault.toBase58(),
     cluster: config.solana.cluster,
   };
 }
@@ -152,6 +191,8 @@ export async function getConfig() {
   return {
     mint: c.mint.toBase58(),
     programId: c.program.programId.toBase58(),
+    reserve: c.reserve.toBase58(),
+    reserveVault: c.reserveVault.toBase58(),
     cluster: config.solana.cluster,
   };
 }

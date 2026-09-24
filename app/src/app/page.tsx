@@ -33,8 +33,9 @@ type OnChain = {
   principalUsd: number;
   accruedYieldUsd: number;
   lastUpdateTs: number;
+  apyBps: number;
   vaultAccount: string;
-  vaultTokenAccount: string;
+  reserveVault: string;
   programId: string;
   cluster: string;
 };
@@ -314,9 +315,10 @@ export default function Home() {
           <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-white/[0.06] pt-3 text-[11px]">
             <span className="text-neutral-500">Verify:</span>
             <span className="text-neutral-400">
-              vault <CopyAddress value={onchain.vaultTokenAccount} label="vault address" />
+              vault <CopyAddress value={onchain.vaultAccount} label="vault address" />
             </span>
-            <ExplorerLink href={solAcct(onchain.vaultTokenAccount)}>Solscan</ExplorerLink>
+            <ExplorerLink href={solAcct(onchain.vaultAccount)}>Solscan</ExplorerLink>
+            <ExplorerLink href={solAcct(onchain.reserveVault)}>yield reserve</ExplorerLink>
             {lastSig && <ExplorerLink href={solTx(lastSig)}>last deposit</ExplorerLink>}
           </div>
         )}

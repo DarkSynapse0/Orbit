@@ -43,12 +43,14 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
   }, [wallet, connection]);
 
   const pdas = useMemo(() => {
-    if (!publicKey || !program) return null;
-    const seeds = (s: string) => [new TextEncoder().encode(s), publicKey.toBytes()];
-    const [vault] = PublicKey.findProgramAddressSync(seeds("vault"), program.programId);
-    const [vaultToken] = PublicKey.findProgramAddressSync(seeds("vault_token"), program.programId);
-    return { vault, vaultToken };
-  }, [publicKey, program]);
+    if (!publicKey || !program || !mint) return null;
+    const enc = new TextEncoder();
+    const mintPk = new PublicKey(mint);
+    const [vault] = PublicKey.findProgramAddressSync([enc.encode("vault"), publicKey.toBytes()], program.programId);
+    const [reserve] = PublicKey.findProgramAddressSync([enc.encode("reserve"), mintPk.toBytes()], program.programId);
+    const [reserveVault] = PublicKey.findProgramAddressSync([enc.encode("reserve_vault"), mintPk.toBytes()], program.programId);
+    return { vault, reserve, reserveVault, mintPk };
+  }, [publicKey, program, mint]);
 
   useEffect(() => {
     fetch(`${API}/config`).then((r) => r.json()).then((c) => { if (c.mint) setMint(c.mint); }).catch(() => {});
@@ -113,8 +115,7 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
   const deposit = () =>
     run("deposit", async () => {
       if (!program || !publicKey || !mint || !pdas) return;
-      const mintPk = new PublicKey(mint);
-      const userAta = getAssociatedTokenAddressSync(mintPk, publicKey);
+      const userAta = getAssociatedTokenAddressSync(pdas.mintPk, publicKey);
       const ixs = [];
       const exists = await program.account.vault.fetchNullable(pdas.vault);
       if (!exists) {
@@ -125,9 +126,7 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
               payer: publicKey,
               owner: publicKey,
               vault: pdas.vault,
-              mint: mintPk,
-              vaultTokenAccount: pdas.vaultToken,
-              tokenProgram: TOKEN_PROGRAM_ID,
+              mint: pdas.mintPk,
               systemProgram: SystemProgram.programId,
             })
             .instruction(),
@@ -140,7 +139,9 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
             funder: publicKey,
             owner: publicKey,
             vault: pdas.vault,
-            vaultTokenAccount: pdas.vaultToken,
+            reserve: pdas.reserve,
+            reserveVault: pdas.reserveVault,
+            mint: pdas.mintPk,
             funderTokenAccount: userAta,
             tokenProgram: TOKEN_PROGRAM_ID,
           })
@@ -156,19 +157,21 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
   const withdraw = () =>
     run("withdraw", async () => {
       if (!program || !publicKey || !mint || !pdas) return;
-      const userAta = getAssociatedTokenAddressSync(new PublicKey(mint), publicKey);
+      const userAta = getAssociatedTokenAddressSync(pdas.mintPk, publicKey);
       const sig = await program.methods
         .withdraw(base(10))
         .accounts({
           authority: publicKey,
           vault: pdas.vault,
-          vaultTokenAccount: pdas.vaultToken,
+          reserve: pdas.reserve,
+          reserveVault: pdas.reserveVault,
+          mint: pdas.mintPk,
           userTokenAccount: userAta,
           tokenProgram: TOKEN_PROGRAM_ID,
         })
         .rpc();
       setLastSig(sig);
-      setStatus("Withdrew 10 USDC");
+      setStatus("Withdrew 10 USDC + yield");
       await refresh();
     });
 
