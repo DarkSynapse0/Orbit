@@ -129,6 +129,48 @@ body {
   animation: draw-underline 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.5s forwards;
 }
 
+/* ---- Hero: floating 3D icon tiles ---- */
+
+/* Gentle in-place bob so tiles look like they're floating, without drifting away. */
+@keyframes icon-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-9px);
+  }
+}
+.animate-icon-float {
+  animation: icon-float 6s ease-in-out infinite;
+}
+
+/* The tile itself keeps a fixed 3D tilt (per-tile --rx/--ry); straightens + lifts on hover. */
+.float-tile {
+  transform: perspective(620px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition:
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.5s ease-out,
+    border-color 0.3s ease-out;
+}
+.float-group:hover .float-tile {
+  transform: perspective(620px) rotateX(0deg) rotateY(0deg) translateY(-6px) scale(1.06);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+/* Hover tooltip. */
+.float-tip {
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity 0.22s ease-out,
+    transform 0.22s ease-out;
+}
+.float-group:hover .float-tip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 /* Honor reduced-motion globally. */
 @media (prefers-reduced-motion: reduce) {
   *,

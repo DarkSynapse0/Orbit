@@ -19,6 +19,7 @@ import { Reveal } from "@/components/landing/Reveal";
 import { LiveYield } from "@/components/landing/LiveYield";
 import LightRays from "@/components/landing/LightRays";
 import { Underline } from "@/components/landing/Underline";
+import { FloatingIcons } from "@/components/landing/FloatingIcons";
 import { SiteHeader } from "@/components/landing/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -85,6 +86,9 @@ export default function Landing() {
             </Button>
           </div>
         </Reveal>
+
+        {/* Floating 3D trust icons framing the headline (desktop only) */}
+        <FloatingIcons />
       </section>
 
       {/* ───────── Trust strip ───────── */}
