@@ -15,7 +15,6 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { Reveal } from "@/components/landing/Reveal";
-import Aurora from "@/components/landing/Aurora";
 import { LiveYield } from "@/components/landing/LiveYield";
 import { OrbitMark } from "@/components/landing/OrbitMark";
 
@@ -49,13 +48,23 @@ export default function Landing() {
 
       {/* ───────── Hero (centered, full-bleed, animated sky) ───────── */}
       <section className="relative -mt-16 flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 pb-24 pt-28 text-center">
-        {/* Calm aurora backdrop (React Bits), tuned to indigo + low intensity for trust */}
+        {/* Clean engineered backdrop: faint grid + a single soft glow. Restraint reads as trust. */}
         <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden>
-          <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, #0b0b18 0%, #0a0a15 50%, #08080c 100%)" }} />
-          <div className="absolute inset-0 opacity-70">
-            <Aurora colorStops={["#4338ca", "#818cf8", "#6d28d9"]} amplitude={0.8} blend={0.6} speed={0.4} />
-          </div>
-          <div className="absolute inset-x-0 bottom-0 h-48" style={{ background: "linear-gradient(180deg, transparent, #08080c)" }} />
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage:
+                "linear-gradient(to right, rgba(255,255,255,0.045) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.045) 1px, transparent 1px)",
+              backgroundSize: "68px 68px",
+              maskImage: "radial-gradient(ellipse 75% 60% at 50% 38%, #000 35%, transparent 78%)",
+              WebkitMaskImage: "radial-gradient(ellipse 75% 60% at 50% 38%, #000 35%, transparent 78%)",
+            }}
+          />
+          <div
+            className="absolute left-1/2 top-[36%] h-[540px] w-[880px] max-w-[95vw] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[130px]"
+            style={{ background: "radial-gradient(circle, rgba(99,102,241,0.20), transparent 70%)" }}
+          />
+          <div className="absolute inset-x-0 bottom-0 h-40" style={{ background: "linear-gradient(180deg, transparent, #08080c)" }} />
         </div>
 
         <Reveal>
@@ -72,10 +81,10 @@ export default function Landing() {
         </Reveal>
 
         <Reveal delay={80}>
-          <h1 className="mt-6 font-serif text-[clamp(2.8rem,7vw,5.5rem)] font-medium leading-[1.02] tracking-[-0.02em]">
+          <h1 className="mt-6 text-[clamp(2.9rem,7.5vw,6rem)] font-semibold leading-[0.98] tracking-[-0.035em] text-white">
             Money that
             <br />
-            saves <span className="italic text-indigo-300">itself.</span>
+            saves <span className="text-indigo-400">itself.</span>
           </h1>
         </Reveal>
 
@@ -137,7 +146,7 @@ export default function Landing() {
       {/* ───────── What is Orbit ───────── */}
       <section className="mx-auto grid w-full max-w-6xl gap-8 px-6 py-20 md:grid-cols-[0.8fr_1.2fr] lg:py-28">
         <Reveal>
-          <h2 className="font-serif text-[clamp(1.9rem,3.5vw,2.75rem)] font-medium leading-tight tracking-[-0.02em]">
+          <h2 className="font-sans text-[clamp(1.9rem,3.5vw,2.75rem)] font-medium leading-tight tracking-[-0.02em]">
             What is Orbit?
           </h2>
         </Reveal>
@@ -161,7 +170,7 @@ export default function Landing() {
                 <span className="grid h-10 w-10 place-items-center rounded-xl bg-emerald-400/10 ring-1 ring-inset ring-emerald-400/20">
                   <TrendingUp className="h-5 w-5 text-emerald-300" aria-hidden />
                 </span>
-                <h3 className="mt-5 font-serif text-2xl font-medium tracking-[-0.01em]">It grows while it sits</h3>
+                <h3 className="mt-5 font-sans text-2xl font-medium tracking-[-0.01em]">It grows while it sits</h3>
                 <p className="mt-2 max-w-md text-[14px] leading-relaxed text-neutral-400">
                   Your balance earns yield from an on-chain reserve, paid out in real tokens. Not a number in a
                   database. You withdraw more than you put in.
@@ -183,7 +192,7 @@ export default function Landing() {
               <span className="grid h-10 w-10 place-items-center rounded-xl bg-indigo-500/10 ring-1 ring-inset ring-indigo-400/25">
                 <Sparkles className="h-5 w-5 text-indigo-300" aria-hidden />
               </span>
-              <h3 className="mt-5 font-serif text-2xl font-medium tracking-[-0.01em]">It saves itself</h3>
+              <h3 className="mt-5 font-sans text-2xl font-medium tracking-[-0.01em]">It saves itself</h3>
               <p className="mt-2 text-[14px] leading-relaxed text-neutral-400">
                 Orbit watches your spending and sets aside a little on each purchase. When it adds up, it moves
                 to your vault automatically. You never have to decide to save.
@@ -210,7 +219,7 @@ export default function Landing() {
               <Lock className="h-6 w-6 text-indigo-300" aria-hidden />
             </span>
             <div>
-              <h3 className="font-serif text-2xl font-medium tracking-[-0.01em]">It stays yours</h3>
+              <h3 className="font-sans text-2xl font-medium tracking-[-0.01em]">It stays yours</h3>
               <p className="mt-2 max-w-2xl text-[14px] leading-relaxed text-neutral-400">
                 The vault is program-controlled but owned by you. Orbit can fund it, but only your key can take
                 money out. No lock-ups, no gatekeeper, no &ldquo;pending withdrawal.&rdquo; Your savings, one signature away.
@@ -223,7 +232,7 @@ export default function Landing() {
       {/* ───────── How it works ───────── */}
       <section id="how" className="mx-auto w-full max-w-6xl scroll-mt-20 px-6 py-20 lg:py-28">
         <Reveal>
-          <h2 className="max-w-xl font-serif text-[clamp(1.9rem,3.5vw,2.75rem)] font-medium leading-tight tracking-[-0.02em]">
+          <h2 className="max-w-xl font-sans text-[clamp(1.9rem,3.5vw,2.75rem)] font-medium leading-tight tracking-[-0.02em]">
             From a coffee to a growing vault, without lifting a finger
           </h2>
         </Reveal>
@@ -268,7 +277,7 @@ export default function Landing() {
             <span className="inline-flex items-center gap-2 rounded-full bg-indigo-500/10 px-3 py-1 text-[12px] text-indigo-200 ring-1 ring-inset ring-indigo-400/20">
               <ShieldCheck className="h-3.5 w-3.5" aria-hidden /> Built to be trusted
             </span>
-            <h2 className="mt-5 max-w-2xl font-serif text-[clamp(1.9rem,3.5vw,2.75rem)] font-medium leading-tight tracking-[-0.02em]">
+            <h2 className="mt-5 max-w-2xl font-sans text-[clamp(1.9rem,3.5vw,2.75rem)] font-medium leading-tight tracking-[-0.02em]">
               The money going in is money you can always get back
             </h2>
           </Reveal>
@@ -297,7 +306,7 @@ export default function Landing() {
       <section id="proof" className="mx-auto w-full max-w-6xl scroll-mt-20 px-6 py-20 lg:py-28">
         <div className="grid gap-10 lg:grid-cols-[1fr_1fr] lg:items-center">
           <Reveal>
-            <h2 className="font-serif text-[clamp(1.9rem,3.5vw,2.75rem)] font-medium leading-tight tracking-[-0.02em]">
+            <h2 className="font-sans text-[clamp(1.9rem,3.5vw,2.75rem)] font-medium leading-tight tracking-[-0.02em]">
               Don&rsquo;t trust it. Verify it.
             </h2>
             <p className="mt-5 max-w-md text-[15px] leading-relaxed text-neutral-400">
@@ -353,7 +362,7 @@ export default function Landing() {
               <span className="grid h-10 w-10 place-items-center rounded-xl bg-indigo-500/10 ring-1 ring-inset ring-indigo-400/25">
                 <Sparkles className="h-5 w-5 text-indigo-300" aria-hidden />
               </span>
-              <h3 className="mt-5 font-serif text-xl font-medium">New to crypto</h3>
+              <h3 className="mt-5 font-sans text-xl font-medium">New to crypto</h3>
               <p className="mt-2 text-[14px] leading-relaxed text-neutral-400">
                 Tap once to create an account. No wallet, no seed phrase, no jargon. Orbit handles the chain so
                 you just watch your savings grow.
@@ -365,7 +374,7 @@ export default function Landing() {
               <span className="grid h-10 w-10 place-items-center rounded-xl bg-indigo-500/10 ring-1 ring-inset ring-indigo-400/25">
                 <Wallet className="h-5 w-5 text-indigo-300" aria-hidden />
               </span>
-              <h3 className="mt-5 font-serif text-xl font-medium">Already on-chain</h3>
+              <h3 className="mt-5 font-sans text-xl font-medium">Already on-chain</h3>
               <p className="mt-2 text-[14px] leading-relaxed text-neutral-400">
                 Connect Phantom or Solflare and keep full self-custody. Put idle USDC to work without handing it
                 to anyone. Your keys, your vault.
@@ -378,7 +387,7 @@ export default function Landing() {
       {/* ───────── FAQ ───────── */}
       <section id="faq" className="mx-auto w-full max-w-3xl scroll-mt-20 px-6 py-20 lg:py-28">
         <Reveal>
-          <h2 className="text-center font-serif text-[clamp(1.9rem,3.5vw,2.75rem)] font-medium tracking-[-0.02em]">
+          <h2 className="text-center font-sans text-[clamp(1.9rem,3.5vw,2.75rem)] font-medium tracking-[-0.02em]">
             Questions, answered
           </h2>
         </Reveal>
@@ -413,7 +422,7 @@ export default function Landing() {
               aria-hidden
             />
             <div className="relative">
-              <h2 className="mx-auto max-w-xl font-serif text-[clamp(2rem,4.5vw,3.25rem)] font-medium leading-[1.05] tracking-[-0.02em]">
+              <h2 className="mx-auto max-w-xl font-sans text-[clamp(2rem,4.5vw,3.25rem)] font-medium leading-[1.05] tracking-[-0.02em]">
                 Put your money in orbit
               </h2>
               <p className="mx-auto mt-4 max-w-md text-[15px] text-neutral-400">
