@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { Reveal } from "@/components/landing/Reveal";
 import { LiveYield } from "@/components/landing/LiveYield";
-import SideRays from "@/components/landing/SideRays";
+import LightRays from "@/components/landing/LightRays";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -56,14 +56,16 @@ export default function Landing() {
 
       {/* ───────── Hero ───────── */}
       <section className="relative -mt-16 flex min-h-[82vh] flex-col items-center justify-center overflow-hidden px-6 pb-24 pt-32 text-center">
-        {/* React Bits Side Rays backdrop, tuned to blue/neutral (no purple) */}
+        {/* React Bits Light Rays backdrop, tuned to blue/neutral (no purple) */}
         <div className="pointer-events-none absolute inset-0 -z-10">
-          <SideRays
-            rayColor1="#4f7dff"
-            rayColor2="#bcd4ff"
-            speed={0.4}
-            intensity={1.6}
-            opacity={0.7}
+          <LightRays
+            raysOrigin="top-center"
+            raysColor="#6f9bff"
+            raysSpeed={0.6}
+            lightSpread={1.1}
+            rayLength={2.2}
+            fadeDistance={1.3}
+            followMouse={false}
           />
           {/* Center scrim so the headline/subcopy stay legible over the rays */}
           <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 62% 52% at 50% 46%, rgba(8,8,12,0.6), transparent 78%)" }} />
