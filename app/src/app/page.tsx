@@ -87,10 +87,8 @@ export default function Landing() {
         </Reveal>
 
         <Reveal delay={160}>
-          <p className="mx-auto mt-6 max-w-xl text-[clamp(0.95rem,1.55vw,1.1rem)] leading-relaxed text-neutral-400">
-            Saving is hard. There&rsquo;s never much left at the end of the month, and it takes
-            willpower most of us just don&rsquo;t have. So Orbit does it for you, a little at a time,
-            before you even notice.
+          <p className="mx-auto mt-6 max-w-lg text-[clamp(0.95rem,1.55vw,1.1rem)] leading-relaxed text-neutral-400">
+            Saving is hard, so Orbit does it for you, a little at a time.
           </p>
         </Reveal>
 
