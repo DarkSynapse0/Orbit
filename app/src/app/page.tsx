@@ -82,7 +82,7 @@ export default function Landing() {
           <h1 className="mt-6 text-[clamp(3.4rem,9vw,7rem)] font-semibold leading-[0.98] tracking-[-0.035em] text-white">
             Grow your savings,
             <br />
-            automatically.
+            the easy way.
           </h1>
         </Reveal>
 
