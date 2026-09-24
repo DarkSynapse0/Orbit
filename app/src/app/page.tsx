@@ -362,7 +362,7 @@ export default function Landing() {
             { q: "Can Orbit take my money?", a: "No. The vault is self-custodial. The program is written so only your key can withdraw. Orbit can add funds, it can never remove them." },
             { q: "Can I withdraw anytime?", a: "Yes. There are no lock-ups or penalties. One click returns your full balance, principal plus the yield it earned, to your wallet." },
             { q: "Do I need a crypto wallet?", a: "No. You can create an account in one tap, with no seed phrase or extension. If you already use Phantom or Solflare, you can connect that instead." },
-            { q: "Where does the yield come from?", a: "Your deposit is placed in an on-chain yield reserve that pays interest in real tokens. On mainnet this routes to an audited lending market like Kamino." },
+            { q: "Where does the yield come from?", a: "Your deposit is placed in an on-chain yield reserve that pays interest in real tokens. On mainnet this routes to a battle-tested lending market such as Aave, the largest lending protocol in DeFi, now live on Solana." },
             { q: "Is this real money?", a: "Today Orbit runs on Solana devnet with test USDC so you can try everything risk-free. The same code moves to mainnet with real USDC and a live bank on-ramp." },
           ].map((f) => (
             <details key={f.q} className="group px-5">

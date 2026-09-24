@@ -35,7 +35,7 @@ bank/card spend
 - **Plaid** = detection only. Never moves money.
 - **Stripe** = the pipe at the threshold. Never holds funds.
 - **Vault** = on-chain USDC, self-custodial, transparent.
-- **Yield** = an on-chain reserve pays real interest in tokens (Kamino on mainnet later).
+- **Yield** = an on-chain reserve pays real interest in tokens. On mainnet this routes to Aave, the largest lending protocol in DeFi, now live on Solana.
 
 ## 5 · Demo (what you'll see)
 1. **Create an account** — no wallet needed, instant.
@@ -67,7 +67,7 @@ bank/card spend
 
 ## 10 · Roadmap
 - **Now:** working end-to-end on devnet (this submission).
-- **Next:** real Stripe on-ramp; Kamino (mainnet) as the yield venue; goals & custom rules.
+- **Next:** real Stripe on-ramp; Aave on Solana (mainnet) as the yield venue; goals & custom rules.
 - **Later:** production key management (Privy/Turnkey), mobile, spending card.
 
 ## 11 · Vision
