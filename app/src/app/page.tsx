@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   ChevronRight,
+  ChevronDown,
   Orbit as OrbitIcon,
   ShieldCheck,
   Lock,
@@ -11,6 +12,7 @@ import {
   Wallet,
   TrendingUp,
   Landmark,
+  CreditCard,
   Coins,
   Check,
   ExternalLink,
@@ -19,6 +21,8 @@ import { Reveal } from "@/components/landing/Reveal";
 import { LiveYield } from "@/components/landing/LiveYield";
 import LightRays from "@/components/landing/LightRays";
 import { Underline } from "@/components/landing/Underline";
+import { GrowthChart } from "@/components/landing/GrowthChart";
+import { SolanaMark, UsdcMark, AaveMark } from "@/components/landing/BrandMarks";
 import { SiteHeader } from "@/components/landing/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -107,90 +111,159 @@ export default function Landing() {
         </Reveal>
       </section>
 
-      {/* ───────── What is Orbit ───────── */}
-      <section className="mx-auto grid w-full max-w-6xl gap-8 px-6 py-20 md:grid-cols-[0.8fr_1.2fr] lg:py-28">
-        <Reveal>
-          <h2 className="font-sans text-[clamp(1.9rem,3.5vw,2.75rem)] font-medium leading-tight tracking-[-0.02em]">
-            What is Orbit?
-          </h2>
-        </Reveal>
-        <Reveal delay={100}>
-          <p className="text-[clamp(1.05rem,1.8vw,1.35rem)] leading-relaxed text-neutral-300">
-            Saving is a habit almost nobody can keep, and most crypto &ldquo;savings&rdquo; feels like your money
-            leaves and never comes back. Orbit fixes both. It quietly skims a small amount from what you already
-            spend, moves it into a vault that stays <span className="text-neutral-100">yours</span>, and grows it
-            with on-chain yield. The habit of an automatic saver, the transparency of an open ledger.
-          </p>
-        </Reveal>
-      </section>
-
-      {/* ───────── Capabilities (bento) ───────── */}
-      <section className="mx-auto w-full max-w-6xl px-6 pb-8">
-        <div className="grid gap-4 lg:grid-cols-3">
-          {/* Wide: grows on-chain, with live yield */}
-          <Reveal className="lg:col-span-2">
-            <div className="flex h-full flex-col justify-between overflow-hidden rounded-3xl border border-white/[0.07] bg-gradient-to-b from-white/[0.05] to-white/[0.01] p-7">
-              <div>
-                <span className="grid h-10 w-10 place-items-center rounded-xl bg-emerald-400/10 ring-1 ring-inset ring-emerald-400/20">
-                  <TrendingUp className="h-5 w-5 text-emerald-300" aria-hidden />
-                </span>
-                <h3 className="mt-5 font-sans text-2xl font-medium tracking-[-0.01em]">It grows while it sits</h3>
-                <p className="mt-2 max-w-md text-[14px] leading-relaxed text-neutral-400">
-                  Your balance earns yield from an on-chain reserve, paid out in real tokens. Not a number in a
-                  database. You withdraw more than you put in.
-                </p>
-              </div>
-              <div className="mt-7 rounded-2xl border border-white/[0.06] bg-[#0a0a10]/60 p-5">
-                <div className="text-[11px] uppercase tracking-wide text-neutral-500">A $10,000 vault, right now</div>
-                <div className="mt-1.5 text-[clamp(1.6rem,4vw,2.4rem)] font-semibold leading-none">
-                  <LiveYield principal={10_000} apy={0.06} />
-                </div>
-                <div className="mt-2 text-[12px] text-neutral-500">growing every second at ~6% APY</div>
-              </div>
-            </div>
-          </Reveal>
-
-          {/* Tall: saves itself */}
-          <Reveal delay={100}>
-            <div className="flex h-full flex-col rounded-3xl border border-white/[0.07] bg-white/[0.02] p-7">
-              <span className="grid h-10 w-10 place-items-center rounded-xl bg-indigo-500/10 ring-1 ring-inset ring-indigo-400/25">
-                <Sparkles className="h-5 w-5 text-indigo-300" aria-hidden />
-              </span>
-              <h3 className="mt-5 font-sans text-2xl font-medium tracking-[-0.01em]">It saves itself</h3>
-              <p className="mt-2 text-[14px] leading-relaxed text-neutral-400">
-                Orbit watches your spending and sets aside a little on each purchase. When it adds up, it moves
-                to your vault automatically. You never have to decide to save.
+      {/* ───────── Data bento (Chronicle-style) ───────── */}
+      <section className="mx-auto w-full max-w-6xl px-6 py-16 lg:py-24">
+        {/* Row 1: intro + big growth chart */}
+        <div className="grid gap-4 lg:grid-cols-2">
+          <Reveal>
+            <div className="flex h-full flex-col justify-center rounded-3xl border border-white/[0.07] bg-white/[0.02] p-8 lg:p-10">
+              <span className="text-[12px] font-semibold uppercase tracking-[0.18em] text-indigo-300">Why Orbit</span>
+              <h2 className="mt-4 font-sans text-[clamp(1.8rem,3vw,2.6rem)] font-medium leading-tight tracking-[-0.02em]">
+                Your money should be growing right now
+              </h2>
+              <p className="mt-4 max-w-md text-[15px] leading-relaxed text-neutral-400">
+                Cash sitting still quietly loses to inflation. Orbit puts your savings to work the moment they
+                land, in a vault only you can touch.
               </p>
-              <div className="mt-auto space-y-2 pt-6 text-[13px]">
+              <div className="mt-8 grid grid-cols-3 gap-4 border-t border-white/[0.06] pt-6">
                 {[
-                  { a: "Spent $120", b: "+$5 set aside" },
-                  { a: "Spent $640", b: "+$10 set aside" },
-                ].map((r) => (
-                  <div key={r.a} className="flex items-center justify-between rounded-lg border border-white/[0.05] bg-white/[0.02] px-3 py-2">
-                    <span className="text-neutral-400">{r.a}</span>
-                    <span className="font-mono tabular-nums text-indigo-300">{r.b}</span>
+                  { v: "6%", l: "APY, on-chain" },
+                  { v: "$0", l: "lock-ups" },
+                  { v: "1-tap", l: "withdrawals" },
+                ].map((s) => (
+                  <div key={s.l}>
+                    <div className="text-[clamp(1.3rem,2.5vw,1.9rem)] font-semibold tabular-nums text-white">{s.v}</div>
+                    <div className="mt-1 text-[12px] text-neutral-500">{s.l}</div>
                   </div>
                 ))}
               </div>
             </div>
           </Reveal>
+
+          <Reveal delay={100}>
+            <div className="flex h-full flex-col overflow-hidden rounded-3xl border border-white/[0.07] bg-gradient-to-b from-white/[0.05] to-white/[0.01] p-6 sm:p-7">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide text-neutral-300">
+                    Vault · Devnet
+                  </span>
+                  <div className="mt-3 flex items-end gap-2.5">
+                    <span className="text-[clamp(2rem,5vw,3rem)] font-semibold leading-none tabular-nums text-white">
+                      <LiveYield principal={5980} apy={0.06} />
+                    </span>
+                    <span className="mb-1 inline-flex items-center gap-1 rounded-md bg-emerald-400/10 px-1.5 py-0.5 text-[12px] font-medium text-emerald-300">
+                      <TrendingUp className="h-3.5 w-3.5" aria-hidden /> 6.0% APY
+                    </span>
+                  </div>
+                  <div className="mt-1.5 text-[12px] text-neutral-500">Balance, growing every second</div>
+                </div>
+                <div className="hidden gap-2 sm:flex">
+                  {["Balance", "12 months"].map((c) => (
+                    <span
+                      key={c}
+                      className="inline-flex items-center gap-1 rounded-lg border border-white/[0.07] bg-white/[0.02] px-2.5 py-1.5 text-[12px] text-neutral-400"
+                    >
+                      {c} <ChevronDown className="h-3 w-3" aria-hidden />
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <GrowthChart />
+              </div>
+
+              <div className="mt-4 flex items-center gap-5 text-[12px] text-neutral-400">
+                <span className="flex items-center gap-2">
+                  <span className="h-[3px] w-4 rounded-full bg-indigo-400" /> Your vault
+                </span>
+                <span className="flex items-center gap-2">
+                  <span className="h-0 w-4 border-t-2 border-dashed border-white/35" /> Cash left idle
+                </span>
+              </div>
+            </div>
+          </Reveal>
         </div>
 
-        {/* Wide row: always yours */}
-        <Reveal className="mt-4">
-          <div className="grid gap-6 rounded-3xl border border-white/[0.07] bg-white/[0.02] p-7 md:grid-cols-[auto_1fr] md:items-center md:gap-8">
-            <span className="grid h-12 w-12 place-items-center rounded-2xl bg-indigo-500/10 ring-1 ring-inset ring-indigo-400/25">
-              <Lock className="h-6 w-6 text-indigo-300" aria-hidden />
-            </span>
-            <div>
-              <h3 className="font-sans text-2xl font-medium tracking-[-0.01em]">It stays yours</h3>
-              <p className="mt-2 max-w-2xl text-[14px] leading-relaxed text-neutral-400">
-                The vault is program-controlled but owned by you. Orbit can fund it, but only your key can take
-                money out. No lock-ups, no gatekeeper, no &ldquo;pending withdrawal.&rdquo; Your savings, one signature away.
-              </p>
+        {/* Row 2: set-aside dashboard + built-on grid */}
+        <div className="mt-4 grid gap-4 lg:grid-cols-2">
+          {/* Automatic set-aside */}
+          <Reveal>
+            <div className="flex h-full flex-col rounded-3xl border border-white/[0.07] bg-white/[0.02] p-6 sm:p-7">
+              <div className="rounded-2xl border border-white/[0.06] bg-[#0a0a10]/60 p-5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[13px] font-medium text-neutral-200">Set aside</span>
+                  <span className="inline-flex items-center gap-1 rounded-lg border border-white/[0.07] bg-white/[0.02] px-2 py-1 text-[11px] text-neutral-400">
+                    This year
+                  </span>
+                </div>
+                <div className="mt-5 flex h-28 items-end gap-1.5">
+                  {[45, 62, 38, 78, 52, 100, 46, 68, 58, 72, 84, 64].map((v, i) => (
+                    <div
+                      key={i}
+                      className={`flex-1 rounded-t-[3px] ${
+                        v === 100 ? "bg-indigo-400" : "bg-gradient-to-t from-indigo-500/30 to-indigo-400/70"
+                      }`}
+                      style={{ height: `${v}%` }}
+                    />
+                  ))}
+                </div>
+                <div className="mt-5 grid grid-cols-3 gap-3 border-t border-white/[0.06] pt-4">
+                  {[
+                    { v: "$620", l: "set aside" },
+                    { v: "48", l: "auto-saves" },
+                    { v: "+18%", l: "vs last month" },
+                  ].map((s) => (
+                    <div key={s.l}>
+                      <div className="text-[clamp(1.1rem,2.2vw,1.5rem)] font-semibold tabular-nums text-white">{s.v}</div>
+                      <div className="mt-0.5 text-[11px] text-neutral-500">{s.l}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="mt-6">
+                <span className="text-[12px] font-semibold uppercase tracking-[0.18em] text-indigo-300">Automatic</span>
+                <h3 className="mt-3 font-sans text-2xl font-medium tracking-[-0.01em]">It saves itself, on every purchase</h3>
+                <p className="mt-2 max-w-md text-[14px] leading-relaxed text-neutral-400">
+                  Orbit sets aside a little whenever you spend: $5 over $100, $10 over $500. It adds up before you
+                  notice, then moves to your vault on its own.
+                </p>
+              </div>
             </div>
-          </div>
-        </Reveal>
+          </Reveal>
+
+          {/* Built on */}
+          <Reveal delay={100}>
+            <div className="flex h-full flex-col rounded-3xl border border-white/[0.07] bg-white/[0.02] p-6 sm:p-7">
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { mark: <SolanaMark className="h-7 w-7" />, name: "Solana" },
+                  { mark: <UsdcMark className="h-7 w-7" />, name: "USDC" },
+                  { mark: <AaveMark className="h-7 w-7" />, name: "Aave" },
+                  { mark: <Landmark className="h-6 w-6 text-neutral-300" aria-hidden />, name: "Plaid" },
+                  { mark: <CreditCard className="h-6 w-6 text-neutral-300" aria-hidden />, name: "Stripe" },
+                  { mark: <Wallet className="h-6 w-6 text-neutral-300" aria-hidden />, name: "Phantom" },
+                ].map((t) => (
+                  <div
+                    key={t.name}
+                    className="flex flex-col items-center gap-2 rounded-2xl border border-white/[0.06] bg-white/[0.02] py-5 transition-colors hover:border-white/[0.12]"
+                  >
+                    <span className="grid h-11 w-11 place-items-center">{t.mark}</span>
+                    <span className="text-[11px] text-neutral-400">{t.name}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-6">
+                <span className="text-[12px] font-semibold uppercase tracking-[0.18em] text-indigo-300">Built on</span>
+                <h3 className="mt-3 font-sans text-2xl font-medium tracking-[-0.01em]">Rails the rest of finance runs on</h3>
+                <p className="mt-2 max-w-md text-[14px] leading-relaxed text-neutral-400">
+                  Bank detection through Plaid, fiat on-ramp through Stripe, custody and yield on Solana with USDC
+                  and Aave. Proven infrastructure, not a black box.
+                </p>
+              </div>
+            </div>
+          </Reveal>
+        </div>
       </section>
 
       {/* ───────── How it works ───────── */}
