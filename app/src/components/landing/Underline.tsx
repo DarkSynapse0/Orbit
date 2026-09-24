@@ -7,16 +7,16 @@ export function Underline({ children }: { children: ReactNode }) {
     <span className="relative inline-block whitespace-nowrap">
       {children}
       <svg
-        className="hand-underline pointer-events-none absolute -bottom-[0.12em] left-0 h-[0.36em] w-full overflow-visible text-indigo-400"
-        viewBox="0 0 200 14"
+        className="hand-underline pointer-events-none absolute -bottom-[0.06em] left-0 h-[0.28em] w-full overflow-visible text-indigo-400"
+        viewBox="0 0 200 12"
         fill="none"
         preserveAspectRatio="none"
         aria-hidden
       >
         <path
-          d="M4 9 C 42 3, 78 3, 116 7 C 148 10, 174 6, 196 5"
+          d="M5 8 C 44 3, 80 3, 118 6 C 150 8.5, 172 6, 195 5"
           stroke="currentColor"
-          strokeWidth="4"
+          strokeWidth="3"
           strokeLinecap="round"
           pathLength={1}
         />
