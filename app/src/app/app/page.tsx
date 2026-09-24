@@ -58,9 +58,9 @@ function CopyAddress({ value, label }: { value: string; label: string }) {
         setTimeout(() => setCopied(false), 1500);
       }}
       aria-label={`Copy ${label}`}
-      className="inline-flex items-center gap-1.5 rounded font-mono text-neutral-400 transition-colors hover:text-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60"
+      className="inline-flex items-center gap-1.5 rounded font-mono text-neutral-600 transition-colors hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60"
     >
-      {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" aria-hidden /> : <Copy className="h-3.5 w-3.5" aria-hidden />}
+      {copied ? <Check className="h-3.5 w-3.5 text-emerald-600" aria-hidden /> : <Copy className="h-3.5 w-3.5" aria-hidden />}
       {truncate(value)}
     </button>
   );
@@ -240,8 +240,8 @@ export default function Home() {
 
   const feedIcon = (kind: Entry["kind"]) => {
     if (kind === "deposit") return <Zap className="h-4 w-4 text-indigo-300" aria-hidden />;
-    if (kind === "spend") return <ShoppingBag className="h-4 w-4 text-neutral-400" aria-hidden />;
-    if (kind === "info") return <Landmark className="h-4 w-4 text-emerald-400" aria-hidden />;
+    if (kind === "spend") return <ShoppingBag className="h-4 w-4 text-neutral-600" aria-hidden />;
+    if (kind === "info") return <Landmark className="h-4 w-4 text-emerald-600" aria-hidden />;
     return <ShoppingBag className="h-4 w-4 text-neutral-600" aria-hidden />;
   };
 
@@ -261,42 +261,42 @@ export default function Home() {
             Devnet
           </span>
           <span
-            className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.04] px-2 py-1 text-[11px] text-neutral-400 ring-1 ring-inset ring-white/[0.06]"
+            className="inline-flex items-center gap-1.5 rounded-full bg-black/[0.04] px-2 py-1 text-[11px] text-neutral-600 ring-1 ring-inset ring-black/[0.08]"
             title={online ? "Backend connected" : "Backend offline"}
           >
-            <span className={`h-1.5 w-1.5 rounded-full ${online ? "bg-emerald-400" : online === false ? "bg-red-400" : "bg-neutral-500"}`} aria-hidden />
+            <span className={`h-1.5 w-1.5 rounded-full ${online ? "bg-emerald-500" : online === false ? "bg-red-500" : "bg-neutral-500"}`} aria-hidden />
             {online === null ? "…" : online ? "live" : "offline"}
           </span>
         </div>
       </header>
 
       {/* Balance hero */}
-      <section className="mt-7 rounded-3xl border border-white/[0.07] bg-gradient-to-b from-white/[0.05] to-white/[0.01] p-6 shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset]">
+      <section className="mt-7 rounded-3xl border border-black/[0.08] bg-white p-6 shadow-sm">
         <div className="text-xs font-medium uppercase tracking-wide text-neutral-500">Total saved</div>
         <div className="mt-1.5 flex items-baseline gap-2">
           <span
             className={`font-mono text-[40px] font-semibold leading-none tabular-nums transition-colors duration-700 ${
-              flash ? "text-emerald-300" : "text-foreground"
+              flash ? "text-emerald-600" : "text-foreground"
             }`}
           >
             {usd(total)}
           </span>
-          <span className="inline-flex items-center gap-1 text-xs text-emerald-400">
+          <span className="inline-flex items-center gap-1 text-xs text-emerald-600">
             <TrendingUp className="h-3.5 w-3.5" aria-hidden /> ~6% APY
           </span>
         </div>
 
         {/* Two tiles */}
         <div className="mt-5 grid grid-cols-2 gap-3">
-          <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-3.5">
+          <div className="rounded-2xl border border-black/[0.08] bg-white p-3.5">
             <div className="text-[11px] text-neutral-500">Set aside · in bank</div>
             <div className="mt-1 font-mono text-lg font-medium tabular-nums text-amber-300">{usd(state.pendingUsd)}</div>
-            <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
+            <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.06]">
               <div className="h-full rounded-full bg-amber-400 transition-[width] duration-300 ease-out" style={{ width: `${pct}%` }} />
             </div>
             <div className="mt-1.5 text-[11px] tabular-nums text-neutral-500">{usd(state.pendingUsd)} / {usd(THRESHOLD)} to deposit</div>
           </div>
-          <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-3.5">
+          <div className="rounded-2xl border border-black/[0.08] bg-white p-3.5">
             <div className="flex items-center justify-between">
               <div className="text-[11px] text-neutral-500">In vault</div>
               {onchain && (
@@ -304,16 +304,16 @@ export default function Home() {
               )}
             </div>
             <div className="mt-1 font-mono text-lg font-medium tabular-nums text-indigo-200">{usd(principalUsd)}</div>
-            <div className="mt-2.5 font-mono text-[11px] tabular-nums text-emerald-400">+{liveYield.toFixed(6)}</div>
+            <div className="mt-2.5 font-mono text-[11px] tabular-nums text-emerald-600">+{liveYield.toFixed(6)}</div>
             <div className="mt-0.5 text-[11px] text-neutral-500">yield, accruing live</div>
           </div>
         </div>
 
         {/* Verify on-chain */}
         {onchain && (
-          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-white/[0.06] pt-3 text-[11px]">
+          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-black/[0.08] pt-3 text-[11px]">
             <span className="text-neutral-500">Verify:</span>
-            <span className="text-neutral-400">
+            <span className="text-neutral-600">
               vault <CopyAddress value={onchain.vaultAccount} label="vault address" />
             </span>
             <ExplorerLink href={solAcct(onchain.vaultAccount)}>Solscan</ExplorerLink>
@@ -326,10 +326,10 @@ export default function Home() {
       {/* Bank / Plaid */}
       <section className="mt-6">
         <div className="mb-2 text-xs font-medium uppercase tracking-wide text-neutral-500">Your bank</div>
-        <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4">
+        <div className="rounded-2xl border border-black/[0.08] bg-white p-4">
           <div className="flex items-center gap-3">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-white/[0.04] ring-1 ring-inset ring-white/[0.06]">
-              <Landmark className="h-5 w-5 text-neutral-300" aria-hidden />
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-black/[0.04] ring-1 ring-inset ring-black/[0.08]">
+              <Landmark className="h-5 w-5 text-neutral-700" aria-hidden />
             </span>
             <div className="min-w-0 flex-1">
               <div className="text-sm font-medium">{plaid?.connected ? "First Platypus Bank" : "No bank connected"}</div>
@@ -337,7 +337,7 @@ export default function Home() {
                 {plaid?.connected ? "Plaid sandbox · detection only" : "Connect to detect spending"}
               </div>
             </div>
-            {plaid?.connected && <span className="h-2 w-2 rounded-full bg-emerald-400" aria-hidden />}
+            {plaid?.connected && <span className="h-2 w-2 rounded-full bg-emerald-500" aria-hidden />}
           </div>
 
           {plaid && !plaid.configured && (
@@ -351,7 +351,7 @@ export default function Home() {
               type="button"
               onClick={connectBank}
               disabled={busy}
-              className="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-white/[0.06] text-sm font-medium text-neutral-100 ring-1 ring-inset ring-white/[0.08] transition-[background,transform] duration-150 ease-out hover:bg-white/[0.1] active:scale-[0.99] disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60"
+              className="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-black/[0.06] text-sm font-medium text-neutral-900 ring-1 ring-inset ring-black/[0.1] transition-[background,transform] duration-150 ease-out hover:bg-black/[0.1] active:scale-[0.99] disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60"
             >
               {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Landmark className="h-4 w-4" aria-hidden />}
               Connect a test bank
@@ -364,7 +364,7 @@ export default function Home() {
               onClick={syncSpending}
               disabled={syncing}
               aria-busy={syncing}
-              className="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-indigo-500 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition-[background,transform] duration-150 ease-out hover:bg-indigo-400 active:scale-[0.99] disabled:pointer-events-none disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#08080c]"
+              className="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-indigo-500 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition-[background,transform] duration-150 ease-out hover:bg-indigo-400 active:scale-[0.99] disabled:pointer-events-none disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#f5f6fa]"
             >
               <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} aria-hidden />
               {syncing ? "Pulling transactions…" : "Sync spending from Plaid"}
@@ -390,7 +390,7 @@ export default function Home() {
               type="button"
               onClick={() => spend(v)}
               disabled={busy || !online || !connected}
-              className="h-11 flex-1 rounded-xl border border-white/[0.06] bg-white/[0.02] text-sm font-medium tabular-nums transition-[background,transform,border-color] duration-150 ease-out hover:border-indigo-400/40 hover:bg-white/[0.05] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60"
+              className="h-11 flex-1 rounded-xl border border-black/[0.08] bg-white text-sm font-medium tabular-nums transition-[background,transform,border-color] duration-150 ease-out hover:border-indigo-400/40 hover:bg-black/[0.05] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60"
             >
               ${v}
             </button>
@@ -404,13 +404,13 @@ export default function Home() {
             onChange={(e) => setAmount(e.target.value)}
             inputMode="decimal"
             placeholder="Custom amount"
-            className="h-11 flex-1 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3.5 text-sm tabular-nums text-foreground placeholder:text-neutral-600 transition-colors focus:border-indigo-400/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40"
+            className="h-11 flex-1 rounded-xl border border-black/[0.08] bg-white px-3.5 text-sm tabular-nums text-foreground placeholder:text-neutral-600 transition-colors focus:border-indigo-400/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40"
           />
           <button
             type="button"
             onClick={() => spend(Number(amount))}
             disabled={busy || !online || !connected}
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-white/[0.06] px-5 text-sm font-medium ring-1 ring-inset ring-white/[0.08] transition-[background,transform] duration-150 ease-out hover:bg-white/[0.1] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-black/[0.06] px-5 text-sm font-medium ring-1 ring-inset ring-black/[0.1] transition-[background,transform] duration-150 ease-out hover:bg-black/[0.1] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60"
           >
             {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null}
             Spend
@@ -428,15 +428,15 @@ export default function Home() {
           <button
             type="button"
             onClick={reset}
-            className="inline-flex items-center gap-1 rounded text-[11px] text-neutral-500 transition-colors hover:text-neutral-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60"
+            className="inline-flex items-center gap-1 rounded text-[11px] text-neutral-500 transition-colors hover:text-neutral-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60"
           >
             <RotateCcw className="h-3 w-3" aria-hidden /> reset
           </button>
         </div>
         {feed.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-white/[0.08] bg-white/[0.01] px-4 py-8 text-center">
+          <div className="rounded-2xl border border-dashed border-black/[0.1] bg-white px-4 py-8 text-center">
             <ShoppingBag className="mx-auto h-6 w-6 text-neutral-600" aria-hidden />
-            <p className="mt-2 text-sm text-neutral-400">No activity yet</p>
+            <p className="mt-2 text-sm text-neutral-600">No activity yet</p>
             <p className="mt-0.5 text-[12px] text-neutral-600">Sync a bank or simulate a purchase to start saving.</p>
           </div>
         ) : (
@@ -448,10 +448,10 @@ export default function Home() {
                   e.kind === "deposit"
                     ? "border-indigo-500/25 bg-indigo-500/[0.08] text-indigo-100"
                     : e.kind === "info"
-                      ? "border-emerald-500/20 bg-emerald-500/[0.06] text-emerald-100"
+                      ? "border-emerald-500/20 bg-emerald-500/[0.06] text-emerald-700"
                       : e.kind === "spend"
-                        ? "border-white/[0.06] bg-white/[0.02] text-neutral-200"
-                        : "border-white/[0.04] bg-white/[0.01] text-neutral-500"
+                        ? "border-black/[0.08] bg-white text-neutral-900"
+                        : "border-black/[0.06] bg-white text-neutral-500"
                 }`}
               >
                 {feedIcon(e.kind)}
@@ -463,7 +463,7 @@ export default function Home() {
       </section>
 
       {/* Footer / disclosure */}
-      <footer className="mt-8 border-t border-white/[0.06] pt-4">
+      <footer className="mt-8 border-t border-black/[0.08] pt-4">
         <p className="text-[11px] leading-5 text-neutral-600">
           Live on Solana devnet. Set-aside detection, threshold, and the vault deposit are real; the fiat→USDC step
           (Stripe) is mocked. Not a bank. Not FDIC-insured — principal is not guaranteed.
