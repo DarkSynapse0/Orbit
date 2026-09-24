@@ -57,9 +57,9 @@ export default function Landing() {
 
         <Reveal delay={80}>
           <h1 className="mt-6 text-[clamp(2.6rem,6.5vw,5rem)] font-semibold leading-[1.02] tracking-[-0.035em] text-white">
-            It saves your money,
+            Sit back while your money
             <br />
-            invests it, and grows it.
+            saves, invests, and grows.
           </h1>
         </Reveal>
 
