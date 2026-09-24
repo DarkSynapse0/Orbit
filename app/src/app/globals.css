@@ -17,11 +17,6 @@ body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
-  /* Subtle depth: indigo glow top, violet glow bottom-right. */
-  background-image:
-    radial-gradient(55rem 40rem at 50% -12%, rgba(99, 102, 241, 0.13), transparent 60%),
-    radial-gradient(45rem 38rem at 92% 108%, rgba(168, 85, 247, 0.08), transparent 60%);
-  background-attachment: fixed;
 }
 
 /* ---- Landing: orbital motion system ---- */

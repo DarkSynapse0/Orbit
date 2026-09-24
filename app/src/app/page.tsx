@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   ChevronRight,
+  Orbit as OrbitIcon,
   ShieldCheck,
   Lock,
   Eye,
@@ -16,7 +17,8 @@ import {
 } from "lucide-react";
 import { Reveal } from "@/components/landing/Reveal";
 import { LiveYield } from "@/components/landing/LiveYield";
-import { OrbitMark } from "@/components/landing/OrbitMark";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 const PROGRAM = "8LEjyrMCKukhxA4q3DRaYGfkappxRayiTPM7saZG2Kgi";
 const solAcct = (a: string) => `https://solscan.io/account/${a}?cluster=devnet`;
@@ -27,99 +29,68 @@ export default function Landing() {
       {/* ───────── Nav ───────── */}
       <header className="sticky top-0 z-40 bg-[#08080c]/40 backdrop-blur-md">
         <nav className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-6">
-          <Link href="/" className="flex items-center gap-2.5 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60">
-            <OrbitMark className="h-8 w-8" title="Orbit" />
+          <Link href="/" className="flex items-center gap-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40">
+            <OrbitIcon className="h-5 w-5 text-white" aria-hidden />
             <span className="text-[15px] font-semibold tracking-tight">Orbit</span>
           </Link>
-          <div className="hidden items-center gap-8 text-[13px] text-neutral-400 md:flex">
-            <a href="#how" className="transition-colors hover:text-neutral-100">How it works</a>
-            <a href="#security" className="transition-colors hover:text-neutral-100">Security</a>
-            <a href="#proof" className="transition-colors hover:text-neutral-100">On-chain</a>
-            <a href="#faq" className="transition-colors hover:text-neutral-100">FAQ</a>
+          <div className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-8 text-[13px] text-neutral-400 md:flex">
+            <a href="#how" className="transition-colors hover:text-white">How it works</a>
+            <a href="#security" className="transition-colors hover:text-white">Security</a>
+            <a href="#proof" className="transition-colors hover:text-white">On-chain</a>
+            <a href="#faq" className="transition-colors hover:text-white">FAQ</a>
           </div>
-          <Link
-            href="/app"
-            className="inline-flex h-9 items-center gap-1.5 rounded-full bg-white/[0.06] px-4 text-[13px] font-medium text-neutral-100 ring-1 ring-inset ring-white/[0.1] transition-[background,transform] duration-150 ease-out hover:bg-white/[0.1] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/70"
-          >
-            Launch app <ArrowRight className="h-3.5 w-3.5" aria-hidden />
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/app"
+              className="hidden rounded px-3 py-1.5 text-[13px] text-neutral-300 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 sm:inline-block"
+            >
+              Launch app
+            </Link>
+            <Button asChild size="sm">
+              <Link href="/app">Get started</Link>
+            </Button>
+          </div>
         </nav>
       </header>
 
-      {/* ───────── Hero (centered, full-bleed, animated sky) ───────── */}
+      {/* ───────── Hero ───────── */}
       <section className="relative -mt-16 flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 pb-24 pt-28 text-center">
-        {/* Clean engineered backdrop: faint grid + a single soft glow. Restraint reads as trust. */}
-        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden>
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage:
-                "linear-gradient(to right, rgba(255,255,255,0.045) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.045) 1px, transparent 1px)",
-              backgroundSize: "68px 68px",
-              maskImage: "radial-gradient(ellipse 75% 60% at 50% 38%, #000 35%, transparent 78%)",
-              WebkitMaskImage: "radial-gradient(ellipse 75% 60% at 50% 38%, #000 35%, transparent 78%)",
-            }}
-          />
-          <div
-            className="absolute left-1/2 top-[36%] h-[540px] w-[880px] max-w-[95vw] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[130px]"
-            style={{ background: "radial-gradient(circle, rgba(99,102,241,0.20), transparent 70%)" }}
-          />
-          <div className="absolute inset-x-0 bottom-0 h-40" style={{ background: "linear-gradient(180deg, transparent, #08080c)" }} />
-        </div>
+        {/* Background intentionally minimal — planet/glow backdrop to be added later. */}
 
         <Reveal>
-          <a
-            href="#proof"
-            className="group inline-flex items-center gap-2 rounded-full border border-white/[0.1] bg-white/[0.04] py-1 pl-1 pr-3 text-[12px] text-neutral-300 backdrop-blur-sm transition-colors hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/70"
-          >
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-400/15 px-2 py-0.5 text-[11px] font-medium text-emerald-300">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" aria-hidden /> Live
-            </span>
-            Real on-chain yield, live on devnet
-            <ChevronRight className="h-3.5 w-3.5 text-neutral-500 transition-transform group-hover:translate-x-0.5" aria-hidden />
-          </a>
+          <Badge variant="accent">
+            <Sparkles aria-hidden /> Early access · Solana devnet
+          </Badge>
         </Reveal>
 
         <Reveal delay={80}>
-          <h1 className="mt-6 text-[clamp(2.9rem,7.5vw,6rem)] font-semibold leading-[0.98] tracking-[-0.035em] text-white">
+          <h1 className="mt-6 text-[clamp(2.9rem,7.5vw,5.75rem)] font-semibold leading-[1.0] tracking-[-0.035em] text-white">
             Money that
             <br />
-            saves <span className="text-indigo-400">itself.</span>
+            saves itself.
           </h1>
         </Reveal>
 
         <Reveal delay={160}>
-          <p className="mx-auto mt-6 max-w-xl text-[clamp(0.95rem,1.6vw,1.15rem)] leading-relaxed text-neutral-400">
-            Orbit sets aside a little from your everyday spending and grows it with on-chain yield.
-            Fully yours, verifiable on Solana, withdraw anytime.
+          <p className="mx-auto mt-6 max-w-xl text-[clamp(0.95rem,1.55vw,1.1rem)] leading-relaxed text-neutral-400">
+            A savings account that runs itself. Orbit sets aside a little from your everyday spending
+            and grows it with on-chain yield. Fully yours, verifiable, withdraw anytime.
           </p>
         </Reveal>
 
         <Reveal delay={240}>
           <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href="/app"
-              className="inline-flex h-12 items-center gap-2 rounded-full bg-white px-7 text-[14px] font-semibold text-neutral-950 shadow-lg shadow-black/30 transition-[transform,box-shadow] duration-150 ease-out hover:shadow-xl hover:shadow-indigo-500/20 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#08080c]"
-            >
-              Open your vault <ArrowRight className="h-4 w-4" aria-hidden />
-            </Link>
-            <a
-              href="#how"
-              className="inline-flex h-12 items-center gap-2 rounded-full border border-white/[0.12] bg-white/[0.04] px-6 text-[14px] font-medium text-neutral-200 backdrop-blur-sm transition-colors duration-150 ease-out hover:bg-white/[0.08] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/70"
-            >
-              See how it works <ChevronRight className="h-4 w-4 text-neutral-400" aria-hidden />
-            </a>
+            <Button asChild size="lg">
+              <Link href="/app">
+                Open your vault <ArrowRight aria-hidden />
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="lg">
+              <a href="#how">
+                See how it works <ChevronRight aria-hidden />
+              </a>
+            </Button>
           </div>
-        </Reveal>
-
-        <Reveal delay={320}>
-          <ul className="mt-12 flex flex-wrap justify-center gap-x-6 gap-y-2 text-[13px] text-neutral-500">
-            {["Self-custodial", "Verifiable on-chain", "Withdraw anytime"].map((t) => (
-              <li key={t} className="inline-flex items-center gap-1.5">
-                <Check className="h-3.5 w-3.5 text-indigo-400" aria-hidden /> {t}
-              </li>
-            ))}
-          </ul>
         </Reveal>
       </section>
 
@@ -443,7 +414,7 @@ export default function Landing() {
       <footer className="mt-auto border-t border-white/[0.06]">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-10 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2.5">
-            <OrbitMark className="h-8 w-8" title="Orbit" />
+            <OrbitIcon className="h-5 w-5 text-white" aria-hidden />
             <div>
               <div className="text-[14px] font-semibold">Orbit</div>
               <div className="text-[12px] text-neutral-500">Self-driving savings on Solana</div>
