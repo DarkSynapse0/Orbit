@@ -28,7 +28,7 @@ export default function Landing() {
   return (
     <div className="relative flex min-h-full flex-col">
       {/* ───────── Nav ───────── */}
-      <header className="sticky top-0 z-40 bg-[#08080c]/40 backdrop-blur-md">
+      <header className="sticky top-0 z-40">
         <nav className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-6">
           <Link href="/" className="flex items-center gap-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40">
             <OrbitIcon className="h-5 w-5 text-white" aria-hidden />
@@ -55,7 +55,7 @@ export default function Landing() {
       </header>
 
       {/* ───────── Hero ───────── */}
-      <section className="relative -mt-16 flex flex-col items-center overflow-hidden px-6 pb-24 pt-40 text-center">
+      <section className="relative -mt-16 flex min-h-[82vh] flex-col items-center justify-center overflow-hidden px-6 pb-24 pt-32 text-center">
         {/* React Bits Side Rays backdrop, tuned to blue/neutral (no purple) */}
         <div className="pointer-events-none absolute inset-0 -z-10">
           <SideRays
