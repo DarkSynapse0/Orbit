@@ -24,9 +24,9 @@ export function LiveYield({ principal = 10_000, apy = 0.06 }: { principal?: numb
   const tail = s.slice(dot + 3);
 
   return (
-    <span className="font-mono tabular-nums text-emerald-300" aria-label={`Balance $${value.toFixed(2)} and rising`}>
+    <span className="font-mono tabular-nums text-emerald-600" aria-label={`Balance $${value.toFixed(2)} and rising`}>
       ${Number(head).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-      <span className="text-emerald-300/40">{tail}</span>
+      <span className="text-emerald-600/40">{tail}</span>
     </span>
   );
 }

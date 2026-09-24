@@ -7,7 +7,7 @@ export function Underline({ children }: { children: ReactNode }) {
     <span className="relative inline-block whitespace-nowrap">
       {children}
       <svg
-        className="hand-underline pointer-events-none absolute -bottom-[0.06em] left-0 h-[0.28em] w-full overflow-visible text-indigo-400"
+        className="hand-underline pointer-events-none absolute -bottom-[0.06em] left-0 h-[0.28em] w-full overflow-visible text-indigo-500"
         viewBox="0 0 200 12"
         fill="none"
         preserveAspectRatio="none"

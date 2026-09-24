@@ -19,7 +19,6 @@ import {
 } from "lucide-react";
 import { Reveal } from "@/components/landing/Reveal";
 import { LiveYield } from "@/components/landing/LiveYield";
-import LightRays from "@/components/landing/LightRays";
 import { Underline } from "@/components/landing/Underline";
 import { GrowthChart } from "@/components/landing/GrowthChart";
 import { SolanaMark, UsdcMark, AaveMark } from "@/components/landing/BrandMarks";
@@ -30,6 +29,10 @@ import { Badge } from "@/components/ui/badge";
 const PROGRAM = "8LEjyrMCKukhxA4q3DRaYGfkappxRayiTPM7saZG2Kgi";
 const solAcct = (a: string) => `https://solscan.io/account/${a}?cluster=devnet`;
 
+// Shared surface treatment for the light theme.
+const CARD =
+  "rounded-3xl border border-black/[0.08] bg-white shadow-[0_1px_2px_rgba(15,17,28,0.04),0_10px_30px_-16px_rgba(15,17,28,0.12)]";
+
 export default function Landing() {
   return (
     <div className="relative flex min-h-full flex-col">
@@ -38,20 +41,16 @@ export default function Landing() {
 
       {/* ───────── Hero ───────── */}
       <section className="relative -mt-20 flex min-h-[82vh] flex-col items-center justify-center overflow-hidden px-6 pb-24 pt-32 text-center">
-        {/* React Bits Light Rays backdrop, tuned to blue/neutral (no purple) */}
+        {/* Soft light backdrop: a single indigo glow, no dark WebGL rays. */}
         <div className="pointer-events-none absolute inset-0 -z-10">
-          <LightRays
-            raysOrigin="top-center"
-            raysColor="#6f9bff"
-            raysSpeed={0.6}
-            lightSpread={1.1}
-            rayLength={2.2}
-            fadeDistance={1.3}
-            followMouse={false}
+          <div
+            className="absolute left-1/2 top-[-8%] h-[38rem] w-[66rem] -translate-x-1/2 rounded-full blur-3xl"
+            style={{ background: "radial-gradient(ellipse at center, rgba(99,102,241,0.18), transparent 68%)" }}
           />
-          {/* Center scrim so the headline/subcopy stay legible over the rays */}
-          <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 62% 52% at 50% 46%, rgba(8,8,12,0.6), transparent 78%)" }} />
-          <div className="absolute inset-x-0 bottom-0 h-48" style={{ background: "linear-gradient(180deg, transparent, #08080c)" }} />
+          <div
+            className="absolute inset-x-0 bottom-0 h-40"
+            style={{ background: "linear-gradient(180deg, transparent, #f5f6fa)" }}
+          />
         </div>
 
         <Reveal>
@@ -61,7 +60,7 @@ export default function Landing() {
         </Reveal>
 
         <Reveal delay={80}>
-          <h1 className="mx-auto mt-6 max-w-3xl text-[clamp(2.2rem,5vw,4rem)] font-semibold leading-[1.05] tracking-[-0.03em] text-white">
+          <h1 className="mx-auto mt-6 max-w-3xl text-[clamp(2.2rem,5vw,4rem)] font-semibold leading-[1.05] tracking-[-0.03em] text-neutral-900">
             Sit back while your money
             <br />
             saves, invests, and <Underline>grows</Underline>.
@@ -69,7 +68,7 @@ export default function Landing() {
         </Reveal>
 
         <Reveal delay={160}>
-          <p className="mx-auto mt-6 max-w-xl text-[clamp(0.95rem,1.55vw,1.1rem)] leading-relaxed text-neutral-400">
+          <p className="mx-auto mt-6 max-w-xl text-[clamp(0.95rem,1.55vw,1.1rem)] leading-relaxed text-neutral-600">
             Most of us mean to save and never get around to it. Orbit sets aside a little from
             your everyday spending and grows it, so your money builds up on its own.
           </p>
@@ -93,7 +92,7 @@ export default function Landing() {
 
       {/* ───────── Trust strip ───────── */}
       <section className="mx-auto w-full max-w-6xl px-6">
-        <Reveal className="grid grid-cols-2 divide-y divide-white/[0.06] rounded-2xl border border-white/[0.06] bg-white/[0.02] sm:grid-cols-4 sm:divide-x sm:divide-y-0">
+        <Reveal className={`grid grid-cols-2 divide-y divide-black/[0.08] sm:grid-cols-4 sm:divide-x sm:divide-y-0 ${CARD}`}>
           {[
             { icon: ShieldCheck, k: "Non-custodial", v: "You hold the keys" },
             { icon: Eye, k: "Transparent", v: "Every dollar on-chain" },
@@ -101,9 +100,9 @@ export default function Landing() {
             { icon: TrendingUp, k: "Productive", v: "Earns real yield" },
           ].map((p) => (
             <div key={p.k} className="flex items-center gap-3 p-5">
-              <p.icon className="h-5 w-5 shrink-0 text-indigo-300" aria-hidden />
+              <p.icon className="h-5 w-5 shrink-0 text-indigo-600" aria-hidden />
               <div>
-                <div className="text-[13px] font-medium text-neutral-100">{p.k}</div>
+                <div className="text-[13px] font-medium text-neutral-900">{p.k}</div>
                 <div className="text-[12px] text-neutral-500">{p.v}</div>
               </div>
             </div>
@@ -116,23 +115,23 @@ export default function Landing() {
         {/* Row 1: intro + big growth chart */}
         <div className="grid gap-4 lg:grid-cols-2">
           <Reveal>
-            <div className="flex h-full flex-col justify-center rounded-3xl border border-white/[0.07] bg-white/[0.02] p-8 lg:p-10">
-              <span className="text-[12px] font-semibold uppercase tracking-[0.18em] text-indigo-300">Why Orbit</span>
-              <h2 className="mt-4 font-sans text-[clamp(1.8rem,3vw,2.6rem)] font-medium leading-tight tracking-[-0.02em]">
+            <div className={`flex h-full flex-col justify-center p-8 lg:p-10 ${CARD}`}>
+              <span className="text-[12px] font-semibold uppercase tracking-[0.18em] text-indigo-600">Why Orbit</span>
+              <h2 className="mt-4 font-sans text-[clamp(1.8rem,3vw,2.6rem)] font-medium leading-tight tracking-[-0.02em] text-neutral-900">
                 Your money should be growing right now
               </h2>
-              <p className="mt-4 max-w-md text-[15px] leading-relaxed text-neutral-400">
+              <p className="mt-4 max-w-md text-[15px] leading-relaxed text-neutral-600">
                 Cash sitting still quietly loses to inflation. Orbit puts your savings to work the moment they
                 land, in a vault only you can touch.
               </p>
-              <div className="mt-8 grid grid-cols-3 gap-4 border-t border-white/[0.06] pt-6">
+              <div className="mt-8 grid grid-cols-3 gap-4 border-t border-black/[0.08] pt-6">
                 {[
                   { v: "6%", l: "APY, on-chain" },
                   { v: "$0", l: "lock-ups" },
                   { v: "1-tap", l: "withdrawals" },
                 ].map((s) => (
                   <div key={s.l}>
-                    <div className="text-[clamp(1.3rem,2.5vw,1.9rem)] font-semibold tabular-nums text-white">{s.v}</div>
+                    <div className="text-[clamp(1.3rem,2.5vw,1.9rem)] font-semibold tabular-nums text-neutral-900">{s.v}</div>
                     <div className="mt-1 text-[12px] text-neutral-500">{s.l}</div>
                   </div>
                 ))}
@@ -141,17 +140,17 @@ export default function Landing() {
           </Reveal>
 
           <Reveal delay={100}>
-            <div className="flex h-full flex-col overflow-hidden rounded-3xl border border-white/[0.07] bg-gradient-to-b from-white/[0.05] to-white/[0.01] p-6 sm:p-7">
+            <div className={`flex h-full flex-col overflow-hidden p-6 sm:p-7 ${CARD}`}>
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <span className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide text-neutral-300">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-black/[0.08] bg-black/[0.03] px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide text-neutral-600">
                     Vault · Devnet
                   </span>
                   <div className="mt-3 flex items-end gap-2.5">
-                    <span className="text-[clamp(2rem,5vw,3rem)] font-semibold leading-none tabular-nums text-white">
+                    <span className="text-[clamp(2rem,5vw,3rem)] font-semibold leading-none tabular-nums text-neutral-900">
                       <LiveYield principal={5980} apy={0.06} />
                     </span>
-                    <span className="mb-1 inline-flex items-center gap-1 rounded-md bg-emerald-400/10 px-1.5 py-0.5 text-[12px] font-medium text-emerald-300">
+                    <span className="mb-1 inline-flex items-center gap-1 rounded-md bg-emerald-500/10 px-1.5 py-0.5 text-[12px] font-medium text-emerald-700">
                       <TrendingUp className="h-3.5 w-3.5" aria-hidden /> 6.0% APY
                     </span>
                   </div>
@@ -161,7 +160,7 @@ export default function Landing() {
                   {["Balance", "12 months"].map((c) => (
                     <span
                       key={c}
-                      className="inline-flex items-center gap-1 rounded-lg border border-white/[0.07] bg-white/[0.02] px-2.5 py-1.5 text-[12px] text-neutral-400"
+                      className="inline-flex items-center gap-1 rounded-lg border border-black/[0.08] bg-black/[0.02] px-2.5 py-1.5 text-[12px] text-neutral-600"
                     >
                       {c} <ChevronDown className="h-3 w-3" aria-hidden />
                     </span>
@@ -173,12 +172,12 @@ export default function Landing() {
                 <GrowthChart />
               </div>
 
-              <div className="mt-4 flex items-center gap-5 text-[12px] text-neutral-400">
+              <div className="mt-4 flex items-center gap-5 text-[12px] text-neutral-600">
                 <span className="flex items-center gap-2">
-                  <span className="h-[3px] w-4 rounded-full bg-indigo-400" /> Your vault
+                  <span className="h-[3px] w-4 rounded-full bg-indigo-500" /> Your vault
                 </span>
                 <span className="flex items-center gap-2">
-                  <span className="h-0 w-4 border-t-2 border-dashed border-white/35" /> Cash left idle
+                  <span className="h-0 w-4 border-t-2 border-dashed border-black/35" /> Cash left idle
                 </span>
               </div>
             </div>
@@ -189,11 +188,11 @@ export default function Landing() {
         <div className="mt-4 grid gap-4 lg:grid-cols-2">
           {/* Automatic set-aside */}
           <Reveal>
-            <div className="flex h-full flex-col rounded-3xl border border-white/[0.07] bg-white/[0.02] p-6 sm:p-7">
-              <div className="rounded-2xl border border-white/[0.06] bg-[#0a0a10]/60 p-5">
+            <div className={`flex h-full flex-col p-6 sm:p-7 ${CARD}`}>
+              <div className="rounded-2xl border border-black/[0.07] bg-black/[0.03] p-5">
                 <div className="flex items-center justify-between">
-                  <span className="text-[13px] font-medium text-neutral-200">Set aside</span>
-                  <span className="inline-flex items-center gap-1 rounded-lg border border-white/[0.07] bg-white/[0.02] px-2 py-1 text-[11px] text-neutral-400">
+                  <span className="text-[13px] font-medium text-neutral-900">Set aside</span>
+                  <span className="inline-flex items-center gap-1 rounded-lg border border-black/[0.08] bg-white px-2 py-1 text-[11px] text-neutral-600">
                     This year
                   </span>
                 </div>
@@ -202,29 +201,29 @@ export default function Landing() {
                     <div
                       key={i}
                       className={`flex-1 rounded-t-[3px] ${
-                        v === 100 ? "bg-indigo-400" : "bg-gradient-to-t from-indigo-500/30 to-indigo-400/70"
+                        v === 100 ? "bg-indigo-500" : "bg-gradient-to-t from-indigo-200 to-indigo-400"
                       }`}
                       style={{ height: `${v}%` }}
                     />
                   ))}
                 </div>
-                <div className="mt-5 grid grid-cols-3 gap-3 border-t border-white/[0.06] pt-4">
+                <div className="mt-5 grid grid-cols-3 gap-3 border-t border-black/[0.08] pt-4">
                   {[
                     { v: "$620", l: "set aside" },
                     { v: "48", l: "auto-saves" },
                     { v: "+18%", l: "vs last month" },
                   ].map((s) => (
                     <div key={s.l}>
-                      <div className="text-[clamp(1.1rem,2.2vw,1.5rem)] font-semibold tabular-nums text-white">{s.v}</div>
+                      <div className="text-[clamp(1.1rem,2.2vw,1.5rem)] font-semibold tabular-nums text-neutral-900">{s.v}</div>
                       <div className="mt-0.5 text-[11px] text-neutral-500">{s.l}</div>
                     </div>
                   ))}
                 </div>
               </div>
               <div className="mt-6">
-                <span className="text-[12px] font-semibold uppercase tracking-[0.18em] text-indigo-300">Automatic</span>
-                <h3 className="mt-3 font-sans text-2xl font-medium tracking-[-0.01em]">It saves itself, on every purchase</h3>
-                <p className="mt-2 max-w-md text-[14px] leading-relaxed text-neutral-400">
+                <span className="text-[12px] font-semibold uppercase tracking-[0.18em] text-indigo-600">Automatic</span>
+                <h3 className="mt-3 font-sans text-2xl font-medium tracking-[-0.01em] text-neutral-900">It saves itself, on every purchase</h3>
+                <p className="mt-2 max-w-md text-[14px] leading-relaxed text-neutral-600">
                   Orbit sets aside a little whenever you spend: $5 over $100, $10 over $500. It adds up before you
                   notice, then moves to your vault on its own.
                 </p>
@@ -234,29 +233,29 @@ export default function Landing() {
 
           {/* Built on */}
           <Reveal delay={100}>
-            <div className="flex h-full flex-col rounded-3xl border border-white/[0.07] bg-white/[0.02] p-6 sm:p-7">
+            <div className={`flex h-full flex-col p-6 sm:p-7 ${CARD}`}>
               <div className="grid grid-cols-3 gap-3">
                 {[
                   { mark: <SolanaMark className="h-7 w-7" />, name: "Solana" },
                   { mark: <UsdcMark className="h-7 w-7" />, name: "USDC" },
                   { mark: <AaveMark className="h-7 w-7" />, name: "Aave" },
-                  { mark: <Landmark className="h-6 w-6 text-neutral-300" aria-hidden />, name: "Plaid" },
-                  { mark: <CreditCard className="h-6 w-6 text-neutral-300" aria-hidden />, name: "Stripe" },
-                  { mark: <Wallet className="h-6 w-6 text-neutral-300" aria-hidden />, name: "Phantom" },
+                  { mark: <Landmark className="h-6 w-6 text-neutral-700" aria-hidden />, name: "Plaid" },
+                  { mark: <CreditCard className="h-6 w-6 text-neutral-700" aria-hidden />, name: "Stripe" },
+                  { mark: <Wallet className="h-6 w-6 text-neutral-700" aria-hidden />, name: "Phantom" },
                 ].map((t) => (
                   <div
                     key={t.name}
-                    className="flex flex-col items-center gap-2 rounded-2xl border border-white/[0.06] bg-white/[0.02] py-5 transition-colors hover:border-white/[0.12]"
+                    className="flex flex-col items-center gap-2 rounded-2xl border border-black/[0.07] bg-black/[0.02] py-5 transition-colors hover:border-black/[0.14]"
                   >
                     <span className="grid h-11 w-11 place-items-center">{t.mark}</span>
-                    <span className="text-[11px] text-neutral-400">{t.name}</span>
+                    <span className="text-[11px] text-neutral-500">{t.name}</span>
                   </div>
                 ))}
               </div>
               <div className="mt-6">
-                <span className="text-[12px] font-semibold uppercase tracking-[0.18em] text-indigo-300">Built on</span>
-                <h3 className="mt-3 font-sans text-2xl font-medium tracking-[-0.01em]">Rails the rest of finance runs on</h3>
-                <p className="mt-2 max-w-md text-[14px] leading-relaxed text-neutral-400">
+                <span className="text-[12px] font-semibold uppercase tracking-[0.18em] text-indigo-600">Built on</span>
+                <h3 className="mt-3 font-sans text-2xl font-medium tracking-[-0.01em] text-neutral-900">Rails the rest of finance runs on</h3>
+                <p className="mt-2 max-w-md text-[14px] leading-relaxed text-neutral-600">
                   Bank detection through Plaid, fiat on-ramp through Stripe, custody and yield on Solana with USDC
                   and Aave. Proven infrastructure, not a black box.
                 </p>
@@ -269,7 +268,7 @@ export default function Landing() {
       {/* ───────── How it works ───────── */}
       <section id="how" className="mx-auto w-full max-w-6xl scroll-mt-20 px-6 py-20 lg:py-28">
         <Reveal>
-          <h2 className="max-w-xl font-sans text-[clamp(1.9rem,3.5vw,2.75rem)] font-medium leading-tight tracking-[-0.02em]">
+          <h2 className="max-w-xl font-sans text-[clamp(1.9rem,3.5vw,2.75rem)] font-medium leading-tight tracking-[-0.02em] text-neutral-900">
             From a coffee to a growing vault, without lifting a finger
           </h2>
         </Reveal>
@@ -283,38 +282,38 @@ export default function Landing() {
             <Reveal key={s.n} delay={i * 80}>
               <div className="flex gap-5">
                 <div className="flex flex-col items-center">
-                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-white/[0.08] bg-white/[0.03] font-mono text-[13px] text-indigo-300">
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-black/[0.1] bg-black/[0.03] font-mono text-[13px] text-indigo-600">
                     {s.n}
                   </span>
-                  {i < 3 && <span className="mt-2 h-full w-px bg-gradient-to-b from-white/[0.12] to-transparent" aria-hidden />}
+                  {i < 3 && <span className="mt-2 h-full w-px bg-gradient-to-b from-black/[0.14] to-transparent" aria-hidden />}
                 </div>
                 <div className="pb-2">
                   <div className="flex items-center gap-2">
-                    <s.icon className="h-4 w-4 text-indigo-300" aria-hidden />
-                    <h3 className="text-[15px] font-semibold text-neutral-100">{s.t}</h3>
+                    <s.icon className="h-4 w-4 text-indigo-600" aria-hidden />
+                    <h3 className="text-[15px] font-semibold text-neutral-900">{s.t}</h3>
                   </div>
-                  <p className="mt-1.5 max-w-sm text-[14px] leading-relaxed text-neutral-400">{s.d}</p>
+                  <p className="mt-1.5 max-w-sm text-[14px] leading-relaxed text-neutral-600">{s.d}</p>
                 </div>
               </div>
             </Reveal>
           ))}
         </div>
         <Reveal delay={120}>
-          <div className="mt-4 flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 text-[13px] text-neutral-400">
-            <RefreshCw className="h-4 w-4 text-emerald-300" aria-hidden />
+          <div className="mt-4 flex items-center gap-2 rounded-xl border border-black/[0.08] bg-black/[0.02] px-4 py-3 text-[13px] text-neutral-600">
+            <RefreshCw className="h-4 w-4 text-emerald-600" aria-hidden />
             Then it grows, and you withdraw principal plus yield whenever you want.
           </div>
         </Reveal>
       </section>
 
       {/* ───────── Security / trust ───────── */}
-      <section id="security" className="scroll-mt-20 border-y border-white/[0.06] bg-white/[0.015]">
+      <section id="security" className="scroll-mt-20 border-y border-black/[0.08] bg-black/[0.02]">
         <div className="mx-auto w-full max-w-6xl px-6 py-20 lg:py-28">
           <Reveal>
-            <span className="inline-flex items-center gap-2 rounded-full bg-indigo-500/10 px-3 py-1 text-[12px] text-indigo-200 ring-1 ring-inset ring-indigo-400/20">
+            <span className="inline-flex items-center gap-2 rounded-full bg-indigo-500/10 px-3 py-1 text-[12px] text-indigo-700 ring-1 ring-inset ring-indigo-500/20">
               <ShieldCheck className="h-3.5 w-3.5" aria-hidden /> Built to be trusted
             </span>
-            <h2 className="mt-5 max-w-2xl font-sans text-[clamp(1.9rem,3.5vw,2.75rem)] font-medium leading-tight tracking-[-0.02em]">
+            <h2 className="mt-5 max-w-2xl font-sans text-[clamp(1.9rem,3.5vw,2.75rem)] font-medium leading-tight tracking-[-0.02em] text-neutral-900">
               The money going in is money you can always get back
             </h2>
           </Reveal>
@@ -329,9 +328,9 @@ export default function Landing() {
             ].map((f, i) => (
               <Reveal key={f.t} delay={(i % 3) * 80}>
                 <div>
-                  <f.icon className="h-5 w-5 text-indigo-300" aria-hidden />
-                  <h3 className="mt-3 text-[15px] font-semibold text-neutral-100">{f.t}</h3>
-                  <p className="mt-1.5 text-[14px] leading-relaxed text-neutral-400">{f.d}</p>
+                  <f.icon className="h-5 w-5 text-indigo-600" aria-hidden />
+                  <h3 className="mt-3 text-[15px] font-semibold text-neutral-900">{f.t}</h3>
+                  <p className="mt-1.5 text-[14px] leading-relaxed text-neutral-600">{f.d}</p>
                 </div>
               </Reveal>
             ))}
@@ -343,23 +342,23 @@ export default function Landing() {
       <section id="proof" className="mx-auto w-full max-w-6xl scroll-mt-20 px-6 py-20 lg:py-28">
         <div className="grid gap-10 lg:grid-cols-[1fr_1fr] lg:items-center">
           <Reveal>
-            <h2 className="font-sans text-[clamp(1.9rem,3.5vw,2.75rem)] font-medium leading-tight tracking-[-0.02em]">
+            <h2 className="font-sans text-[clamp(1.9rem,3.5vw,2.75rem)] font-medium leading-tight tracking-[-0.02em] text-neutral-900">
               Don&rsquo;t trust it. Verify it.
             </h2>
-            <p className="mt-5 max-w-md text-[15px] leading-relaxed text-neutral-400">
+            <p className="mt-5 max-w-md text-[15px] leading-relaxed text-neutral-600">
               Orbit runs on a live Solana program. The vault, the deposits, and the yield are all on-chain and
               open to inspect. This isn&rsquo;t a mockup of DeFi, it is DeFi.
             </p>
             <div className="mt-7 space-y-3">
-              <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+              <div className="rounded-xl border border-black/[0.08] bg-black/[0.02] p-4">
                 <div className="text-[11px] uppercase tracking-wide text-neutral-500">Vault program (devnet)</div>
                 <div className="mt-1 flex items-center justify-between gap-3">
-                  <code className="truncate font-mono text-[13px] text-neutral-200">{PROGRAM}</code>
+                  <code className="truncate font-mono text-[13px] text-neutral-800">{PROGRAM}</code>
                   <a
                     href={solAcct(PROGRAM)}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex shrink-0 items-center gap-1 text-[12px] text-indigo-300 transition-colors hover:text-indigo-200"
+                    className="inline-flex shrink-0 items-center gap-1 text-[12px] text-indigo-600 transition-colors hover:text-indigo-500"
                   >
                     Solscan <ExternalLink className="h-3 w-3" aria-hidden />
                   </a>
@@ -369,21 +368,21 @@ export default function Landing() {
           </Reveal>
 
           <Reveal delay={100}>
-            <div className="rounded-3xl border border-white/[0.07] bg-gradient-to-b from-white/[0.05] to-white/[0.01] p-7">
-              <div className="text-[13px] font-medium text-neutral-300">Proven on-chain</div>
+            <div className={`p-7 ${CARD}`}>
+              <div className="text-[13px] font-medium text-neutral-700">Proven on-chain</div>
               <p className="mt-1 text-[13px] text-neutral-500">A real deposit, then a real withdrawal:</p>
               <div className="mt-5 space-y-3 font-mono text-[14px] tabular-nums">
-                <div className="flex items-center justify-between rounded-lg border border-white/[0.05] bg-white/[0.02] px-4 py-3">
-                  <span className="text-neutral-400">deposited</span>
-                  <span className="text-neutral-200">1,000,000.00</span>
+                <div className="flex items-center justify-between rounded-lg border border-black/[0.07] bg-black/[0.02] px-4 py-3">
+                  <span className="text-neutral-500">deposited</span>
+                  <span className="text-neutral-800">1,000,000.00</span>
                 </div>
-                <div className="flex items-center justify-between rounded-lg border border-emerald-400/15 bg-emerald-400/[0.06] px-4 py-3">
-                  <span className="text-emerald-200/80">withdrew</span>
-                  <span className="text-emerald-300">1,000,000.03</span>
+                <div className="flex items-center justify-between rounded-lg border border-emerald-500/20 bg-emerald-500/[0.08] px-4 py-3">
+                  <span className="text-emerald-700/80">withdrew</span>
+                  <span className="text-emerald-700">1,000,000.03</span>
                 </div>
               </div>
               <p className="mt-4 flex items-center gap-1.5 text-[12px] text-neutral-500">
-                <Check className="h-3.5 w-3.5 text-emerald-400" aria-hidden />
+                <Check className="h-3.5 w-3.5 text-emerald-600" aria-hidden />
                 Real interest, paid out in tokens. Withdrew more than deposited.
               </p>
             </div>
@@ -395,24 +394,24 @@ export default function Landing() {
       <section className="mx-auto w-full max-w-6xl px-6 pb-8">
         <div className="grid gap-4 md:grid-cols-2">
           <Reveal>
-            <div className="flex h-full flex-col rounded-3xl border border-white/[0.07] bg-white/[0.02] p-7">
-              <span className="grid h-10 w-10 place-items-center rounded-xl bg-indigo-500/10 ring-1 ring-inset ring-indigo-400/25">
-                <Sparkles className="h-5 w-5 text-indigo-300" aria-hidden />
+            <div className={`flex h-full flex-col p-7 ${CARD}`}>
+              <span className="grid h-10 w-10 place-items-center rounded-xl bg-indigo-500/10 ring-1 ring-inset ring-indigo-500/20">
+                <Sparkles className="h-5 w-5 text-indigo-600" aria-hidden />
               </span>
-              <h3 className="mt-5 font-sans text-xl font-medium">New to crypto</h3>
-              <p className="mt-2 text-[14px] leading-relaxed text-neutral-400">
+              <h3 className="mt-5 font-sans text-xl font-medium text-neutral-900">New to crypto</h3>
+              <p className="mt-2 text-[14px] leading-relaxed text-neutral-600">
                 Tap once to create an account. No wallet, no seed phrase, no jargon. Orbit handles the chain so
                 you just watch your savings grow.
               </p>
             </div>
           </Reveal>
           <Reveal delay={100}>
-            <div className="flex h-full flex-col rounded-3xl border border-white/[0.07] bg-white/[0.02] p-7">
-              <span className="grid h-10 w-10 place-items-center rounded-xl bg-indigo-500/10 ring-1 ring-inset ring-indigo-400/25">
-                <Wallet className="h-5 w-5 text-indigo-300" aria-hidden />
+            <div className={`flex h-full flex-col p-7 ${CARD}`}>
+              <span className="grid h-10 w-10 place-items-center rounded-xl bg-indigo-500/10 ring-1 ring-inset ring-indigo-500/20">
+                <Wallet className="h-5 w-5 text-indigo-600" aria-hidden />
               </span>
-              <h3 className="mt-5 font-sans text-xl font-medium">Already on-chain</h3>
-              <p className="mt-2 text-[14px] leading-relaxed text-neutral-400">
+              <h3 className="mt-5 font-sans text-xl font-medium text-neutral-900">Already on-chain</h3>
+              <p className="mt-2 text-[14px] leading-relaxed text-neutral-600">
                 Connect Phantom or Solflare and keep full self-custody. Put idle USDC to work without handing it
                 to anyone. Your keys, your vault.
               </p>
@@ -424,11 +423,11 @@ export default function Landing() {
       {/* ───────── FAQ ───────── */}
       <section id="faq" className="mx-auto w-full max-w-3xl scroll-mt-20 px-6 py-20 lg:py-28">
         <Reveal>
-          <h2 className="text-center font-sans text-[clamp(1.9rem,3.5vw,2.75rem)] font-medium tracking-[-0.02em]">
+          <h2 className="text-center font-sans text-[clamp(1.9rem,3.5vw,2.75rem)] font-medium tracking-[-0.02em] text-neutral-900">
             Questions, answered
           </h2>
         </Reveal>
-        <Reveal delay={80} className="mt-10 divide-y divide-white/[0.06] rounded-2xl border border-white/[0.06] bg-white/[0.02]">
+        <Reveal delay={80} className={`mt-10 divide-y divide-black/[0.08] ${CARD}`}>
           {[
             { q: "Can Orbit take my money?", a: "No. The vault is self-custodial. The program is written so only your key can withdraw. Orbit can add funds, it can never remove them." },
             { q: "Can I withdraw anytime?", a: "Yes. There are no lock-ups or penalties. One click returns your full balance, principal plus the yield it earned, to your wallet." },
@@ -437,13 +436,13 @@ export default function Landing() {
             { q: "Is this real money?", a: "Today Orbit runs on Solana devnet with test USDC so you can try everything risk-free. The same code moves to mainnet with real USDC and a live bank on-ramp." },
           ].map((f) => (
             <details key={f.q} className="group px-5">
-              <summary className="flex cursor-pointer list-none items-center justify-between py-4 text-[15px] font-medium text-neutral-100 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40">
+              <summary className="flex cursor-pointer list-none items-center justify-between py-4 text-[15px] font-medium text-neutral-900 transition-colors hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40">
                 {f.q}
-                <span className="ml-4 grid h-6 w-6 shrink-0 place-items-center rounded-full border border-white/[0.1] text-neutral-400 transition-transform duration-200 group-open:rotate-45" aria-hidden>
+                <span className="ml-4 grid h-6 w-6 shrink-0 place-items-center rounded-full border border-black/[0.12] text-neutral-500 transition-transform duration-200 group-open:rotate-45" aria-hidden>
                   +
                 </span>
               </summary>
-              <p className="pb-5 pr-10 text-[14px] leading-relaxed text-neutral-400">{f.a}</p>
+              <p className="pb-5 pr-10 text-[14px] leading-relaxed text-neutral-600">{f.a}</p>
             </details>
           ))}
         </Reveal>
@@ -452,22 +451,22 @@ export default function Landing() {
       {/* ───────── Final CTA ───────── */}
       <section className="mx-auto w-full max-w-6xl px-6 pb-24">
         <Reveal>
-          <div className="relative overflow-hidden rounded-[2rem] border border-white/[0.08] bg-gradient-to-b from-indigo-500/[0.12] to-white/[0.01] px-6 py-16 text-center">
+          <div className="relative overflow-hidden rounded-[2rem] border border-black/[0.08] bg-gradient-to-b from-indigo-500/[0.10] to-white px-6 py-16 text-center shadow-[0_1px_2px_rgba(15,17,28,0.04),0_20px_50px_-24px_rgba(79,70,229,0.35)]">
             <div
               className="pointer-events-none absolute inset-x-0 -top-1/2 h-full blur-3xl"
-              style={{ background: "radial-gradient(40rem 20rem at 50% 100%, rgba(99,102,241,0.25), transparent 70%)" }}
+              style={{ background: "radial-gradient(40rem 20rem at 50% 100%, rgba(99,102,241,0.22), transparent 70%)" }}
               aria-hidden
             />
             <div className="relative">
-              <h2 className="mx-auto max-w-xl font-sans text-[clamp(2rem,4.5vw,3.25rem)] font-medium leading-[1.05] tracking-[-0.02em]">
+              <h2 className="mx-auto max-w-xl font-sans text-[clamp(2rem,4.5vw,3.25rem)] font-medium leading-[1.05] tracking-[-0.02em] text-neutral-900">
                 Put your money in orbit
               </h2>
-              <p className="mx-auto mt-4 max-w-md text-[15px] text-neutral-400">
+              <p className="mx-auto mt-4 max-w-md text-[15px] text-neutral-600">
                 Start saving in under a minute. No wallet needed, nothing locked up, everything verifiable.
               </p>
               <Link
                 href="/app"
-                className="mt-8 inline-flex h-12 items-center gap-2 rounded-full bg-indigo-500 px-7 text-[14px] font-semibold text-white shadow-lg shadow-indigo-500/25 transition-[background,transform] duration-150 ease-out hover:bg-indigo-400 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#08080c]"
+                className="mt-8 inline-flex h-12 items-center gap-2 rounded-full bg-indigo-600 px-7 text-[14px] font-semibold text-white shadow-lg shadow-indigo-600/25 transition-[background,transform] duration-150 ease-out hover:bg-indigo-500 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#f5f6fa]"
               >
                 Open your vault <ArrowRight className="h-4 w-4" aria-hidden />
               </Link>
@@ -477,23 +476,23 @@ export default function Landing() {
       </section>
 
       {/* ───────── Footer ───────── */}
-      <footer className="mt-auto border-t border-white/[0.06]">
+      <footer className="mt-auto border-t border-black/[0.08]">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-10 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2.5">
-            <OrbitIcon className="h-5 w-5 text-white" aria-hidden />
+            <OrbitIcon className="h-5 w-5 text-neutral-900" aria-hidden />
             <div>
-              <div className="text-[14px] font-semibold">Orbit</div>
+              <div className="text-[14px] font-semibold text-neutral-900">Orbit</div>
               <div className="text-[12px] text-neutral-500">Self-driving savings on Solana</div>
             </div>
           </div>
-          <div className="flex items-center gap-6 text-[13px] text-neutral-400">
-            <a href="#how" className="transition-colors hover:text-neutral-100">How it works</a>
-            <a href="#security" className="transition-colors hover:text-neutral-100">Security</a>
-            <Link href="/app" className="transition-colors hover:text-neutral-100">Launch app</Link>
+          <div className="flex items-center gap-6 text-[13px] text-neutral-600">
+            <a href="#how" className="transition-colors hover:text-neutral-900">How it works</a>
+            <a href="#security" className="transition-colors hover:text-neutral-900">Security</a>
+            <Link href="/app" className="transition-colors hover:text-neutral-900">Launch app</Link>
           </div>
         </div>
         <div className="mx-auto w-full max-w-6xl px-6 pb-10">
-          <p className="text-[11px] leading-5 text-neutral-600">
+          <p className="text-[11px] leading-5 text-neutral-500">
             Live on Solana devnet for demonstration. Detection, the on-chain vault, and yield are real; the
             fiat-to-USDC step is simulated. Not a bank. Not FDIC-insured. Principal is not guaranteed. Nothing
             here is financial advice. Built for the Colosseum Crypto World&rsquo;s Fair.

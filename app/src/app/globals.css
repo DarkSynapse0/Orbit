@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
-/* Orbit is a dark-first product; force the dark palette. */
+/* Orbit light theme: an indigo-tinted off-white surface, near-black ink. */
 :root {
-  --background: #08080c;
-  --foreground: #ececf1;
+  --background: #f5f6fa;
+  --foreground: #14151c;
 }
 
 @theme inline {

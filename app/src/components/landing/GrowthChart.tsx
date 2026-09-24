@@ -40,27 +40,27 @@ export function GrowthChart() {
       {/* horizontal grid + axis labels */}
       {GRID.map((v) => (
         <g key={v}>
-          <line x1={L} x2={W - R} y1={y(v)} y2={y(v)} stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-          <text x={L} y={y(v) - 4} fill="rgba(255,255,255,0.32)" fontSize="10" fontFamily="var(--font-geist-mono)">
+          <line x1={L} x2={W - R} y1={y(v)} y2={y(v)} stroke="rgba(15,17,28,0.08)" strokeWidth="1" />
+          <text x={L} y={y(v) - 4} fill="rgba(15,17,28,0.4)" fontSize="10" fontFamily="var(--font-geist-mono)">
             ${v / 10}k
           </text>
         </g>
       ))}
 
       {/* idle cash, dashed */}
-      <path d={toLine(IDLE)} fill="none" stroke="rgba(255,255,255,0.28)" strokeWidth="2" strokeDasharray="5 5" strokeLinecap="round" />
+      <path d={toLine(IDLE)} fill="none" stroke="rgba(15,17,28,0.25)" strokeWidth="2" strokeDasharray="5 5" strokeLinecap="round" />
 
       {/* your vault, solid + area */}
       <path d={toArea(ORBIT)} fill="url(#orbitArea)" />
-      <path d={toLine(ORBIT)} fill="none" stroke="#818cf8" strokeWidth="2.75" strokeLinecap="round" strokeLinejoin="round" />
+      <path d={toLine(ORBIT)} fill="none" stroke="#4f46e5" strokeWidth="2.75" strokeLinecap="round" strokeLinejoin="round" />
 
       {/* current point */}
-      <line x1={lastX} x2={lastX} y1={lastY} y2={H - B} stroke="rgba(129,140,248,0.35)" strokeWidth="1" strokeDasharray="3 3" />
-      <circle cx={lastX} cy={lastY} r="5.5" fill="#818cf8" />
-      <circle cx={lastX} cy={lastY} r="5.5" fill="none" stroke="#0a0a10" strokeWidth="2" />
+      <line x1={lastX} x2={lastX} y1={lastY} y2={H - B} stroke="rgba(79,70,229,0.35)" strokeWidth="1" strokeDasharray="3 3" />
+      <circle cx={lastX} cy={lastY} r="5.5" fill="#4f46e5" />
+      <circle cx={lastX} cy={lastY} r="5.5" fill="none" stroke="#ffffff" strokeWidth="2" />
       <g transform={`translate(${lastX - 66}, ${lastY - 34})`}>
-        <rect width="60" height="22" rx="6" fill="#0c0c14" stroke="rgba(255,255,255,0.12)" />
-        <text x="30" y="15" textAnchor="middle" fill="#c7d2fe" fontSize="11" fontWeight="600" fontFamily="var(--font-geist-mono)">
+        <rect width="60" height="22" rx="6" fill="#ffffff" stroke="rgba(15,17,28,0.12)" />
+        <text x="30" y="15" textAnchor="middle" fill="#4338ca" fontSize="11" fontWeight="600" fontFamily="var(--font-geist-mono)">
           $6,010
         </text>
       </g>
