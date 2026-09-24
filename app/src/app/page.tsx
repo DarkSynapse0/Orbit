@@ -62,7 +62,8 @@ export default function Landing() {
             tunnelColor="#0a1024"
             cableColor="#2f5bd0"
             pulseColor="#a9c7ff"
-            speed={0.6}
+            speed={0.05}
+            pulseSpeed={0.15}
             opacity={0.9}
           />
           {/* Center scrim so the headline/subcopy stay legible over the tunnel */}
