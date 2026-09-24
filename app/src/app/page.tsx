@@ -18,6 +18,7 @@ import {
 import { Reveal } from "@/components/landing/Reveal";
 import { LiveYield } from "@/components/landing/LiveYield";
 import LightRays from "@/components/landing/LightRays";
+import { Underline } from "@/components/landing/Underline";
 import { SiteHeader } from "@/components/landing/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -59,7 +60,7 @@ export default function Landing() {
           <h1 className="mt-6 text-[clamp(2.6rem,6.5vw,5rem)] font-semibold leading-[1.02] tracking-[-0.035em] text-white">
             Sit back while your money
             <br />
-            saves, invests, and grows.
+            saves, invests, and <Underline>grows</Underline>.
           </h1>
         </Reveal>
 

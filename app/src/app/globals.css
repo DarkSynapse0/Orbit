@@ -117,6 +117,18 @@ body {
   animation: twinkle ease-in-out infinite;
 }
 
+/* Hand-drawn accent underline that draws itself in under a focus word. */
+@keyframes draw-underline {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.hand-underline path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw-underline 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.5s forwards;
+}
+
 /* Honor reduced-motion globally. */
 @media (prefers-reduced-motion: reduce) {
   *,
