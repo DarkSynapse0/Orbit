@@ -78,9 +78,9 @@ export default function Landing() {
 
         <Reveal delay={80}>
           <h1 className="mt-6 text-[clamp(3.4rem,9vw,7rem)] font-semibold leading-[0.98] tracking-[-0.035em] text-white">
-            Save without
+            Grow your savings,
             <br />
-            even trying.
+            automatically.
           </h1>
         </Reveal>
 
