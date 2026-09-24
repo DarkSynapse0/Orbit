@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { Reveal } from "@/components/landing/Reveal";
 import { LiveYield } from "@/components/landing/LiveYield";
-import LightTunnel from "@/components/landing/LightTunnel";
+import SideRays from "@/components/landing/SideRays";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -56,18 +56,17 @@ export default function Landing() {
 
       {/* ───────── Hero ───────── */}
       <section className="relative -mt-16 flex flex-col items-center overflow-hidden px-6 pb-24 pt-40 text-center">
-        {/* React Bits Light Tunnel backdrop, tuned to blue/neutral (no purple) */}
+        {/* React Bits Side Rays backdrop, tuned to blue/neutral (no purple) */}
         <div className="pointer-events-none absolute inset-0 -z-10">
-          <LightTunnel
-            tunnelColor="#0a1024"
-            cableColor="#2f5bd0"
-            pulseColor="#a9c7ff"
-            speed={0.05}
-            pulseSpeed={0.15}
-            opacity={0.9}
+          <SideRays
+            rayColor1="#4f7dff"
+            rayColor2="#bcd4ff"
+            speed={0.4}
+            intensity={1.6}
+            opacity={0.7}
           />
-          {/* Center scrim so the headline/subcopy stay legible over the tunnel */}
-          <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 62% 52% at 50% 46%, rgba(8,8,12,0.7), transparent 76%)" }} />
+          {/* Center scrim so the headline/subcopy stay legible over the rays */}
+          <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 62% 52% at 50% 46%, rgba(8,8,12,0.6), transparent 78%)" }} />
           <div className="absolute inset-x-0 bottom-0 h-48" style={{ background: "linear-gradient(180deg, transparent, #08080c)" }} />
         </div>
 
