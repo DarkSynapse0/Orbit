@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Spectral } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
@@ -13,16 +13,25 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Calm, screen-optimized serif for brand headlines — trust without the Playfair/Fraunces cliché.
+const spectral = Spectral({
+  variable: "--font-display",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
+});
+
 export const metadata: Metadata = {
-  title: "Orbit — self-driving savings on Solana",
-  description: "Orbit sets aside a slice of every purchase and grows it with on-chain USDC yield.",
+  title: "Orbit — money that saves itself",
+  description:
+    "Orbit sets aside a little from your everyday spending and grows it with on-chain yield. Self-custodial, verifiable, withdraw anytime.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${spectral.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <Providers>{children}</Providers>
