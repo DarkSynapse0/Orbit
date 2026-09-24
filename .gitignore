@@ -27,6 +27,11 @@ id.json
 **/.devnet.json
 **/.plaid.json
 
+# sqlite ledger
+*.db
+*.db-shm
+*.db-wal
+
 # generated research export
 *.pdf
 
