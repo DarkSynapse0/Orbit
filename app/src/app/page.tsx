@@ -14,7 +14,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { Reveal } from "@/components/landing/Reveal";
-import { HeroBackground } from "@/components/landing/HeroBackground";
+import Aurora from "@/components/landing/Aurora";
 import { LiveYield } from "@/components/landing/LiveYield";
 import { OrbitMark } from "@/components/landing/OrbitMark";
 
@@ -48,7 +48,14 @@ export default function Landing() {
 
       {/* ───────── Hero (centered, full-bleed, animated sky) ───────── */}
       <section className="relative -mt-16 flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 pb-24 pt-28 text-center">
-        <HeroBackground />
+        {/* Calm aurora backdrop (React Bits), tuned to indigo + low intensity for trust */}
+        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden>
+          <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, #0b0b18 0%, #0a0a15 50%, #08080c 100%)" }} />
+          <div className="absolute inset-0 opacity-70">
+            <Aurora colorStops={["#4338ca", "#818cf8", "#6d28d9"]} amplitude={0.8} blend={0.6} speed={0.4} />
+          </div>
+          <div className="absolute inset-x-0 bottom-0 h-48" style={{ background: "linear-gradient(180deg, transparent, #08080c)" }} />
+        </div>
 
         <Reveal>
           <span className="inline-flex items-center gap-2 rounded-full bg-white/[0.05] px-3 py-1 text-[12px] text-neutral-300 ring-1 ring-inset ring-white/[0.1] backdrop-blur-sm">
