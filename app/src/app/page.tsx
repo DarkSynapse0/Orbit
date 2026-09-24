@@ -57,16 +57,16 @@ export default function Landing() {
 
         <Reveal delay={80}>
           <h1 className="mt-6 text-[clamp(3.4rem,9vw,7rem)] font-semibold leading-[0.98] tracking-[-0.035em] text-white">
-            Grow your savings,
+            Saving money is hard.
             <br />
-            the easy way.
+            Orbit does it for you.
           </h1>
         </Reveal>
 
         <Reveal delay={160}>
           <p className="mx-auto mt-6 max-w-xl text-[clamp(0.95rem,1.55vw,1.1rem)] leading-relaxed text-neutral-400">
-            Saving takes willpower most of us just don&rsquo;t have. So Orbit does it for you,
-            a little at a time, before you even notice.
+            Most of us mean to save and never get around to it. Orbit sets aside a little from
+            your everyday spending and grows it, so your money builds up on its own.
           </p>
         </Reveal>
 
