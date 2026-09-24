@@ -3,7 +3,7 @@ import cors from 'cors';
 import { config } from './config.js';
 import { plaidRouter } from './routes/plaid.js';
 import { getState } from './ledger.js';
-import { getVaultOnChain, getConfig, mintToAddress } from './onchain.js';
+import { getVaultOnChain, getConfig, mintToAddress, fundSol } from './onchain.js';
 
 // Never let a transient RPC error (e.g. a devnet 429) take the whole server down.
 process.on('unhandledRejection', (e) => console.error('[unhandledRejection]', (e as Error)?.message ?? e));
@@ -63,6 +63,19 @@ app.get('/price/sol', async (_req, res) => {
     console.error('[price] SOL price fetch failed, serving last value:', (e as Error).message);
   }
   res.json({ usd: solPrice.usd });
+});
+
+app.post('/fund-sol', async (req, res) => {
+  const address = req.body?.address as string;
+  if (!address) {
+    res.status(400).json({ error: 'address required' });
+    return;
+  }
+  try {
+    res.json(await fundSol(address));
+  } catch (e) {
+    res.status(500).json({ error: (e as Error).message });
+  }
 });
 
 app.use('/plaid', plaidRouter);

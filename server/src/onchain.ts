@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import * as anchor from '@coral-xyz/anchor';
-import { Connection, Keypair, PublicKey, SystemProgram } from '@solana/web3.js';
+import { Connection, Keypair, PublicKey, SystemProgram, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
 import { createMint, getOrCreateAssociatedTokenAccount, mintTo, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { config } from './config.js';
 
@@ -195,6 +195,20 @@ export async function getConfig() {
     reserveVault: c.reserveVault.toBase58(),
     cluster: config.solana.cluster,
   };
+}
+
+/** Gas faucet: top up a wallet with a little devnet SOL so it can pay tx fees (used by the
+ *  embedded/no-install account, which starts with zero SOL). Skips if it already has enough. */
+export async function fundSol(address: string, sol = 0.02): Promise<{ funded: boolean; sig?: string }> {
+  const c = await ctx();
+  const to = new PublicKey(address);
+  const balance = await c.connection.getBalance(to);
+  if (balance >= 0.01 * 1e9) return { funded: false };
+  const tx = new Transaction().add(
+    SystemProgram.transfer({ fromPubkey: c.wallet.publicKey, toPubkey: to, lamports: Math.round(sol * 1e9) }),
+  );
+  const sig = await sendAndConfirmTransaction(c.connection, tx, [c.wallet]);
+  return { funded: true, sig };
 }
 
 /** Faucet: mint test USDC to an arbitrary wallet (the dev wallet is the mint authority). */

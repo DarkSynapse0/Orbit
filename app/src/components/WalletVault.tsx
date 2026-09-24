@@ -6,8 +6,9 @@ import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { AnchorProvider, Program, BN, type Idl } from "@coral-xyz/anchor";
 import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { Wallet, Coins, ArrowDownToLine, ArrowUpFromLine, Copy, Check, ExternalLink, Loader2, ShieldCheck } from "lucide-react";
+import { Wallet, Coins, ArrowDownToLine, ArrowUpFromLine, Copy, Check, ExternalLink, Loader2, ShieldCheck, Sparkles } from "lucide-react";
 import idl from "@/idl/orbit_vault.json";
+import { OrbitWalletName } from "@/lib/orbitWallet";
 
 const API = "http://localhost:4000";
 const DECIMALS = 6;
@@ -20,7 +21,8 @@ const solTx = (s: string) => `https://solscan.io/tx/${s}?cluster=devnet`;
 export function WalletVault({ onChanged }: { onChanged?: () => void }) {
   const { connection } = useConnection();
   const wallet = useAnchorWallet();
-  const { publicKey, connected } = useWallet();
+  const { publicKey, connected, connecting, select, connect, wallet: activeWallet } = useWallet();
+  const isEmbedded = activeWallet?.adapter.name === OrbitWalletName;
 
   const [mint, setMint] = useState<string | null>(null);
   const [usdc, setUsdc] = useState(0);
@@ -35,6 +37,32 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
   // hydration mismatch inside WalletMultiButton.
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+
+  // Non-crypto onboarding: create an in-app embedded wallet and connect it. select() switches
+  // the active adapter; we connect once it's the Orbit one.
+  const [creating, setCreating] = useState(false);
+  const createAccount = useCallback(() => {
+    setCreating(true);
+    select(OrbitWalletName);
+  }, [select]);
+  useEffect(() => {
+    if (creating && activeWallet?.adapter.name === OrbitWalletName && !connected && !connecting) {
+      connect()
+        .catch(() => {})
+        .finally(() => setCreating(false));
+    }
+  }, [creating, activeWallet, connected, connecting, connect]);
+
+  // A freshly created embedded wallet has no SOL for tx fees — top it up (server skips if it
+  // already has enough, so Solflare/Phantom users aren't funded).
+  useEffect(() => {
+    if (!connected || !publicKey) return;
+    fetch(`${API}/fund-sol`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ address: publicKey.toBase58() }),
+    }).catch(() => {});
+  }, [connected, publicKey]);
 
   const program = useMemo(() => {
     if (!wallet) return null;
@@ -197,11 +225,24 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
               <Wallet className="h-5 w-5 text-indigo-300" aria-hidden />
             </span>
             <div>
-              <div className="text-sm font-medium">Connect a wallet to open your vault</div>
+              <div className="text-sm font-medium">Open your vault</div>
               <div className="mt-0.5 text-[12px] text-neutral-500">One vault, fully yours. Orbit funds it automatically; only you can withdraw.</div>
             </div>
-            <WalletMultiButton style={{ height: 44, borderRadius: 12, background: "#6366f1", fontSize: 14 }} />
-            <div className="text-[11px] text-neutral-600">Phantom or Solflare · switch the wallet to Devnet</div>
+            <button
+              type="button"
+              onClick={createAccount}
+              disabled={creating || connecting}
+              className="inline-flex h-11 w-full max-w-[260px] items-center justify-center gap-2 rounded-xl bg-indigo-500 text-sm font-semibold text-white transition-[background,transform] duration-150 ease-out hover:bg-indigo-400 active:scale-[0.99] disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/70"
+            >
+              {creating || connecting ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Sparkles className="h-4 w-4" aria-hidden />}
+              Create an account
+            </button>
+            <div className="text-[11px] text-neutral-600">No wallet, no seed phrase — Orbit makes one for you.</div>
+            <div className="flex w-full max-w-[260px] items-center gap-3 py-0.5 text-[10px] uppercase tracking-wide text-neutral-600">
+              <span className="h-px flex-1 bg-white/[0.08]" /> or <span className="h-px flex-1 bg-white/[0.08]" />
+            </div>
+            <WalletMultiButton style={{ height: 40, borderRadius: 12, background: "rgba(255,255,255,0.06)", fontSize: 13 }} />
+            <div className="text-[11px] text-neutral-600">Already have Phantom or Solflare? Connect it (Devnet).</div>
           </div>
         ) : (
           <>
@@ -223,6 +264,11 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
                   >
                     {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" aria-hidden /> : <Copy className="h-3.5 w-3.5 text-neutral-500" aria-hidden />}
                     {truncate(publicKey.toBase58())}
+                    {isEmbedded && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-indigo-500/15 px-1.5 py-0.5 text-[10px] font-medium text-indigo-300">
+                        <Sparkles className="h-2.5 w-2.5" aria-hidden /> Orbit account
+                      </span>
+                    )}
                   </button>
                   <div className="font-mono text-[11px] tabular-nums text-neutral-500">
                     {sol.toFixed(2)} SOL{solPrice > 0 && ` · ≈ $${(sol * solPrice).toFixed(2)}`}

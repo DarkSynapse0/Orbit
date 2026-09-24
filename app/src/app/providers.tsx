@@ -12,12 +12,14 @@ import { ConnectionProvider, WalletProvider } from "@solana/wallet-adapter-react
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { clusterApiUrl } from "@solana/web3.js";
 import "@solana/wallet-adapter-react-ui/styles.css";
+import { OrbitWalletAdapter } from "@/lib/orbitWallet";
 
-// Phantom and Solflare implement the Wallet Standard, so they auto-register — no explicit
-// adapters needed. Devnet endpoint, autoConnect so the wallet persists across refreshes.
+// Phantom and Solflare implement the Wallet Standard, so they auto-register. We add Orbit's
+// own embedded wallet for non-crypto users (no extension needed). Devnet endpoint, autoConnect
+// so the wallet persists across refreshes.
 export function Providers({ children }: { children: React.ReactNode }) {
   const endpoint = useMemo(() => clusterApiUrl("devnet"), []);
-  const wallets = useMemo(() => [], []);
+  const wallets = useMemo(() => [new OrbitWalletAdapter()], []);
   return (
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider wallets={wallets} autoConnect>
