@@ -12,9 +12,11 @@ pub mod orbit_vault {
     use super::*;
 
     /// Create a user's savings vault + its USDC token account (the on-chain chamber).
+    /// The `payer` funds rent (can be the Orbit backend); the `owner` owns the vault and
+    /// is the only key that can ever withdraw. This lets Orbit open a vault for a user.
     pub fn initialize_vault(ctx: Context<InitializeVault>) -> Result<()> {
         let vault = &mut ctx.accounts.vault;
-        vault.authority = ctx.accounts.authority.key();
+        vault.authority = ctx.accounts.owner.key();
         vault.mint = ctx.accounts.mint.key();
         vault.principal = 0;
         vault.accrued_yield = 0;
@@ -23,7 +25,9 @@ pub mod orbit_vault {
         Ok(())
     }
 
-    /// Deposit USDC into the vault. Accrues yield first, then folds in the new principal.
+    /// Deposit USDC into a vault. Anyone (the user, or Orbit's backend at threshold) may
+    /// fund a vault; the `funder` provides the USDC and signs. Only the owner can withdraw.
+    /// Accrues yield first, then folds in the new principal.
     pub fn deposit(ctx: Context<Deposit>, amount: u64) -> Result<()> {
         require!(amount > 0, VaultError::ZeroAmount);
         accrue(&mut ctx.accounts.vault)?;
@@ -31,9 +35,9 @@ pub mod orbit_vault {
         let cpi = CpiContext::new(
             ctx.accounts.token_program.key(),
             Transfer {
-                from: ctx.accounts.user_token_account.to_account_info(),
+                from: ctx.accounts.funder_token_account.to_account_info(),
                 to: ctx.accounts.vault_token_account.to_account_info(),
-                authority: ctx.accounts.authority.to_account_info(),
+                authority: ctx.accounts.funder.to_account_info(),
             },
         );
         token::transfer(cpi, amount)?;
@@ -105,13 +109,16 @@ impl Vault {
 #[derive(Accounts)]
 pub struct InitializeVault<'info> {
     #[account(mut)]
-    pub authority: Signer<'info>,
+    pub payer: Signer<'info>,
+
+    /// CHECK: only used to derive the vault PDA and set as owner; not read or written.
+    pub owner: UncheckedAccount<'info>,
 
     #[account(
         init,
-        payer = authority,
+        payer = payer,
         space = Vault::LEN,
-        seeds = [b"vault", authority.key().as_ref()],
+        seeds = [b"vault", owner.key().as_ref()],
         bump
     )]
     pub vault: Account<'info, Vault>,
@@ -120,10 +127,10 @@ pub struct InitializeVault<'info> {
 
     #[account(
         init,
-        payer = authority,
+        payer = payer,
         token::mint = mint,
         token::authority = vault,
-        seeds = [b"vault_token", authority.key().as_ref()],
+        seeds = [b"vault_token", owner.key().as_ref()],
         bump
     )]
     pub vault_token_account: Account<'info, TokenAccount>,
@@ -135,25 +142,27 @@ pub struct InitializeVault<'info> {
 #[derive(Accounts)]
 pub struct Deposit<'info> {
     #[account(mut)]
-    pub authority: Signer<'info>,
+    pub funder: Signer<'info>,
+
+    /// CHECK: only used to derive the vault PDA; identifies whose vault is being funded.
+    pub owner: UncheckedAccount<'info>,
 
     #[account(
         mut,
-        seeds = [b"vault", authority.key().as_ref()],
-        bump = vault.bump,
-        has_one = authority
+        seeds = [b"vault", owner.key().as_ref()],
+        bump = vault.bump
     )]
     pub vault: Account<'info, Vault>,
 
     #[account(
         mut,
-        seeds = [b"vault_token", authority.key().as_ref()],
+        seeds = [b"vault_token", owner.key().as_ref()],
         bump
     )]
     pub vault_token_account: Account<'info, TokenAccount>,
 
     #[account(mut)]
-    pub user_token_account: Account<'info, TokenAccount>,
+    pub funder_token_account: Account<'info, TokenAccount>,
 
     pub token_program: Program<'info, Token>,
 }

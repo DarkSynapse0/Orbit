@@ -2,28 +2,34 @@ import { Router } from 'express';
 import { computeSetAside, DEFAULT_TIERS } from '@orbit/shared';
 import { addPending, moveToInvested, getState, resetState } from '../ledger.js';
 import { simulateStripeDeposit, depositToVault } from '../solana.js';
-import { withdrawAllOnChain } from '../onchain.js';
 import { isConfigured, hasItem, connectSandbox, syncTransactions, clearItem } from '../plaidClient.js';
 import { config } from '../config.js';
 
 export const plaidRouter = Router();
 
-// Shared pipeline: earmark -> threshold -> (mock Stripe) -> real on-chain deposit.
-async function runPipeline(userId: string, amountUsd: number) {
+// Shared pipeline: earmark -> threshold -> (mock Stripe) -> real deposit into the user's vault.
+// `wallet` is the connected user's address (the vault owner). Without it we can still earmark,
+// but the deposit waits until a wallet is connected — the money stays in the bank until then.
+async function runPipeline(userId: string, amountUsd: number, wallet?: string) {
   const setAside = computeSetAside(amountUsd, DEFAULT_TIERS);
   if (setAside > 0) addPending(userId, setAside);
 
   const state = getState(userId);
   let deposited = false;
+  let needsWallet = false;
   let batch = 0;
   if (state.pendingUsd >= config.thresholdUsd) {
-    batch = state.pendingUsd;
-    await simulateStripeDeposit(userId, batch);
-    const sig = await depositToVault(userId, batch);
-    moveToInvested(userId, batch, sig);
-    deposited = true;
+    if (!wallet) {
+      needsWallet = true;
+    } else {
+      batch = state.pendingUsd;
+      await simulateStripeDeposit(batch);
+      const sig = await depositToVault(wallet, batch);
+      moveToInvested(userId, batch, sig);
+      deposited = true;
+    }
   }
-  return { setAside, deposited, batch };
+  return { setAside, deposited, needsWallet, batch };
 }
 
 /** Is Plaid configured (keys present) and is a sandbox bank connected? */
@@ -53,6 +59,7 @@ plaidRouter.post('/connect', async (_req, res) => {
 /** Pull real transactions from Plaid sandbox and run each purchase through the pipeline. */
 plaidRouter.post('/sync', async (req, res) => {
   const userId = (req.body?.userId as string) ?? 'demo';
+  const wallet = req.body?.wallet as string | undefined;
   if (!isConfigured()) {
     res.status(400).json({ error: 'Plaid keys not set in server/.env' });
     return;
@@ -60,12 +67,14 @@ plaidRouter.post('/sync', async (req, res) => {
   try {
     const purchases = await syncTransactions();
     const processed = [];
+    let needsWallet = false;
     for (const p of purchases) {
-      const r = await runPipeline(userId, p.amountUsd);
+      const r = await runPipeline(userId, p.amountUsd, wallet);
       processed.push({ name: p.name, amountUsd: p.amountUsd, setAside: r.setAside, deposited: r.deposited });
+      if (r.needsWallet) needsWallet = true;
       if (r.deposited) await new Promise((res) => setTimeout(res, 800)); // ease off the RPC between deposits
     }
-    res.json({ processed, state: getState(userId) });
+    res.json({ processed, needsWallet, state: getState(userId) });
   } catch (e) {
     res.status(500).json({ error: (e as Error).message });
   }
@@ -74,19 +83,16 @@ plaidRouter.post('/sync', async (req, res) => {
 /** Demo endpoint: push one purchase through the pipeline. */
 plaidRouter.post('/simulate-purchase', async (req, res) => {
   const userId = (req.body?.userId as string) ?? 'demo';
+  const wallet = req.body?.wallet as string | undefined;
   const amountUsd = Number(req.body?.amountUsd);
-  const r = await runPipeline(userId, amountUsd);
-  res.json({ setAside: r.setAside, deposited: r.deposited, state: getState(userId) });
+  const r = await runPipeline(userId, amountUsd, wallet);
+  res.json({ setAside: r.setAside, deposited: r.deposited, needsWallet: r.needsWallet, state: getState(userId) });
 });
 
-/** Reset a user's savings state (demo replay). */
+/** Reset a user's earmark/bank state (demo replay). The on-chain vault is the user's own
+ * money — only they can withdraw it, via the vault's Withdraw button. Reset never touches it. */
 plaidRouter.post('/reset', async (req, res) => {
   const userId = (req.body?.userId as string) ?? 'demo';
-  try {
-    await withdrawAllOnChain();
-  } catch (e) {
-    console.error('[reset] on-chain withdraw failed:', (e as Error).message);
-  }
   clearItem();
   res.json({ state: resetState(userId) });
 });

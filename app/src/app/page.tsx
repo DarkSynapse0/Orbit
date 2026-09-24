@@ -14,6 +14,8 @@ import {
   TrendingUp,
   Loader2,
 } from "lucide-react";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { WalletVault } from "@/components/WalletVault";
 
 const API = "http://localhost:4000";
 const THRESHOLD = 10;
@@ -27,8 +29,10 @@ type SavingsState = {
   lastDepositSig?: string;
 };
 type OnChain = {
+  exists: boolean;
   principalUsd: number;
   accruedYieldUsd: number;
+  lastUpdateTs: number;
   vaultAccount: string;
   vaultTokenAccount: string;
   programId: string;
@@ -85,10 +89,15 @@ export default function Home() {
   const [plaid, setPlaid] = useState<{ configured: boolean; connected: boolean } | null>(null);
   const [syncing, setSyncing] = useState(false);
 
-  const investedSince = useRef<number>(Date.now());
-  const [liveYield, setLiveYield] = useState(0);
+  const { publicKey, connected } = useWallet();
+  const owner = publicKey?.toBase58() ?? null;
 
-  const principalUsd = onchain?.principalUsd ?? state.investedUsd;
+  const [now, setNow] = useState(() => Date.now());
+
+  const principalUsd = onchain?.principalUsd ?? 0;
+  // Live yield = the yield already folded on-chain + what has accrued since that last stamp.
+  const elapsed = onchain?.lastUpdateTs ? Math.max(0, now / 1000 - onchain.lastUpdateTs) : 0;
+  const liveYield = (onchain?.accruedYieldUsd ?? 0) + (principalUsd * APY * elapsed) / SECONDS_PER_YEAR;
   const total = state.pendingUsd + principalUsd + liveYield;
   const pct = Math.min(100, (state.pendingUsd / THRESHOLD) * 100);
 
@@ -106,10 +115,9 @@ export default function Home() {
   }, [principalUsd]);
 
   useEffect(() => {
-    const t = setInterval(() => {
-      const elapsed = (Date.now() - investedSince.current) / 1000;
-      setLiveYield((principalUsd * APY * elapsed) / SECONDS_PER_YEAR);
-    }, 120);
+    if (!principalUsd) return;
+    const reduced = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const t = setInterval(() => setNow(Date.now()), reduced ? 1000 : 200);
     return () => clearInterval(t);
   }, [principalUsd]);
 
@@ -121,29 +129,42 @@ export default function Home() {
   const log = (kind: Entry["kind"], text: string) =>
     setFeed((f) => [{ id: Date.now() + Math.random(), kind, text }, ...f].slice(0, 14));
 
-  const refreshVault = () =>
-    fetch(`${API}/vault`).then((r) => r.json()).then((v) => { if (!v.error) setOnchain(v); }).catch(() => {});
+  const refreshVault = useCallback(() => {
+    if (!owner) return;
+    fetch(`${API}/vault?owner=${owner}`).then((r) => r.json()).then((v) => { if (!v.error) setOnchain(v); }).catch(() => {});
+  }, [owner]);
+
+  // Read the connected wallet's vault on connect, and poll so server-side (auto) deposits show up.
+  useEffect(() => {
+    if (!connected || !owner) {
+      setOnchain(null);
+      return;
+    }
+    refreshVault();
+    const t = setInterval(refreshVault, 6000);
+    return () => clearInterval(t);
+  }, [connected, owner, refreshVault]);
 
   const spend = useCallback(
     async (amt: number) => {
       if (!amt || amt <= 0) return;
       setBusy(true);
       try {
-        const prev = principalUsd;
         const res = await fetch(`${API}/plaid/simulate-purchase`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: `p${Date.now()}`, userId: "demo", amountUsd: amt, detectedAt: new Date().toISOString() }),
+          body: JSON.stringify({ id: `p${Date.now()}`, userId: "demo", amountUsd: amt, wallet: owner, detectedAt: new Date().toISOString() }),
         });
-        const data: { setAside: number; deposited: boolean; state: SavingsState } = await res.json();
+        const data: { setAside: number; deposited: boolean; needsWallet?: boolean; state: SavingsState } = await res.json();
         setState(data.state);
         if (data.setAside > 0) log("spend", `Spent ${usd(amt)} · set aside ${usd(data.setAside)}`);
         else log("none", `Spent ${usd(amt)} · below tier, nothing set aside`);
         if (data.deposited) {
-          investedSince.current = Date.now();
-          log("deposit", `Threshold reached · ${usd(data.state.investedUsd - prev)} deposited on-chain`);
+          log("deposit", `Threshold reached · deposited into your vault on-chain`);
           if (data.state.lastDepositSig && !data.state.lastDepositSig.startsWith("mock-")) setLastSig(data.state.lastDepositSig);
           refreshVault();
+        } else if (data.needsWallet) {
+          log("info", "Threshold reached — connect your wallet to move it into your vault");
         }
       } catch {
         setOnline(false);
@@ -151,7 +172,7 @@ export default function Home() {
         setBusy(false);
       }
     },
-    [principalUsd],
+    [owner, refreshVault],
   );
 
   const connectBank = useCallback(async () => {
@@ -176,7 +197,7 @@ export default function Home() {
         await fetch(`${API}/plaid/sync`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId: "demo" }),
+          body: JSON.stringify({ userId: "demo", wallet: owner }),
         })
       ).json();
       if (d.error) {
@@ -186,23 +207,21 @@ export default function Home() {
       for (const p of d.processed ?? []) {
         if (p.setAside > 0) log("spend", `${p.name} · ${usd(p.amountUsd)} → set aside ${usd(p.setAside)}`);
         else log("none", `${p.name} · ${usd(p.amountUsd)} → below tier`);
-        if (p.deposited) log("deposit", `Threshold reached · deposited on-chain`);
+        if (p.deposited) log("deposit", `Threshold reached · deposited into your vault`);
       }
       if (!d.processed?.length) log("info", "No new spending from Plaid");
+      if (d.needsWallet) log("info", "Threshold reached — connect your wallet to move it into your vault");
       if (d.state) {
         setState(d.state);
         if (d.state.lastDepositSig && !d.state.lastDepositSig.startsWith("mock-")) setLastSig(d.state.lastDepositSig);
-        if ((d.processed ?? []).some((p: { deposited: boolean }) => p.deposited)) {
-          investedSince.current = Date.now();
-          refreshVault();
-        }
+        if ((d.processed ?? []).some((p: { deposited: boolean }) => p.deposited)) refreshVault();
       }
     } catch {
       log("none", "Plaid sync failed");
     } finally {
       setSyncing(false);
     }
-  }, []);
+  }, [owner, refreshVault]);
 
   const reset = useCallback(async () => {
     await fetch(`${API}/plaid/reset`, {
@@ -212,12 +231,10 @@ export default function Home() {
     }).catch(() => {});
     setState({ userId: "demo", pendingUsd: 0, investedUsd: 0 });
     setFeed([]);
-    setLiveYield(0);
-    setOnchain(null);
     setLastSig(null);
     setPlaid((p) => (p ? { ...p, connected: false } : p));
-    investedSince.current = Date.now();
-  }, []);
+    refreshVault();
+  }, [refreshVault]);
 
   const feedIcon = (kind: Entry["kind"]) => {
     if (kind === "deposit") return <Zap className="h-4 w-4 text-indigo-300" aria-hidden />;
@@ -355,16 +372,23 @@ export default function Home() {
         </div>
       </section>
 
+      <WalletVault onChanged={refreshVault} />
+
       {/* Simulate (secondary) */}
       <section className="mt-6">
         <div className="mb-2 text-xs font-medium uppercase tracking-wide text-neutral-500">Or simulate a purchase</div>
+        {!connected && (
+          <p className="mb-2 rounded-lg bg-indigo-500/[0.08] px-3 py-2 text-[12px] text-indigo-200/90 ring-1 ring-inset ring-indigo-400/20">
+            Connect your wallet above to open your vault — that&apos;s where set-asides get deposited.
+          </p>
+        )}
         <div className="flex gap-2">
           {[45, 120, 600].map((v) => (
             <button
               key={v}
               type="button"
               onClick={() => spend(v)}
-              disabled={busy || !online}
+              disabled={busy || !online || !connected}
               className="h-11 flex-1 rounded-xl border border-white/[0.06] bg-white/[0.02] text-sm font-medium tabular-nums transition-[background,transform,border-color] duration-150 ease-out hover:border-indigo-400/40 hover:bg-white/[0.05] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60"
             >
               ${v}
@@ -384,7 +408,7 @@ export default function Home() {
           <button
             type="button"
             onClick={() => spend(Number(amount))}
-            disabled={busy || !online}
+            disabled={busy || !online || !connected}
             className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-white/[0.06] px-5 text-sm font-medium ring-1 ring-inset ring-white/[0.08] transition-[background,transform] duration-150 ease-out hover:bg-white/[0.1] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60"
           >
             {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null}

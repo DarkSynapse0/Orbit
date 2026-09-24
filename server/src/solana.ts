@@ -4,29 +4,29 @@ import { deliverUsdc, depositOnChain } from './onchain.js';
 /**
  * HACKATHON MOCK — stands in for the one faked hop in the locked architecture:
  * Stripe pulling fiat from the bank, converting to USDC, and delivering it to
- * Orbit's on-chain vault. In production this becomes a real Stripe call; nothing
- * else in the pipeline changes. See doc "Money Movement Architecture (locked)".
+ * Orbit's settlement wallet (the funder). In production this becomes a real Stripe
+ * call; nothing else in the pipeline changes. See doc "Money Movement Architecture".
  *
- * TODO (Week 2): drop real devnet USDC into the vault for this user.
+ * Here we mint test USDC into the server's (funder's) token account, ready to be
+ * deposited into the user's own vault.
  */
-export async function simulateStripeDeposit(userId: string, amountUsd: number): Promise<void> {
+export async function simulateStripeDeposit(amountUsd: number): Promise<void> {
   try {
     await deliverUsdc(amountUsd);
-    console.log(`[stripe->usdc] minted ${amountUsd} USDC to the user wallet on ${config.solana.cluster}`);
+    console.log(`[stripe->usdc] minted ${amountUsd} test USDC to the funder wallet on ${config.solana.cluster}`);
   } catch (e) {
     console.error('[stripe->usdc] on-chain mint failed (continuing):', (e as Error).message);
   }
 }
 
 /**
- * Deposit the vault's USDC into the yield venue and return the tx signature.
- * TODO (Week 1): real deposit via the Anchor vault program (CPI to Kamino) or the
- * mock yield vault on devnet — decided by the Day-1 Kamino-devnet check.
+ * Deposit USDC from the funder into the user's own on-chain vault and return the tx
+ * signature. The user (owner) is the only key that can withdraw.
  */
-export async function depositToVault(userId: string, amountUsd: number): Promise<string> {
+export async function depositToVault(ownerAddress: string, amountUsd: number): Promise<string> {
   try {
-    const sig = await depositOnChain(amountUsd);
-    console.log(`[deposit] ${amountUsd} USDC -> vault on-chain sig=${sig}`);
+    const sig = await depositOnChain(ownerAddress, amountUsd);
+    console.log(`[deposit] ${amountUsd} USDC -> ${ownerAddress}'s vault, sig=${sig}`);
     return sig;
   } catch (e) {
     console.error('[deposit] on-chain deposit failed, using mock sig:', (e as Error).message);
