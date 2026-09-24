@@ -72,6 +72,47 @@ body {
   transform: none;
 }
 
+/* Hero: slow ambient motion. Starfield drifts gently; aurora glows breathe and wander. */
+@keyframes star-drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-28px, 16px, 0);
+  }
+}
+@keyframes aurora-a {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.45;
+  }
+  50% {
+    transform: translate3d(5%, -3%, 0) scale(1.12);
+    opacity: 0.7;
+  }
+}
+@keyframes aurora-b {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.35;
+  }
+  50% {
+    transform: translate3d(-4%, 4%, 0) scale(1.1);
+    opacity: 0.6;
+  }
+}
+.animate-star-drift {
+  animation: star-drift 90s ease-in-out infinite alternate;
+}
+.animate-aurora-a {
+  animation: aurora-a 24s ease-in-out infinite;
+}
+.animate-aurora-b {
+  animation: aurora-b 30s ease-in-out infinite;
+}
+
 .animate-orbit {
   animation: orbit-spin linear infinite;
 }

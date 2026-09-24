@@ -14,7 +14,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { Reveal } from "@/components/landing/Reveal";
-import { OrbitScene } from "@/components/landing/OrbitScene";
+import { HeroBackground } from "@/components/landing/HeroBackground";
 import { LiveYield } from "@/components/landing/LiveYield";
 import { OrbitMark } from "@/components/landing/OrbitMark";
 
@@ -25,7 +25,7 @@ export default function Landing() {
   return (
     <div className="relative flex min-h-full flex-col">
       {/* ───────── Nav ───────── */}
-      <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-[#08080c]/70 backdrop-blur-md">
+      <header className="sticky top-0 z-40 bg-[#08080c]/40 backdrop-blur-md">
         <nav className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-6">
           <Link href="/" className="flex items-center gap-2.5 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60">
             <OrbitMark className="h-8 w-8" title="Orbit" />
@@ -46,46 +46,56 @@ export default function Landing() {
         </nav>
       </header>
 
-      {/* ───────── Hero ───────── */}
-      <section className="mx-auto grid w-full max-w-6xl items-center gap-10 px-6 pb-16 pt-14 lg:grid-cols-2 lg:gap-8 lg:pb-28 lg:pt-24">
-        <Reveal className="order-2 lg:order-1">
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/[0.04] px-3 py-1 text-[12px] text-neutral-300 ring-1 ring-inset ring-white/[0.08]">
+      {/* ───────── Hero (centered, full-bleed, animated sky) ───────── */}
+      <section className="relative -mt-16 flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 pb-24 pt-28 text-center">
+        <HeroBackground />
+
+        <Reveal>
+          <span className="inline-flex items-center gap-2 rounded-full bg-white/[0.05] px-3 py-1 text-[12px] text-neutral-300 ring-1 ring-inset ring-white/[0.1] backdrop-blur-sm">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" aria-hidden /> Live on Solana devnet
           </span>
-          <h1 className="mt-5 font-serif text-[clamp(2.6rem,6vw,4.5rem)] font-medium leading-[1.02] tracking-[-0.02em]">
+        </Reveal>
+
+        <Reveal delay={80}>
+          <h1 className="mt-6 font-serif text-[clamp(2.8rem,7vw,5.5rem)] font-medium leading-[1.02] tracking-[-0.02em]">
             Money that
             <br />
             saves <span className="italic text-indigo-300">itself.</span>
           </h1>
-          <p className="mt-6 max-w-md text-[15px] leading-relaxed text-neutral-400">
+        </Reveal>
+
+        <Reveal delay={160}>
+          <p className="mx-auto mt-6 max-w-xl text-[clamp(0.95rem,1.6vw,1.15rem)] leading-relaxed text-neutral-400">
             Orbit sets aside a little from your everyday spending and grows it with on-chain yield.
             Fully yours, verifiable on Solana, withdraw anytime.
           </p>
-          <div className="mt-8 flex flex-wrap items-center gap-3">
+        </Reveal>
+
+        <Reveal delay={240}>
+          <div className="mt-9 flex flex-col items-center gap-4">
             <Link
               href="/app"
-              className="inline-flex h-12 items-center gap-2 rounded-full bg-indigo-500 px-6 text-[14px] font-semibold text-white shadow-lg shadow-indigo-500/25 transition-[background,transform] duration-150 ease-out hover:bg-indigo-400 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#08080c]"
+              className="inline-flex h-12 items-center gap-2 rounded-full bg-white px-7 text-[14px] font-semibold text-neutral-950 shadow-lg shadow-black/30 transition-[transform,box-shadow] duration-150 ease-out hover:shadow-xl hover:shadow-indigo-500/20 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#08080c]"
             >
               Open your vault <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>
             <a
               href="#how"
-              className="inline-flex h-12 items-center gap-2 rounded-full px-5 text-[14px] font-medium text-neutral-300 ring-1 ring-inset ring-white/[0.1] transition-colors hover:text-white hover:ring-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/70"
+              className="text-[13px] text-neutral-400 underline-offset-4 transition-colors hover:text-neutral-200 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/70"
             >
               See how it works
             </a>
           </div>
-          <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-[13px] text-neutral-500">
+        </Reveal>
+
+        <Reveal delay={320}>
+          <ul className="mt-12 flex flex-wrap justify-center gap-x-6 gap-y-2 text-[13px] text-neutral-500">
             {["Self-custodial", "Verifiable on-chain", "Withdraw anytime"].map((t) => (
               <li key={t} className="inline-flex items-center gap-1.5">
                 <Check className="h-3.5 w-3.5 text-indigo-400" aria-hidden /> {t}
               </li>
             ))}
           </ul>
-        </Reveal>
-
-        <Reveal className="order-1 lg:order-2" delay={120}>
-          <OrbitScene />
         </Reveal>
       </section>
 
