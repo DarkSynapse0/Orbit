@@ -55,7 +55,7 @@ export default function Landing() {
       </header>
 
       {/* ───────── Hero ───────── */}
-      <section className="relative -mt-16 flex min-h-[82vh] flex-col items-center justify-center overflow-hidden px-6 pb-24 pt-32 text-center">
+      <section className="relative -mt-20 flex min-h-[82vh] flex-col items-center justify-center overflow-hidden px-6 pb-24 pt-32 text-center">
         {/* React Bits Light Rays backdrop, tuned to blue/neutral (no purple) */}
         <div className="pointer-events-none absolute inset-0 -z-10">
           <LightRays
