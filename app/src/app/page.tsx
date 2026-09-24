@@ -29,25 +29,25 @@ export default function Landing() {
     <div className="relative flex min-h-full flex-col">
       {/* ───────── Nav ───────── */}
       <header className="sticky top-0 z-40">
-        <nav className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-6">
-          <Link href="/" className="flex items-center gap-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40">
-            <OrbitIcon className="h-5 w-5 text-white" aria-hidden />
-            <span className="text-[15px] font-semibold tracking-tight">Orbit</span>
+        <nav className="mx-auto flex h-20 w-full max-w-6xl items-center justify-between px-6">
+          <Link href="/" className="flex items-center gap-2.5 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40">
+            <OrbitIcon className="h-7 w-7 text-white" aria-hidden />
+            <span className="text-xl font-semibold tracking-tight">Orbit</span>
           </Link>
-          <div className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-8 text-[13px] text-neutral-400 md:flex">
+          <div className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-9 text-[15px] text-neutral-300 md:flex">
             <a href="#how" className="transition-colors hover:text-white">How it works</a>
             <a href="#security" className="transition-colors hover:text-white">Security</a>
             <a href="#proof" className="transition-colors hover:text-white">On-chain</a>
             <a href="#faq" className="transition-colors hover:text-white">FAQ</a>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Link
               href="/app"
-              className="hidden rounded px-3 py-1.5 text-[13px] text-neutral-300 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 sm:inline-block"
+              className="hidden rounded px-3 py-2 text-[15px] text-neutral-300 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 sm:inline-block"
             >
               Launch app
             </Link>
-            <Button asChild size="sm">
+            <Button asChild>
               <Link href="/app">Get started</Link>
             </Button>
           </div>
@@ -87,8 +87,9 @@ export default function Landing() {
         </Reveal>
 
         <Reveal delay={160}>
-          <p className="mx-auto mt-6 max-w-lg text-[clamp(0.95rem,1.55vw,1.1rem)] leading-relaxed text-neutral-400">
-            Saving is hard, so Orbit does it for you, a little at a time.
+          <p className="mx-auto mt-6 max-w-xl text-[clamp(0.95rem,1.55vw,1.1rem)] leading-relaxed text-neutral-400">
+            Saving takes willpower most of us just don&rsquo;t have. So Orbit does it for you,
+            a little at a time, before you even notice.
           </p>
         </Reveal>
 
