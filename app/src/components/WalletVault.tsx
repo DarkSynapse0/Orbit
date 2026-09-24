@@ -29,6 +29,7 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
   const [sol, setSol] = useState(0);
   const [solPrice, setSolPrice] = useState(0);
   const [principal, setPrincipal] = useState<number | null>(null);
+  const [depositAmt, setDepositAmt] = useState("10");
   const [busy, setBusy] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [lastSig, setLastSig] = useState<string | null>(null);
@@ -143,6 +144,11 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
   const deposit = () =>
     run("deposit", async () => {
       if (!program || !publicKey || !mint || !pdas) return;
+      const amt = Math.min(Math.max(Number(depositAmt) || 0, 0), usdc);
+      if (amt <= 0) {
+        setStatus("Enter an amount you have");
+        return;
+      }
       const userAta = getAssociatedTokenAddressSync(pdas.mintPk, publicKey);
       const ixs = [];
       const exists = await program.account.vault.fetchNullable(pdas.vault);
@@ -162,7 +168,7 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
       }
       ixs.push(
         await program.methods
-          .deposit(base(10))
+          .deposit(base(amt))
           .accounts({
             funder: publicKey,
             owner: publicKey,
@@ -178,7 +184,7 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
       const tx = new Transaction().add(...ixs);
       const sig = await (program.provider as AnchorProvider).sendAndConfirm(tx);
       setLastSig(sig);
-      setStatus(exists ? "Deposited 10 USDC" : "Opened vault + deposited 10 USDC");
+      setStatus(exists ? `Deposited ${amt} USDC` : `Opened vault + deposited ${amt} USDC`);
       await refresh();
     });
 
@@ -278,7 +284,30 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
               <WalletMultiButton style={{ height: 32, borderRadius: 10, background: "rgba(255,255,255,0.06)", fontSize: 12, padding: "0 10px" }} />
             </div>
 
-            <div className="mt-4 grid grid-cols-3 gap-2">
+            <div className="mt-4 flex items-center gap-2">
+              <label htmlFor="deposit-amt" className="sr-only">Deposit amount in USDC</label>
+              <div className="relative flex-1">
+                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[13px] text-neutral-500">$</span>
+                <input
+                  id="deposit-amt"
+                  value={depositAmt}
+                  onChange={(e) => setDepositAmt(e.target.value.replace(/[^0-9.]/g, ""))}
+                  inputMode="decimal"
+                  className="h-11 w-full rounded-xl border border-white/[0.06] bg-white/[0.02] pl-6 pr-3 text-[13px] tabular-nums text-foreground placeholder:text-neutral-600 transition-colors focus:border-indigo-400/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40"
+                  placeholder="Amount"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => setDepositAmt(usdc > 0 ? String(Math.floor(usdc)) : "0")}
+                disabled={busy !== null || usdc <= 0}
+                className="h-11 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 text-[12px] font-medium text-neutral-400 transition-colors hover:text-neutral-200 disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60"
+              >
+                Max
+              </button>
+            </div>
+
+            <div className="mt-2 grid grid-cols-3 gap-2">
               <button
                 type="button"
                 onClick={getUsdc}
@@ -291,11 +320,11 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
               <button
                 type="button"
                 onClick={deposit}
-                disabled={busy !== null || usdc < 10}
+                disabled={busy !== null || usdc <= 0 || Number(depositAmt) <= 0}
                 className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl bg-indigo-500 text-[13px] font-semibold text-white transition-[background,transform] duration-150 ease-out hover:bg-indigo-400 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/70"
               >
                 {busy === "deposit" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <ArrowDownToLine className="h-4 w-4" aria-hidden />}
-                Deposit $10
+                Deposit
               </button>
               <button
                 type="button"
