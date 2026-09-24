@@ -57,9 +57,9 @@ export default function Landing() {
 
         <Reveal delay={80}>
           <h1 className="mt-6 text-[clamp(3.4rem,9vw,7rem)] font-semibold leading-[0.98] tracking-[-0.035em] text-white">
-            Saving money is hard.
+            You keep meaning
             <br />
-            Orbit does it for you.
+            to save. Orbit just does.
           </h1>
         </Reveal>
 
