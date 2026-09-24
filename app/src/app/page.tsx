@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Reveal } from "@/components/landing/Reveal";
 import { LiveYield } from "@/components/landing/LiveYield";
+import LightTunnel from "@/components/landing/LightTunnel";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -54,8 +55,20 @@ export default function Landing() {
       </header>
 
       {/* ───────── Hero ───────── */}
-      <section className="relative -mt-16 flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 pb-24 pt-28 text-center">
-        {/* Background intentionally minimal — planet/glow backdrop to be added later. */}
+      <section className="relative -mt-16 flex flex-col items-center overflow-hidden px-6 pb-24 pt-40 text-center">
+        {/* React Bits Light Tunnel backdrop, tuned to blue/neutral (no purple) */}
+        <div className="pointer-events-none absolute inset-0 -z-10">
+          <LightTunnel
+            tunnelColor="#0a1024"
+            cableColor="#2f5bd0"
+            pulseColor="#a9c7ff"
+            speed={0.6}
+            opacity={0.9}
+          />
+          {/* Center scrim so the headline/subcopy stay legible over the tunnel */}
+          <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 62% 52% at 50% 46%, rgba(8,8,12,0.7), transparent 76%)" }} />
+          <div className="absolute inset-x-0 bottom-0 h-48" style={{ background: "linear-gradient(180deg, transparent, #08080c)" }} />
+        </div>
 
         <Reveal>
           <Badge variant="accent">
@@ -64,7 +77,7 @@ export default function Landing() {
         </Reveal>
 
         <Reveal delay={80}>
-          <h1 className="mt-6 text-[clamp(2.9rem,7.5vw,5.75rem)] font-semibold leading-[1.0] tracking-[-0.035em] text-white">
+          <h1 className="mt-6 text-[clamp(3.4rem,9vw,7rem)] font-semibold leading-[0.98] tracking-[-0.035em] text-white">
             Save without
             <br />
             even trying.
