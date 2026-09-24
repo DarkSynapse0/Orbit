@@ -157,9 +157,17 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
   const withdraw = () =>
     run("withdraw", async () => {
       if (!program || !publicKey || !mint || !pdas) return;
+      // Withdraw the full principal; the reserve pays it back plus all accrued interest.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const acc: any = await program.account.vault.fetchNullable(pdas.vault);
+      const principalBase = acc ? new BN(acc.principal.toString()) : new BN(0);
+      if (principalBase.isZero()) {
+        setStatus("Nothing to withdraw");
+        return;
+      }
       const userAta = getAssociatedTokenAddressSync(pdas.mintPk, publicKey);
       const sig = await program.methods
-        .withdraw(base(10))
+        .withdraw(principalBase)
         .accounts({
           authority: publicKey,
           vault: pdas.vault,
@@ -171,7 +179,7 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
         })
         .rpc();
       setLastSig(sig);
-      setStatus("Withdrew 10 USDC + yield");
+      setStatus("Withdrew everything + yield");
       await refresh();
     });
 
@@ -246,11 +254,11 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
               <button
                 type="button"
                 onClick={withdraw}
-                disabled={busy !== null || (principal ?? 0) < 10}
+                disabled={busy !== null || (principal ?? 0) <= 0}
                 className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl border border-white/[0.06] bg-white/[0.02] text-[13px] font-medium transition-[background,transform] duration-150 ease-out hover:bg-white/[0.05] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60"
               >
                 {busy === "withdraw" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <ArrowUpFromLine className="h-4 w-4" aria-hidden />}
-                Withdraw
+                Withdraw all
               </button>
             </div>
 
