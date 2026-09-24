@@ -65,16 +65,16 @@ export default function Landing() {
 
         <Reveal delay={80}>
           <h1 className="mt-6 text-[clamp(2.9rem,7.5vw,5.75rem)] font-semibold leading-[1.0] tracking-[-0.035em] text-white">
-            Money that
+            Save without
             <br />
-            saves itself.
+            even trying.
           </h1>
         </Reveal>
 
         <Reveal delay={160}>
           <p className="mx-auto mt-6 max-w-xl text-[clamp(0.95rem,1.55vw,1.1rem)] leading-relaxed text-neutral-400">
-            A savings account that runs itself. Orbit sets aside a little from your everyday spending
-            and grows it with on-chain yield. Fully yours, verifiable, withdraw anytime.
+            End up with real savings that grow every day, no budgeting, no willpower, no effort.
+            And it&rsquo;s always yours to withdraw, the moment you need it.
           </p>
         </Reveal>
 
