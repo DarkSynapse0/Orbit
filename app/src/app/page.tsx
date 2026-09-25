@@ -89,6 +89,19 @@ export default function Landing() {
         </Reveal>
       </section>
 
+      {/* ───────── Live vault counter ───────── */}
+      <section className="mx-auto w-full max-w-5xl overflow-hidden px-6 pb-12 text-center">
+        <Reveal>
+          <span className="inline-flex items-center gap-2 rounded-full border border-black/[0.08] bg-black/[0.03] px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-neutral-600 dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-neutral-400">
+            Vault · Devnet
+          </span>
+          <div className="mt-6 text-[clamp(1.8rem,4.2vw,3.25rem)] font-semibold leading-none tracking-[-0.03em]">
+            <LiveYield principal={48920} apy={0.06} />
+          </div>
+          <p className="mt-5 text-[14px] text-neutral-500">A live vault balance, growing every second at 6% APY.</p>
+        </Reveal>
+      </section>
+
       {/* ───────── Trust strip (separate cards, blends into the hero) ───────── */}
       <section className="mx-auto w-full max-w-6xl px-6">
         <Reveal className="grid grid-cols-2 gap-3 sm:grid-cols-4">
