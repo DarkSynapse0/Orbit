@@ -63,6 +63,17 @@ const solAcct = (a: string) => `https://solscan.io/account/${a}?cluster=devnet`;
 
 const PANEL = "rounded-2xl border border-[var(--border)] bg-[var(--surface)]";
 
+// Yield venues the vault's USDC can be routed to. The Orbit reserve is live on devnet now;
+// the mainnet lenders are where deposits route in production. APY/TVL are indicative.
+type Venue = { id: string; name: string; mono: string; apy: number; tvl: string; blurb: string; live: boolean };
+const VENUES: Venue[] = [
+  { id: "reserve", name: "Orbit Reserve", mono: "O", apy: 6.0, tvl: "devnet", blurb: "Audited program vault. Live now.", live: true },
+  { id: "kamino", name: "Kamino Lend", mono: "K", apy: 8.4, tvl: "$1.4B", blurb: "The most-used lending market on Solana.", live: false },
+  { id: "aave", name: "Aave v3", mono: "A", apy: 5.2, tvl: "$22B", blurb: "The largest lending protocol in DeFi.", live: false },
+  { id: "save", name: "Save · Solend", mono: "S", apy: 6.9, tvl: "$380M", blurb: "Battle-tested Solana lending.", live: false },
+  { id: "marginfi", name: "marginfi", mono: "m", apy: 5.7, tvl: "$420M", blurb: "Permissionless Solana lending.", live: false },
+];
+
 const TABS: { id: TabId; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "activity", label: "Activity", icon: ActivityIcon },
@@ -146,9 +157,22 @@ export default function Home() {
   const [paused, setPaused] = useState(false);
   const [multiplier, setMultiplier] = useState(1);
 
-  // Earn projection
+  // Earn projection + yield venue
   const [projAmt, setProjAmt] = useState("2000");
   const [projYears, setProjYears] = useState(5);
+  const [venueId, setVenueId] = useState("reserve");
+  useEffect(() => {
+    try {
+      const v = localStorage.getItem("orbit.venue");
+      if (v) setVenueId(v);
+    } catch {}
+  }, []);
+  const selectVenue = (id: string) => {
+    setVenueId(id);
+    try {
+      localStorage.setItem("orbit.venue", id);
+    } catch {}
+  };
 
   const { publicKey, connected } = useWallet();
   const owner = publicKey?.toBase58() ?? null;
@@ -302,10 +326,12 @@ export default function Home() {
     return <ShoppingBag className="h-4 w-4 text-[var(--muted)]" aria-hidden />;
   };
 
+  const selectedVenue = VENUES.find((v) => v.id === venueId) ?? VENUES[0];
   const projected = useMemo(() => {
     const a = Number(projAmt) || 0;
-    return a * Math.pow(1 + APY, projYears);
-  }, [projAmt, projYears]);
+    const rate = selectedVenue.apy / 100;
+    return a * Math.pow(1 + rate, projYears);
+  }, [projAmt, projYears, selectedVenue.apy]);
 
   const activeTab = TABS.find((t) => t.id === tab)!;
 
@@ -756,12 +782,64 @@ export default function Home() {
             <div className="space-y-6">
               <section className={`${PANEL} p-6 lg:p-8`}>
                 <div className="flex flex-wrap items-baseline gap-x-3">
-                  <span className="font-mono text-[clamp(2.4rem,6vw,3.5rem)] font-semibold leading-none text-[var(--accent-strong)]">6.0%</span>
-                  <span className="text-sm text-[var(--muted)]">APY, on-chain</span>
+                  <span className="font-mono text-[clamp(2.4rem,6vw,3.5rem)] font-semibold leading-none text-[var(--accent-strong)]">
+                    {selectedVenue.apy.toFixed(1)}%
+                  </span>
+                  <span className="text-sm text-[var(--muted)]">APY · {selectedVenue.name}</span>
                 </div>
                 <p className="mt-4 max-w-md text-[13px] leading-relaxed text-[var(--muted)]">
-                  Your deposit sits in an on-chain yield reserve that pays interest in real tokens, compounding every
-                  second. On mainnet this routes to Aave, the largest lending market in DeFi.
+                  Your vault&rsquo;s USDC earns in an on-chain lending venue, compounding every second. Pick where it
+                  works below.
+                </p>
+              </section>
+
+              {/* Venue chooser */}
+              <section className={`${PANEL} p-6`}>
+                <div className="flex items-center justify-between">
+                  <SectionLabel>Yield venue</SectionLabel>
+                  <span className="text-[11px] text-[var(--faint)]">where your money invests</span>
+                </div>
+                <div className="mt-4 space-y-2">
+                  {VENUES.map((v) => {
+                    const on = v.id === venueId;
+                    return (
+                      <button
+                        key={v.id}
+                        type="button"
+                        onClick={() => selectVenue(v.id)}
+                        aria-pressed={on}
+                        className={`flex w-full items-center gap-4 rounded-xl border p-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40 ${
+                          on ? "border-[var(--accent)] bg-[var(--accent-soft)]" : "border-[var(--border)] bg-[var(--background)] hover:border-[var(--border-strong)]"
+                        }`}
+                      >
+                        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-[var(--border)] bg-[var(--surface)] font-mono text-lg font-semibold">
+                          {v.mono}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="flex items-center gap-2">
+                            <span className="text-sm font-medium">{v.name}</span>
+                            {v.live ? (
+                              <span className="rounded-full bg-[var(--accent-soft)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--accent-strong)]">Live · devnet</span>
+                            ) : (
+                              <span className="rounded-full bg-[var(--surface)] px-1.5 py-0.5 text-[10px] text-[var(--muted)]">Mainnet</span>
+                            )}
+                          </span>
+                          <span className="mt-0.5 block truncate text-[12px] text-[var(--muted)]">{v.blurb}</span>
+                        </span>
+                        <span className="shrink-0 text-right">
+                          <span className="block font-mono text-base font-semibold text-[var(--accent-strong)]">{v.apy.toFixed(1)}%</span>
+                          <span className="block text-[11px] text-[var(--muted)]">TVL {v.tvl}</span>
+                        </span>
+                        <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full border ${on ? "border-[var(--accent)] bg-[var(--accent)]" : "border-[var(--border-strong)]"}`}>
+                          {on && <Check className="h-3 w-3 text-white" aria-hidden />}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="mt-4 text-[11px] leading-5 text-[var(--faint)]">
+                  On devnet, deposits earn in the audited Orbit reserve. Choosing a mainnet venue sets where Orbit routes
+                  your USDC in production. Rates vary and are indicative.
                 </p>
               </section>
 
@@ -803,7 +881,9 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-                <p className="mt-4 text-[11px] text-[var(--faint)]">Illustrative at a fixed 6% APY, compounded annually. Not a guarantee.</p>
+                <p className="mt-4 text-[11px] text-[var(--faint)]">
+                  Illustrative at {selectedVenue.name}&rsquo;s {selectedVenue.apy.toFixed(1)}% APY, compounded annually. Not a guarantee.
+                </p>
               </section>
             </div>
           )}
