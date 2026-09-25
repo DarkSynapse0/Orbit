@@ -96,7 +96,7 @@ export default function Landing() {
             Vault · Devnet
           </span>
           <div className="mt-6 text-[clamp(1.8rem,4.2vw,3.25rem)] font-semibold leading-none tracking-[-0.03em]">
-            <LiveYield principal={48920} apy={0.06} />
+            <LiveYield principal={5980} apy={0.06} />
           </div>
           <p className="mt-5 text-[14px] text-neutral-500">A live vault balance, growing every second at 6% APY.</p>
         </Reveal>
