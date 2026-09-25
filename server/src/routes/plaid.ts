@@ -17,19 +17,28 @@ async function runPipeline(userId: string, amountUsd: number, wallet?: string) {
   const state = getState(userId);
   let deposited = false;
   let needsWallet = false;
+  let depositError: string | undefined;
   let batch = 0;
   if (state.pendingUsd >= config.thresholdUsd) {
     if (!wallet) {
       needsWallet = true;
     } else {
       batch = state.pendingUsd;
-      await simulateStripeDeposit(batch);
-      const sig = await depositToVault(wallet, batch);
-      moveToInvested(userId, batch, sig);
-      deposited = true;
+      try {
+        await simulateStripeDeposit(batch);
+        const sig = await depositToVault(wallet, batch);
+        // Only mark invested once the on-chain deposit actually succeeded.
+        moveToInvested(userId, batch, sig);
+        deposited = true;
+      } catch (e) {
+        // Leave the batch pending so it retries on the next threshold hit; surface the error.
+        depositError = (e as Error).message;
+        console.error('[pipeline] deposit failed, keeping funds pending:', depositError);
+        batch = 0;
+      }
     }
   }
-  return { setAside, deposited, needsWallet, batch };
+  return { setAside, deposited, needsWallet, depositError, batch };
 }
 
 /** Is Plaid configured (keys present) and is a sandbox bank connected? */
@@ -70,7 +79,7 @@ plaidRouter.post('/sync', async (req, res) => {
     let needsWallet = false;
     for (const p of purchases) {
       const r = await runPipeline(userId, p.amountUsd, wallet);
-      processed.push({ name: p.name, amountUsd: p.amountUsd, setAside: r.setAside, deposited: r.deposited });
+      processed.push({ name: p.name, amountUsd: p.amountUsd, setAside: r.setAside, deposited: r.deposited, depositError: r.depositError });
       if (r.needsWallet) needsWallet = true;
       if (r.deposited) await new Promise((res) => setTimeout(res, 800)); // ease off the RPC between deposits
     }
@@ -86,7 +95,7 @@ plaidRouter.post('/simulate-purchase', async (req, res) => {
   const wallet = req.body?.wallet as string | undefined;
   const amountUsd = Number(req.body?.amountUsd);
   const r = await runPipeline(userId, amountUsd, wallet);
-  res.json({ setAside: r.setAside, deposited: r.deposited, needsWallet: r.needsWallet, state: getState(userId) });
+  res.json({ setAside: r.setAside, deposited: r.deposited, needsWallet: r.needsWallet, depositError: r.depositError, state: getState(userId) });
 });
 
 /** Reset a user's earmark/bank state (demo replay). The on-chain vault is the user's own

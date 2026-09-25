@@ -24,12 +24,10 @@ export async function simulateStripeDeposit(amountUsd: number): Promise<void> {
  * signature. The user (owner) is the only key that can withdraw.
  */
 export async function depositToVault(ownerAddress: string, amountUsd: number): Promise<string> {
-  try {
-    const sig = await depositOnChain(ownerAddress, amountUsd);
-    console.log(`[deposit] ${amountUsd} USDC -> ${ownerAddress}'s vault, sig=${sig}`);
-    return sig;
-  } catch (e) {
-    console.error('[deposit] on-chain deposit failed, using mock sig:', (e as Error).message);
-    return `mock-sig-${Date.now()}`;
-  }
+  // No silent mock fallback: if the on-chain deposit fails we must NOT report success,
+  // otherwise the ledger says "invested" while the vault stays empty. Let it throw so the
+  // pipeline keeps the money pending and can retry on the next threshold hit.
+  const sig = await depositOnChain(ownerAddress, amountUsd);
+  console.log(`[deposit] ${amountUsd} USDC -> ${ownerAddress}'s vault, sig=${sig}`);
+  return sig;
 }

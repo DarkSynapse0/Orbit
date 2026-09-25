@@ -213,7 +213,7 @@ export default function Home() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ id: `p${Date.now()}`, userId: "demo", amountUsd: amt, wallet: owner, detectedAt: new Date().toISOString() }),
         });
-        const data: { setAside: number; deposited: boolean; needsWallet?: boolean; state: SavingsState } = await res.json();
+        const data: { setAside: number; deposited: boolean; needsWallet?: boolean; depositError?: string; state: SavingsState } = await res.json();
         setState(data.state);
         if (data.setAside > 0) log("spend", `Spent ${usd(amt)} · set aside ${usd(data.setAside)}`);
         else log("none", `Spent ${usd(amt)} · below tier, nothing set aside`);
@@ -221,6 +221,8 @@ export default function Home() {
           log("deposit", `Threshold reached · deposited into your vault on-chain`);
           if (data.state.lastDepositSig && !data.state.lastDepositSig.startsWith("mock-")) setLastSig(data.state.lastDepositSig);
           refreshVault();
+        } else if (data.depositError) {
+          log("none", `Deposit failed — kept pending, will retry. (${data.depositError.slice(0, 80)})`);
         } else if (data.needsWallet) {
           log("info", "Threshold reached — connect your wallet to move it into your vault");
         }

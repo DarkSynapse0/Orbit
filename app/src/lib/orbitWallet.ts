@@ -78,6 +78,10 @@ export class OrbitWalletAdapter extends BaseSignerWalletAdapter {
       const kp = loadOrCreateKeypair();
       this._keypair = kp;
       this._publicKey = kp.publicKey;
+      // Defer the emit to the next macrotask. The provider subscribes to `connect` in a
+      // parent effect, which React runs *after* child effects — so a synchronous emit here
+      // would fire before the listener exists and be missed (leaving `connected` false).
+      await new Promise((resolve) => setTimeout(resolve, 0));
       this.emit("connect", kp.publicKey);
     } finally {
       this._connecting = false;
