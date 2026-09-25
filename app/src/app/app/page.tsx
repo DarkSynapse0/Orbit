@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   Landmark,
@@ -13,9 +13,21 @@ import {
   RotateCcw,
   TrendingUp,
   Loader2,
+  LayoutDashboard,
+  Activity as ActivityIcon,
+  Lock,
+  SlidersHorizontal,
+  Percent,
+  Settings as SettingsIcon,
+  ArrowDownToLine,
+  ArrowUpFromLine,
+  ChevronRight,
+  ShieldCheck,
+  Wallet,
 } from "lucide-react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletVault } from "@/components/WalletVault";
+import { GrowthChart } from "@/components/landing/GrowthChart";
 import { OrbitMark } from "@/components/landing/OrbitMark";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -42,11 +54,24 @@ type OnChain = {
   cluster: string;
 };
 type Entry = { id: number; kind: "spend" | "deposit" | "none" | "info"; text: string };
+type TabId = "overview" | "activity" | "vault" | "bank" | "automation" | "earn" | "settings";
 
 const usd = (n: number) => `$${n.toFixed(2)}`;
 const truncate = (a: string, n = 4) => (a.length <= n * 2 + 1 ? a : `${a.slice(0, n)}…${a.slice(-n)}`);
 const solTx = (s: string) => `https://solscan.io/tx/${s}?cluster=devnet`;
 const solAcct = (a: string) => `https://solscan.io/account/${a}?cluster=devnet`;
+
+const PANEL = "rounded-2xl border border-[var(--border)] bg-[var(--surface)]";
+
+const TABS: { id: TabId; label: string; icon: typeof LayoutDashboard }[] = [
+  { id: "overview", label: "Overview", icon: LayoutDashboard },
+  { id: "activity", label: "Activity", icon: ActivityIcon },
+  { id: "vault", label: "Vault", icon: Lock },
+  { id: "bank", label: "Bank", icon: Landmark },
+  { id: "automation", label: "Automation", icon: SlidersHorizontal },
+  { id: "earn", label: "Earn", icon: Percent },
+  { id: "settings", label: "Settings", icon: SettingsIcon },
+];
 
 function CopyAddress({ value, label }: { value: string; label: string }) {
   const [copied, setCopied] = useState(false);
@@ -59,9 +84,9 @@ function CopyAddress({ value, label }: { value: string; label: string }) {
         setTimeout(() => setCopied(false), 1500);
       }}
       aria-label={`Copy ${label}`}
-      className="inline-flex items-center gap-1.5 rounded font-mono text-neutral-600 dark:text-neutral-400 transition-colors hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/60"
+      className="inline-flex items-center gap-1.5 rounded font-mono text-[var(--muted)] transition-colors hover:text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/50"
     >
-      {copied ? <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-300" aria-hidden /> : <Copy className="h-3.5 w-3.5" aria-hidden />}
+      {copied ? <Check className="h-3.5 w-3.5 text-[var(--accent)]" aria-hidden /> : <Copy className="h-3.5 w-3.5" aria-hidden />}
       {truncate(value)}
     </button>
   );
@@ -73,7 +98,7 @@ function ExplorerLink({ href, children }: { href: string; children: React.ReactN
       href={href}
       target="_blank"
       rel="noreferrer"
-      className="inline-flex items-center gap-1 rounded text-green-600 dark:text-green-400 transition-colors hover:text-green-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/60"
+      className="inline-flex items-center gap-1 rounded text-[var(--accent-strong)] transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/50"
     >
       {children}
       <ExternalLink className="h-3 w-3" aria-hidden />
@@ -81,7 +106,31 @@ function ExplorerLink({ href, children }: { href: string; children: React.ReactN
   );
 }
 
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return <div className="text-[11px] font-medium uppercase tracking-[0.16em] text-[var(--faint)]">{children}</div>;
+}
+
+function Toggle({ on, onClick, label }: { on: boolean; onClick: () => void; label: string }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      aria-label={label}
+      onClick={onClick}
+      className={`relative h-6 w-11 shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/50 ${
+        on ? "bg-[var(--accent)]" : "bg-[var(--border-strong)]"
+      }`}
+    >
+      <span
+        className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-[left] duration-200 ${on ? "left-[22px]" : "left-0.5"}`}
+      />
+    </button>
+  );
+}
+
 export default function Home() {
+  const [tab, setTab] = useState<TabId>("overview");
   const [state, setState] = useState<SavingsState>({ userId: "demo", pendingUsd: 0, investedUsd: 0 });
   const [feed, setFeed] = useState<Entry[]>([]);
   const [amount, setAmount] = useState("120");
@@ -92,19 +141,26 @@ export default function Home() {
   const [plaid, setPlaid] = useState<{ configured: boolean; connected: boolean } | null>(null);
   const [syncing, setSyncing] = useState(false);
 
+  // Automation (demo-local controls)
+  const [autoInvest, setAutoInvest] = useState(true);
+  const [paused, setPaused] = useState(false);
+  const [multiplier, setMultiplier] = useState(1);
+
+  // Earn projection
+  const [projAmt, setProjAmt] = useState("2000");
+  const [projYears, setProjYears] = useState(5);
+
   const { publicKey, connected } = useWallet();
   const owner = publicKey?.toBase58() ?? null;
 
   const [now, setNow] = useState(() => Date.now());
 
   const principalUsd = onchain?.principalUsd ?? 0;
-  // Live yield = the yield already folded on-chain + what has accrued since that last stamp.
   const elapsed = onchain?.lastUpdateTs ? Math.max(0, now / 1000 - onchain.lastUpdateTs) : 0;
   const liveYield = (onchain?.accruedYieldUsd ?? 0) + (principalUsd * APY * elapsed) / SECONDS_PER_YEAR;
   const total = state.pendingUsd + principalUsd + liveYield;
   const pct = Math.min(100, (state.pendingUsd / THRESHOLD) * 100);
 
-  // Flash the balance green when a deposit lands (not on the micro yield ticks).
   const [flash, setFlash] = useState(false);
   const prevPrincipal = useRef(principalUsd);
   useEffect(() => {
@@ -130,14 +186,13 @@ export default function Home() {
   }, []);
 
   const log = (kind: Entry["kind"], text: string) =>
-    setFeed((f) => [{ id: Date.now() + Math.random(), kind, text }, ...f].slice(0, 14));
+    setFeed((f) => [{ id: Date.now() + Math.random(), kind, text }, ...f].slice(0, 40));
 
   const refreshVault = useCallback(() => {
     if (!owner) return;
     fetch(`${API}/vault?owner=${owner}`).then((r) => r.json()).then((v) => { if (!v.error) setOnchain(v); }).catch(() => {});
   }, [owner]);
 
-  // Read the connected wallet's vault on connect, and poll so server-side (auto) deposits show up.
   useEffect(() => {
     if (!connected || !owner) {
       setOnchain(null);
@@ -240,237 +295,570 @@ export default function Home() {
   }, [refreshVault]);
 
   const feedIcon = (kind: Entry["kind"]) => {
-    if (kind === "deposit") return <Zap className="h-4 w-4 text-green-600 dark:text-green-400" aria-hidden />;
-    if (kind === "spend") return <ShoppingBag className="h-4 w-4 text-neutral-600 dark:text-neutral-400" aria-hidden />;
-    if (kind === "info") return <Landmark className="h-4 w-4 text-emerald-600 dark:text-emerald-300" aria-hidden />;
-    return <ShoppingBag className="h-4 w-4 text-neutral-600 dark:text-neutral-400" aria-hidden />;
+    if (kind === "deposit") return <Zap className="h-4 w-4 text-[var(--accent)]" aria-hidden />;
+    if (kind === "info") return <Landmark className="h-4 w-4 text-[var(--accent-strong)]" aria-hidden />;
+    return <ShoppingBag className="h-4 w-4 text-[var(--muted)]" aria-hidden />;
   };
 
+  const projected = useMemo(() => {
+    const a = Number(projAmt) || 0;
+    return a * Math.pow(1 + APY, projYears);
+  }, [projAmt, projYears]);
+
+  const activeTab = TABS.find((t) => t.id === tab)!;
+
   return (
-    <main className="mx-auto w-full max-w-md flex-1 px-5 pb-16 pt-8">
-      {/* Header */}
-      <header className="flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2.5 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/60" aria-label="Orbit home">
-          <OrbitMark className="h-9 w-9" title="Orbit" />
+    <div className="flex min-h-full flex-1">
+      {/* ───────── Sidebar (desktop) ───────── */}
+      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-[var(--border)] px-3 py-5 lg:flex">
+        <Link href="/" className="flex items-center gap-2.5 px-2" aria-label="Orbit home">
+          <OrbitMark className="h-8 w-8" title="Orbit" />
           <div>
-            <div className="text-[15px] font-semibold leading-none tracking-tight">Orbit</div>
-            <div className="mt-1 text-[11px] leading-none text-neutral-500">self-driving savings</div>
+            <div className="font-display text-[15px] font-semibold leading-none tracking-tight">Orbit</div>
+            <div className="mt-1 text-[11px] leading-none text-[var(--muted)]">self-driving savings</div>
           </div>
         </Link>
-        <div className="flex items-center gap-2">
-          <span className="rounded-full bg-neutral-500/10 px-2 py-1 text-[11px] font-medium text-neutral-900 dark:text-neutral-100 ring-1 ring-inset ring-neutral-500/20">
-            Devnet
-          </span>
-          <span
-            className="inline-flex items-center gap-1.5 rounded-full bg-black/[0.04] dark:bg-white/[0.04] px-2 py-1 text-[11px] text-neutral-600 dark:text-neutral-400 ring-1 ring-inset ring-black/[0.08] dark:ring-white/[0.08]"
-            title={online ? "Backend connected" : "Backend offline"}
-          >
-            <span className={`h-1.5 w-1.5 rounded-full ${online ? "bg-emerald-500" : online === false ? "bg-red-500" : "bg-neutral-500"}`} aria-hidden />
-            {online === null ? "…" : online ? "live" : "offline"}
-          </span>
-          <ThemeToggle />
-        </div>
-      </header>
 
-      {/* Balance hero */}
-      <section className="mt-7 rounded-3xl border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-white/[0.02] p-6 shadow-sm">
-        <div className="text-xs font-medium uppercase tracking-wide text-neutral-500">Total saved</div>
-        <div className="mt-1.5 flex items-baseline gap-2">
-          <span
-            className={`font-mono text-[40px] font-semibold leading-none tabular-nums transition-colors duration-700 ${
-              flash ? "text-emerald-600 dark:text-emerald-300" : "text-foreground"
-            }`}
-          >
-            {usd(total)}
-          </span>
-          <span className="inline-flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-300">
-            <TrendingUp className="h-3.5 w-3.5" aria-hidden /> ~6% APY
-          </span>
-        </div>
-
-        {/* Two tiles */}
-        <div className="mt-5 grid grid-cols-2 gap-3">
-          <div className="rounded-2xl border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-white/[0.02] p-3.5">
-            <div className="text-[11px] text-neutral-500">Set aside · in bank</div>
-            <div className="mt-1 font-mono text-lg font-medium tabular-nums text-neutral-900 dark:text-neutral-100">{usd(state.pendingUsd)}</div>
-            <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.06] dark:bg-white/[0.06]">
-              <div className="h-full rounded-full bg-neutral-400 transition-[width] duration-300 ease-out" style={{ width: `${pct}%` }} />
-            </div>
-            <div className="mt-1.5 text-[11px] tabular-nums text-neutral-500">{usd(state.pendingUsd)} / {usd(THRESHOLD)} to deposit</div>
-          </div>
-          <div className="rounded-2xl border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-white/[0.02] p-3.5">
-            <div className="flex items-center justify-between">
-              <div className="text-[11px] text-neutral-500">In vault</div>
-              {onchain && (
-                <span className="rounded-full bg-green-500/15 px-1.5 py-0.5 text-[10px] text-green-600 dark:text-green-400">on-chain</span>
-              )}
-            </div>
-            <div className="mt-1 font-mono text-lg font-medium tabular-nums text-green-700 dark:text-green-300">{usd(principalUsd)}</div>
-            <div className="mt-2.5 font-mono text-[11px] tabular-nums text-emerald-600 dark:text-emerald-300">+{liveYield.toFixed(6)}</div>
-            <div className="mt-0.5 text-[11px] text-neutral-500">yield, accruing live</div>
-          </div>
-        </div>
-
-        {/* Verify on-chain */}
-        {onchain && (
-          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-black/[0.08] dark:border-white/[0.08] pt-3 text-[11px]">
-            <span className="text-neutral-500">Verify:</span>
-            <span className="text-neutral-600 dark:text-neutral-400">
-              vault <CopyAddress value={onchain.vaultAccount} label="vault address" />
-            </span>
-            <ExplorerLink href={solAcct(onchain.vaultAccount)}>Solscan</ExplorerLink>
-            <ExplorerLink href={solAcct(onchain.reserveVault)}>yield reserve</ExplorerLink>
-            {lastSig && <ExplorerLink href={solTx(lastSig)}>last deposit</ExplorerLink>}
-          </div>
-        )}
-      </section>
-
-      {/* Bank / Plaid */}
-      <section className="mt-6">
-        <div className="mb-2 text-xs font-medium uppercase tracking-wide text-neutral-500">Your bank</div>
-        <div className="rounded-2xl border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-white/[0.02] p-4">
-          <div className="flex items-center gap-3">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-black/[0.04] dark:bg-white/[0.04] ring-1 ring-inset ring-black/[0.08] dark:ring-white/[0.08]">
-              <Landmark className="h-5 w-5 text-neutral-700 dark:text-neutral-300" aria-hidden />
-            </span>
-            <div className="min-w-0 flex-1">
-              <div className="text-sm font-medium">{plaid?.connected ? "First Platypus Bank" : "No bank connected"}</div>
-              <div className="text-[11px] text-neutral-500">
-                {plaid?.connected ? "Plaid sandbox · detection only" : "Connect to detect spending"}
-              </div>
-            </div>
-            {plaid?.connected && <span className="h-2 w-2 rounded-full bg-emerald-500" aria-hidden />}
-          </div>
-
-          {plaid && !plaid.configured && (
-            <p className="mt-3 rounded-lg bg-neutral-500/10 px-3 py-2 text-[12px] text-neutral-700/90 dark:text-neutral-200/90">
-              Add <code className="font-mono">PLAID_CLIENT_ID</code> and <code className="font-mono">PLAID_SECRET</code> to <code className="font-mono">server/.env</code> to enable real detection.
-            </p>
-          )}
-
-          {plaid?.configured && !plaid.connected && (
+        <nav className="mt-8 flex-1 space-y-0.5">
+          {TABS.map((t) => (
             <button
+              key={t.id}
               type="button"
-              onClick={connectBank}
-              disabled={busy}
-              className="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-black/[0.06] dark:bg-white/[0.06] text-sm font-medium text-neutral-900 dark:text-neutral-100 ring-1 ring-inset ring-black/[0.1] dark:ring-white/[0.1] transition-[background,transform] duration-150 ease-out hover:bg-black/[0.1] active:scale-[0.99] disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/60"
+              onClick={() => setTab(t.id)}
+              className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40 ${
+                tab === t.id
+                  ? "bg-[var(--surface)] font-medium text-[var(--foreground)]"
+                  : "text-[var(--muted)] hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
+              }`}
             >
-              {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Landmark className="h-4 w-4" aria-hidden />}
-              Connect a test bank
+              <t.icon className="h-[18px] w-[18px]" aria-hidden />
+              {t.label}
             </button>
-          )}
+          ))}
+        </nav>
 
-          {plaid?.connected && (
-            <button
-              type="button"
-              onClick={syncSpending}
-              disabled={syncing}
-              aria-busy={syncing}
-              className="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-green-600 text-sm font-semibold text-white shadow-lg shadow-green-600/20 transition-[background,transform] duration-150 ease-out hover:bg-green-500 active:scale-[0.99] disabled:pointer-events-none disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]"
-            >
-              <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} aria-hidden />
-              {syncing ? "Pulling transactions…" : "Sync spending from Plaid"}
-            </button>
-          )}
+        <div className="space-y-3 border-t border-[var(--border)] px-2 pt-4">
+          <div className="flex items-center gap-2 text-[12px]">
+            <span className={`h-1.5 w-1.5 rounded-full ${connected ? "bg-[var(--accent)]" : "bg-[var(--faint)]"}`} aria-hidden />
+            <span className="truncate font-mono text-[var(--muted)]">{owner ? truncate(owner) : "No wallet"}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--surface)] px-2 py-1 text-[11px] text-[var(--muted)]">
+              <span className={`h-1.5 w-1.5 rounded-full ${online ? "bg-[var(--accent)]" : online === false ? "bg-red-500" : "bg-[var(--faint)]"}`} aria-hidden />
+              {online === null ? "…" : online ? "Devnet · live" : "offline"}
+            </span>
+            <ThemeToggle />
+          </div>
         </div>
-      </section>
+      </aside>
 
-      <WalletVault onChanged={refreshVault} />
+      {/* ───────── Main ───────── */}
+      <div className="flex min-w-0 flex-1 flex-col">
+        {/* Top bar */}
+        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-[var(--border)] bg-[var(--background)]/80 px-5 backdrop-blur-md lg:px-8">
+          <div className="flex items-center gap-2.5">
+            <Link href="/" className="lg:hidden" aria-label="Orbit home">
+              <OrbitMark className="h-7 w-7" title="Orbit" />
+            </Link>
+            <h1 className="font-display text-lg font-semibold tracking-tight">{activeTab.label}</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="hidden items-center gap-1.5 rounded-full bg-[var(--surface)] px-2.5 py-1 text-[11px] text-[var(--muted)] sm:inline-flex">
+              <span className={`h-1.5 w-1.5 rounded-full ${online ? "bg-[var(--accent)]" : online === false ? "bg-red-500" : "bg-[var(--faint)]"}`} aria-hidden />
+              {online === null ? "…" : online ? "Devnet" : "offline"}
+            </span>
+            {connected ? (
+              <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] px-3 py-1.5 text-[12px]">
+                <Wallet className="h-3.5 w-3.5 text-[var(--accent)]" aria-hidden />
+                <span className="font-mono">{truncate(owner!)}</span>
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setTab("vault")}
+                className="inline-flex items-center gap-2 rounded-full bg-[var(--contrast)] px-3.5 py-2 text-[12px] font-semibold text-[var(--contrast-fg)] transition-opacity hover:opacity-90"
+              >
+                <Wallet className="h-3.5 w-3.5" aria-hidden /> Connect
+              </button>
+            )}
+            <span className="lg:hidden">
+              <ThemeToggle />
+            </span>
+          </div>
+        </header>
 
-      {/* Simulate (secondary) */}
-      <section className="mt-6">
-        <div className="mb-2 text-xs font-medium uppercase tracking-wide text-neutral-500">Or simulate a purchase</div>
-        {!connected && (
-          <p className="mb-2 rounded-lg bg-green-500/[0.08] px-3 py-2 text-[12px] text-green-700/90 dark:text-green-300/90 ring-1 ring-inset ring-green-500/20">
-            Connect your wallet above to open your vault — that&apos;s where set-asides get deposited.
-          </p>
-        )}
-        <div className="flex gap-2">
-          {[45, 120, 600].map((v) => (
+        {/* Mobile tabs */}
+        <div className="flex gap-1 overflow-x-auto border-b border-[var(--border)] px-4 py-2 lg:hidden">
+          {TABS.map((t) => (
             <button
-              key={v}
+              key={t.id}
               type="button"
-              onClick={() => spend(v)}
-              disabled={busy || !online || !connected}
-              className="h-11 flex-1 rounded-xl border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-white/[0.02] text-sm font-medium tabular-nums transition-[background,transform,border-color] duration-150 ease-out hover:border-green-500/40 hover:bg-black/[0.05] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/60"
+              onClick={() => setTab(t.id)}
+              className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] transition-colors ${
+                tab === t.id ? "bg-[var(--contrast)] text-[var(--contrast-fg)]" : "text-[var(--muted)]"
+              }`}
             >
-              ${v}
+              <t.icon className="h-4 w-4" aria-hidden />
+              {t.label}
             </button>
           ))}
         </div>
-        <div className="mt-2 flex gap-2">
-          <label htmlFor="amount" className="sr-only">Purchase amount in dollars</label>
-          <input
-            id="amount"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            inputMode="decimal"
-            placeholder="Custom amount"
-            className="h-11 flex-1 rounded-xl border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-white/[0.02] px-3.5 text-sm tabular-nums text-foreground placeholder:text-neutral-600 transition-colors focus:border-green-500/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500/40"
-          />
-          <button
-            type="button"
-            onClick={() => spend(Number(amount))}
-            disabled={busy || !online || !connected}
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-black/[0.06] dark:bg-white/[0.06] px-5 text-sm font-medium ring-1 ring-inset ring-black/[0.1] dark:ring-white/[0.1] transition-[background,transform] duration-150 ease-out hover:bg-black/[0.1] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/60"
-          >
-            {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null}
-            Spend
-          </button>
-        </div>
-        <p className="mt-2 text-[11px] text-neutral-500">
-          Tier rule · over $500 sets aside $10 · over $100 sets aside $5 · else nothing.
-        </p>
-      </section>
 
-      {/* Activity */}
-      <section className="mt-7">
-        <div className="mb-2 flex items-center justify-between">
-          <div className="text-xs font-medium uppercase tracking-wide text-neutral-500">Activity</div>
-          <button
-            type="button"
-            onClick={reset}
-            className="inline-flex items-center gap-1 rounded text-[11px] text-neutral-500 transition-colors hover:text-neutral-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/60"
-          >
-            <RotateCcw className="h-3 w-3" aria-hidden /> reset
-          </button>
-        </div>
-        {feed.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-black/[0.1] dark:border-white/[0.1] bg-white dark:bg-white/[0.02] px-4 py-8 text-center">
-            <ShoppingBag className="mx-auto h-6 w-6 text-neutral-600 dark:text-neutral-400" aria-hidden />
-            <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">No activity yet</p>
-            <p className="mt-0.5 text-[12px] text-neutral-600 dark:text-neutral-400">Sync a bank or simulate a purchase to start saving.</p>
-          </div>
-        ) : (
-          <ul className="space-y-1.5">
-            {feed.map((e) => (
-              <li
-                key={e.id}
-                className={`flex items-center gap-3 rounded-xl border px-3.5 py-2.5 text-sm ${
-                  e.kind === "deposit"
-                    ? "border-green-500/25 bg-green-500/[0.08] text-green-800 dark:text-green-200"
-                    : e.kind === "info"
-                      ? "border-emerald-500/20 bg-emerald-500/[0.06] text-emerald-700 dark:text-emerald-300"
-                      : e.kind === "spend"
-                        ? "border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-white/[0.02] text-neutral-900 dark:text-neutral-100"
-                        : "border-black/[0.06] dark:border-white/[0.06] bg-white dark:bg-white/[0.02] text-neutral-500"
-                }`}
-              >
-                {feedIcon(e.kind)}
-                <span className="min-w-0 flex-1">{e.text}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+        <main className="mx-auto w-full max-w-5xl flex-1 px-5 py-8 lg:px-8 lg:py-10">
+          {/* ───────── Overview ───────── */}
+          {tab === "overview" && (
+            <div className="space-y-6">
+              {/* Balance hero */}
+              <section className={`${PANEL} p-6 lg:p-8`}>
+                <SectionLabel>Total balance</SectionLabel>
+                <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <span
+                    className={`font-mono text-[clamp(2.4rem,6vw,3.5rem)] font-semibold leading-none tabular-nums transition-colors duration-700 ${
+                      flash ? "text-[var(--accent)]" : "text-[var(--foreground)]"
+                    }`}
+                  >
+                    {usd(total)}
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[var(--accent-soft)] px-2 py-0.5 text-[12px] font-medium text-[var(--accent-strong)]">
+                    <TrendingUp className="h-3.5 w-3.5" aria-hidden /> 6% APY
+                  </span>
+                </div>
+                <div className="mt-2 font-mono text-[13px] text-[var(--accent-strong)]">
+                  +{liveYield.toFixed(6)} <span className="text-[var(--muted)]">earned, accruing live</span>
+                </div>
 
-      {/* Footer / disclosure */}
-      <footer className="mt-8 border-t border-black/[0.08] dark:border-white/[0.08] pt-4">
-        <p className="text-[11px] leading-5 text-neutral-600 dark:text-neutral-400">
-          Live on Solana devnet. Set-aside detection, threshold, and the vault deposit are real; the fiat→USDC step
-          (Stripe) is mocked. Not a bank. Not FDIC-insured — principal is not guaranteed.
-        </p>
-      </footer>
-    </main>
+                {/* quick actions */}
+                <div className="mt-6 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setTab("vault")}
+                    className="inline-flex items-center gap-2 rounded-xl bg-[var(--contrast)] px-4 py-2.5 text-[13px] font-semibold text-[var(--contrast-fg)] transition-opacity hover:opacity-90"
+                  >
+                    <ArrowDownToLine className="h-4 w-4" aria-hidden /> Deposit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTab("vault")}
+                    className="inline-flex items-center gap-2 rounded-xl border border-[var(--border-strong)] px-4 py-2.5 text-[13px] font-medium transition-colors hover:bg-[var(--surface)]"
+                  >
+                    <ArrowUpFromLine className="h-4 w-4" aria-hidden /> Withdraw
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTab("bank")}
+                    className="inline-flex items-center gap-2 rounded-xl border border-[var(--border-strong)] px-4 py-2.5 text-[13px] font-medium transition-colors hover:bg-[var(--surface)]"
+                  >
+                    <ShoppingBag className="h-4 w-4" aria-hidden /> Add spending
+                  </button>
+                </div>
+              </section>
+
+              {/* stat tiles */}
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div className={`${PANEL} p-5`}>
+                  <div className="text-[12px] text-[var(--muted)]">Set aside · in bank</div>
+                  <div className="mt-1.5 font-mono text-2xl font-semibold tabular-nums">{usd(state.pendingUsd)}</div>
+                  <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-[var(--border)]">
+                    <div className="h-full rounded-full bg-[var(--faint)] transition-[width] duration-300" style={{ width: `${pct}%` }} />
+                  </div>
+                  <div className="mt-1.5 font-mono text-[11px] tabular-nums text-[var(--muted)]">{usd(state.pendingUsd)} / {usd(THRESHOLD)} to deposit</div>
+                </div>
+                <div className={`${PANEL} p-5`}>
+                  <div className="flex items-center justify-between">
+                    <div className="text-[12px] text-[var(--muted)]">In vault</div>
+                    {onchain && <span className="rounded-full bg-[var(--accent-soft)] px-1.5 py-0.5 text-[10px] text-[var(--accent-strong)]">on-chain</span>}
+                  </div>
+                  <div className="mt-1.5 font-mono text-2xl font-semibold tabular-nums text-[var(--accent-strong)]">{usd(principalUsd)}</div>
+                  <div className="mt-3 text-[11px] text-[var(--muted)]">principal, invested</div>
+                </div>
+                <div className={`${PANEL} p-5`}>
+                  <div className="text-[12px] text-[var(--muted)]">Yield earned</div>
+                  <div className="mt-1.5 font-mono text-2xl font-semibold tabular-nums text-[var(--accent-strong)]">{liveYield.toFixed(6)}</div>
+                  <div className="mt-3 text-[11px] text-[var(--muted)]">paid in tokens, live</div>
+                </div>
+              </div>
+
+              {/* chart */}
+              <section className={`${PANEL} p-6`}>
+                <div className="flex items-center justify-between">
+                  <SectionLabel>Balance over time</SectionLabel>
+                  <span className="text-[11px] text-[var(--faint)]">illustrative</span>
+                </div>
+                <div className="mt-5">
+                  <GrowthChart />
+                </div>
+              </section>
+
+              {/* recent activity */}
+              <section className={`${PANEL} p-6`}>
+                <div className="flex items-center justify-between">
+                  <SectionLabel>Recent activity</SectionLabel>
+                  <button type="button" onClick={() => setTab("activity")} className="inline-flex items-center gap-1 text-[12px] text-[var(--muted)] hover:text-[var(--foreground)]">
+                    View all <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+                  </button>
+                </div>
+                {feed.length === 0 ? (
+                  <p className="mt-4 text-[13px] text-[var(--muted)]">No activity yet. Sync a bank or add spending to start.</p>
+                ) : (
+                  <ul className="mt-4 space-y-1.5">
+                    {feed.slice(0, 5).map((e) => (
+                      <li key={e.id} className="flex items-center gap-3 text-[13px]">
+                        {feedIcon(e.kind)}
+                        <span className="min-w-0 flex-1 text-[var(--foreground)]">{e.text}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+            </div>
+          )}
+
+          {/* ───────── Activity ───────── */}
+          {tab === "activity" && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <SectionLabel>All activity</SectionLabel>
+                <button
+                  type="button"
+                  onClick={reset}
+                  className="inline-flex items-center gap-1 rounded text-[12px] text-[var(--muted)] transition-colors hover:text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/50"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" aria-hidden /> reset
+                </button>
+              </div>
+              {feed.length === 0 ? (
+                <div className={`${PANEL} border-dashed px-4 py-14 text-center`}>
+                  <ShoppingBag className="mx-auto h-6 w-6 text-[var(--muted)]" aria-hidden />
+                  <p className="mt-2 text-sm text-[var(--muted)]">No activity yet</p>
+                  <p className="mt-0.5 text-[12px] text-[var(--faint)]">Sync a bank or simulate a purchase to start saving.</p>
+                </div>
+              ) : (
+                <ul className="space-y-1.5">
+                  {feed.map((e) => (
+                    <li
+                      key={e.id}
+                      className={`flex items-center gap-3 rounded-xl border px-3.5 py-3 text-sm ${
+                        e.kind === "deposit"
+                          ? "border-[var(--accent-soft)] bg-[var(--accent-soft)] text-[var(--accent-strong)]"
+                          : "border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)]"
+                      }`}
+                    >
+                      {feedIcon(e.kind)}
+                      <span className="min-w-0 flex-1">{e.text}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+
+          {/* ───────── Vault ───────── */}
+          {tab === "vault" && (
+            <div className="space-y-6">
+              <WalletVault onChanged={refreshVault} />
+
+              <section className={`${PANEL} p-6`}>
+                <SectionLabel>On-chain details</SectionLabel>
+                {onchain ? (
+                  <dl className="mt-4 space-y-3 text-[13px]">
+                    {[
+                      { k: "Vault account", v: onchain.vaultAccount },
+                      { k: "Yield reserve", v: onchain.reserveVault },
+                      { k: "Program", v: onchain.programId },
+                    ].map((row) => (
+                      <div key={row.k} className="flex items-center justify-between gap-3 border-b border-[var(--border)] pb-3">
+                        <dt className="text-[var(--muted)]">{row.k}</dt>
+                        <dd className="flex items-center gap-3">
+                          <CopyAddress value={row.v} label={row.k} />
+                          <ExplorerLink href={solAcct(row.v)}>Solscan</ExplorerLink>
+                        </dd>
+                      </div>
+                    ))}
+                    <div className="flex items-center justify-between gap-3">
+                      <dt className="text-[var(--muted)]">Network · APY</dt>
+                      <dd className="font-mono">{onchain.cluster} · {(onchain.apyBps / 100).toFixed(1)}%</dd>
+                    </div>
+                    {lastSig && (
+                      <div className="pt-1">
+                        <ExplorerLink href={solTx(lastSig)}>View last deposit transaction</ExplorerLink>
+                      </div>
+                    )}
+                  </dl>
+                ) : (
+                  <p className="mt-4 text-[13px] text-[var(--muted)]">Connect or create a wallet above to see your vault on-chain.</p>
+                )}
+              </section>
+
+              <div className={`${PANEL} flex items-start gap-3 p-5`}>
+                <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-[var(--accent)]" aria-hidden />
+                <p className="text-[13px] leading-relaxed text-[var(--muted)]">
+                  Self-custodial by design. Orbit can fund your vault, but the program only lets{" "}
+                  <span className="text-[var(--foreground)]">your key</span> withdraw. No lock-ups, no gatekeeper.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* ───────── Bank ───────── */}
+          {tab === "bank" && (
+            <div className="space-y-6">
+              <section className={`${PANEL} p-6`}>
+                <SectionLabel>Connected bank</SectionLabel>
+                <div className="mt-4 flex items-center gap-3">
+                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--background)] ring-1 ring-inset ring-[var(--border)]">
+                    <Landmark className="h-5 w-5 text-[var(--foreground)]" aria-hidden />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-medium">{plaid?.connected ? "First Platypus Bank" : "No bank connected"}</div>
+                    <div className="text-[12px] text-[var(--muted)]">{plaid?.connected ? "Plaid sandbox · detection only" : "Connect to detect spending"}</div>
+                  </div>
+                  {plaid?.connected && <span className="h-2 w-2 rounded-full bg-[var(--accent)]" aria-hidden />}
+                </div>
+
+                {plaid && !plaid.configured && (
+                  <p className="mt-4 rounded-lg bg-[var(--surface)] px-3 py-2 text-[12px] text-[var(--muted)]">
+                    Add <code className="font-mono">PLAID_CLIENT_ID</code> and <code className="font-mono">PLAID_SECRET</code> to <code className="font-mono">server/.env</code> to enable real detection.
+                  </p>
+                )}
+                {plaid?.configured && !plaid.connected && (
+                  <button
+                    type="button"
+                    onClick={connectBank}
+                    disabled={busy}
+                    className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-[var(--border-strong)] text-sm font-medium transition-colors hover:bg-[var(--surface)] disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/50"
+                  >
+                    {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Landmark className="h-4 w-4" aria-hidden />} Connect a test bank
+                  </button>
+                )}
+                {plaid?.connected && (
+                  <button
+                    type="button"
+                    onClick={syncSpending}
+                    disabled={syncing}
+                    aria-busy={syncing}
+                    className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--accent)] text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/50"
+                  >
+                    <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} aria-hidden />
+                    {syncing ? "Pulling transactions…" : "Sync spending from Plaid"}
+                  </button>
+                )}
+              </section>
+
+              <section className={`${PANEL} p-6`}>
+                <SectionLabel>Simulate a purchase</SectionLabel>
+                {!connected && (
+                  <p className="mt-3 rounded-lg bg-[var(--accent-soft)] px-3 py-2 text-[12px] text-[var(--accent-strong)]">
+                    Connect your wallet (Vault) to open your vault — that&apos;s where set-asides get deposited.
+                  </p>
+                )}
+                <div className="mt-4 flex gap-2">
+                  {[45, 120, 600].map((v) => (
+                    <button
+                      key={v}
+                      type="button"
+                      onClick={() => spend(v)}
+                      disabled={busy || !online || !connected}
+                      className="h-11 flex-1 rounded-xl border border-[var(--border)] bg-[var(--background)] text-sm font-medium tabular-nums transition-colors hover:border-[var(--accent)]/40 hover:bg-[var(--surface)] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/50"
+                    >
+                      ${v}
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-2 flex gap-2">
+                  <label htmlFor="amount" className="sr-only">Purchase amount in dollars</label>
+                  <input
+                    id="amount"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    inputMode="decimal"
+                    placeholder="Custom amount"
+                    className="h-11 flex-1 rounded-xl border border-[var(--border)] bg-[var(--background)] px-3.5 text-sm tabular-nums text-[var(--foreground)] placeholder:text-[var(--faint)] transition-colors focus:border-[var(--accent)]/50 focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => spend(Number(amount))}
+                    disabled={busy || !online || !connected}
+                    className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-[var(--border-strong)] px-5 text-sm font-medium transition-colors hover:bg-[var(--surface)] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/50"
+                  >
+                    {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null} Spend
+                  </button>
+                </div>
+                <p className="mt-3 text-[12px] text-[var(--muted)]">Tier rule · over $500 sets aside $10 · over $100 sets aside $5 · else nothing.</p>
+              </section>
+            </div>
+          )}
+
+          {/* ───────── Automation ───────── */}
+          {tab === "automation" && (
+            <div className="space-y-6">
+              <section className={`${PANEL} p-6`}>
+                <SectionLabel>Round-up rule</SectionLabel>
+                <div className="mt-4 grid grid-cols-2 gap-4">
+                  {[
+                    { spend: "Over $100", set: "$5" },
+                    { spend: "Over $500", set: "$10" },
+                  ].map((t) => (
+                    <div key={t.spend} className="rounded-xl border border-[var(--border)] bg-[var(--background)] p-5">
+                      <div className="text-[12px] text-[var(--muted)]">{t.spend}</div>
+                      <div className="mt-2 font-mono text-3xl font-semibold text-[var(--accent-strong)]">{t.set}</div>
+                      <div className="mt-1 text-[11px] text-[var(--muted)]">set aside</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-5 flex items-center justify-between border-t border-[var(--border)] pt-4 text-[13px]">
+                  <span className="text-[var(--muted)]">Deposit threshold</span>
+                  <span className="font-mono">{usd(THRESHOLD)}</span>
+                </div>
+              </section>
+
+              <section className={`${PANEL} divide-y divide-[var(--border)]`}>
+                {[
+                  { label: "Auto-invest at threshold", desc: "Move set-asides into your vault automatically.", on: autoInvest, set: () => setAutoInvest((v) => !v) },
+                  { label: "Pause saving", desc: "Keep detecting, stop setting money aside.", on: paused, set: () => setPaused((v) => !v) },
+                ].map((row) => (
+                  <div key={row.label} className="flex items-center justify-between gap-4 p-5">
+                    <div>
+                      <div className="text-sm font-medium">{row.label}</div>
+                      <div className="mt-0.5 text-[12px] text-[var(--muted)]">{row.desc}</div>
+                    </div>
+                    <Toggle on={row.on} onClick={row.set} label={row.label} />
+                  </div>
+                ))}
+                <div className="flex items-center justify-between gap-4 p-5">
+                  <div>
+                    <div className="text-sm font-medium">Round-up multiplier</div>
+                    <div className="mt-0.5 text-[12px] text-[var(--muted)]">Save more per purchase.</div>
+                  </div>
+                  <div className="flex rounded-full border border-[var(--border)] p-0.5">
+                    {[1, 2, 3].map((m) => (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => setMultiplier(m)}
+                        className={`rounded-full px-3 py-1 text-[13px] font-medium transition-colors ${
+                          multiplier === m ? "bg-[var(--contrast)] text-[var(--contrast-fg)]" : "text-[var(--muted)]"
+                        }`}
+                      >
+                        {m}×
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </section>
+              <p className="text-[12px] text-[var(--faint)]">These controls are a demo preview; the live rule is fixed at the tiers above.</p>
+            </div>
+          )}
+
+          {/* ───────── Earn ───────── */}
+          {tab === "earn" && (
+            <div className="space-y-6">
+              <section className={`${PANEL} p-6 lg:p-8`}>
+                <div className="flex flex-wrap items-baseline gap-x-3">
+                  <span className="font-mono text-[clamp(2.4rem,6vw,3.5rem)] font-semibold leading-none text-[var(--accent-strong)]">6.0%</span>
+                  <span className="text-sm text-[var(--muted)]">APY, on-chain</span>
+                </div>
+                <p className="mt-4 max-w-md text-[13px] leading-relaxed text-[var(--muted)]">
+                  Your deposit sits in an on-chain yield reserve that pays interest in real tokens, compounding every
+                  second. On mainnet this routes to Aave, the largest lending market in DeFi.
+                </p>
+              </section>
+
+              <section className={`${PANEL} p-6`}>
+                <SectionLabel>Projection</SectionLabel>
+                <div className="mt-5 grid gap-6 sm:grid-cols-2">
+                  <div>
+                    <label htmlFor="proj" className="text-[12px] text-[var(--muted)]">Starting balance</label>
+                    <div className="mt-2 flex items-center rounded-xl border border-[var(--border)] bg-[var(--background)] px-3">
+                      <span className="text-[var(--muted)]">$</span>
+                      <input
+                        id="proj"
+                        value={projAmt}
+                        onChange={(e) => setProjAmt(e.target.value)}
+                        inputMode="decimal"
+                        className="h-11 w-full bg-transparent px-1.5 font-mono text-sm tabular-nums focus:outline-none"
+                      />
+                    </div>
+                    <label htmlFor="years" className="mt-5 block text-[12px] text-[var(--muted)]">
+                      Time · <span className="font-mono text-[var(--foreground)]">{projYears} {projYears === 1 ? "year" : "years"}</span>
+                    </label>
+                    <input
+                      id="years"
+                      type="range"
+                      min={1}
+                      max={30}
+                      value={projYears}
+                      onChange={(e) => setProjYears(Number(e.target.value))}
+                      className="mt-3 w-full accent-[var(--accent)]"
+                    />
+                  </div>
+                  <div className="flex flex-col justify-center rounded-xl border border-[var(--border)] bg-[var(--background)] p-5">
+                    <div className="text-[12px] text-[var(--muted)]">Projected value</div>
+                    <div className="mt-1 font-mono text-3xl font-semibold tabular-nums text-[var(--accent-strong)]">
+                      ${projected.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+                    </div>
+                    <div className="mt-1 text-[12px] text-[var(--muted)]">
+                      +${(projected - (Number(projAmt) || 0)).toLocaleString("en-US", { maximumFractionDigits: 0 })} in yield
+                    </div>
+                  </div>
+                </div>
+                <p className="mt-4 text-[11px] text-[var(--faint)]">Illustrative at a fixed 6% APY, compounded annually. Not a guarantee.</p>
+              </section>
+            </div>
+          )}
+
+          {/* ───────── Settings ───────── */}
+          {tab === "settings" && (
+            <div className="space-y-6">
+              <section className={`${PANEL} divide-y divide-[var(--border)]`}>
+                <div className="flex items-center justify-between gap-4 p-5">
+                  <div>
+                    <div className="text-sm font-medium">Wallet</div>
+                    <div className="mt-0.5 font-mono text-[12px] text-[var(--muted)]">{owner ? owner : "Not connected"}</div>
+                  </div>
+                  {!connected && (
+                    <button type="button" onClick={() => setTab("vault")} className="rounded-full border border-[var(--border-strong)] px-3 py-1.5 text-[12px] font-medium transition-colors hover:bg-[var(--surface)]">
+                      Connect
+                    </button>
+                  )}
+                </div>
+                <div className="flex items-center justify-between gap-4 p-5">
+                  <div>
+                    <div className="text-sm font-medium">Appearance</div>
+                    <div className="mt-0.5 text-[12px] text-[var(--muted)]">Light or dark theme.</div>
+                  </div>
+                  <ThemeToggle />
+                </div>
+                <div className="flex items-center justify-between gap-4 p-5">
+                  <div>
+                    <div className="text-sm font-medium">Network</div>
+                    <div className="mt-0.5 text-[12px] text-[var(--muted)]">Solana devnet</div>
+                  </div>
+                  <ExplorerLink href={solAcct(onchain?.programId ?? "8LEjyrMCKukhxA4q3DRaYGfkappxRayiTPM7saZG2Kgi")}>Program</ExplorerLink>
+                </div>
+              </section>
+
+              <section className={`${PANEL} flex items-center justify-between gap-4 p-5`}>
+                <div>
+                  <div className="text-sm font-medium">Reset demo data</div>
+                  <div className="mt-0.5 text-[12px] text-[var(--muted)]">Clears set-asides and activity. Your on-chain vault is untouched.</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={reset}
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--border-strong)] px-3.5 py-2 text-[12px] font-medium transition-colors hover:bg-[var(--surface)]"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" aria-hidden /> Reset
+                </button>
+              </section>
+
+              <p className="text-[11px] leading-5 text-[var(--faint)]">
+                Live on Solana devnet. Detection, threshold, and the vault deposit are real; the fiat→USDC step (Stripe)
+                is mocked. Not a bank. Not FDIC-insured — principal is not guaranteed.
+              </p>
+            </div>
+          )}
+        </main>
+      </div>
+    </div>
   );
 }
