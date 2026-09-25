@@ -222,13 +222,13 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
       <div className="mb-2 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-neutral-500">
         <ShieldCheck className="h-3.5 w-3.5" aria-hidden /> Your vault · you hold the keys
       </div>
-      <div className="rounded-2xl border border-black/[0.08] bg-white p-4">
+      <div className="rounded-2xl border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-white/[0.02] p-4">
         {!mounted ? (
           <div className="h-24" aria-hidden />
         ) : !connected || !publicKey ? (
           <div className="flex flex-col items-center gap-3 py-4 text-center">
             <span className="grid h-11 w-11 place-items-center rounded-2xl bg-indigo-500/10 ring-1 ring-inset ring-indigo-400/25">
-              <Wallet className="h-5 w-5 text-indigo-300" aria-hidden />
+              <Wallet className="h-5 w-5 text-indigo-600 dark:text-indigo-300" aria-hidden />
             </span>
             <div>
               <div className="text-sm font-medium">Open your vault</div>
@@ -243,19 +243,19 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
               {creating || connecting ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Sparkles className="h-4 w-4" aria-hidden />}
               Create an account
             </button>
-            <div className="text-[11px] text-neutral-600">No wallet, no seed phrase — Orbit makes one for you.</div>
-            <div className="flex w-full max-w-[260px] items-center gap-3 py-0.5 text-[10px] uppercase tracking-wide text-neutral-600">
-              <span className="h-px flex-1 bg-black/[0.1]" /> or <span className="h-px flex-1 bg-black/[0.1]" />
+            <div className="text-[11px] text-neutral-600 dark:text-neutral-400">No wallet, no seed phrase — Orbit makes one for you.</div>
+            <div className="flex w-full max-w-[260px] items-center gap-3 py-0.5 text-[10px] uppercase tracking-wide text-neutral-600 dark:text-neutral-400">
+              <span className="h-px flex-1 bg-black/[0.1] dark:bg-white/[0.1]" /> or <span className="h-px flex-1 bg-black/[0.1] dark:bg-white/[0.1]" />
             </div>
             <WalletMultiButton style={{ height: 40, borderRadius: 12, background: "rgba(255,255,255,0.06)", fontSize: 13 }} />
-            <div className="text-[11px] text-neutral-600">Already have Phantom or Solflare? Connect it (Devnet).</div>
+            <div className="text-[11px] text-neutral-600 dark:text-neutral-400">Already have Phantom or Solflare? Connect it (Devnet).</div>
           </div>
         ) : (
           <>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <span className="grid h-9 w-9 place-items-center rounded-xl bg-black/[0.04] ring-1 ring-inset ring-black/[0.08]">
-                  <Wallet className="h-4 w-4 text-neutral-700" aria-hidden />
+                <span className="grid h-9 w-9 place-items-center rounded-xl bg-black/[0.04] dark:bg-white/[0.04] ring-1 ring-inset ring-black/[0.08] dark:ring-white/[0.08]">
+                  <Wallet className="h-4 w-4 text-neutral-700 dark:text-neutral-300" aria-hidden />
                 </span>
                 <div>
                   <button
@@ -265,13 +265,13 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
                       setCopied(true);
                       setTimeout(() => setCopied(false), 1500);
                     }}
-                    className="inline-flex items-center gap-1.5 rounded font-mono text-sm text-neutral-900 transition-colors hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60"
+                    className="inline-flex items-center gap-1.5 rounded font-mono text-sm text-neutral-900 dark:text-neutral-100 transition-colors hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60"
                     aria-label="Copy wallet address"
                   >
-                    {copied ? <Check className="h-3.5 w-3.5 text-emerald-600" aria-hidden /> : <Copy className="h-3.5 w-3.5 text-neutral-500" aria-hidden />}
+                    {copied ? <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-300" aria-hidden /> : <Copy className="h-3.5 w-3.5 text-neutral-500" aria-hidden />}
                     {truncate(publicKey.toBase58())}
                     {isEmbedded && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-indigo-500/15 px-1.5 py-0.5 text-[10px] font-medium text-indigo-300">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-indigo-500/15 px-1.5 py-0.5 text-[10px] font-medium text-indigo-600 dark:text-indigo-300">
                         <Sparkles className="h-2.5 w-2.5" aria-hidden /> Orbit account
                       </span>
                     )}
@@ -293,7 +293,7 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
                   value={depositAmt}
                   onChange={(e) => setDepositAmt(e.target.value.replace(/[^0-9.]/g, ""))}
                   inputMode="decimal"
-                  className="h-11 w-full rounded-xl border border-black/[0.08] bg-white pl-6 pr-3 text-[13px] tabular-nums text-foreground placeholder:text-neutral-600 transition-colors focus:border-indigo-400/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40"
+                  className="h-11 w-full rounded-xl border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-white/[0.02] pl-6 pr-3 text-[13px] tabular-nums text-foreground placeholder:text-neutral-600 transition-colors focus:border-indigo-400/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40"
                   placeholder="Amount"
                 />
               </div>
@@ -301,7 +301,7 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
                 type="button"
                 onClick={() => setDepositAmt(usdc > 0 ? String(Math.floor(usdc)) : "0")}
                 disabled={busy !== null || usdc <= 0}
-                className="h-11 rounded-xl border border-black/[0.08] bg-white px-3 text-[12px] font-medium text-neutral-600 transition-colors hover:text-neutral-900 disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60"
+                className="h-11 rounded-xl border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-white/[0.02] px-3 text-[12px] font-medium text-neutral-600 dark:text-neutral-400 transition-colors hover:text-neutral-900 disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60"
               >
                 Max
               </button>
@@ -312,7 +312,7 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
                 type="button"
                 onClick={getUsdc}
                 disabled={busy !== null}
-                className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl border border-black/[0.08] bg-white text-[13px] font-medium transition-[background,transform] duration-150 ease-out hover:bg-black/[0.05] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60"
+                className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-white/[0.02] text-[13px] font-medium transition-[background,transform] duration-150 ease-out hover:bg-black/[0.05] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60"
               >
                 {busy === "faucet" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Coins className="h-4 w-4" aria-hidden />}
                 Get USDC
@@ -330,7 +330,7 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
                 type="button"
                 onClick={withdraw}
                 disabled={busy !== null || (principal ?? 0) <= 0}
-                className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl border border-black/[0.08] bg-white text-[13px] font-medium transition-[background,transform] duration-150 ease-out hover:bg-black/[0.05] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60"
+                className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-white/[0.02] text-[13px] font-medium transition-[background,transform] duration-150 ease-out hover:bg-black/[0.05] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60"
               >
                 {busy === "withdraw" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <ArrowUpFromLine className="h-4 w-4" aria-hidden />}
                 Withdraw all
@@ -343,9 +343,9 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
 
             {(status || lastSig) && (
               <div className="mt-2 flex items-center justify-between text-[11px]">
-                <span className="text-neutral-600">{status}</span>
+                <span className="text-neutral-600 dark:text-neutral-400">{status}</span>
                 {lastSig && (
-                  <a href={solTx(lastSig)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-indigo-300 hover:text-indigo-200">
+                  <a href={solTx(lastSig)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-indigo-600 dark:text-indigo-300 hover:text-indigo-200">
                     view tx <ExternalLink className="h-3 w-3" aria-hidden />
                   </a>
                 )}
