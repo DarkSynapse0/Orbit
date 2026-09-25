@@ -32,8 +32,8 @@ export function GrowthChart() {
     <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img" aria-label="Vault balance growing over 12 months">
       <defs>
         <linearGradient id="orbitArea" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#818cf8" stopOpacity="0.28" />
-          <stop offset="100%" stopColor="#818cf8" stopOpacity="0" />
+          <stop offset="0%" stopColor="var(--chart-line)" stopOpacity="0.22" />
+          <stop offset="100%" stopColor="var(--chart-line)" stopOpacity="0" />
         </linearGradient>
       </defs>
 

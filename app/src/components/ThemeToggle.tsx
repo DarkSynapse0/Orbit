@@ -26,7 +26,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
       type="button"
       onClick={toggle}
       aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
-      className={`grid h-9 w-9 place-items-center rounded-full border border-black/[0.1] text-neutral-600 transition-colors hover:bg-black/[0.05] hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40 dark:border-white/[0.12] dark:text-neutral-300 dark:hover:bg-white/[0.08] dark:hover:text-white ${className}`}
+      className={`grid h-9 w-9 place-items-center rounded-full border border-[var(--border)] text-[var(--muted)] transition-colors hover:bg-[var(--surface)] hover:text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40 ${className}`}
     >
       <Sun className="h-[18px] w-[18px] dark:hidden" aria-hidden />
       <Moon className="hidden h-[18px] w-[18px] dark:block" aria-hidden />

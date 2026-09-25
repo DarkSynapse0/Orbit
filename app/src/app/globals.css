@@ -3,45 +3,77 @@
 /* Class-based dark mode: `.dark` on <html> flips the theme. */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Light theme: an indigo-tinted off-white surface, near-black ink. */
+/* Light theme: paper white, near-black ink, growth green. */
 :root {
-  --background: #f5f6fa;
-  --foreground: #14151c;
-  --chart-grid: rgba(15, 17, 28, 0.08);
-  --chart-axis: rgba(15, 17, 28, 0.4);
-  --chart-dash: rgba(15, 17, 28, 0.25);
-  --chart-line: #4f46e5;
+  --background: #ffffff;
+  --foreground: #0a0a0a;
+  --muted: #71717a;
+  --faint: #a1a1aa;
+  --surface: #f5f5f5;
+  --border: rgba(10, 10, 10, 0.1);
+  --border-strong: rgba(10, 10, 10, 0.16);
+  --contrast: #0a0a0a; /* inverted band background */
+  --contrast-fg: #fafafa;
+  --contrast-muted: rgba(250, 250, 250, 0.6);
+  --contrast-border: rgba(250, 250, 250, 0.14);
+  --accent: #16a34a; /* growth green */
+  --accent-strong: #15803d;
+  --accent-soft: rgba(22, 163, 74, 0.1);
+
+  --chart-grid: rgba(10, 10, 10, 0.07);
+  --chart-axis: rgba(10, 10, 10, 0.38);
+  --chart-dash: rgba(10, 10, 10, 0.22);
+  --chart-line: #16a34a;
   --chart-ring: #ffffff;
-  --chart-label-bg: #ffffff;
-  --chart-label-border: rgba(15, 17, 28, 0.12);
-  --chart-label-text: #4338ca;
+  --chart-label-bg: #0a0a0a;
+  --chart-label-border: rgba(10, 10, 10, 0.12);
+  --chart-label-text: #fafafa;
 }
 
 /* Dark theme. */
 .dark {
-  --background: #08080c;
-  --foreground: #ececf1;
-  --chart-grid: rgba(255, 255, 255, 0.06);
-  --chart-axis: rgba(255, 255, 255, 0.32);
-  --chart-dash: rgba(255, 255, 255, 0.28);
-  --chart-line: #818cf8;
-  --chart-ring: #0a0a10;
-  --chart-label-bg: #0c0c14;
-  --chart-label-border: rgba(255, 255, 255, 0.12);
-  --chart-label-text: #c7d2fe;
+  --background: #0a0a0b;
+  --foreground: #fafafa;
+  --muted: #a1a1aa;
+  --faint: #71717a;
+  --surface: #141416;
+  --border: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.18);
+  --contrast: #fafafa;
+  --contrast-fg: #0a0a0a;
+  --contrast-muted: rgba(10, 10, 10, 0.6);
+  --contrast-border: rgba(10, 10, 10, 0.12);
+  --accent: #34d399;
+  --accent-strong: #4ade80;
+  --accent-soft: rgba(52, 211, 153, 0.12);
+
+  --chart-grid: rgba(255, 255, 255, 0.07);
+  --chart-axis: rgba(255, 255, 255, 0.34);
+  --chart-dash: rgba(255, 255, 255, 0.24);
+  --chart-line: #34d399;
+  --chart-ring: #0a0a0b;
+  --chart-label-bg: #fafafa;
+  --chart-label-border: rgba(255, 255, 255, 0.16);
+  --chart-label-text: #0a0a0a;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-display: var(--ff-display);
+  --font-sans: var(--ff-sans);
+  --font-mono: var(--ff-mono);
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-family: var(--ff-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+::selection {
+  background: var(--accent);
+  color: #fff;
 }
 
 /* ---- Landing: orbital motion system ---- */

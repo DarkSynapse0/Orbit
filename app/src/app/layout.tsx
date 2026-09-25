@@ -1,17 +1,17 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Display: technical grotesque. Body: Inter. Numbers/addresses: JetBrains Mono.
+const fontDisplay = Space_Grotesk({
+  variable: "--ff-display",
   subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  display: "swap",
 });
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const fontSans = Inter({ variable: "--ff-sans", subsets: ["latin"], display: "swap" });
+const fontMono = JetBrains_Mono({ variable: "--ff-mono", subsets: ["latin"], display: "swap" });
 
 export const metadata: Metadata = {
   title: "Orbit — money that saves itself",
@@ -23,7 +23,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${fontDisplay.variable} ${fontSans.variable} ${fontMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
