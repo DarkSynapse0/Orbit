@@ -29,9 +29,8 @@ import { Badge } from "@/components/ui/badge";
 const PROGRAM = "8LEjyrMCKukhxA4q3DRaYGfkappxRayiTPM7saZG2Kgi";
 const solAcct = (a: string) => `https://solscan.io/account/${a}?cluster=devnet`;
 
-// Shared surface treatment for the light theme.
-const CARD =
-  "rounded-3xl border border-black/[0.08] bg-white shadow-[0_1px_2px_rgba(15,17,28,0.04),0_10px_30px_-16px_rgba(15,17,28,0.12)]";
+// Shared surface treatment for the light theme: flat, border-only cards.
+const CARD = "rounded-3xl border border-black/[0.08] bg-white";
 
 export default function Landing() {
   return (
@@ -90,16 +89,19 @@ export default function Landing() {
         </Reveal>
       </section>
 
-      {/* ───────── Trust strip ───────── */}
+      {/* ───────── Trust strip (separate cards, blends into the hero) ───────── */}
       <section className="mx-auto w-full max-w-6xl px-6">
-        <Reveal className={`grid grid-cols-2 divide-y divide-black/[0.08] sm:grid-cols-4 sm:divide-x sm:divide-y-0 ${CARD}`}>
+        <Reveal className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[
             { icon: ShieldCheck, k: "Non-custodial", v: "You hold the keys" },
             { icon: Eye, k: "Transparent", v: "Every dollar on-chain" },
             { icon: RefreshCw, k: "Liquid", v: "Withdraw anytime" },
             { icon: TrendingUp, k: "Productive", v: "Earns real yield" },
           ].map((p) => (
-            <div key={p.k} className="flex items-center gap-3 p-5">
+            <div
+              key={p.k}
+              className="flex items-center gap-3 rounded-2xl border border-black/[0.08] bg-white/70 p-5 backdrop-blur-sm"
+            >
               <p.icon className="h-5 w-5 shrink-0 text-indigo-600" aria-hidden />
               <div>
                 <div className="text-[13px] font-medium text-neutral-900">{p.k}</div>
@@ -451,7 +453,7 @@ export default function Landing() {
       {/* ───────── Final CTA ───────── */}
       <section className="mx-auto w-full max-w-6xl px-6 pb-24">
         <Reveal>
-          <div className="relative overflow-hidden rounded-[2rem] border border-black/[0.08] bg-gradient-to-b from-indigo-500/[0.10] to-white px-6 py-16 text-center shadow-[0_1px_2px_rgba(15,17,28,0.04),0_20px_50px_-24px_rgba(79,70,229,0.35)]">
+          <div className="relative overflow-hidden rounded-[2rem] border border-black/[0.08] bg-gradient-to-b from-indigo-500/[0.10] to-white px-6 py-16 text-center">
             <div
               className="pointer-events-none absolute inset-x-0 -top-1/2 h-full blur-3xl"
               style={{ background: "radial-gradient(40rem 20rem at 50% 100%, rgba(99,102,241,0.22), transparent 70%)" }}
