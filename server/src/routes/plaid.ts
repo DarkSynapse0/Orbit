@@ -22,7 +22,7 @@ function categorize(name: string): string {
 // Shared pipeline: earmark -> threshold -> (mock Stripe) -> real deposit into the user's vault.
 // `wallet` is the connected user's address (the vault owner). Without it we can still earmark,
 // but the deposit waits until a wallet is connected — the money stays in the bank until then.
-async function runPipeline(userId: string, amountUsd: number, wallet?: string, name = 'Purchase') {
+async function runPipeline(userId: string, amountUsd: number, wallet?: string, name = 'Purchase', ts = Date.now()) {
   const setAside = computeSetAside(amountUsd, DEFAULT_TIERS);
   if (setAside > 0) addPending(userId, setAside);
 
@@ -57,7 +57,7 @@ async function runPipeline(userId: string, amountUsd: number, wallet?: string, n
     amountUsd,
     setAside,
     deposited,
-    ts: Date.now(),
+    ts,
   });
   return { setAside, deposited, needsWallet, depositError, batch };
 }
@@ -99,7 +99,7 @@ plaidRouter.post('/sync', async (req, res) => {
     const processed = [];
     let needsWallet = false;
     for (const p of purchases) {
-      const r = await runPipeline(userId, p.amountUsd, wallet, p.name);
+      const r = await runPipeline(userId, p.amountUsd, wallet, p.name, p.date ? new Date(p.date).getTime() : Date.now());
       processed.push({ name: p.name, amountUsd: p.amountUsd, setAside: r.setAside, deposited: r.deposited, depositError: r.depositError });
       if (r.needsWallet) needsWallet = true;
       if (r.deposited) await new Promise((res) => setTimeout(res, 800)); // ease off the RPC between deposits

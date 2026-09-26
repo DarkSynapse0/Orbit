@@ -49,7 +49,7 @@ export async function connectSandbox(): Promise<void> {
   save({ accessToken: ex.data.access_token, cursor: undefined });
 }
 
-export type DetectedPurchase = { amountUsd: number; name: string };
+export type DetectedPurchase = { amountUsd: number; name: string; date?: string };
 
 /**
  * Pull new transactions via /transactions/sync (cursor-based) and return the spending ones
@@ -68,7 +68,7 @@ export async function syncTransactions(): Promise<DetectedPurchase[]> {
     while (hasMore) {
       const res = await plaid.transactionsSync({ access_token: st.accessToken, cursor });
       for (const t of res.data.added) {
-        if (t.amount > 0) all.push({ amountUsd: t.amount, name: t.merchant_name ?? t.name ?? 'purchase' });
+        if (t.amount > 0) all.push({ amountUsd: t.amount, name: t.merchant_name ?? t.name ?? 'purchase', date: t.date });
       }
       if (res.data.added.length > 0) gotAny = true;
       cursor = res.data.next_cursor;
