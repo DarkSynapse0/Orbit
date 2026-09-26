@@ -10,8 +10,8 @@ import { Wallet, Coins, ArrowDownToLine, ArrowUpFromLine, Copy, Check, ExternalL
 import { PhantomMark } from "@/components/landing/BrandMarks";
 import idl from "@/idl/orbit_vault.json";
 import { OrbitWalletName } from "@/lib/orbitWallet";
+import { apiFetch } from "@/lib/api";
 
-const API = "http://localhost:4000";
 const DECIMALS = 6;
 const base = (usd: number) => new BN(Math.round(usd * 10 ** DECIMALS));
 const truncate = (a: string, n = 4) => `${a.slice(0, n)}…${a.slice(-n)}`;
@@ -59,7 +59,7 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
   // already has enough, so Solflare/Phantom users aren't funded).
   useEffect(() => {
     if (!connected || !publicKey) return;
-    fetch(`${API}/fund-sol`, {
+    apiFetch(`/fund-sol`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ address: publicKey.toBase58() }),
@@ -83,8 +83,8 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
   }, [publicKey, program, mint]);
 
   useEffect(() => {
-    fetch(`${API}/config`).then((r) => r.json()).then((c) => { if (c.mint) setMint(c.mint); }).catch(() => {});
-    fetch(`${API}/price/sol`).then((r) => r.json()).then((p) => { if (p.usd) setSolPrice(p.usd); }).catch(() => {});
+    apiFetch(`/config`).then((r) => r.json()).then((c) => { if (c.mint) setMint(c.mint); }).catch(() => {});
+    apiFetch(`/price/sol`).then((r) => r.json()).then((p) => { if (p.usd) setSolPrice(p.usd); }).catch(() => {});
   }, []);
 
   const refresh = useCallback(async () => {
@@ -131,7 +131,7 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
   const getUsdc = () =>
     run("faucet", async () => {
       if (!publicKey) return;
-      const r = await fetch(`${API}/faucet`, {
+      const r = await apiFetch(`/faucet`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ address: publicKey.toBase58(), usd: 100 }),

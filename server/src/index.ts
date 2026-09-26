@@ -1,50 +1,80 @@
 import express from 'express';
 import cors from 'cors';
+import rateLimit from 'express-rate-limit';
 import { config } from './config.js';
 import { plaidRouter } from './routes/plaid.js';
 import { getState } from './ledger.js';
 import { getVaultOnChain, getConfig, mintToAddress, fundSol } from './onchain.js';
+import { authRouter } from './routes/auth.js';
+import { requireAuth } from './auth.js';
+import { parseAmount, parseAddress, BadRequest } from './validate.js';
 
 // Never let a transient RPC error (e.g. a devnet 429) take the whole server down.
 process.on('unhandledRejection', (e) => console.error('[unhandledRejection]', (e as Error)?.message ?? e));
 process.on('uncaughtException', (e) => console.error('[uncaughtException]', (e as Error)?.message ?? e));
 
 const app = express();
-app.use(cors());
-app.use(express.json());
+app.set('trust proxy', 1);
+// Only allow the known frontend origin(s) to call the API.
+app.use(
+  cors({
+    origin: config.corsOrigins,
+    credentials: true,
+    methods: ['GET', 'POST'],
+  }),
+);
+app.use(express.json({ limit: '32kb' }));
 
-app.get('/health', (_req, res) => res.json({ ok: true, cluster: config.solana.cluster }));
-app.get('/balance/:userId', (req, res) => res.json(getState(req.params.userId)));
-app.get('/vault', async (req, res) => {
-  const owner = req.query.owner as string | undefined;
-  if (!owner) {
-    res.status(400).json({ error: 'owner (wallet address) required' });
+// Baseline rate limit on everything; tighter limits on the money/faucet routes.
+const apiLimiter = rateLimit({ windowMs: 60_000, max: 120, standardHeaders: true, legacyHeaders: false });
+const faucetLimiter = rateLimit({ windowMs: 60_000, max: 5, standardHeaders: true, legacyHeaders: false });
+app.use(apiLimiter);
+
+// Turn thrown errors into safe responses: 400 for bad input, generic 5xx otherwise.
+// Never leak internal (RPC/anchor/db) error text to clients.
+function fail(res: express.Response, e: unknown, fallbackStatus = 500) {
+  if (e instanceof BadRequest) {
+    res.status(400).json({ error: e.message });
     return;
   }
+  console.error('[error]', (e as Error)?.message ?? e);
+  res.status(fallbackStatus).json({ error: 'internal error' });
+}
+
+app.get('/health', (_req, res) => res.json({ ok: true, cluster: config.solana.cluster }));
+
+// Auth: exchange a Google credential (or demo) for a session token.
+app.use('/auth', authRouter);
+
+// A user's own ledger balance — requires auth, reads the caller's own userId.
+app.get('/balance', requireAuth, (req, res) => res.json(getState(req.userId!)));
+app.get('/vault', async (req, res) => {
   try {
+    const owner = parseAddress(req.query.owner);
     res.json(await getVaultOnChain(owner));
   } catch (e) {
-    res.status(503).json({ error: (e as Error).message });
+    fail(res, e, 503);
   }
 });
 app.get('/config', async (_req, res) => {
   try {
     res.json(await getConfig());
   } catch (e) {
-    res.status(503).json({ error: (e as Error).message });
+    fail(res, e, 503);
   }
 });
-app.post('/faucet', async (req, res) => {
-  const address = req.body?.address as string;
-  const usd = Number(req.body?.usd ?? 100);
-  if (!address) {
-    res.status(400).json({ error: 'address required' });
+// Devnet-only test-token faucet. Requires auth + strict rate limit; capped amount.
+app.post('/faucet', faucetLimiter, requireAuth, async (req, res) => {
+  if (!config.isDevnet) {
+    res.status(403).json({ error: 'faucet is devnet-only' });
     return;
   }
   try {
+    const address = parseAddress(req.body?.address);
+    const usd = parseAmount(req.body?.usd ?? 100, { max: 1000 });
     res.json(await mintToAddress(address, usd));
   } catch (e) {
-    res.status(500).json({ error: (e as Error).message });
+    fail(res, e);
   }
 });
 // Live SOL/USD price (mainnet market rate) so the UI can value a wallet's SOL in dollars.
@@ -65,16 +95,17 @@ app.get('/price/sol', async (_req, res) => {
   res.json({ usd: solPrice.usd });
 });
 
-app.post('/fund-sol', async (req, res) => {
-  const address = req.body?.address as string;
-  if (!address) {
-    res.status(400).json({ error: 'address required' });
+// Devnet-only gas top-up for the embedded wallet. Auth + strict rate limit.
+app.post('/fund-sol', faucetLimiter, requireAuth, async (req, res) => {
+  if (!config.isDevnet) {
+    res.status(403).json({ error: 'fund-sol is devnet-only' });
     return;
   }
   try {
+    const address = parseAddress(req.body?.address);
     res.json(await fundSol(address));
   } catch (e) {
-    res.status(500).json({ error: (e as Error).message });
+    fail(res, e);
   }
 });
 
@@ -83,7 +114,7 @@ app.get('/venues', async (_req, res) => {
     const { getVenueStats } = await import('./defillama.js');
     res.json({ venues: await getVenueStats() });
   } catch (e) {
-    res.status(502).json({ error: (e as Error).message });
+    fail(res, e, 502);
   }
 });
 

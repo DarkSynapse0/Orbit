@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { API, getToken, setToken } from "@/lib/api";
 
 // Lightweight auth: real Google sign-in via Google Identity Services when a
 // client id is configured (NEXT_PUBLIC_GOOGLE_CLIENT_ID), otherwise a demo
@@ -22,16 +23,6 @@ const Ctx = createContext<AuthCtx | null>(null);
 const LS_KEY = "orbit.user.v1";
 const CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
-function decodeJwt(token: string): Record<string, string> {
-  try {
-    const payload = token.split(".")[1];
-    const json = atob(payload.replace(/-/g, "+").replace(/_/g, "/"));
-    return JSON.parse(decodeURIComponent(escape(json)));
-  } catch {
-    return {};
-  }
-}
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<OrbitUser | null>(null);
   const [ready, setReady] = useState(false);
@@ -46,11 +37,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch {}
   }, []);
 
-  // Restore a saved session.
+  // Exchange a Google credential for a verified server session.
+  const exchangeGoogle = useCallback(
+    async (credential: string) => {
+      try {
+        const r = await fetch(`${API}/auth/google`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ credential }),
+        });
+        if (!r.ok) throw new Error(`auth ${r.status}`);
+        const d = (await r.json()) as { token: string; user: OrbitUser };
+        setToken(d.token);
+        persist(d.user);
+      } catch (e) {
+        console.error("[auth] Google sign-in failed:", (e as Error).message);
+      }
+    },
+    [persist],
+  );
+
+  // Restore a saved session, but only if we still hold a session token — otherwise
+  // the API would 401 and the gate would be out of sync with real auth.
   useEffect(() => {
     try {
       const s = localStorage.getItem(LS_KEY);
-      if (s) setUser(JSON.parse(s));
+      if (s && getToken()) setUser(JSON.parse(s));
+      else {
+        setToken(null);
+        localStorage.removeItem(LS_KEY);
+      }
     } catch {}
     setReady(true);
   }, []);
@@ -64,8 +80,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         g().accounts.id.initialize({
           client_id: CLIENT_ID,
           callback: (resp: { credential: string }) => {
-            const p = decodeJwt(resp.credential);
-            persist({ name: p.name || "Orbit user", email: p.email || "", picture: p.picture });
+            // Verify the credential server-side; never trust it client-side.
+            exchangeGoogle(resp.credential);
           },
         });
         gsiReady.current = true;
@@ -88,10 +104,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     s.defer = true;
     s.onload = init;
     document.body.appendChild(s);
-  }, [persist]);
+  }, [exchangeGoogle]);
 
-  const signInDemo = useCallback(() => {
-    persist({ name: "Alex Rivera", email: "alex@orbit.app" });
+  const signInDemo = useCallback(async () => {
+    try {
+      const r = await fetch(`${API}/auth/demo`, { method: "POST" });
+      if (!r.ok) throw new Error(`demo ${r.status}`);
+      const d = (await r.json()) as { token: string; user: OrbitUser };
+      setToken(d.token);
+      persist(d.user);
+    } catch (e) {
+      console.error("[auth] demo sign-in failed:", (e as Error).message);
+    }
   }, [persist]);
 
   const signInWithGoogle = useCallback(() => {
@@ -128,6 +152,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       (window as unknown as { google?: any }).google?.accounts?.id?.disableAutoSelect?.();
     } catch {}
+    setToken(null);
     persist(null);
   }, [persist]);
 

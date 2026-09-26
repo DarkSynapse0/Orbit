@@ -29,6 +29,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { apiFetch } from "@/lib/api";
 import { AuthScreen } from "@/components/AuthScreen";
 import { UserMenu, Avatar } from "@/components/UserMenu";
 import { LineArea, HBars } from "@/components/dashboard/Charts";
@@ -39,7 +40,6 @@ import { OrbitLogo } from "@/components/OrbitLogo";
 import { AaveMark, KaminoMark, SaveMark, MarginfiMark } from "@/components/landing/BrandMarks";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
-const API = "http://localhost:4000";
 const THRESHOLD = 10;
 const APY = 0.06;
 const SECONDS_PER_YEAR = 31_536_000;
@@ -212,7 +212,7 @@ export default function Home() {
   const [venueOpen, setVenueOpen] = useState(false);
   const [liveVenues, setLiveVenues] = useState<Record<string, { apy: number | null; tvl: number | null }>>({});
   useEffect(() => {
-    fetch(`${API}/venues`)
+    apiFetch(`/venues`)
       .then((r) => r.json())
       .then((d) => d.venues && setLiveVenues(d.venues))
       .catch(() => {});
@@ -262,8 +262,8 @@ export default function Home() {
   }, [principalUsd]);
 
   useEffect(() => {
-    fetch(`${API}/health`).then((r) => setOnline(r.ok)).catch(() => setOnline(false));
-    fetch(`${API}/plaid/status`).then((r) => r.json()).then(setPlaid).catch(() => {});
+    apiFetch(`/health`).then((r) => setOnline(r.ok)).catch(() => setOnline(false));
+    apiFetch(`/plaid/status`).then((r) => r.json()).then(setPlaid).catch(() => {});
   }, []);
 
   const log = (kind: Entry["kind"], text: string) =>
@@ -271,12 +271,12 @@ export default function Home() {
 
   const refreshVault = useCallback(() => {
     if (!owner) return;
-    fetch(`${API}/vault?owner=${owner}`).then((r) => r.json()).then((v) => { if (!v.error) setOnchain(v); }).catch(() => {});
+    apiFetch(`/vault?owner=${owner}`).then((r) => r.json()).then((v) => { if (!v.error) setOnchain(v); }).catch(() => {});
   }, [owner]);
 
   const [txns, setTxns] = useState<Txn[]>([]);
   const refreshTxns = useCallback(() => {
-    fetch(`${API}/plaid/transactions?userId=demo`)
+    apiFetch(`/plaid/transactions`)
       .then((r) => r.json())
       .then((d) => setTxns(d.transactions ?? []))
       .catch(() => {});
@@ -284,7 +284,7 @@ export default function Home() {
   useEffect(() => {
     refreshTxns();
     // Load the saved state so balances survive reloads.
-    fetch(`${API}/plaid/state?userId=demo`)
+    apiFetch(`/plaid/state`)
       .then((r) => r.json())
       .then((d) => d.state && setState(d.state))
       .catch(() => {});
@@ -305,10 +305,10 @@ export default function Home() {
       if (!amt || amt <= 0) return;
       setBusy(true);
       try {
-        const res = await fetch(`${API}/plaid/simulate-purchase`, {
+        const res = await apiFetch(`/plaid/simulate-purchase`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: `p${Date.now()}`, userId: "demo", amountUsd: amt, wallet: owner, detectedAt: new Date().toISOString() }),
+          body: JSON.stringify({ amountUsd: amt, wallet: owner, detectedAt: new Date().toISOString() }),
         });
         const data: { setAside: number; deposited: boolean; needsWallet?: boolean; depositError?: string; state: SavingsState } = await res.json();
         setState(data.state);
@@ -340,10 +340,10 @@ export default function Home() {
     setInvesting(true);
     try {
       const d = await (
-        await fetch(`${API}/plaid/invest-now`, {
+        await apiFetch(`/plaid/invest-now`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId: "demo", wallet: owner }),
+          body: JSON.stringify({ wallet: owner }),
         })
       ).json();
       if (d.state) setState(d.state);
@@ -379,7 +379,7 @@ export default function Home() {
   const connectBank = useCallback(async () => {
     setBusy(true);
     try {
-      const d = await (await fetch(`${API}/plaid/connect`, { method: "POST" })).json();
+      const d = await (await apiFetch(`/plaid/connect`, { method: "POST" })).json();
       if (d.connected) {
         setPlaid({ configured: true, connected: true });
         log("info", "Connected First Platypus Bank via Plaid sandbox");
@@ -395,10 +395,10 @@ export default function Home() {
     setSyncing(true);
     try {
       const d = await (
-        await fetch(`${API}/plaid/sync`, {
+        await apiFetch(`/plaid/sync`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId: "demo", wallet: owner }),
+          body: JSON.stringify({ wallet: owner }),
         })
       ).json();
       if (d.error) {
@@ -426,10 +426,10 @@ export default function Home() {
   }, [owner, refreshVault, refreshTxns]);
 
   const reset = useCallback(async () => {
-    await fetch(`${API}/plaid/reset`, {
+    await apiFetch(`/plaid/reset`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: "demo" }),
+      body: JSON.stringify({}),
     }).catch(() => {});
     setState({ userId: "demo", pendingUsd: 0, investedUsd: 0 });
     setFeed([]);

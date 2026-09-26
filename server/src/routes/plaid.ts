@@ -1,11 +1,24 @@
 import { Router } from 'express';
+import type { Response } from 'express';
 import { computeSetAside, DEFAULT_TIERS } from '@orbit/shared';
 import { addPending, moveToInvested, getState, resetState, recordTxn, getTransactions } from '../ledger.js';
 import { simulateStripeDeposit, depositToVault } from '../solana.js';
 import { isConfigured, hasItem, connectSandbox, syncTransactions, clearItem } from '../plaidClient.js';
 import { config } from '../config.js';
+import { requireAuth } from '../auth.js';
+import { parseAmount, parseAddress, BadRequest } from '../validate.js';
 
 export const plaidRouter = Router();
+
+// Bad input -> 400; everything else -> generic 5xx (never leak internals).
+function fail(res: Response, e: unknown, status = 500) {
+  if (e instanceof BadRequest) {
+    res.status(400).json({ error: e.message });
+    return;
+  }
+  console.error('[plaid] error:', (e as Error)?.message ?? e);
+  res.status(status).json({ error: 'internal error' });
+}
 
 // Bucket a merchant name into a spending category for the dashboard breakdown.
 function categorize(name: string): string {
@@ -73,7 +86,7 @@ plaidRouter.post('/webhook', async (_req, res) => {
 });
 
 /** Connect a sandbox bank via Plaid. */
-plaidRouter.post('/connect', async (_req, res) => {
+plaidRouter.post('/connect', requireAuth, async (_req, res) => {
   if (!isConfigured()) {
     res.status(400).json({ error: 'Plaid keys not set in server/.env' });
     return;
@@ -82,16 +95,22 @@ plaidRouter.post('/connect', async (_req, res) => {
     await connectSandbox();
     res.json({ connected: true });
   } catch (e) {
-    res.status(500).json({ error: (e as Error).message });
+    fail(res, e);
   }
 });
 
 /** Pull real transactions from Plaid sandbox and run each purchase through the pipeline. */
-plaidRouter.post('/sync', async (req, res) => {
-  const userId = (req.body?.userId as string) ?? 'demo';
-  const wallet = req.body?.wallet as string | undefined;
+plaidRouter.post('/sync', requireAuth, async (req, res) => {
+  const userId = req.userId!;
   if (!isConfigured()) {
     res.status(400).json({ error: 'Plaid keys not set in server/.env' });
+    return;
+  }
+  let wallet: string | undefined;
+  try {
+    if (req.body?.wallet) wallet = parseAddress(req.body.wallet);
+  } catch (e) {
+    fail(res, e);
     return;
   }
   try {
@@ -106,28 +125,34 @@ plaidRouter.post('/sync', async (req, res) => {
     }
     res.json({ processed, needsWallet, state: getState(userId) });
   } catch (e) {
-    res.status(500).json({ error: (e as Error).message });
+    fail(res, e);
   }
 });
 
 /** Demo endpoint: push one purchase through the pipeline. */
-plaidRouter.post('/simulate-purchase', async (req, res) => {
-  const userId = (req.body?.userId as string) ?? 'demo';
-  const wallet = req.body?.wallet as string | undefined;
-  const amountUsd = Number(req.body?.amountUsd);
-  const name = (req.body?.name as string) || `Purchase · $${amountUsd}`;
-  const r = await runPipeline(userId, amountUsd, wallet, name);
-  res.json({ setAside: r.setAside, deposited: r.deposited, needsWallet: r.needsWallet, depositError: r.depositError, state: getState(userId) });
+plaidRouter.post('/simulate-purchase', requireAuth, async (req, res) => {
+  try {
+    const userId = req.userId!;
+    const amountUsd = parseAmount(req.body?.amountUsd);
+    const wallet = req.body?.wallet ? parseAddress(req.body.wallet) : undefined;
+    const name = (req.body?.name as string)?.slice(0, 120) || `Purchase · $${amountUsd}`;
+    const r = await runPipeline(userId, amountUsd, wallet, name);
+    res.json({ setAside: r.setAside, deposited: r.deposited, needsWallet: r.needsWallet, depositError: r.depositError, state: getState(userId) });
+  } catch (e) {
+    fail(res, e);
+  }
 });
 
 /** Flush the pending set-aside into the user's vault now, without waiting for a new
  * purchase. Used when a wallet connects after money was already earmarked, or to
  * retry a deposit that failed earlier. Deposits the whole pending batch. */
-plaidRouter.post('/invest-now', async (req, res) => {
-  const userId = (req.body?.userId as string) ?? 'demo';
-  const wallet = req.body?.wallet as string | undefined;
-  if (!wallet) {
-    res.status(400).json({ error: 'wallet required' });
+plaidRouter.post('/invest-now', requireAuth, async (req, res) => {
+  const userId = req.userId!;
+  let wallet: string;
+  try {
+    wallet = parseAddress(req.body?.wallet);
+  } catch (e) {
+    fail(res, e);
     return;
   }
   const batch = getState(userId).pendingUsd;
@@ -141,27 +166,25 @@ plaidRouter.post('/invest-now', async (req, res) => {
     moveToInvested(userId, batch, sig);
     res.json({ deposited: true, sig, batch, state: getState(userId) });
   } catch (e) {
-    // Keep the funds pending so it can be retried.
-    res.status(502).json({ error: (e as Error).message, deposited: false, state: getState(userId) });
+    // Keep the funds pending so it can be retried; don't leak the internal error.
+    console.error('[plaid] invest-now deposit failed:', (e as Error)?.message ?? e);
+    res.status(502).json({ error: 'deposit failed', deposited: false, state: getState(userId) });
   }
 });
 
 /** Current saved state (pending + invested) so the dashboard survives reloads. */
-plaidRouter.get('/state', (req, res) => {
-  const userId = (req.query?.userId as string) ?? 'demo';
-  res.json({ state: getState(userId) });
+plaidRouter.get('/state', requireAuth, (req, res) => {
+  res.json({ state: getState(req.userId!) });
 });
 
 /** Real transaction history for the dashboard charts. */
-plaidRouter.get('/transactions', (req, res) => {
-  const userId = (req.query?.userId as string) ?? 'demo';
-  res.json({ transactions: getTransactions(userId) });
+plaidRouter.get('/transactions', requireAuth, (req, res) => {
+  res.json({ transactions: getTransactions(req.userId!) });
 });
 
 /** Reset a user's earmark/bank state (demo replay). The on-chain vault is the user's own
  * money — only they can withdraw it, via the vault's Withdraw button. Reset never touches it. */
-plaidRouter.post('/reset', async (req, res) => {
-  const userId = (req.body?.userId as string) ?? 'demo';
+plaidRouter.post('/reset', requireAuth, async (req, res) => {
   clearItem();
-  res.json({ state: resetState(userId) });
+  res.json({ state: resetState(req.userId!) });
 });
