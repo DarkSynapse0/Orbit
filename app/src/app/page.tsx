@@ -8,7 +8,6 @@ import {
   ShieldCheck,
   Eye,
   RefreshCw,
-  Wallet,
   ExternalLink,
 } from "lucide-react";
 import { Reveal } from "@/components/landing/Reveal";
@@ -16,7 +15,7 @@ import { LiveYield } from "@/components/landing/LiveYield";
 import { Underline } from "@/components/landing/Underline";
 import { GrowthChart } from "@/components/landing/GrowthChart";
 import { OrbitRings } from "@/components/landing/OrbitRings";
-import { SolanaMark, UsdcMark, AaveMark, StripeMark, PlaidMark } from "@/components/landing/BrandMarks";
+import { SolanaMark, UsdcMark, AaveMark, StripeMark, PlaidMark, PhantomMark } from "@/components/landing/BrandMarks";
 import { SiteHeader } from "@/components/landing/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -239,7 +238,7 @@ export default function Landing() {
               { mark: <AaveMark className="h-11 w-11" />, name: "Aave" },
               { mark: <PlaidMark className="h-10 w-10 text-[var(--foreground)]" />, name: "Plaid" },
               { mark: <StripeMark className="h-11 w-11" />, name: "Stripe" },
-              { mark: <Wallet className="h-9 w-9 text-[var(--foreground)]" aria-hidden />, name: "Phantom" },
+              { mark: <PhantomMark className="h-10 w-10 text-[#ab9ff2]" />, name: "Phantom" },
             ].map((t) => (
               <div key={t.name} className="flex flex-col items-center gap-3 bg-[var(--background)] py-8">
                 <span className="grid h-12 w-12 place-items-center">{t.mark}</span>
