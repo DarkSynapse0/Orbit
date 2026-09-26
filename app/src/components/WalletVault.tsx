@@ -7,6 +7,7 @@ import { AnchorProvider, Program, BN, type Idl } from "@coral-xyz/anchor";
 import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { Wallet, Coins, ArrowDownToLine, ArrowUpFromLine, Copy, Check, ExternalLink, Loader2, ShieldCheck, Sparkles, Power } from "lucide-react";
+import { PhantomMark } from "@/components/landing/BrandMarks";
 import idl from "@/idl/orbit_vault.json";
 import { OrbitWalletName } from "@/lib/orbitWallet";
 
@@ -247,11 +248,14 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
             <div className="flex w-full items-center gap-3 text-[10px] uppercase tracking-wide text-neutral-500">
               <span className="h-px flex-1 bg-black/[0.1] dark:bg-white/[0.1]" /> or <span className="h-px flex-1 bg-black/[0.1] dark:bg-white/[0.1]" />
             </div>
-            <div className="wallet-adapter-fullwidth w-full">
+            <div className="wallet-adapter-fullwidth flex w-full items-center gap-2.5">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-[var(--border-strong)] bg-[var(--surface)]">
+                <PhantomMark className="h-5 w-5 text-[#ab9ff2]" />
+              </span>
               <WalletMultiButton
                 style={{
                   height: 44,
-                  width: "100%",
+                  flex: 1,
                   borderRadius: 12,
                   background: "var(--surface)",
                   color: "var(--foreground)",
