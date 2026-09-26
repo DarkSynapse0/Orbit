@@ -27,7 +27,7 @@ import {
   ShieldCheck,
   Wallet,
 } from "lucide-react";
-import { StatCard, LineArea, Donut, HBars } from "@/components/dashboard/Charts";
+import { LineArea, HBars } from "@/components/dashboard/Charts";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletVault } from "@/components/WalletVault";
 import { OrbitMark } from "@/components/landing/OrbitMark";
@@ -491,122 +491,119 @@ export default function Home() {
           {/* ───────── Overview ───────── */}
           {tab === "overview" && (
             <div className="space-y-4">
-              {/* Three simple numbers */}
-              <div className="grid gap-4 sm:grid-cols-3">
-                <StatCard
-                  highlight
-                  icon={<Wallet className="h-5 w-5 text-[var(--foreground)]" aria-hidden />}
-                  delta={{ up: true, value: "6% a year" }}
-                  value={usd(total)}
-                  label="Total saved"
-                />
-                <StatCard
-                  icon={<Coins className="h-5 w-5 text-[var(--foreground)]" aria-hidden />}
-                  delta={onchain ? { up: true, value: "on-chain" } : undefined}
-                  value={usd(principalUsd)}
-                  label="In your vault"
-                />
-                <StatCard
-                  icon={<TrendingUp className="h-5 w-5 text-[var(--accent-strong)]" aria-hidden />}
-                  delta={{ up: true, value: "live" }}
-                  value={liveYield.toFixed(6)}
-                  label="Interest earned"
-                />
-              </div>
-
-              {/* Savings chart + quick actions / activity */}
-              <div className="grid gap-4 lg:grid-cols-3">
-                <section className={`${PANEL} p-6 lg:col-span-2`}>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-display text-[15px] font-semibold">Your savings over time</h3>
-                      <p className="mt-0.5 text-[12px] text-[var(--muted)]">Growing every second at 6% a year</p>
+              {/* Hero: balance + its growth curve, together */}
+              <section className={`${PANEL} overflow-hidden`}>
+                <div className="grid divide-y divide-[var(--border)] lg:grid-cols-[0.82fr_1.18fr] lg:divide-x lg:divide-y-0">
+                  {/* Balance + actions */}
+                  <div className="flex flex-col p-6 lg:p-8">
+                    <SectionLabel>Total saved</SectionLabel>
+                    <div
+                      className={`mt-3 font-mono text-[clamp(2.75rem,6vw,4.25rem)] font-semibold leading-none tabular-nums transition-colors duration-700 ${
+                        flash ? "text-[var(--accent)]" : "text-[var(--foreground)]"
+                      }`}
+                    >
+                      {usd(total)}
                     </div>
-                    {!analytics.hasData && (
-                      <span className="rounded-lg border border-[var(--border)] px-2.5 py-1 text-[11px] text-[var(--faint)]">sample</span>
-                    )}
-                  </div>
-                  <div className="mt-6">
-                    <LineArea
-                      series={[{ label: "Saved", points: analytics.hasData ? analytics.savingsLine : SAMPLE_LINE }]}
-                      xLabels={analytics.hasData ? analytics.savingsLabels : SAMPLE_LINE_LABELS}
-                      fmtY={(v) => `$${v >= 1000 ? `${Math.round(v / 1000)}k` : Math.round(v)}`}
-                    />
-                  </div>
-                </section>
-
-                <div className="space-y-4">
-                  <section className={`${PANEL} p-6`}>
-                    <SectionLabel>Quick actions</SectionLabel>
-                    <div className="mt-4 space-y-2">
-                      <button type="button" onClick={() => setTab("vault")} className="flex w-full items-center gap-2 rounded-xl bg-[var(--contrast)] px-4 py-2.5 text-[13px] font-semibold text-[var(--contrast-fg)] transition-opacity hover:opacity-90">
+                    <div className="mt-3 flex flex-wrap items-center gap-2 text-[13px]">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-[var(--accent-soft)] px-2 py-0.5 font-medium text-[var(--accent-strong)]">
+                        <TrendingUp className="h-3.5 w-3.5" aria-hidden /> 6% a year
+                      </span>
+                      <span className="font-mono text-[var(--accent-strong)]">+{liveYield.toFixed(6)}</span>
+                      <span className="text-[var(--muted)]">earned, live</span>
+                    </div>
+                    <div className="mt-auto flex flex-wrap gap-2 pt-8">
+                      <button type="button" onClick={() => setTab("vault")} className="inline-flex items-center gap-2 rounded-xl bg-[var(--contrast)] px-4 py-2.5 text-[13px] font-semibold text-[var(--contrast-fg)] transition-opacity hover:opacity-90">
                         <ArrowDownToLine className="h-4 w-4" aria-hidden /> Add money
                       </button>
-                      <div className="grid grid-cols-2 gap-2">
-                        <button type="button" onClick={() => setTab("vault")} className="flex items-center justify-center gap-2 rounded-xl border border-[var(--border-strong)] px-3 py-2.5 text-[13px] font-medium transition-colors hover:bg-[var(--background)]">
-                          <ArrowUpFromLine className="h-4 w-4" aria-hidden /> Take out
-                        </button>
-                        <button type="button" onClick={() => setTab("bank")} className="flex items-center justify-center gap-2 rounded-xl border border-[var(--border-strong)] px-3 py-2.5 text-[13px] font-medium transition-colors hover:bg-[var(--background)]">
-                          <ShoppingBag className="h-4 w-4" aria-hidden /> Spend
-                        </button>
-                      </div>
-                    </div>
-                  </section>
-
-                  <section className={`${PANEL} p-6`}>
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-display text-[15px] font-semibold">Recent activity</h3>
-                      <button type="button" onClick={() => setTab("activity")} className="inline-flex items-center gap-1 text-[12px] text-[var(--muted)] hover:text-[var(--foreground)]">
-                        See all <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+                      <button type="button" onClick={() => setTab("vault")} className="inline-flex items-center gap-2 rounded-xl border border-[var(--border-strong)] px-4 py-2.5 text-[13px] font-medium transition-colors hover:bg-[var(--background)]">
+                        <ArrowUpFromLine className="h-4 w-4" aria-hidden /> Take out
                       </button>
                     </div>
-                    {feed.length === 0 ? (
-                      <p className="mt-4 text-[13px] text-[var(--muted)]">Nothing yet. Spend or sync a bank to start saving.</p>
-                    ) : (
-                      <ul className="mt-4 space-y-2.5">
-                        {feed.slice(0, 5).map((e) => (
-                          <li key={e.id} className="flex items-center gap-3 text-[13px]">
-                            {feedIcon(e.kind)}
-                            <span className="min-w-0 flex-1 truncate text-[var(--foreground)]">{e.text}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </section>
+                  </div>
+                  {/* Growth curve */}
+                  <div className="p-6">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-display text-[15px] font-semibold">Your savings over time</h3>
+                      {analytics.hasData ? (
+                        <span className="rounded-lg border border-[var(--border)] px-2.5 py-1 text-[11px] text-[var(--muted)]">all time</span>
+                      ) : (
+                        <span className="rounded-lg border border-[var(--border)] px-2.5 py-1 text-[11px] text-[var(--faint)]">sample</span>
+                      )}
+                    </div>
+                    <div className="mt-5">
+                      <LineArea
+                        series={[{ label: "Saved", points: analytics.hasData ? analytics.savingsLine : SAMPLE_LINE }]}
+                        xLabels={analytics.hasData ? analytics.savingsLabels : SAMPLE_LINE_LABELS}
+                        fmtY={(v) => `$${v >= 1000 ? `${Math.round(v / 1000)}k` : Math.round(v)}`}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* Breakdown: the three parts that make up the total */}
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div className={`${PANEL} p-5`}>
+                  <div className="flex items-center gap-2 text-[12px] text-[var(--muted)]">
+                    <Coins className="h-4 w-4" aria-hidden /> In your vault
+                    {onchain && <span className="rounded-full bg-[var(--accent-soft)] px-1.5 py-0.5 text-[10px] text-[var(--accent-strong)]">on-chain</span>}
+                  </div>
+                  <div className="mt-2 font-mono text-xl font-semibold tabular-nums text-[var(--accent-strong)]">{usd(principalUsd)}</div>
+                  <div className="mt-1 text-[11px] text-[var(--faint)]">invested, earning yield</div>
+                </div>
+                <div className={`${PANEL} p-5`}>
+                  <div className="flex items-center gap-2 text-[12px] text-[var(--muted)]">
+                    <Landmark className="h-4 w-4" aria-hidden /> Set aside
+                  </div>
+                  <div className="mt-2 font-mono text-xl font-semibold tabular-nums">{usd(state.pendingUsd)}</div>
+                  <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[var(--border)]">
+                    <div className="h-full rounded-full bg-[var(--faint)] transition-[width] duration-300" style={{ width: `${pct}%` }} />
+                  </div>
+                  <div className="mt-1.5 font-mono text-[11px] tabular-nums text-[var(--faint)]">{usd(state.pendingUsd)} / {usd(THRESHOLD)} to next deposit</div>
+                </div>
+                <div className={`${PANEL} p-5`}>
+                  <div className="flex items-center gap-2 text-[12px] text-[var(--muted)]">
+                    <TrendingUp className="h-4 w-4 text-[var(--accent-strong)]" aria-hidden /> Interest earned
+                  </div>
+                  <div className="mt-2 font-mono text-xl font-semibold tabular-nums text-[var(--accent-strong)]">{liveYield.toFixed(6)}</div>
+                  <div className="mt-1 text-[11px] text-[var(--faint)]">paid in tokens, live</div>
                 </div>
               </div>
 
-              {/* Where it comes from + where the money is */}
-              <div className="grid gap-4 lg:grid-cols-2">
+              {/* Activity + where it comes from */}
+              <div className="grid gap-4 lg:grid-cols-[1.1fr_1fr]">
+                <section className={`${PANEL} p-6`}>
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-display text-[15px] font-semibold">Recent activity</h3>
+                    <button type="button" onClick={() => setTab("activity")} className="inline-flex items-center gap-1 text-[12px] text-[var(--muted)] hover:text-[var(--foreground)]">
+                      See all <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+                    </button>
+                  </div>
+                  {feed.length === 0 ? (
+                    <div className="mt-6 flex flex-col items-center justify-center py-8 text-center">
+                      <span className="grid h-10 w-10 place-items-center rounded-full bg-[var(--surface)] ring-1 ring-inset ring-[var(--border)]">
+                        <ShoppingBag className="h-5 w-5 text-[var(--muted)]" aria-hidden />
+                      </span>
+                      <p className="mt-3 text-[13px] text-[var(--muted)]">Nothing yet</p>
+                      <p className="mt-0.5 text-[12px] text-[var(--faint)]">Spend or sync a bank to start saving.</p>
+                    </div>
+                  ) : (
+                    <ul className="mt-4 space-y-1">
+                      {feed.slice(0, 6).map((e) => (
+                        <li key={e.id} className="flex items-center gap-3 rounded-lg px-2 py-2 text-[13px] hover:bg-[var(--background)]">
+                          <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[var(--surface)]">{feedIcon(e.kind)}</span>
+                          <span className="min-w-0 flex-1 truncate text-[var(--foreground)]">{e.text}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+
                 <section className={`${PANEL} p-6`}>
                   <h3 className="font-display text-[15px] font-semibold">Where your savings come from</h3>
                   <p className="mt-0.5 text-[12px] text-[var(--muted)]">Set aside from your spending</p>
                   <div className="mt-5">
                     <HBars rows={analytics.categories.length ? analytics.categories : SAMPLE_CATEGORIES} />
-                  </div>
-                </section>
-
-                <section className={`${PANEL} p-6`}>
-                  <h3 className="font-display text-[15px] font-semibold">Where your money is</h3>
-                  <p className="mt-0.5 text-[12px] text-[var(--muted)]">Waiting in bank vs invested</p>
-                  <div className="mt-6">
-                    <Donut
-                      centerTop={usd(total)}
-                      centerBottom="total"
-                      segments={
-                        principalUsd + state.pendingUsd + liveYield > 0.001
-                          ? [
-                              { label: "In your vault", value: principalUsd, color: "var(--accent)" },
-                              { label: "Set aside", value: state.pendingUsd, color: "var(--muted)" },
-                              { label: "Interest", value: liveYield, color: "var(--faint)" },
-                            ]
-                          : [
-                              { label: "In your vault", value: 80, color: "var(--accent)" },
-                              { label: "Set aside", value: 15, color: "var(--muted)" },
-                              { label: "Interest", value: 5, color: "var(--faint)" },
-                            ]
-                      }
-                    />
                   </div>
                 </section>
               </div>
