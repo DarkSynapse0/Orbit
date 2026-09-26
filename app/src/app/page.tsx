@@ -9,7 +9,6 @@ import {
   Eye,
   RefreshCw,
   Wallet,
-  CreditCard,
   ExternalLink,
 } from "lucide-react";
 import { Reveal } from "@/components/landing/Reveal";
@@ -17,7 +16,7 @@ import { LiveYield } from "@/components/landing/LiveYield";
 import { Underline } from "@/components/landing/Underline";
 import { GrowthChart } from "@/components/landing/GrowthChart";
 import { OrbitRings } from "@/components/landing/OrbitRings";
-import { SolanaMark, UsdcMark, AaveMark } from "@/components/landing/BrandMarks";
+import { SolanaMark, UsdcMark, AaveMark, StripeMark } from "@/components/landing/BrandMarks";
 import { SiteHeader } from "@/components/landing/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -239,7 +238,7 @@ export default function Landing() {
               { mark: <UsdcMark className="h-7 w-7" />, name: "USDC" },
               { mark: <AaveMark className="h-7 w-7" />, name: "Aave" },
               { mark: <Landmark className="h-6 w-6 text-[var(--foreground)]" aria-hidden />, name: "Plaid" },
-              { mark: <CreditCard className="h-6 w-6 text-[var(--foreground)]" aria-hidden />, name: "Stripe" },
+              { mark: <StripeMark className="h-7 w-7" />, name: "Stripe" },
               { mark: <Wallet className="h-6 w-6 text-[var(--foreground)]" aria-hidden />, name: "Phantom" },
             ].map((t) => (
               <div key={t.name} className="flex flex-col items-center gap-3 bg-[var(--background)] py-8">

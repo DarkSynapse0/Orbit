@@ -30,6 +30,7 @@ import { LineArea, HBars } from "@/components/dashboard/Charts";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletVault } from "@/components/WalletVault";
 import { OrbitMark } from "@/components/landing/OrbitMark";
+import { AaveMark } from "@/components/landing/BrandMarks";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 const API = "http://localhost:4000";
@@ -77,14 +78,39 @@ const SAMPLE_CATEGORIES = [
 
 // Yield venues the vault's USDC can be routed to. The Orbit reserve is live on devnet now;
 // the mainnet lenders are where deposits route in production. APY/TVL are indicative.
-type Venue = { id: string; name: string; mono: string; apy: number; tvl: string; blurb: string; live: boolean };
+type Venue = {
+  id: string;
+  name: string;
+  mono: string;
+  apy: number;
+  tvl: string;
+  blurb: string;
+  live: boolean;
+  Mark?: React.ComponentType<{ className?: string }>;
+};
 const VENUES: Venue[] = [
-  { id: "reserve", name: "Orbit Reserve", mono: "O", apy: 6.0, tvl: "devnet", blurb: "Audited program vault. Live now.", live: true },
+  { id: "reserve", name: "Orbit Reserve", mono: "O", apy: 6.0, tvl: "devnet", blurb: "Audited program vault. Live now.", live: true, Mark: OrbitMark },
   { id: "kamino", name: "Kamino Lend", mono: "K", apy: 8.4, tvl: "$1.4B", blurb: "The most-used lending market on Solana.", live: false },
-  { id: "aave", name: "Aave v3", mono: "A", apy: 5.2, tvl: "$22B", blurb: "The largest lending protocol in DeFi.", live: false },
+  { id: "aave", name: "Aave v3", mono: "A", apy: 5.2, tvl: "$22B", blurb: "The largest lending protocol in DeFi.", live: false, Mark: AaveMark },
   { id: "save", name: "Save · Solend", mono: "S", apy: 6.9, tvl: "$380M", blurb: "Battle-tested Solana lending.", live: false },
   { id: "marginfi", name: "marginfi", mono: "m", apy: 5.7, tvl: "$420M", blurb: "Permissionless Solana lending.", live: false },
 ];
+
+// Renders a venue's real logo when available, else a monogram tile.
+function VenueMark({ venue, className = "h-8 w-8" }: { venue: Venue; className?: string }) {
+  if (venue.Mark) {
+    return (
+      <span className={`grid ${className} shrink-0 place-items-center`}>
+        <venue.Mark className="h-full w-full" />
+      </span>
+    );
+  }
+  return (
+    <span className={`grid ${className} shrink-0 place-items-center rounded-lg border border-[var(--border)] bg-[var(--surface)] font-mono text-sm font-semibold`}>
+      {venue.mono}
+    </span>
+  );
+}
 
 // The product story: money comes in (Save) → it grows (Grow) → see it (Activity) → your stuff (Account).
 type TabDef = { id: TabId; label: string; icon: typeof HomeIcon; hint: string };
@@ -798,7 +824,7 @@ export default function Home() {
                       aria-expanded={venueOpen}
                       className="flex min-w-[260px] items-center gap-3 rounded-xl border border-[var(--border-strong)] bg-[var(--background)] px-3 py-2.5 text-left transition-colors hover:bg-[var(--surface)]"
                     >
-                      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-[var(--border)] bg-[var(--surface)] font-mono text-sm font-semibold">{selectedVenue.mono}</span>
+                      <VenueMark venue={selectedVenue} className="h-8 w-8" />
                       <span className="min-w-0 flex-1">
                         <span className="flex items-center gap-1.5">
                           <span className="text-[13px] font-medium">{selectedVenue.name}</span>
@@ -816,7 +842,7 @@ export default function Home() {
                             const on = v.id === venueId;
                             return (
                               <button key={v.id} type="button" onClick={() => selectVenue(v.id)} className={`flex w-full items-center gap-3 rounded-lg px-2.5 py-2.5 text-left transition-colors ${on ? "bg-[var(--accent-soft)]" : "hover:bg-[var(--background)]"}`}>
-                                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-[var(--border)] bg-[var(--background)] font-mono text-sm font-semibold">{v.mono}</span>
+                                <VenueMark venue={v} className="h-8 w-8" />
                                 <span className="min-w-0 flex-1">
                                   <span className="flex items-center gap-1.5">
                                     <span className="text-[13px] font-medium">{v.name}</span>

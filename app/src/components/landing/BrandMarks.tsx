@@ -30,6 +30,19 @@ export function UsdcMark({ className = "" }: { className?: string }) {
   );
 }
 
+export function StripeMark({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="100 100 312 312" className={className} aria-hidden>
+      <path
+        fill="#635bff"
+        fillRule="evenodd"
+        d="m120 392 272-57.683V120l-272 58.357z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
+
 export function AaveMark({ className = "" }: { className?: string }) {
   return (
     <svg viewBox="0 0 32 32" className={className} aria-hidden>
