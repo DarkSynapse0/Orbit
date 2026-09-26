@@ -31,7 +31,7 @@ export function SiteHeader() {
           <OrbitIcon className="h-6 w-6 text-[var(--foreground)]" aria-hidden />
           <span className="font-display text-xl font-semibold tracking-tight text-[var(--foreground)]">Orbit</span>
         </Link>
-        <div className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-9 text-[14px] text-[var(--muted)] md:flex">
+        <div className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-9 text-[15px] text-[var(--muted)] md:flex">
           <a href="#how" className="transition-colors hover:text-[var(--foreground)]">How it works</a>
           <a href="#proof" className="transition-colors hover:text-[var(--foreground)]">On-chain</a>
           <a href="#faq" className="transition-colors hover:text-[var(--foreground)]">FAQ</a>
@@ -40,7 +40,7 @@ export function SiteHeader() {
           <ThemeToggle />
           <Link
             href="/app"
-            className="hidden rounded px-3 py-2 text-[14px] text-[var(--muted)] transition-colors hover:text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40 sm:inline-block"
+            className="hidden rounded px-3 py-2 text-[15px] text-[var(--muted)] transition-colors hover:text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40 sm:inline-block"
           >
             Launch app
           </Link>

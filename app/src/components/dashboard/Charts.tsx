@@ -6,7 +6,7 @@ import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 export function DeltaBadge({ up, value }: { up: boolean; value: string }) {
   return (
     <span
-      className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[11px] font-medium ${
+      className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[12px] font-medium ${
         up ? "bg-[var(--accent-soft)] text-[var(--accent-strong)]" : "bg-red-500/10 text-red-500"
       }`}
     >
@@ -44,7 +44,7 @@ export function StatCard({
         {delta && <DeltaBadge up={delta.up} value={delta.value} />}
       </div>
       <div className="mt-4 font-mono text-2xl font-semibold tabular-nums">{value}</div>
-      <div className="mt-1 text-[12px] text-[var(--muted)]">{label}</div>
+      <div className="mt-1 text-[13px] text-[var(--muted)]">{label}</div>
     </div>
   );
 }
@@ -101,7 +101,7 @@ export function GroupedBars({
           </div>
         </div>
       </div>
-      <div className="mt-4 flex items-center gap-5 text-[12px] text-[var(--muted)]">
+      <div className="mt-4 flex items-center gap-5 text-[13px] text-[var(--muted)]">
         <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-sm bg-[var(--accent)]" /> {aLabel}</span>
         <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-sm bg-[var(--faint)]" /> {bLabel}</span>
       </div>
@@ -176,7 +176,7 @@ export function LineArea({
           </span>
         ))}
       </div>
-      <div className="mt-3 flex items-center gap-5 text-[12px] text-[var(--muted)]">
+      <div className="mt-3 flex items-center gap-5 text-[13px] text-[var(--muted)]">
         {series.map((s, si) => (
           <span key={s.label} className="flex items-center gap-2">
             <span
@@ -261,7 +261,7 @@ export function Donut({
       </div>
       <div className="flex-1 space-y-2.5">
         {segments.map((s) => (
-          <div key={s.label} className="flex items-center justify-between text-[13px]">
+          <div key={s.label} className="flex items-center justify-between text-[14px]">
             <span className="flex items-center gap-2 text-[var(--muted)]">
               <span className="h-2.5 w-2.5 rounded-full" style={{ background: s.color }} /> {s.label}
             </span>
@@ -280,11 +280,11 @@ export function HBars({ rows }: { rows: { label: string; v: number }[] }) {
     <div className="space-y-3">
       {rows.map((r) => (
         <div key={r.label} className="flex items-center gap-3">
-          <span className="w-24 shrink-0 truncate text-[12px] text-[var(--muted)]">{r.label}</span>
+          <span className="w-24 shrink-0 truncate text-[13px] text-[var(--muted)]">{r.label}</span>
           <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-[var(--border)]">
             <div className="h-full rounded-full bg-[var(--accent)]" style={{ width: `${(r.v / max) * 100}%` }} />
           </div>
-          <span className="w-14 shrink-0 text-right font-mono text-[11px] tabular-nums text-[var(--muted)]">
+          <span className="w-14 shrink-0 text-right font-mono text-[12px] tabular-nums text-[var(--muted)]">
             ${r.v.toLocaleString()}
           </span>
         </div>

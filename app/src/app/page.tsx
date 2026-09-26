@@ -16,7 +16,7 @@ import { LiveYield } from "@/components/landing/LiveYield";
 import { Underline } from "@/components/landing/Underline";
 import { GrowthChart } from "@/components/landing/GrowthChart";
 import { OrbitRings } from "@/components/landing/OrbitRings";
-import { SolanaMark, UsdcMark, AaveMark, StripeMark } from "@/components/landing/BrandMarks";
+import { SolanaMark, UsdcMark, AaveMark, StripeMark, PlaidMark } from "@/components/landing/BrandMarks";
 import { SiteHeader } from "@/components/landing/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,7 +24,7 @@ import { Badge } from "@/components/ui/badge";
 const PROGRAM = "8LEjyrMCKukhxA4q3DRaYGfkappxRayiTPM7saZG2Kgi";
 const solAcct = (a: string) => `https://solscan.io/account/${a}?cluster=devnet`;
 
-const eyebrow = "text-[11px] font-medium uppercase tracking-[0.22em]";
+const eyebrow = "text-[12px] font-medium uppercase tracking-[0.22em]";
 
 export default function Landing() {
   return (
@@ -56,7 +56,7 @@ export default function Landing() {
         </Reveal>
 
         <Reveal delay={160}>
-          <p className="mt-6 max-w-md text-[15px] leading-relaxed text-[var(--muted)]">
+          <p className="mt-6 max-w-md text-[16px] leading-relaxed text-[var(--muted)]">
             Orbit sets aside a little from everyday spending, invests it on-chain, and grows it. Hands-free.
           </p>
         </Reveal>
@@ -82,7 +82,7 @@ export default function Landing() {
           <div className="mt-5 font-mono text-[clamp(2rem,7vw,4.5rem)] font-semibold tracking-[-0.02em]">
             <LiveYield principal={5980} apy={0.06} />
           </div>
-          <div className="mt-4 text-[13px] text-[var(--muted)]">
+          <div className="mt-4 text-[14px] text-[var(--muted)]">
             A real on-chain balance, compounding every second at 6% APY.
           </div>
         </Reveal>
@@ -100,8 +100,8 @@ export default function Landing() {
             <div key={p.k} className="flex items-center gap-3 px-6 py-6">
               <p.icon className="h-5 w-5 shrink-0 text-[var(--foreground)]" aria-hidden />
               <div>
-                <div className="text-[13px] font-medium">{p.k}</div>
-                <div className="text-[12px] text-[var(--muted)]">{p.v}</div>
+                <div className="text-[14px] font-medium">{p.k}</div>
+                <div className="text-[13px] text-[var(--muted)]">{p.v}</div>
               </div>
             </div>
           ))}
@@ -125,11 +125,11 @@ export default function Landing() {
             <Reveal key={s.n} delay={i * 90}>
               <div className="border-t border-[var(--border-strong)] pt-6">
                 <div className="flex items-center justify-between">
-                  <span className="font-mono text-[13px] text-[var(--muted)]">{s.n}</span>
+                  <span className="font-mono text-[14px] text-[var(--muted)]">{s.n}</span>
                   <s.icon className="h-5 w-5 text-[var(--accent)]" aria-hidden />
                 </div>
                 <h3 className="mt-8 font-display text-xl font-semibold tracking-tight">{s.t}</h3>
-                <p className="mt-2 text-[14px] leading-relaxed text-[var(--muted)]">{s.d}</p>
+                <p className="mt-2 text-[15px] leading-relaxed text-[var(--muted)]">{s.d}</p>
               </div>
             </Reveal>
           ))}
@@ -146,7 +146,7 @@ export default function Landing() {
               <br />
               Yours grows.
             </h2>
-            <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-[var(--muted)]">
+            <p className="mt-5 max-w-sm text-[16px] leading-relaxed text-[var(--muted)]">
               The same money, left in a bank versus working in Orbit. Real on-chain yield, compounding every second.
             </p>
             <div className="mt-8 grid grid-cols-3 gap-6">
@@ -172,14 +172,14 @@ export default function Landing() {
                     <LiveYield principal={5980} apy={0.06} />
                   </div>
                 </div>
-                <span className="inline-flex items-center gap-1 rounded-full bg-[var(--accent-soft)] px-2 py-1 text-[12px] font-medium text-[var(--accent-strong)]">
+                <span className="inline-flex items-center gap-1 rounded-full bg-[var(--accent-soft)] px-2 py-1 text-[13px] font-medium text-[var(--accent-strong)]">
                   <TrendingUp className="h-3.5 w-3.5" aria-hidden /> 6.0%
                 </span>
               </div>
               <div className="mt-6">
                 <GrowthChart />
               </div>
-              <div className="mt-4 flex items-center gap-5 text-[12px] text-[var(--muted)]">
+              <div className="mt-4 flex items-center gap-5 text-[13px] text-[var(--muted)]">
                 <span className="flex items-center gap-2">
                   <span className="h-[3px] w-4 rounded-full bg-[var(--accent)]" /> Your vault
                 </span>
@@ -200,7 +200,7 @@ export default function Landing() {
             <h2 className="mt-4 font-display text-[clamp(1.9rem,4vw,3.25rem)] font-semibold leading-[1.02] tracking-[-0.03em]">
               It saves on every purchase.
             </h2>
-            <p className="mt-5 max-w-sm text-[15px] leading-relaxed" style={{ color: "var(--contrast-muted)" }}>
+            <p className="mt-5 max-w-sm text-[16px] leading-relaxed" style={{ color: "var(--contrast-muted)" }}>
               A small set-aside scales with what you spend. You never decide to save; it just happens.
             </p>
           </Reveal>
@@ -215,7 +215,7 @@ export default function Landing() {
                   <div className="mt-3 font-mono text-[clamp(2.4rem,6vw,4rem)] font-semibold leading-none text-[var(--accent)]">
                     {t.set}
                   </div>
-                  <div className="mt-2 text-[12px]" style={{ color: "var(--contrast-muted)" }}>set aside</div>
+                  <div className="mt-2 text-[13px]" style={{ color: "var(--contrast-muted)" }}>set aside</div>
                 </div>
               ))}
             </div>
@@ -234,16 +234,16 @@ export default function Landing() {
         <Reveal delay={80}>
           <div className="mt-12 grid grid-cols-3 gap-px overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--border)] md:grid-cols-6">
             {[
-              { mark: <SolanaMark className="h-7 w-7" />, name: "Solana" },
-              { mark: <UsdcMark className="h-7 w-7" />, name: "USDC" },
-              { mark: <AaveMark className="h-7 w-7" />, name: "Aave" },
-              { mark: <Landmark className="h-6 w-6 text-[var(--foreground)]" aria-hidden />, name: "Plaid" },
-              { mark: <StripeMark className="h-7 w-7" />, name: "Stripe" },
-              { mark: <Wallet className="h-6 w-6 text-[var(--foreground)]" aria-hidden />, name: "Phantom" },
+              { mark: <SolanaMark className="h-11 w-11" />, name: "Solana" },
+              { mark: <UsdcMark className="h-11 w-11" />, name: "USDC" },
+              { mark: <AaveMark className="h-11 w-11" />, name: "Aave" },
+              { mark: <PlaidMark className="h-10 w-10 text-[var(--foreground)]" />, name: "Plaid" },
+              { mark: <StripeMark className="h-11 w-11" />, name: "Stripe" },
+              { mark: <Wallet className="h-9 w-9 text-[var(--foreground)]" aria-hidden />, name: "Phantom" },
             ].map((t) => (
               <div key={t.name} className="flex flex-col items-center gap-3 bg-[var(--background)] py-8">
-                <span className="grid h-10 w-10 place-items-center">{t.mark}</span>
-                <span className="text-[11px] text-[var(--muted)]">{t.name}</span>
+                <span className="grid h-12 w-12 place-items-center">{t.mark}</span>
+                <span className="text-[14px] text-[var(--muted)]">{t.name}</span>
               </div>
             ))}
           </div>
@@ -258,7 +258,7 @@ export default function Landing() {
             <h2 className="mt-4 font-display text-[clamp(1.9rem,4vw,3.25rem)] font-semibold leading-[1.02] tracking-[-0.03em]">
               Don&rsquo;t trust it. Check it.
             </h2>
-            <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-[var(--muted)]">
+            <p className="mt-5 max-w-sm text-[16px] leading-relaxed text-[var(--muted)]">
               A live Solana program. The vault, deposits, and yield are all on-chain and open to inspect.
             </p>
             <a
@@ -269,7 +269,7 @@ export default function Landing() {
             >
               <span className="min-w-0">
                 <span className={`block ${eyebrow} text-[var(--faint)]`}>Vault program</span>
-                <code className="mt-1 block truncate font-mono text-[13px]">{PROGRAM}</code>
+                <code className="mt-1 block truncate font-mono text-[14px]">{PROGRAM}</code>
               </span>
               <ExternalLink className="h-4 w-4 shrink-0 text-[var(--accent)]" aria-hidden />
             </a>
@@ -278,7 +278,7 @@ export default function Landing() {
           <Reveal delay={100}>
             <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-7">
               <div className={`${eyebrow} text-[var(--faint)]`}>Proven on-chain</div>
-              <div className="mt-5 space-y-3 font-mono text-[14px] tabular-nums">
+              <div className="mt-5 space-y-3 font-mono text-[15px] tabular-nums">
                 <div className="flex items-center justify-between rounded-lg border border-[var(--border)] px-4 py-3">
                   <span className="text-[var(--muted)]">deposited</span>
                   <span>1,000,000.00</span>
@@ -288,7 +288,7 @@ export default function Landing() {
                   <span className="text-[var(--accent-strong)]">1,000,000.03</span>
                 </div>
               </div>
-              <p className="mt-4 text-[12px] text-[var(--muted)]">
+              <p className="mt-4 text-[13px] text-[var(--muted)]">
                 Real interest, paid in tokens. Withdrew more than deposited.
               </p>
             </div>
@@ -315,7 +315,7 @@ export default function Landing() {
                   +
                 </span>
               </summary>
-              <p className="pb-6 pr-10 text-[14px] leading-relaxed text-[var(--muted)]">{f.a}</p>
+              <p className="pb-6 pr-10 text-[15px] leading-relaxed text-[var(--muted)]">{f.a}</p>
             </details>
           ))}
         </Reveal>
@@ -331,12 +331,12 @@ export default function Landing() {
             <h2 className="mx-auto max-w-xl font-display text-[clamp(2.2rem,5vw,4rem)] font-semibold leading-[1.0] tracking-[-0.03em]">
               Put your money in orbit.
             </h2>
-            <p className="mx-auto mt-5 max-w-md text-[15px]" style={{ color: "var(--contrast-muted)" }}>
+            <p className="mx-auto mt-5 max-w-md text-[16px]" style={{ color: "var(--contrast-muted)" }}>
               Under a minute to start. No wallet needed, nothing locked, everything verifiable.
             </p>
             <Link
               href="/app"
-              className="mt-9 inline-flex h-12 items-center gap-2 rounded-full bg-[var(--accent)] px-7 text-[15px] font-semibold text-white transition-opacity duration-150 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--contrast)]"
+              className="mt-9 inline-flex h-12 items-center gap-2 rounded-full bg-[var(--accent)] px-7 text-[16px] font-semibold text-white transition-opacity duration-150 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--contrast)]"
             >
               Open your vault <ArrowUpRight className="h-4 w-4" aria-hidden />
             </Link>
@@ -350,18 +350,18 @@ export default function Landing() {
           <div className="flex items-center gap-2.5">
             <OrbitRings className="h-6 w-6 text-[var(--foreground)]" />
             <div>
-              <div className="font-display text-[14px] font-semibold">Orbit</div>
-              <div className="text-[12px] text-[var(--muted)]">Self-driving savings on Solana</div>
+              <div className="font-display text-[15px] font-semibold">Orbit</div>
+              <div className="text-[13px] text-[var(--muted)]">Self-driving savings on Solana</div>
             </div>
           </div>
-          <div className="flex items-center gap-6 text-[13px] text-[var(--muted)]">
+          <div className="flex items-center gap-6 text-[14px] text-[var(--muted)]">
             <a href="#how" className="transition-colors hover:text-[var(--foreground)]">How it works</a>
             <a href="#proof" className="transition-colors hover:text-[var(--foreground)]">On-chain</a>
             <Link href="/app" className="transition-colors hover:text-[var(--foreground)]">Launch app</Link>
           </div>
         </div>
         <div className="mx-auto w-full max-w-6xl px-6 pb-10">
-          <p className="text-[11px] leading-5 text-[var(--faint)]">
+          <p className="text-[12px] leading-5 text-[var(--faint)]">
             Live on Solana devnet for demonstration. Detection, the on-chain vault, and yield are real; the
             fiat-to-USDC step is simulated. Not a bank. Not FDIC-insured. Principal is not guaranteed. Built for
             the Colosseum Crypto World&rsquo;s Fair.

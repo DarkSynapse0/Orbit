@@ -156,7 +156,7 @@ function ExplorerLink({ href, children }: { href: string; children: React.ReactN
 }
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
-  return <div className="text-[11px] font-medium uppercase tracking-[0.16em] text-[var(--faint)]">{children}</div>;
+  return <div className="text-[12px] font-medium uppercase tracking-[0.16em] text-[var(--faint)]">{children}</div>;
 }
 
 function Toggle({ on, onClick, label }: { on: boolean; onClick: () => void; label: string }) {
@@ -432,8 +432,8 @@ export default function Home() {
         <Link href="/" className="flex items-center gap-2.5 px-1" aria-label="Orbit home">
           <OrbitMark className="h-8 w-8" title="Orbit" />
           <div>
-            <div className="font-display text-[15px] font-semibold leading-none tracking-tight">Orbit</div>
-            <div className="mt-1 text-[11px] leading-none text-[var(--muted)]">self-driving savings</div>
+            <div className="font-display text-[16px] font-semibold leading-none tracking-tight">Orbit</div>
+            <div className="mt-1 text-[12px] leading-none text-[var(--muted)]">self-driving savings</div>
           </div>
         </Link>
 
@@ -456,12 +456,12 @@ export default function Home() {
         </nav>
 
         <div className="space-y-3 border-t border-[var(--border)] px-1 pt-4">
-          <div className="flex items-center gap-2 text-[12px]">
+          <div className="flex items-center gap-2 text-[13px]">
             <span className={`h-1.5 w-1.5 rounded-full ${connected ? "bg-[var(--accent)]" : "bg-[var(--faint)]"}`} aria-hidden />
             <span className="truncate font-mono text-[var(--muted)]">{owner ? truncate(owner) : "No wallet"}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--surface)] px-2 py-1 text-[11px] text-[var(--muted)]">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--surface)] px-2 py-1 text-[12px] text-[var(--muted)]">
               <span className={`h-1.5 w-1.5 rounded-full ${online ? "bg-[var(--accent)]" : online === false ? "bg-red-500" : "bg-[var(--faint)]"}`} aria-hidden />
               {online === null ? "…" : online ? "Devnet · live" : "offline"}
             </span>
@@ -479,12 +479,12 @@ export default function Home() {
             </Link>
             <div>
               <h1 className="font-display text-lg font-semibold leading-none tracking-tight">{activeNav.label}</h1>
-              <p className="mt-1 hidden text-[12px] leading-none text-[var(--muted)] sm:block">{activeNav.hint}</p>
+              <p className="mt-1 hidden text-[13px] leading-none text-[var(--muted)] sm:block">{activeNav.hint}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             {connected ? (
-              <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] px-3 py-1.5 text-[12px]">
+              <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] px-3 py-1.5 text-[13px]">
                 <Wallet className="h-3.5 w-3.5 text-[var(--accent)]" aria-hidden />
                 <span className="font-mono">{truncate(owner!)}</span>
               </span>
@@ -492,7 +492,7 @@ export default function Home() {
               <button
                 type="button"
                 onClick={() => setTab("grow")}
-                className="inline-flex items-center gap-2 rounded-full bg-[var(--contrast)] px-3.5 py-2 text-[12px] font-semibold text-[var(--contrast-fg)] transition-opacity hover:opacity-90"
+                className="inline-flex items-center gap-2 rounded-full bg-[var(--contrast)] px-3.5 py-2 text-[13px] font-semibold text-[var(--contrast-fg)] transition-opacity hover:opacity-90"
               >
                 <Wallet className="h-3.5 w-3.5" aria-hidden /> Connect
               </button>
@@ -519,7 +519,7 @@ export default function Home() {
                     >
                       {usd(total)}
                     </div>
-                    <div className="mt-3 flex flex-wrap items-center gap-2 text-[13px]">
+                    <div className="mt-3 flex flex-wrap items-center gap-2 text-[14px]">
                       <span className="inline-flex items-center gap-1 rounded-full bg-[var(--accent-soft)] px-2 py-0.5 font-medium text-[var(--accent-strong)]">
                         <TrendingUp className="h-3.5 w-3.5" aria-hidden /> 6% a year
                       </span>
@@ -527,18 +527,18 @@ export default function Home() {
                       <span className="text-[var(--muted)]">earned, live</span>
                     </div>
                     <div className="mt-auto flex flex-wrap gap-2 pt-8">
-                      <button type="button" onClick={() => setTab("grow")} className="inline-flex items-center gap-2 rounded-xl bg-[var(--contrast)] px-4 py-2.5 text-[13px] font-semibold text-[var(--contrast-fg)] transition-opacity hover:opacity-90">
+                      <button type="button" onClick={() => setTab("grow")} className="inline-flex items-center gap-2 rounded-xl bg-[var(--contrast)] px-4 py-2.5 text-[14px] font-semibold text-[var(--contrast-fg)] transition-opacity hover:opacity-90">
                         <ArrowDownToLine className="h-4 w-4" aria-hidden /> Add money
                       </button>
-                      <button type="button" onClick={() => setTab("grow")} className="inline-flex items-center gap-2 rounded-xl border border-[var(--border-strong)] px-4 py-2.5 text-[13px] font-medium transition-colors hover:bg-[var(--background)]">
+                      <button type="button" onClick={() => setTab("grow")} className="inline-flex items-center gap-2 rounded-xl border border-[var(--border-strong)] px-4 py-2.5 text-[14px] font-medium transition-colors hover:bg-[var(--background)]">
                         <ArrowUpFromLine className="h-4 w-4" aria-hidden /> Take out
                       </button>
                     </div>
                   </div>
                   <div className="p-6">
                     <div className="flex items-center justify-between">
-                      <h3 className="font-display text-[15px] font-semibold">Your savings over time</h3>
-                      <span className="rounded-lg border border-[var(--border)] px-2.5 py-1 text-[11px] text-[var(--muted)]">{analytics.hasData ? "all time" : "sample"}</span>
+                      <h3 className="font-display text-[16px] font-semibold">Your savings over time</h3>
+                      <span className="rounded-lg border border-[var(--border)] px-2.5 py-1 text-[12px] text-[var(--muted)]">{analytics.hasData ? "all time" : "sample"}</span>
                     </div>
                     <div className="mt-5">
                       <LineArea
@@ -554,25 +554,25 @@ export default function Home() {
               {/* Breakdown */}
               <div className="grid gap-4 sm:grid-cols-3">
                 <div className={`${PANEL} p-5`}>
-                  <div className="flex items-center gap-2 text-[12px] text-[var(--muted)]">
+                  <div className="flex items-center gap-2 text-[13px] text-[var(--muted)]">
                     <Coins className="h-4 w-4" aria-hidden /> In your vault
                     {onchain && <span className="rounded-full bg-[var(--accent-soft)] px-1.5 py-0.5 text-[10px] text-[var(--accent-strong)]">on-chain</span>}
                   </div>
                   <div className="mt-2 font-mono text-xl font-semibold tabular-nums text-[var(--accent-strong)]">{usd(principalUsd)}</div>
-                  <div className="mt-1 text-[11px] text-[var(--faint)]">invested, earning yield</div>
+                  <div className="mt-1 text-[12px] text-[var(--faint)]">invested, earning yield</div>
                 </div>
                 <div className={`${PANEL} p-5`}>
-                  <div className="flex items-center gap-2 text-[12px] text-[var(--muted)]"><Landmark className="h-4 w-4" aria-hidden /> Set aside</div>
+                  <div className="flex items-center gap-2 text-[13px] text-[var(--muted)]"><Landmark className="h-4 w-4" aria-hidden /> Set aside</div>
                   <div className="mt-2 font-mono text-xl font-semibold tabular-nums">{usd(state.pendingUsd)}</div>
                   <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[var(--border)]">
                     <div className="h-full rounded-full bg-[var(--faint)] transition-[width] duration-300" style={{ width: `${pct}%` }} />
                   </div>
-                  <div className="mt-1.5 font-mono text-[11px] tabular-nums text-[var(--faint)]">{usd(state.pendingUsd)} / {usd(THRESHOLD)} to next deposit</div>
+                  <div className="mt-1.5 font-mono text-[12px] tabular-nums text-[var(--faint)]">{usd(state.pendingUsd)} / {usd(THRESHOLD)} to next deposit</div>
                 </div>
                 <div className={`${PANEL} p-5`}>
-                  <div className="flex items-center gap-2 text-[12px] text-[var(--muted)]"><TrendingUp className="h-4 w-4 text-[var(--accent-strong)]" aria-hidden /> Interest earned</div>
+                  <div className="flex items-center gap-2 text-[13px] text-[var(--muted)]"><TrendingUp className="h-4 w-4 text-[var(--accent-strong)]" aria-hidden /> Interest earned</div>
                   <div className="mt-2 font-mono text-xl font-semibold tabular-nums text-[var(--accent-strong)]">{liveYield.toFixed(6)}</div>
-                  <div className="mt-1 text-[11px] text-[var(--faint)]">paid in tokens, live</div>
+                  <div className="mt-1 text-[12px] text-[var(--faint)]">paid in tokens, live</div>
                 </div>
               </div>
 
@@ -580,16 +580,16 @@ export default function Home() {
               <div className="grid gap-4 lg:grid-cols-[1.1fr_1fr]">
                 <section className={`${PANEL} p-6`}>
                   <div className="flex items-center justify-between">
-                    <h3 className="font-display text-[15px] font-semibold">Recent activity</h3>
-                    <button type="button" onClick={() => setTab("activity")} className="inline-flex items-center gap-1 text-[12px] text-[var(--muted)] hover:text-[var(--foreground)]">
+                    <h3 className="font-display text-[16px] font-semibold">Recent activity</h3>
+                    <button type="button" onClick={() => setTab("activity")} className="inline-flex items-center gap-1 text-[13px] text-[var(--muted)] hover:text-[var(--foreground)]">
                       See all <ChevronRight className="h-3.5 w-3.5" aria-hidden />
                     </button>
                   </div>
                   {txns.length === 0 ? (
                     <div className="mt-6 flex flex-col items-center justify-center py-8 text-center">
                       <span className="grid h-10 w-10 place-items-center rounded-full bg-[var(--background)] ring-1 ring-inset ring-[var(--border)]"><ShoppingBag className="h-5 w-5 text-[var(--muted)]" aria-hidden /></span>
-                      <p className="mt-3 text-[13px] text-[var(--muted)]">Nothing yet</p>
-                      <p className="mt-0.5 text-[12px] text-[var(--faint)]">Spend or sync a bank to start saving.</p>
+                      <p className="mt-3 text-[14px] text-[var(--muted)]">Nothing yet</p>
+                      <p className="mt-0.5 text-[13px] text-[var(--faint)]">Spend or sync a bank to start saving.</p>
                     </div>
                   ) : (
                     <ul className="mt-3 space-y-0.5">
@@ -599,10 +599,10 @@ export default function Home() {
                             {t.deposited ? <Zap className="h-4 w-4 text-[var(--accent)]" aria-hidden /> : <ShoppingBag className="h-4 w-4 text-[var(--muted)]" aria-hidden />}
                           </span>
                           <span className="min-w-0 flex-1">
-                            <span className="block truncate text-[13px] font-medium">{t.name}</span>
-                            <span className="block text-[11px] text-[var(--muted)]">{t.category} · {txnDate(t.ts)}</span>
+                            <span className="block truncate text-[14px] font-medium">{t.name}</span>
+                            <span className="block text-[12px] text-[var(--muted)]">{t.category} · {txnDate(t.ts)}</span>
                           </span>
-                          <span className={`shrink-0 font-mono text-[13px] tabular-nums ${t.setAside > 0 ? "text-[var(--accent-strong)]" : "text-[var(--faint)]"}`}>
+                          <span className={`shrink-0 font-mono text-[14px] tabular-nums ${t.setAside > 0 ? "text-[var(--accent-strong)]" : "text-[var(--faint)]"}`}>
                             {t.setAside > 0 ? `+${usd(t.setAside)}` : "—"}
                           </span>
                         </li>
@@ -613,16 +613,16 @@ export default function Home() {
 
                 {setup.bank && setup.vault ? (
                   <section className={`${PANEL} p-6`}>
-                    <h3 className="font-display text-[15px] font-semibold">Where your savings come from</h3>
-                    <p className="mt-0.5 text-[12px] text-[var(--muted)]">Set aside from your spending</p>
+                    <h3 className="font-display text-[16px] font-semibold">Where your savings come from</h3>
+                    <p className="mt-0.5 text-[13px] text-[var(--muted)]">Set aside from your spending</p>
                     <div className="mt-5">
                       <HBars rows={analytics.categories.length ? analytics.categories : SAMPLE_CATEGORIES} />
                     </div>
                   </section>
                 ) : (
                   <section className={`${PANEL} p-6`}>
-                    <h3 className="font-display text-[15px] font-semibold">Get set up</h3>
-                    <p className="mt-0.5 text-[12px] text-[var(--muted)]">Two quick steps to start saving on autopilot</p>
+                    <h3 className="font-display text-[16px] font-semibold">Get set up</h3>
+                    <p className="mt-0.5 text-[13px] text-[var(--muted)]">Two quick steps to start saving on autopilot</p>
                     <div className="mt-5 space-y-2.5">
                       {[
                         { done: setup.vault, label: "Open your vault", desc: "Create an account in one tap", go: "grow" as TabId },
@@ -638,8 +638,8 @@ export default function Home() {
                             {s.done ? <Check className="h-4 w-4" aria-hidden /> : <span className="h-1.5 w-1.5 rounded-full bg-current" />}
                           </span>
                           <span className="min-w-0 flex-1">
-                            <span className={`block text-[14px] font-medium ${s.done ? "text-[var(--muted)] line-through" : ""}`}>{s.label}</span>
-                            <span className="block text-[12px] text-[var(--muted)]">{s.desc}</span>
+                            <span className={`block text-[15px] font-medium ${s.done ? "text-[var(--muted)] line-through" : ""}`}>{s.label}</span>
+                            <span className="block text-[13px] text-[var(--muted)]">{s.desc}</span>
                           </span>
                           {!s.done && <ChevronRight className="h-4 w-4 shrink-0 text-[var(--faint)]" aria-hidden />}
                         </button>
@@ -655,8 +655,8 @@ export default function Home() {
           {tab === "save" && (
             <div className="space-y-4">
               <div className={`${PANEL} p-6`}>
-                <h3 className="font-display text-[15px] font-semibold">Money comes in on its own</h3>
-                <p className="mt-1 max-w-2xl text-[13px] leading-relaxed text-[var(--muted)]">
+                <h3 className="font-display text-[16px] font-semibold">Money comes in on its own</h3>
+                <p className="mt-1 max-w-2xl text-[14px] leading-relaxed text-[var(--muted)]">
                   Connect your bank and Orbit quietly sets aside a little whenever you spend, then moves it to your vault
                   once it adds up. You never have to decide to save.
                 </p>
@@ -670,12 +670,12 @@ export default function Home() {
                     <span className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--background)] ring-1 ring-inset ring-[var(--border)]"><Landmark className="h-5 w-5 text-[var(--foreground)]" aria-hidden /></span>
                     <div className="min-w-0 flex-1">
                       <div className="text-sm font-medium">{plaid?.connected ? "First Platypus Bank" : "No bank connected"}</div>
-                      <div className="text-[12px] text-[var(--muted)]">{plaid?.connected ? "Plaid sandbox · detection only" : "Connect to detect spending"}</div>
+                      <div className="text-[13px] text-[var(--muted)]">{plaid?.connected ? "Plaid sandbox · detection only" : "Connect to detect spending"}</div>
                     </div>
                     {plaid?.connected && <span className="h-2 w-2 rounded-full bg-[var(--accent)]" aria-hidden />}
                   </div>
                   {plaid && !plaid.configured && (
-                    <p className="mt-4 rounded-lg bg-[var(--background)] px-3 py-2 text-[12px] text-[var(--muted)]">Add <code className="font-mono">PLAID_CLIENT_ID</code> and <code className="font-mono">PLAID_SECRET</code> to <code className="font-mono">server/.env</code> for real detection.</p>
+                    <p className="mt-4 rounded-lg bg-[var(--background)] px-3 py-2 text-[13px] text-[var(--muted)]">Add <code className="font-mono">PLAID_CLIENT_ID</code> and <code className="font-mono">PLAID_SECRET</code> to <code className="font-mono">server/.env</code> for real detection.</p>
                   )}
                   {plaid?.configured && !plaid.connected && (
                     <button type="button" onClick={connectBank} disabled={busy} className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-[var(--border-strong)] text-sm font-medium transition-colors hover:bg-[var(--background)] disabled:pointer-events-none disabled:opacity-50">
@@ -693,7 +693,7 @@ export default function Home() {
                 <section className={`${PANEL} p-6`}>
                   <SectionLabel>Try it — simulate a purchase</SectionLabel>
                   {!connected && (
-                    <p className="mt-3 rounded-lg bg-[var(--accent-soft)] px-3 py-2 text-[12px] text-[var(--accent-strong)]">Open your vault in Grow first — that&apos;s where set-asides land.</p>
+                    <p className="mt-3 rounded-lg bg-[var(--accent-soft)] px-3 py-2 text-[13px] text-[var(--accent-strong)]">Open your vault in Grow first — that&apos;s where set-asides land.</p>
                   )}
                   <div className="mt-4 flex gap-2">
                     {[45, 120, 600].map((v) => (
@@ -715,13 +715,13 @@ export default function Home() {
                   <div className="mt-4 grid grid-cols-2 gap-4">
                     {[{ spend: "Over $100", set: "$5" }, { spend: "Over $500", set: "$10" }].map((t) => (
                       <div key={t.spend} className="rounded-xl border border-[var(--border)] bg-[var(--background)] p-5">
-                        <div className="text-[12px] text-[var(--muted)]">{t.spend}</div>
+                        <div className="text-[13px] text-[var(--muted)]">{t.spend}</div>
                         <div className="mt-2 font-mono text-3xl font-semibold text-[var(--accent-strong)]">{t.set}</div>
-                        <div className="mt-1 text-[11px] text-[var(--muted)]">set aside</div>
+                        <div className="mt-1 text-[12px] text-[var(--muted)]">set aside</div>
                       </div>
                     ))}
                   </div>
-                  <div className="mt-5 flex items-center justify-between border-t border-[var(--border)] pt-4 text-[13px]">
+                  <div className="mt-5 flex items-center justify-between border-t border-[var(--border)] pt-4 text-[14px]">
                     <span className="text-[var(--muted)]">Moves to vault at</span>
                     <span className="font-mono">{usd(THRESHOLD)}</span>
                   </div>
@@ -729,24 +729,24 @@ export default function Home() {
 
                 <section className={`${PANEL} divide-y divide-[var(--border)]`}>
                   <div className="flex items-center justify-between gap-4 p-5">
-                    <div><div className="text-sm font-medium">Auto-invest at threshold</div><div className="mt-0.5 text-[12px] text-[var(--muted)]">Move set-asides into your vault automatically.</div></div>
+                    <div><div className="text-sm font-medium">Auto-invest at threshold</div><div className="mt-0.5 text-[13px] text-[var(--muted)]">Move set-asides into your vault automatically.</div></div>
                     <Toggle on={autoInvest} onClick={() => setAutoInvest((v) => !v)} label="Auto-invest" />
                   </div>
                   <div className="flex items-center justify-between gap-4 p-5">
-                    <div><div className="text-sm font-medium">Pause saving</div><div className="mt-0.5 text-[12px] text-[var(--muted)]">Keep watching, stop setting aside.</div></div>
+                    <div><div className="text-sm font-medium">Pause saving</div><div className="mt-0.5 text-[13px] text-[var(--muted)]">Keep watching, stop setting aside.</div></div>
                     <Toggle on={paused} onClick={() => setPaused((v) => !v)} label="Pause" />
                   </div>
                   <div className="flex items-center justify-between gap-4 p-5">
-                    <div><div className="text-sm font-medium">Save more per purchase</div><div className="mt-0.5 text-[12px] text-[var(--muted)]">Multiply each set-aside.</div></div>
+                    <div><div className="text-sm font-medium">Save more per purchase</div><div className="mt-0.5 text-[13px] text-[var(--muted)]">Multiply each set-aside.</div></div>
                     <div className="flex rounded-full border border-[var(--border)] p-0.5">
                       {[1, 2, 3].map((m) => (
-                        <button key={m} type="button" onClick={() => setMultiplier(m)} className={`rounded-full px-3 py-1 text-[13px] font-medium transition-colors ${multiplier === m ? "bg-[var(--contrast)] text-[var(--contrast-fg)]" : "text-[var(--muted)]"}`}>{m}×</button>
+                        <button key={m} type="button" onClick={() => setMultiplier(m)} className={`rounded-full px-3 py-1 text-[14px] font-medium transition-colors ${multiplier === m ? "bg-[var(--contrast)] text-[var(--contrast-fg)]" : "text-[var(--muted)]"}`}>{m}×</button>
                       ))}
                     </div>
                   </div>
                 </section>
               </div>
-              <p className="text-[11px] text-[var(--faint)]">Automation controls are a demo preview; the live rule is fixed at the tiers above.</p>
+              <p className="text-[12px] text-[var(--faint)]">Automation controls are a demo preview; the live rule is fixed at the tiers above.</p>
             </div>
           )}
 
@@ -755,12 +755,12 @@ export default function Home() {
             <div className="space-y-4">
               <div className={`${PANEL} flex flex-wrap items-center justify-between gap-4 p-6`}>
                 <div>
-                  <h3 className="font-display text-[15px] font-semibold">Your money grows on-chain</h3>
-                  <p className="mt-1 text-[13px] text-[var(--muted)]">Held in your own vault, earning real yield you can withdraw anytime.</p>
+                  <h3 className="font-display text-[16px] font-semibold">Your money grows on-chain</h3>
+                  <p className="mt-1 text-[14px] text-[var(--muted)]">Held in your own vault, earning real yield you can withdraw anytime.</p>
                 </div>
                 <div className="flex items-baseline gap-2">
                   <span className="font-mono text-3xl font-semibold text-[var(--accent-strong)]">{selectedVenue.apy.toFixed(1)}%</span>
-                  <span className="text-[12px] text-[var(--muted)]">APY · {selectedVenue.name}</span>
+                  <span className="text-[13px] text-[var(--muted)]">APY · {selectedVenue.name}</span>
                 </div>
               </div>
 
@@ -783,8 +783,8 @@ export default function Home() {
                             <s.icon className="h-4 w-4 text-[var(--accent-strong)]" aria-hidden />
                           </span>
                           <span>
-                            <span className="block text-[13px] font-medium">{s.t}</span>
-                            <span className="block text-[12px] text-[var(--muted)]">{s.d}</span>
+                            <span className="block text-[14px] font-medium">{s.t}</span>
+                            <span className="block text-[13px] text-[var(--muted)]">{s.d}</span>
                           </span>
                         </li>
                       ))}
@@ -794,7 +794,7 @@ export default function Home() {
                   <section className={`${PANEL} p-6`}>
                     <SectionLabel>On-chain</SectionLabel>
                     {onchain ? (
-                      <dl className="mt-4 space-y-3 text-[13px]">
+                      <dl className="mt-4 space-y-3 text-[14px]">
                         {[{ k: "Vault", v: onchain.vaultAccount }, { k: "Yield reserve", v: onchain.reserveVault }, { k: "Program", v: onchain.programId }].map((row) => (
                           <div key={row.k} className="flex items-center justify-between gap-3 border-b border-[var(--border)] pb-3">
                             <dt className="text-[var(--muted)]">{row.k}</dt>
@@ -804,7 +804,7 @@ export default function Home() {
                         {lastSig && <div className="pt-1"><ExplorerLink href={solTx(lastSig)}>Last deposit transaction</ExplorerLink></div>}
                       </dl>
                     ) : (
-                      <p className="mt-4 text-[13px] text-[var(--muted)]">Open your vault to see it live on Solana.</p>
+                      <p className="mt-4 text-[14px] text-[var(--muted)]">Open your vault to see it live on Solana.</p>
                     )}
                   </section>
                 </div>
@@ -814,8 +814,8 @@ export default function Home() {
               <section className={`${PANEL} p-6`}>
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div>
-                    <h3 className="font-display text-[15px] font-semibold">Where it earns</h3>
-                    <p className="mt-0.5 text-[12px] text-[var(--muted)]">Which platform grows your USDC</p>
+                    <h3 className="font-display text-[16px] font-semibold">Where it earns</h3>
+                    <p className="mt-0.5 text-[13px] text-[var(--muted)]">Which platform grows your USDC</p>
                   </div>
                   <div className="relative">
                     <button
@@ -827,10 +827,10 @@ export default function Home() {
                       <VenueMark venue={selectedVenue} className="h-8 w-8" />
                       <span className="min-w-0 flex-1">
                         <span className="flex items-center gap-1.5">
-                          <span className="text-[13px] font-medium">{selectedVenue.name}</span>
+                          <span className="text-[14px] font-medium">{selectedVenue.name}</span>
                           {selectedVenue.live ? <span className="rounded-full bg-[var(--accent-soft)] px-1.5 py-0.5 text-[9px] font-medium text-[var(--accent-strong)]">Live</span> : <span className="rounded-full bg-[var(--surface)] px-1.5 py-0.5 text-[9px] text-[var(--muted)]">Mainnet</span>}
                         </span>
-                        <span className="block text-[11px] text-[var(--muted)]">{selectedVenue.apy.toFixed(1)}% APY · TVL {selectedVenue.tvl}</span>
+                        <span className="block text-[12px] text-[var(--muted)]">{selectedVenue.apy.toFixed(1)}% APY · TVL {selectedVenue.tvl}</span>
                       </span>
                       <ChevronDown className={`h-4 w-4 shrink-0 text-[var(--muted)] transition-transform ${venueOpen ? "rotate-180" : ""}`} aria-hidden />
                     </button>
@@ -845,12 +845,12 @@ export default function Home() {
                                 <VenueMark venue={v} className="h-8 w-8" />
                                 <span className="min-w-0 flex-1">
                                   <span className="flex items-center gap-1.5">
-                                    <span className="text-[13px] font-medium">{v.name}</span>
+                                    <span className="text-[14px] font-medium">{v.name}</span>
                                     {v.live ? <span className="rounded-full bg-[var(--accent-soft)] px-1.5 py-0.5 text-[9px] font-medium text-[var(--accent-strong)]">Live</span> : <span className="rounded-full bg-[var(--background)] px-1.5 py-0.5 text-[9px] text-[var(--muted)]">Mainnet</span>}
                                   </span>
-                                  <span className="block truncate text-[11px] text-[var(--muted)]">{v.blurb}</span>
+                                  <span className="block truncate text-[12px] text-[var(--muted)]">{v.blurb}</span>
                                 </span>
-                                <span className="shrink-0 font-mono text-[13px] font-semibold text-[var(--accent-strong)]">{v.apy.toFixed(1)}%</span>
+                                <span className="shrink-0 font-mono text-[14px] font-semibold text-[var(--accent-strong)]">{v.apy.toFixed(1)}%</span>
                                 {on && <Check className="h-4 w-4 shrink-0 text-[var(--accent-strong)]" aria-hidden />}
                               </button>
                             );
@@ -860,7 +860,7 @@ export default function Home() {
                     )}
                   </div>
                 </div>
-                <p className="mt-4 text-[11px] leading-5 text-[var(--faint)]">On devnet, deposits earn in the audited Orbit reserve. Choosing a mainnet venue sets where Orbit routes in production.</p>
+                <p className="mt-4 text-[12px] leading-5 text-[var(--faint)]">On devnet, deposits earn in the audited Orbit reserve. Choosing a mainnet venue sets where Orbit routes in production.</p>
               </section>
 
               {/* Projection */}
@@ -868,19 +868,19 @@ export default function Home() {
                 <SectionLabel>What it could grow to</SectionLabel>
                 <div className="mt-5 grid gap-6 md:grid-cols-[1fr_0.7fr]">
                   <div>
-                    <label htmlFor="proj" className="text-[12px] text-[var(--muted)]">Starting balance</label>
+                    <label htmlFor="proj" className="text-[13px] text-[var(--muted)]">Starting balance</label>
                     <div className="mt-2 flex items-center rounded-xl border border-[var(--border)] bg-[var(--background)] px-3">
                       <span className="text-[var(--muted)]">$</span>
                       <input id="proj" value={projAmt} onChange={(e) => setProjAmt(e.target.value)} inputMode="decimal" className="h-11 w-full bg-transparent px-1.5 font-mono text-sm tabular-nums focus:outline-none" />
                     </div>
-                    <label htmlFor="years" className="mt-5 block text-[12px] text-[var(--muted)]">Time · <span className="font-mono text-[var(--foreground)]">{projYears} {projYears === 1 ? "year" : "years"}</span></label>
+                    <label htmlFor="years" className="mt-5 block text-[13px] text-[var(--muted)]">Time · <span className="font-mono text-[var(--foreground)]">{projYears} {projYears === 1 ? "year" : "years"}</span></label>
                     <input id="years" type="range" min={1} max={30} value={projYears} onChange={(e) => setProjYears(Number(e.target.value))} className="mt-3 w-full accent-[var(--accent)]" />
-                    <p className="mt-4 text-[11px] text-[var(--faint)]">Illustrative at {selectedVenue.name}&rsquo;s {selectedVenue.apy.toFixed(1)}% APY, compounded annually. Not a guarantee.</p>
+                    <p className="mt-4 text-[12px] text-[var(--faint)]">Illustrative at {selectedVenue.name}&rsquo;s {selectedVenue.apy.toFixed(1)}% APY, compounded annually. Not a guarantee.</p>
                   </div>
                   <div className="flex flex-col justify-center rounded-xl border border-[var(--border)] bg-[var(--background)] p-5">
-                    <div className="text-[12px] text-[var(--muted)]">Projected value</div>
+                    <div className="text-[13px] text-[var(--muted)]">Projected value</div>
                     <div className="mt-1 font-mono text-[clamp(2rem,4vw,2.75rem)] font-semibold leading-none tabular-nums text-[var(--accent-strong)]">${projected.toLocaleString("en-US", { maximumFractionDigits: 0 })}</div>
-                    <div className="mt-2 text-[12px] text-[var(--muted)]">+${(projected - (Number(projAmt) || 0)).toLocaleString("en-US", { maximumFractionDigits: 0 })} in yield</div>
+                    <div className="mt-2 text-[13px] text-[var(--muted)]">+${(projected - (Number(projAmt) || 0)).toLocaleString("en-US", { maximumFractionDigits: 0 })} in yield</div>
                   </div>
                 </div>
               </section>
@@ -892,20 +892,20 @@ export default function Home() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <SectionLabel>Every transaction</SectionLabel>
-                <button type="button" onClick={reset} className="inline-flex items-center gap-1 rounded text-[12px] text-[var(--muted)] transition-colors hover:text-[var(--foreground)]"><RotateCcw className="h-3.5 w-3.5" aria-hidden /> reset</button>
+                <button type="button" onClick={reset} className="inline-flex items-center gap-1 rounded text-[13px] text-[var(--muted)] transition-colors hover:text-[var(--foreground)]"><RotateCcw className="h-3.5 w-3.5" aria-hidden /> reset</button>
               </div>
               {txns.length === 0 ? (
                 <div className={`${PANEL} border-dashed px-4 py-16 text-center`}>
                   <ShoppingBag className="mx-auto h-6 w-6 text-[var(--muted)]" aria-hidden />
                   <p className="mt-2 text-sm text-[var(--muted)]">No transactions yet</p>
-                  <p className="mt-0.5 text-[12px] text-[var(--faint)]">Simulate a purchase or sync a bank in Save.</p>
+                  <p className="mt-0.5 text-[13px] text-[var(--faint)]">Simulate a purchase or sync a bank in Save.</p>
                 </div>
               ) : (
                 <section className={`${PANEL} overflow-hidden`}>
                   <div className="overflow-x-auto">
-                    <table className="w-full min-w-[560px] text-left text-[13px]">
+                    <table className="w-full min-w-[560px] text-left text-[14px]">
                       <thead>
-                        <tr className="border-b border-[var(--border)] text-[11px] uppercase tracking-[0.14em] text-[var(--faint)]">
+                        <tr className="border-b border-[var(--border)] text-[12px] uppercase tracking-[0.14em] text-[var(--faint)]">
                           <th className="px-5 py-3 font-medium">Transaction</th>
                           <th className="px-5 py-3 font-medium">Category</th>
                           <th className="px-5 py-3 font-medium">Date</th>
@@ -926,18 +926,18 @@ export default function Home() {
                               </div>
                             </td>
                             <td className="px-5 py-3 text-[var(--muted)]">{t.category}</td>
-                            <td className="px-5 py-3 font-mono text-[12px] text-[var(--muted)]">{txnDate(t.ts)}</td>
+                            <td className="px-5 py-3 font-mono text-[13px] text-[var(--muted)]">{txnDate(t.ts)}</td>
                             <td className="px-5 py-3 text-right font-mono tabular-nums text-[var(--muted)]">{usd(t.amountUsd)}</td>
                             <td className={`px-5 py-3 text-right font-mono tabular-nums ${t.setAside > 0 ? "text-[var(--accent-strong)]" : "text-[var(--faint)]"}`}>
                               {t.setAside > 0 ? `+${usd(t.setAside)}` : "—"}
                             </td>
                             <td className="px-5 py-3 text-right">
                               {t.deposited ? (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-[var(--accent-soft)] px-2 py-0.5 text-[11px] font-medium text-[var(--accent-strong)]">In vault</span>
+                                <span className="inline-flex items-center gap-1 rounded-full bg-[var(--accent-soft)] px-2 py-0.5 text-[12px] font-medium text-[var(--accent-strong)]">In vault</span>
                               ) : t.setAside > 0 ? (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-[var(--surface)] px-2 py-0.5 text-[11px] text-[var(--muted)]">Set aside</span>
+                                <span className="inline-flex items-center gap-1 rounded-full bg-[var(--surface)] px-2 py-0.5 text-[12px] text-[var(--muted)]">Set aside</span>
                               ) : (
-                                <span className="text-[11px] text-[var(--faint)]">—</span>
+                                <span className="text-[12px] text-[var(--faint)]">—</span>
                               )}
                             </td>
                           </tr>
@@ -960,7 +960,7 @@ export default function Home() {
                     <span className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--background)] ring-1 ring-inset ring-[var(--border)]"><Wallet className="h-5 w-5 text-[var(--foreground)]" aria-hidden /></span>
                     <div className="min-w-0 flex-1">
                       <div className="text-sm font-medium">{connected ? "Orbit account" : "No wallet connected"}</div>
-                      <div className="mt-0.5 truncate font-mono text-[12px] text-[var(--muted)]">{owner ?? "Open one in Grow"}</div>
+                      <div className="mt-0.5 truncate font-mono text-[13px] text-[var(--muted)]">{owner ?? "Open one in Grow"}</div>
                     </div>
                     {connected && <span className="h-2 w-2 rounded-full bg-[var(--accent)]" aria-hidden />}
                   </div>
@@ -969,26 +969,26 @@ export default function Home() {
 
                 <section className={`${PANEL} divide-y divide-[var(--border)]`}>
                   <div className="flex items-center justify-between gap-4 p-5">
-                    <div><div className="text-sm font-medium">Appearance</div><div className="mt-0.5 text-[12px] text-[var(--muted)]">Light or dark theme</div></div>
+                    <div><div className="text-sm font-medium">Appearance</div><div className="mt-0.5 text-[13px] text-[var(--muted)]">Light or dark theme</div></div>
                     <ThemeToggle />
                   </div>
                   <div className="flex items-center justify-between gap-4 p-5">
-                    <div><div className="text-sm font-medium">Network</div><div className="mt-0.5 text-[12px] text-[var(--muted)]">Solana devnet</div></div>
+                    <div><div className="text-sm font-medium">Network</div><div className="mt-0.5 text-[13px] text-[var(--muted)]">Solana devnet</div></div>
                     <ExplorerLink href={solAcct(onchain?.programId ?? "8LEjyrMCKukhxA4q3DRaYGfkappxRayiTPM7saZG2Kgi")}>Program</ExplorerLink>
                   </div>
                   <div className="flex items-center justify-between gap-4 p-5">
-                    <div><div className="text-sm font-medium">Backend</div><div className="mt-0.5 text-[12px] text-[var(--muted)]">Detection &amp; deposit service</div></div>
-                    <span className="inline-flex items-center gap-1.5 text-[12px] text-[var(--muted)]"><span className={`h-1.5 w-1.5 rounded-full ${online ? "bg-[var(--accent)]" : online === false ? "bg-red-500" : "bg-[var(--faint)]"}`} aria-hidden />{online === null ? "…" : online ? "Connected" : "Offline"}</span>
+                    <div><div className="text-sm font-medium">Backend</div><div className="mt-0.5 text-[13px] text-[var(--muted)]">Detection &amp; deposit service</div></div>
+                    <span className="inline-flex items-center gap-1.5 text-[13px] text-[var(--muted)]"><span className={`h-1.5 w-1.5 rounded-full ${online ? "bg-[var(--accent)]" : online === false ? "bg-red-500" : "bg-[var(--faint)]"}`} aria-hidden />{online === null ? "…" : online ? "Connected" : "Offline"}</span>
                   </div>
                 </section>
               </div>
 
               <section className={`${PANEL} flex items-center justify-between gap-4 p-5`}>
-                <div><div className="text-sm font-medium">Reset demo data</div><div className="mt-0.5 text-[12px] text-[var(--muted)]">Clears set-asides and activity. Your on-chain vault is untouched.</div></div>
-                <button type="button" onClick={reset} className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--border-strong)] px-3.5 py-2 text-[12px] font-medium transition-colors hover:bg-[var(--background)]"><RotateCcw className="h-3.5 w-3.5" aria-hidden /> Reset</button>
+                <div><div className="text-sm font-medium">Reset demo data</div><div className="mt-0.5 text-[13px] text-[var(--muted)]">Clears set-asides and activity. Your on-chain vault is untouched.</div></div>
+                <button type="button" onClick={reset} className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--border-strong)] px-3.5 py-2 text-[13px] font-medium transition-colors hover:bg-[var(--background)]"><RotateCcw className="h-3.5 w-3.5" aria-hidden /> Reset</button>
               </section>
 
-              <p className="text-[11px] leading-5 text-[var(--faint)]">Live on Solana devnet. Detection, threshold, and the vault deposit are real; the fiat→USDC step (Stripe) is mocked. Not a bank. Not FDIC-insured — principal is not guaranteed.</p>
+              <p className="text-[12px] leading-5 text-[var(--faint)]">Live on Solana devnet. Detection, threshold, and the vault deposit are real; the fiat→USDC step (Stripe) is mocked. Not a bank. Not FDIC-insured — principal is not guaranteed.</p>
             </div>
           )}
         </main>
@@ -1001,7 +1001,7 @@ export default function Home() {
             key={t.id}
             type="button"
             onClick={() => setTab(t.id)}
-            className={`flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] transition-colors ${tab === t.id ? "text-[var(--accent-strong)]" : "text-[var(--muted)]"}`}
+            className={`flex flex-1 flex-col items-center gap-1 py-2.5 text-[12px] transition-colors ${tab === t.id ? "text-[var(--accent-strong)]" : "text-[var(--muted)]"}`}
           >
             <t.icon className="h-5 w-5" aria-hidden />
             {t.label}
