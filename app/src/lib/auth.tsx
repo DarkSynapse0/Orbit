@@ -13,6 +13,7 @@ type AuthCtx = {
   ready: boolean;
   hasGoogle: boolean;
   googleReady: boolean;
+  error: string | null;
   renderGoogleButton: (el: HTMLElement, opts?: Record<string, unknown>) => void;
   signInWithGoogle: () => void;
   signInDemo: () => void;
@@ -27,6 +28,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<OrbitUser | null>(null);
   const [ready, setReady] = useState(false);
   const [googleReady, setGoogleReady] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const gsiReady = useRef(false);
 
   const persist = useCallback((u: OrbitUser | null) => {
@@ -40,19 +42,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Exchange a Google credential for a verified server session.
   const exchangeGoogle = useCallback(
     async (credential: string) => {
+      setError(null);
+      let r: Response;
       try {
-        const r = await fetch(`${API}/auth/google`, {
+        r = await fetch(`${API}/auth/google`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ credential }),
         });
-        if (!r.ok) throw new Error(`auth ${r.status}`);
-        const d = (await r.json()) as { token: string; user: OrbitUser };
-        setToken(d.token);
-        persist(d.user);
       } catch (e) {
-        console.error("[auth] Google sign-in failed:", (e as Error).message);
+        // Network/CORS/CSP failure — the API wasn't reachable at all.
+        console.error("[auth] Google exchange could not reach the API:", (e as Error).message);
+        setError(`Couldn't reach the Orbit API at ${API}. Check the backend is running and NEXT_PUBLIC_API_URL is correct.`);
+        return;
       }
+      if (!r.ok) {
+        const body = await r.text().catch(() => "");
+        console.error("[auth] Google exchange rejected:", r.status, body);
+        setError(`Sign-in was rejected by the server (${r.status}). ${body.slice(0, 140)}`);
+        return;
+      }
+      const d = (await r.json()) as { token: string; user: OrbitUser };
+      setToken(d.token);
+      persist(d.user);
     },
     [persist],
   );
@@ -107,6 +119,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [exchangeGoogle]);
 
   const signInDemo = useCallback(async () => {
+    setError(null);
     try {
       const r = await fetch(`${API}/auth/demo`, { method: "POST" });
       if (!r.ok) throw new Error(`demo ${r.status}`);
@@ -115,6 +128,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       persist(d.user);
     } catch (e) {
       console.error("[auth] demo sign-in failed:", (e as Error).message);
+      setError(`Couldn't reach the Orbit API at ${API}. Is the backend running?`);
     }
   }, [persist]);
 
@@ -157,7 +171,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [persist]);
 
   return (
-    <Ctx.Provider value={{ user, ready, hasGoogle: !!CLIENT_ID, googleReady, renderGoogleButton, signInWithGoogle, signInDemo, signOut }}>
+    <Ctx.Provider value={{ user, ready, hasGoogle: !!CLIENT_ID, googleReady, error, renderGoogleButton, signInWithGoogle, signInDemo, signOut }}>
       {children}
     </Ctx.Provider>
   );

@@ -13,7 +13,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 // forms. We render Google's own branded button when GSI is ready; otherwise a
 // token-styled fallback that still signs in (demo account when no client id).
 export function AuthScreen() {
-  const { googleReady, hasGoogle, renderGoogleButton, signInWithGoogle, signInDemo } = useAuth();
+  const { googleReady, hasGoogle, error, renderGoogleButton, signInWithGoogle, signInDemo } = useAuth();
   const btnRef = useRef<HTMLDivElement>(null);
   const [mode, setMode] = useState<"signin" | "signup">("signin");
 
@@ -103,6 +103,12 @@ export function AuthScreen() {
                   </button>
                 )}
               </div>
+
+              {error && (
+                <p className="mt-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-[12px] leading-relaxed text-red-600 dark:text-red-400">
+                  {error}
+                </p>
+              )}
 
               <div className="my-5 flex items-center gap-3 text-xs text-[var(--muted)]">
                 <span className="h-px flex-1 bg-[var(--border)]" />
