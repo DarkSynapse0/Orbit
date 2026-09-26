@@ -91,7 +91,7 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
     if (!program || !publicKey || !mint || !pdas) return;
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const acc: any = await program.account.vault.fetchNullable(pdas.vault);
+      const acc: any = await (program.account as any).vault.fetchNullable(pdas.vault);
       setPrincipal(acc ? Number(acc.principal) / 10 ** DECIMALS : null);
     } catch {
       setPrincipal(null);
@@ -152,7 +152,7 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
       }
       const userAta = getAssociatedTokenAddressSync(pdas.mintPk, publicKey);
       const ixs = [];
-      const exists = await program.account.vault.fetchNullable(pdas.vault);
+      const exists = await (program.account as any).vault.fetchNullable(pdas.vault);
       if (!exists) {
         ixs.push(
           await program.methods
@@ -194,7 +194,7 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
       if (!program || !publicKey || !mint || !pdas) return;
       // Withdraw the full principal; the reserve pays it back plus all accrued interest.
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const acc: any = await program.account.vault.fetchNullable(pdas.vault);
+      const acc: any = await (program.account as any).vault.fetchNullable(pdas.vault);
       const principalBase = acc ? new BN(acc.principal.toString()) : new BN(0);
       if (principalBase.isZero()) {
         setStatus("Nothing to withdraw");

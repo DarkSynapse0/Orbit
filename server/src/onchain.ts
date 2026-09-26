@@ -1,5 +1,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
+import path from 'node:path';
+import bs58 from 'bs58';
 import * as anchor from '@coral-xyz/anchor';
 import { Connection, Keypair, PublicKey, SystemProgram, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
 import { createMint, getOrCreateAssociatedTokenAccount, mintTo, TOKEN_PROGRAM_ID } from '@solana/spl-token';
@@ -29,9 +31,24 @@ type Ctx = {
 };
 
 let ctxPromise: Promise<Ctx> | null = null;
-const mintFile = new URL('../.devnet.json', import.meta.url);
+// Saved test mint lives on the data volume when DATA_DIR is set (survives redeploys),
+// otherwise alongside the source for local dev.
+const mintFile: string | URL = config.dataDir
+  ? path.join(config.dataDir, 'devnet.json')
+  : new URL('../.devnet.json', import.meta.url);
 
 function loadKeypair(): Keypair {
+  // Prefer an env secret (for hosted deploys); fall back to the local CLI wallet (dev).
+  const secret = config.funderSecretKey.trim();
+  if (secret) {
+    try {
+      if (secret.startsWith('[')) return Keypair.fromSecretKey(Uint8Array.from(JSON.parse(secret)));
+      // base58-encoded secret key
+      return Keypair.fromSecretKey(bs58.decode(secret));
+    } catch (e) {
+      throw new Error(`FUNDER_SECRET_KEY is set but invalid: ${(e as Error).message}`);
+    }
+  }
   const path = `${os.homedir()}/.config/solana/id.json`;
   return Keypair.fromSecretKey(Uint8Array.from(JSON.parse(fs.readFileSync(path, 'utf8'))));
 }
@@ -65,13 +82,22 @@ function reservePdas(program: anchor.Program, mint: PublicKey) {
   return { reserve, reserveVault };
 }
 
+function readIdl(): string {
+  const bundled = new URL('./idl/orbit_vault.json', import.meta.url);
+  try {
+    return fs.readFileSync(bundled, 'utf8');
+  } catch {
+    return fs.readFileSync(new URL('../../orbit-vault/target/idl/orbit_vault.json', import.meta.url), 'utf8');
+  }
+}
+
 async function build(): Promise<Ctx> {
   const wallet = loadKeypair();
   const connection = new Connection(config.solana.rpcUrl, 'confirmed');
   const provider = new anchor.AnchorProvider(connection, new anchor.Wallet(wallet), { commitment: 'confirmed' });
-  const idl = JSON.parse(
-    fs.readFileSync(new URL('../../orbit-vault/target/idl/orbit_vault.json', import.meta.url), 'utf8'),
-  ) as anchor.Idl;
+  // IDL is bundled with the server (works on hosts without the Anchor build tree);
+  // fall back to the built copy in the monorepo for local dev after a rebuild.
+  const idl = JSON.parse(readIdl()) as anchor.Idl;
   const program = new anchor.Program(idl, provider);
   const mint = await loadOrCreateMint(connection, wallet);
   const ata = await getOrCreateAssociatedTokenAccount(connection, wallet, mint, wallet.publicKey);

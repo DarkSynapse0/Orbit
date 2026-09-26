@@ -1,11 +1,16 @@
 import { DatabaseSync } from 'node:sqlite';
 import { fileURLToPath } from 'node:url';
+import path from 'node:path';
 import type { SavingsState } from '@orbit/shared';
+import { config } from './config.js';
 
 // Durable earmark ledger backed by SQLite (Node's built-in node:sqlite — zero deps).
 // "pending" = earmarked, dollars still in the user's bank; "invested" = USDC in the vault.
-// Survives server restarts, unlike the previous in-memory Map.
-const dbPath = fileURLToPath(new URL('../.orbit.db', import.meta.url));
+// Survives server restarts, unlike the previous in-memory Map. On a host with a mounted
+// volume, DATA_DIR points the db at that volume so it persists across redeploys.
+const dbPath = config.dataDir
+  ? path.join(config.dataDir, 'orbit.db')
+  : fileURLToPath(new URL('../.orbit.db', import.meta.url));
 const db = new DatabaseSync(dbPath);
 db.exec(`
   CREATE TABLE IF NOT EXISTS savings (

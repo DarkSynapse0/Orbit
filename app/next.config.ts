@@ -43,6 +43,8 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Compile the workspace TS package (no prebuilt dist) during `next build` on Vercel.
+  transpilePackages: ["@orbit/shared"],
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

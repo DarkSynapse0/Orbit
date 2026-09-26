@@ -25,4 +25,10 @@ export const config = {
   googleClientId: process.env.GOOGLE_CLIENT_ID ?? process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? '',
   // Secret used to sign session tokens. MUST be set in production.
   sessionSecret: process.env.SESSION_SECRET ?? 'dev-only-insecure-session-secret-change-me',
+  // Where persistent files (SQLite db, saved mint) live. On a host with a mounted
+  // volume set this to that path (e.g. /data). Empty = alongside the source (local dev).
+  dataDir: process.env.DATA_DIR ?? '',
+  // Funder/authority secret key for on-chain ops. base58 string or a JSON byte array.
+  // Falls back to the local Solana CLI wallet when unset (local dev only).
+  funderSecretKey: process.env.FUNDER_SECRET_KEY ?? '',
 };
