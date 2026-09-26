@@ -116,7 +116,7 @@ export default function Landing() {
             Three steps. Then nothing.
           </h2>
         </Reveal>
-        <div className="mt-16 grid gap-x-10 gap-y-12 sm:grid-cols-3">
+        <div className="mt-16 grid grid-cols-1 gap-x-10 gap-y-12 sm:grid-cols-3">
           {[
             { n: "01", icon: Landmark, t: "You spend", d: "Connect your bank. Orbit watches through Plaid. It never touches your money." },
             { n: "02", icon: Coins, t: "Orbit invests", d: "A little per purchase, converted to USDC and deposited into your on-chain vault." },
@@ -138,8 +138,8 @@ export default function Landing() {
 
       {/* ───────── The output: growth chart ───────── */}
       <section className="mx-auto w-full max-w-6xl px-6 pb-24 lg:pb-32">
-        <div className="grid gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
-          <Reveal>
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
+          <Reveal className="min-w-0">
             <div className={`${eyebrow} text-[var(--accent-strong)]`}>The output</div>
             <h2 className="mt-4 font-display text-[clamp(1.9rem,4vw,3.25rem)] font-semibold leading-[1.02] tracking-[-0.03em]">
               Idle cash loses.
@@ -194,7 +194,7 @@ export default function Landing() {
 
       {/* ───────── Inverted band: the set-aside rule ───────── */}
       <section className="bg-[var(--contrast)] text-[var(--contrast-fg)]">
-        <div className="mx-auto grid max-w-6xl gap-12 px-6 py-24 lg:grid-cols-2 lg:items-center lg:py-28">
+        <div className="mx-auto grid max-w-6xl grid-cols-1 gap-12 px-6 py-24 lg:grid-cols-2 lg:items-center lg:py-28">
           <Reveal>
             <div className={`${eyebrow}`} style={{ color: "var(--accent)" }}>Automatic</div>
             <h2 className="mt-4 font-display text-[clamp(1.9rem,4vw,3.25rem)] font-semibold leading-[1.02] tracking-[-0.03em]">
@@ -252,8 +252,8 @@ export default function Landing() {
 
       {/* ───────── On-chain proof ───────── */}
       <section id="proof" className="border-t border-[var(--border)]">
-        <div className="mx-auto grid w-full max-w-6xl scroll-mt-20 gap-12 px-6 py-24 lg:grid-cols-2 lg:items-center lg:py-32">
-          <Reveal>
+        <div className="mx-auto grid w-full max-w-6xl grid-cols-1 scroll-mt-20 gap-12 px-6 py-24 lg:grid-cols-2 lg:items-center lg:py-32">
+          <Reveal className="min-w-0">
             <div className={`${eyebrow} text-[var(--accent-strong)]`}>Verifiable</div>
             <h2 className="mt-4 font-display text-[clamp(1.9rem,4vw,3.25rem)] font-semibold leading-[1.02] tracking-[-0.03em]">
               Don&rsquo;t trust it. Check it.
@@ -265,7 +265,7 @@ export default function Landing() {
               href={solAcct(PROGRAM)}
               target="_blank"
               rel="noreferrer"
-              className="mt-7 inline-flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 transition-colors hover:border-[var(--border-strong)]"
+              className="mt-7 inline-flex max-w-full items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 transition-colors hover:border-[var(--border-strong)]"
             >
               <span className="min-w-0">
                 <span className={`block ${eyebrow} text-[var(--faint)]`}>Vault program</span>

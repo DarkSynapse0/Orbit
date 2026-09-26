@@ -67,10 +67,18 @@
   --font-mono: var(--ff-mono);
 }
 
+/* Mobile-first safety net: clip any stray horizontal overflow so phones never
+   sideways-scroll. `clip` (not `hidden`) doesn't create a scroll container, so
+   the sticky header still works. */
+html {
+  overflow-x: clip;
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--ff-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  overflow-x: clip;
 }
 
 ::selection {
