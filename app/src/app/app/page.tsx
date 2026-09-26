@@ -23,13 +23,11 @@ import {
   ArrowDownToLine,
   ArrowUpFromLine,
   ChevronRight,
-  ChevronLeft,
-  ChevronDown,
   Coins,
   ShieldCheck,
   Wallet,
 } from "lucide-react";
-import { StatCard, GroupedBars, Donut, Bars, HBars } from "@/components/dashboard/Charts";
+import { StatCard, LineArea, Donut, HBars } from "@/components/dashboard/Charts";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletVault } from "@/components/WalletVault";
 import { OrbitMark } from "@/components/landing/OrbitMark";
@@ -58,6 +56,7 @@ type OnChain = {
   cluster: string;
 };
 type Entry = { id: number; kind: "spend" | "deposit" | "none" | "info"; text: string };
+type Txn = { id: number; name: string; category: string; amountUsd: number; setAside: number; deposited: boolean; ts: number };
 type TabId = "overview" | "activity" | "vault" | "bank" | "automation" | "earn" | "account" | "settings";
 
 const usd = (n: number) => `$${n.toFixed(2)}`;
@@ -67,30 +66,14 @@ const solAcct = (a: string) => `https://solscan.io/account/${a}?cluster=devnet`;
 
 const PANEL = "rounded-2xl border border-[var(--border)] bg-[var(--surface)]";
 
-// Illustrative analytics data for the dashboard (demo).
-const SAMPLE_WEEKLY = [
-  { x: "W1", a: 40, b: 90 },
-  { x: "W2", a: 65, b: 120 },
-  { x: "W3", a: 50, b: 150 },
-  { x: "W4", a: 85, b: 200 },
-  { x: "W5", a: 45, b: 230 },
-  { x: "W6", a: 70, b: 290 },
-  { x: "W7", a: 60, b: 340 },
-];
-const SAMPLE_MONTHLY = [
-  { x: "Jan", v: 45 },
-  { x: "Feb", v: 62 },
-  { x: "Mar", v: 38 },
-  { x: "Apr", v: 78 },
-  { x: "May", v: 52 },
-  { x: "Jun", v: 84 },
-];
+// Placeholder shown only until there are real transactions (fresh account).
+const SAMPLE_LINE = [15, 25, 30, 45, 55, 75, 90, 110, 130, 160];
+const SAMPLE_LINE_LABELS = ["", "", "", "", "", "", "", "", "", "now"];
 const SAMPLE_CATEGORIES = [
-  { label: "Groceries", v: 320 },
-  { label: "Dining", v: 180 },
-  { label: "Transport", v: 140 },
-  { label: "Shopping", v: 95 },
-  { label: "Bills", v: 60 },
+  { label: "Groceries", v: 25 },
+  { label: "Dining", v: 20 },
+  { label: "Transport", v: 15 },
+  { label: "Shopping", v: 10 },
 ];
 
 // Yield venues the vault's USDC can be routed to. The Orbit reserve is live on devnet now;
@@ -253,6 +236,22 @@ export default function Home() {
     fetch(`${API}/vault?owner=${owner}`).then((r) => r.json()).then((v) => { if (!v.error) setOnchain(v); }).catch(() => {});
   }, [owner]);
 
+  const [txns, setTxns] = useState<Txn[]>([]);
+  const refreshTxns = useCallback(() => {
+    fetch(`${API}/plaid/transactions?userId=demo`)
+      .then((r) => r.json())
+      .then((d) => setTxns(d.transactions ?? []))
+      .catch(() => {});
+  }, []);
+  useEffect(() => {
+    refreshTxns();
+    // Load the saved state so balances survive reloads.
+    fetch(`${API}/plaid/state?userId=demo`)
+      .then((r) => r.json())
+      .then((d) => d.state && setState(d.state))
+      .catch(() => {});
+  }, [refreshTxns]);
+
   useEffect(() => {
     if (!connected || !owner) {
       setOnchain(null);
@@ -275,6 +274,7 @@ export default function Home() {
         });
         const data: { setAside: number; deposited: boolean; needsWallet?: boolean; depositError?: string; state: SavingsState } = await res.json();
         setState(data.state);
+        refreshTxns();
         if (data.setAside > 0) log("spend", `Spent ${usd(amt)} · set aside ${usd(data.setAside)}`);
         else log("none", `Spent ${usd(amt)} · below tier, nothing set aside`);
         if (data.deposited) {
@@ -292,7 +292,7 @@ export default function Home() {
         setBusy(false);
       }
     },
-    [owner, refreshVault],
+    [owner, refreshVault, refreshTxns],
   );
 
   const connectBank = useCallback(async () => {
@@ -336,12 +336,13 @@ export default function Home() {
         if (d.state.lastDepositSig && !d.state.lastDepositSig.startsWith("mock-")) setLastSig(d.state.lastDepositSig);
         if ((d.processed ?? []).some((p: { deposited: boolean }) => p.deposited)) refreshVault();
       }
+      refreshTxns();
     } catch {
       log("none", "Plaid sync failed");
     } finally {
       setSyncing(false);
     }
-  }, [owner, refreshVault]);
+  }, [owner, refreshVault, refreshTxns]);
 
   const reset = useCallback(async () => {
     await fetch(`${API}/plaid/reset`, {
@@ -354,7 +355,8 @@ export default function Home() {
     setLastSig(null);
     setPlaid((p) => (p ? { ...p, connected: false } : p));
     refreshVault();
-  }, [refreshVault]);
+    refreshTxns();
+  }, [refreshVault, refreshTxns]);
 
   const feedIcon = (kind: Entry["kind"]) => {
     if (kind === "deposit") return <Zap className="h-4 w-4 text-[var(--accent)]" aria-hidden />;
@@ -368,6 +370,28 @@ export default function Home() {
     const rate = selectedVenue.apy / 100;
     return a * Math.pow(1 + rate, projYears);
   }, [projAmt, projYears, selectedVenue.apy]);
+
+  // Real chart data derived from the transaction history (simple + readable).
+  const analytics = useMemo(() => {
+    const asc = [...txns].sort((a, b) => a.ts - b.ts);
+    let cum = 0;
+    const pts = asc.map((t) => {
+      cum += t.setAside;
+      return { ts: t.ts, cum };
+    });
+    const recent = pts.slice(-10);
+    const savingsLine = recent.map((p) => Math.round(p.cum));
+    const savingsLabels = recent.map((p) =>
+      new Date(p.ts).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+    );
+    const catMap: Record<string, number> = {};
+    for (const t of txns) catMap[t.category] = (catMap[t.category] ?? 0) + t.setAside;
+    const categories = Object.entries(catMap)
+      .map(([label, v]) => ({ label, v: Math.round(v) }))
+      .sort((a, b) => b.v - a.v)
+      .slice(0, 5);
+    return { hasData: txns.length > 0, savingsLine, savingsLabels, categories, totalSaved: Math.round(cum) };
+  }, [txns]);
 
   const activeLabel = [...SECTION_TABS, ...SIDEBAR_TABS].find((t) => t.id === tab)?.label ?? "";
 
@@ -467,110 +491,60 @@ export default function Home() {
           {/* ───────── Overview ───────── */}
           {tab === "overview" && (
             <div className="space-y-4">
-              {/* Stat cards */}
+              {/* Three simple numbers */}
               <div className="grid gap-4 sm:grid-cols-3">
                 <StatCard
                   highlight
                   icon={<Wallet className="h-5 w-5 text-[var(--foreground)]" aria-hidden />}
-                  delta={{ up: true, value: "6.0%" }}
+                  delta={{ up: true, value: "6% a year" }}
                   value={usd(total)}
-                  label="Total balance"
+                  label="Total saved"
                 />
                 <StatCard
                   icon={<Coins className="h-5 w-5 text-[var(--foreground)]" aria-hidden />}
                   delta={onchain ? { up: true, value: "on-chain" } : undefined}
                   value={usd(principalUsd)}
-                  label="Invested in vault"
+                  label="In your vault"
                 />
                 <StatCard
                   icon={<TrendingUp className="h-5 w-5 text-[var(--accent-strong)]" aria-hidden />}
                   delta={{ up: true, value: "live" }}
                   value={liveYield.toFixed(6)}
-                  label="Yield earned"
+                  label="Interest earned"
                 />
               </div>
 
-              {/* Main + right analytics */}
+              {/* Savings chart + quick actions / activity */}
               <div className="grid gap-4 lg:grid-cols-3">
-                {/* Left column */}
-                <div className="space-y-4 lg:col-span-2">
-                  <section className={`${PANEL} p-6`}>
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-display text-[15px] font-semibold">Savings analytic</h3>
-                      <div className="flex items-center gap-1.5">
-                        <button type="button" className="inline-flex items-center gap-1 rounded-lg border border-[var(--border)] px-2.5 py-1 text-[12px] text-[var(--muted)] transition-colors hover:bg-[var(--background)]">
-                          7 weeks <ChevronDown className="h-3 w-3" aria-hidden />
-                        </button>
-                        <button type="button" aria-label="Previous" className="grid h-7 w-7 place-items-center rounded-lg border border-[var(--border)] text-[var(--muted)] transition-colors hover:bg-[var(--background)]"><ChevronLeft className="h-3.5 w-3.5" aria-hidden /></button>
-                        <button type="button" aria-label="Next" className="grid h-7 w-7 place-items-center rounded-lg border border-[var(--border)] text-[var(--muted)] transition-colors hover:bg-[var(--background)]"><ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>
-                      </div>
+                <section className={`${PANEL} p-6 lg:col-span-2`}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-display text-[15px] font-semibold">Your savings over time</h3>
+                      <p className="mt-0.5 text-[12px] text-[var(--muted)]">Growing every second at 6% a year</p>
                     </div>
-                    <div className="mt-6">
-                      <GroupedBars data={SAMPLE_WEEKLY} aLabel="Set aside" bLabel="In vault" />
-                    </div>
-                  </section>
-
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <section className={`${PANEL} p-6`}>
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-display text-[15px] font-semibold">Allocation</h3>
-                        <span className="rounded-lg border border-[var(--border)] px-2.5 py-1 text-[12px] text-[var(--muted)]">This month</span>
-                      </div>
-                      <div className="mt-6">
-                        <Donut
-                          centerTop={usd(total)}
-                          centerBottom="total"
-                          segments={
-                            principalUsd + state.pendingUsd + liveYield > 0.001
-                              ? [
-                                  { label: "In vault", value: principalUsd, color: "var(--accent)" },
-                                  { label: "Set aside", value: state.pendingUsd, color: "var(--muted)" },
-                                  { label: "Yield", value: liveYield, color: "var(--faint)" },
-                                ]
-                              : [
-                                  { label: "In vault", value: 80, color: "var(--accent)" },
-                                  { label: "Set aside", value: 15, color: "var(--muted)" },
-                                  { label: "Yield", value: 5, color: "var(--faint)" },
-                                ]
-                          }
-                        />
-                      </div>
-                    </section>
-
-                    <section className={`${PANEL} p-6`}>
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-display text-[15px] font-semibold">Set-asides</h3>
-                        <span className="rounded-lg border border-[var(--border)] px-2.5 py-1 text-[12px] text-[var(--muted)]">6 months</span>
-                      </div>
-                      <div className="mt-6">
-                        <Bars data={SAMPLE_MONTHLY} />
-                      </div>
-                    </section>
+                    {!analytics.hasData && (
+                      <span className="rounded-lg border border-[var(--border)] px-2.5 py-1 text-[11px] text-[var(--faint)]">sample</span>
+                    )}
                   </div>
-                </div>
+                  <div className="mt-6">
+                    <LineArea
+                      series={[{ label: "Saved", points: analytics.hasData ? analytics.savingsLine : SAMPLE_LINE }]}
+                      xLabels={analytics.hasData ? analytics.savingsLabels : SAMPLE_LINE_LABELS}
+                      fmtY={(v) => `$${v >= 1000 ? `${Math.round(v / 1000)}k` : Math.round(v)}`}
+                    />
+                  </div>
+                </section>
 
-                {/* Right column */}
                 <div className="space-y-4">
-                  <section className={`${PANEL} p-6`}>
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-display text-[15px] font-semibold">By category</h3>
-                      <span className="rounded-lg border border-[var(--border)] px-2.5 py-1 text-[12px] text-[var(--muted)]">This month</span>
-                    </div>
-                    <p className="mt-1 text-[11px] text-[var(--faint)]">Where your set-asides come from</p>
-                    <div className="mt-5">
-                      <HBars rows={SAMPLE_CATEGORIES} />
-                    </div>
-                  </section>
-
                   <section className={`${PANEL} p-6`}>
                     <SectionLabel>Quick actions</SectionLabel>
                     <div className="mt-4 space-y-2">
                       <button type="button" onClick={() => setTab("vault")} className="flex w-full items-center gap-2 rounded-xl bg-[var(--contrast)] px-4 py-2.5 text-[13px] font-semibold text-[var(--contrast-fg)] transition-opacity hover:opacity-90">
-                        <ArrowDownToLine className="h-4 w-4" aria-hidden /> Deposit
+                        <ArrowDownToLine className="h-4 w-4" aria-hidden /> Add money
                       </button>
                       <div className="grid grid-cols-2 gap-2">
                         <button type="button" onClick={() => setTab("vault")} className="flex items-center justify-center gap-2 rounded-xl border border-[var(--border-strong)] px-3 py-2.5 text-[13px] font-medium transition-colors hover:bg-[var(--background)]">
-                          <ArrowUpFromLine className="h-4 w-4" aria-hidden /> Withdraw
+                          <ArrowUpFromLine className="h-4 w-4" aria-hidden /> Take out
                         </button>
                         <button type="button" onClick={() => setTab("bank")} className="flex items-center justify-center gap-2 rounded-xl border border-[var(--border-strong)] px-3 py-2.5 text-[13px] font-medium transition-colors hover:bg-[var(--background)]">
                           <ShoppingBag className="h-4 w-4" aria-hidden /> Spend
@@ -583,11 +557,11 @@ export default function Home() {
                     <div className="flex items-center justify-between">
                       <h3 className="font-display text-[15px] font-semibold">Recent activity</h3>
                       <button type="button" onClick={() => setTab("activity")} className="inline-flex items-center gap-1 text-[12px] text-[var(--muted)] hover:text-[var(--foreground)]">
-                        View all <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+                        See all <ChevronRight className="h-3.5 w-3.5" aria-hidden />
                       </button>
                     </div>
                     {feed.length === 0 ? (
-                      <p className="mt-4 text-[13px] text-[var(--muted)]">No activity yet. Sync a bank or add spending to start.</p>
+                      <p className="mt-4 text-[13px] text-[var(--muted)]">Nothing yet. Spend or sync a bank to start saving.</p>
                     ) : (
                       <ul className="mt-4 space-y-2.5">
                         {feed.slice(0, 5).map((e) => (
@@ -600,6 +574,41 @@ export default function Home() {
                     )}
                   </section>
                 </div>
+              </div>
+
+              {/* Where it comes from + where the money is */}
+              <div className="grid gap-4 lg:grid-cols-2">
+                <section className={`${PANEL} p-6`}>
+                  <h3 className="font-display text-[15px] font-semibold">Where your savings come from</h3>
+                  <p className="mt-0.5 text-[12px] text-[var(--muted)]">Set aside from your spending</p>
+                  <div className="mt-5">
+                    <HBars rows={analytics.categories.length ? analytics.categories : SAMPLE_CATEGORIES} />
+                  </div>
+                </section>
+
+                <section className={`${PANEL} p-6`}>
+                  <h3 className="font-display text-[15px] font-semibold">Where your money is</h3>
+                  <p className="mt-0.5 text-[12px] text-[var(--muted)]">Waiting in bank vs invested</p>
+                  <div className="mt-6">
+                    <Donut
+                      centerTop={usd(total)}
+                      centerBottom="total"
+                      segments={
+                        principalUsd + state.pendingUsd + liveYield > 0.001
+                          ? [
+                              { label: "In your vault", value: principalUsd, color: "var(--accent)" },
+                              { label: "Set aside", value: state.pendingUsd, color: "var(--muted)" },
+                              { label: "Interest", value: liveYield, color: "var(--faint)" },
+                            ]
+                          : [
+                              { label: "In your vault", value: 80, color: "var(--accent)" },
+                              { label: "Set aside", value: 15, color: "var(--muted)" },
+                              { label: "Interest", value: 5, color: "var(--faint)" },
+                            ]
+                      }
+                    />
+                  </div>
+                </section>
               </div>
             </div>
           )}

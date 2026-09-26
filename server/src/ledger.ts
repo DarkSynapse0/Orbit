@@ -14,7 +14,65 @@ db.exec(`
     invested_usd      REAL NOT NULL DEFAULT 0,
     last_deposit_sig  TEXT
   );
+  CREATE TABLE IF NOT EXISTS transactions (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id     TEXT NOT NULL,
+    name        TEXT NOT NULL,
+    category    TEXT NOT NULL DEFAULT 'Other',
+    amount_usd  REAL NOT NULL,
+    set_aside   REAL NOT NULL DEFAULT 0,
+    deposited   INTEGER NOT NULL DEFAULT 0,
+    ts          INTEGER NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS idx_txn_user_ts ON transactions (user_id, ts);
 `);
+
+export type Txn = {
+  id: number;
+  name: string;
+  category: string;
+  amountUsd: number;
+  setAside: number;
+  deposited: boolean;
+  ts: number;
+};
+
+const insertTxnStmt = db.prepare(
+  `INSERT INTO transactions (user_id, name, category, amount_usd, set_aside, deposited, ts)
+   VALUES (?, ?, ?, ?, ?, ?, ?)`,
+);
+const selectTxnStmt = db.prepare('SELECT * FROM transactions WHERE user_id = ? ORDER BY ts DESC, id DESC LIMIT ?');
+const deleteTxnStmt = db.prepare('DELETE FROM transactions WHERE user_id = ?');
+
+/** Record a processed spend/set-aside so the dashboard can chart real history. */
+export function recordTxn(
+  userId: string,
+  t: { name: string; category: string; amountUsd: number; setAside: number; deposited: boolean; ts: number },
+): void {
+  insertTxnStmt.run(userId, t.name, t.category, t.amountUsd, t.setAside, t.deposited ? 1 : 0, t.ts);
+}
+
+/** Recent transactions, newest first. */
+export function getTransactions(userId: string, limit = 500): Txn[] {
+  const rows = selectTxnStmt.all(userId, limit) as {
+    id: number;
+    name: string;
+    category: string;
+    amount_usd: number;
+    set_aside: number;
+    deposited: number;
+    ts: number;
+  }[];
+  return rows.map((r) => ({
+    id: r.id,
+    name: r.name,
+    category: r.category,
+    amountUsd: r.amount_usd,
+    setAside: r.set_aside,
+    deposited: !!r.deposited,
+    ts: r.ts,
+  }));
+}
 
 type Row = { user_id: string; pending_usd: number; invested_usd: number; last_deposit_sig: string | null };
 
@@ -65,8 +123,9 @@ export function moveToInvested(userId: string, amountUsd: number, sig: string): 
   return s;
 }
 
-/** Clear a user's state (demo replay). */
+/** Clear a user's state + transaction history (demo replay). */
 export function resetState(userId: string): SavingsState {
   deleteStmt.run(userId);
+  deleteTxnStmt.run(userId);
   return getState(userId);
 }

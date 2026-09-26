@@ -109,6 +109,88 @@ export function GroupedBars({
   );
 }
 
+// Multi-series line chart: first series gets a filled area, others render as dashed lines.
+export function LineArea({
+  series,
+  xLabels,
+  fmtY = (v) => (v >= 1000 ? `${Math.round(v / 1000)}k` : `${Math.round(v)}`),
+}: {
+  series: { label: string; points: number[]; dashed?: boolean }[];
+  xLabels: string[];
+  fmtY?: (v: number) => string;
+}) {
+  const W = 580, H = 240, L = 26, R = 12, T = 16, B = 26;
+  const max = Math.max(1, ...series.flatMap((s) => s.points));
+  const n = Math.max(1, xLabels.length);
+  const x = (i: number) => L + (n <= 1 ? (W - L - R) / 2 : (i * (W - L - R)) / (n - 1));
+  const y = (v: number) => T + (1 - v / max) * (H - T - B);
+  const toLine = (pts: number[]) => pts.map((v, i) => `${i ? "L" : "M"} ${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(" ");
+  const toArea = (pts: number[]) => `${toLine(pts)} L ${x(pts.length - 1).toFixed(1)} ${H - B} L ${x(0).toFixed(1)} ${H - B} Z`;
+  const ticks = 3;
+  const first = series[0];
+  const lastX = first ? x(first.points.length - 1) : 0;
+  const lastY = first ? y(first.points[first.points.length - 1] ?? 0) : 0;
+  // show a subset of x labels to avoid crowding
+  const labelStep = Math.ceil(n / 7);
+  return (
+    <div>
+      <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img" aria-label="Savings over time">
+        <defs>
+          <linearGradient id="laArea" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.22" />
+            <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        {Array.from({ length: ticks + 1 }, (_, i) => {
+          const v = (max * (ticks - i)) / ticks;
+          return (
+            <g key={i}>
+              <line x1={L} x2={W - R} y1={y(v)} y2={y(v)} stroke="var(--chart-grid)" strokeWidth="1" />
+              <text x={0} y={y(v) + 3} fill="var(--chart-axis)" fontSize="9" fontFamily="var(--font-mono)">{fmtY(v)}</text>
+            </g>
+          );
+        })}
+        {first && <path d={toArea(first.points)} fill="url(#laArea)" />}
+        {series.map((s, si) =>
+          s.points.length > 1 ? (
+            <path
+              key={s.label}
+              d={toLine(s.points)}
+              fill="none"
+              stroke={si === 0 ? "var(--accent)" : "var(--chart-dash)"}
+              strokeWidth={si === 0 ? 2.5 : 1.75}
+              strokeDasharray={s.dashed ? "5 5" : undefined}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          ) : null,
+        )}
+        {first && first.points.length > 0 && (
+          <circle cx={lastX} cy={lastY} r="4" fill="var(--accent)" stroke="var(--chart-ring)" strokeWidth="2" />
+        )}
+      </svg>
+      <div className="mt-1 flex justify-between px-1">
+        {xLabels.map((lbl, i) => (
+          <span key={i} className="flex-1 text-center font-mono text-[10px] text-[var(--faint)]">
+            {i % labelStep === 0 || i === xLabels.length - 1 ? lbl : ""}
+          </span>
+        ))}
+      </div>
+      <div className="mt-3 flex items-center gap-5 text-[12px] text-[var(--muted)]">
+        {series.map((s, si) => (
+          <span key={s.label} className="flex items-center gap-2">
+            <span
+              className={`h-2.5 w-4 rounded-full ${si === 0 ? "bg-[var(--accent)]" : ""}`}
+              style={si === 0 ? undefined : { borderTop: "2px dashed var(--chart-dash)" }}
+            />
+            {s.label}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // Simple single-series bars.
 export function Bars({ data }: { data: { x: string; v: number }[] }) {
   const max = Math.max(1, ...data.map((d) => d.v));

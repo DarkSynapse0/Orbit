@@ -1,16 +1,28 @@
 import { Router } from 'express';
 import { computeSetAside, DEFAULT_TIERS } from '@orbit/shared';
-import { addPending, moveToInvested, getState, resetState } from '../ledger.js';
+import { addPending, moveToInvested, getState, resetState, recordTxn, getTransactions } from '../ledger.js';
 import { simulateStripeDeposit, depositToVault } from '../solana.js';
 import { isConfigured, hasItem, connectSandbox, syncTransactions, clearItem } from '../plaidClient.js';
 import { config } from '../config.js';
 
 export const plaidRouter = Router();
 
+// Bucket a merchant name into a spending category for the dashboard breakdown.
+function categorize(name: string): string {
+  const n = name.toLowerCase();
+  const has = (...k: string[]) => k.some((w) => n.includes(w));
+  if (has('grocery', 'market', 'whole foods', 'walmart', 'costco', 'trader', 'aldi', 'kroger', 'food')) return 'Groceries';
+  if (has('coffee', 'starbucks', 'cafe', 'restaurant', 'mcdonald', 'burger', 'pizza', 'dining', 'bar', 'grill', 'kfc', 'taco')) return 'Dining';
+  if (has('uber', 'lyft', 'gas', 'shell', 'chevron', 'fuel', 'transit', 'airline', 'air', 'metro', 'parking', 'auto')) return 'Transport';
+  if (has('amazon', 'shop', 'store', 'target', 'best buy', 'apple', 'nike', 'mall', 'sparkfun')) return 'Shopping';
+  if (has('electric', 'utility', 'comcast', 'verizon', 'at&t', 'bill', 'insurance', 'rent', 'water', 'internet', 'phone')) return 'Bills';
+  return 'Other';
+}
+
 // Shared pipeline: earmark -> threshold -> (mock Stripe) -> real deposit into the user's vault.
 // `wallet` is the connected user's address (the vault owner). Without it we can still earmark,
 // but the deposit waits until a wallet is connected — the money stays in the bank until then.
-async function runPipeline(userId: string, amountUsd: number, wallet?: string) {
+async function runPipeline(userId: string, amountUsd: number, wallet?: string, name = 'Purchase') {
   const setAside = computeSetAside(amountUsd, DEFAULT_TIERS);
   if (setAside > 0) addPending(userId, setAside);
 
@@ -38,6 +50,15 @@ async function runPipeline(userId: string, amountUsd: number, wallet?: string) {
       }
     }
   }
+  // Persist the transaction so the dashboard can chart real history.
+  recordTxn(userId, {
+    name,
+    category: categorize(name),
+    amountUsd,
+    setAside,
+    deposited,
+    ts: Date.now(),
+  });
   return { setAside, deposited, needsWallet, depositError, batch };
 }
 
@@ -78,7 +99,7 @@ plaidRouter.post('/sync', async (req, res) => {
     const processed = [];
     let needsWallet = false;
     for (const p of purchases) {
-      const r = await runPipeline(userId, p.amountUsd, wallet);
+      const r = await runPipeline(userId, p.amountUsd, wallet, p.name);
       processed.push({ name: p.name, amountUsd: p.amountUsd, setAside: r.setAside, deposited: r.deposited, depositError: r.depositError });
       if (r.needsWallet) needsWallet = true;
       if (r.deposited) await new Promise((res) => setTimeout(res, 800)); // ease off the RPC between deposits
@@ -94,8 +115,21 @@ plaidRouter.post('/simulate-purchase', async (req, res) => {
   const userId = (req.body?.userId as string) ?? 'demo';
   const wallet = req.body?.wallet as string | undefined;
   const amountUsd = Number(req.body?.amountUsd);
-  const r = await runPipeline(userId, amountUsd, wallet);
+  const name = (req.body?.name as string) || `Purchase · $${amountUsd}`;
+  const r = await runPipeline(userId, amountUsd, wallet, name);
   res.json({ setAside: r.setAside, deposited: r.deposited, needsWallet: r.needsWallet, depositError: r.depositError, state: getState(userId) });
+});
+
+/** Current saved state (pending + invested) so the dashboard survives reloads. */
+plaidRouter.get('/state', (req, res) => {
+  const userId = (req.query?.userId as string) ?? 'demo';
+  res.json({ state: getState(userId) });
+});
+
+/** Real transaction history for the dashboard charts. */
+plaidRouter.get('/transactions', (req, res) => {
+  const userId = (req.query?.userId as string) ?? 'demo';
+  res.json({ transactions: getTransactions(userId) });
 });
 
 /** Reset a user's earmark/bank state (demo replay). The on-chain vault is the user's own
