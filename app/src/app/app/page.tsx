@@ -744,14 +744,6 @@ export default function Home() {
           {/* ═══════════ SAVE ═══════════ */}
           {tab === "save" && (
             <div className="space-y-4">
-              <div className={`${PANEL} p-6`}>
-                <h3 className="font-display text-[16px] font-semibold">Money comes in on its own</h3>
-                <p className="mt-1 max-w-2xl text-[14px] leading-relaxed text-[var(--muted)]">
-                  Connect your bank and Orbit quietly sets aside a little whenever you spend, then moves it to your vault
-                  once it adds up. You never have to decide to save.
-                </p>
-              </div>
-
               <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
                 {/* Bank */}
                 <section className={`${PANEL} p-6`}>
@@ -819,15 +811,15 @@ export default function Home() {
 
                 <section className={`${PANEL} divide-y divide-[var(--border)]`}>
                   <div className="flex items-center justify-between gap-4 p-5">
-                    <div><div className="text-sm font-medium">Auto-invest at threshold</div><div className="mt-0.5 text-[13px] text-[var(--muted)]">Move set-asides into your vault automatically.</div></div>
+                    <div className="text-sm font-medium">Auto-invest at threshold</div>
                     <Toggle on={autoInvest} onClick={() => setAutoInvest((v) => !v)} label="Auto-invest" />
                   </div>
                   <div className="flex items-center justify-between gap-4 p-5">
-                    <div><div className="text-sm font-medium">Pause saving</div><div className="mt-0.5 text-[13px] text-[var(--muted)]">Keep watching, stop setting aside.</div></div>
+                    <div className="text-sm font-medium">Pause saving</div>
                     <Toggle on={paused} onClick={() => setPaused((v) => !v)} label="Pause" />
                   </div>
                   <div className="flex items-center justify-between gap-4 p-5">
-                    <div><div className="text-sm font-medium">Save more per purchase</div><div className="mt-0.5 text-[13px] text-[var(--muted)]">Multiply each set-aside.</div></div>
+                    <div className="text-sm font-medium">Save more per purchase</div>
                     <div className="flex rounded-full border border-[var(--border)] p-0.5">
                       {[1, 2, 3].map((m) => (
                         <button key={m} type="button" onClick={() => setMultiplier(m)} className={`rounded-full px-3 py-1 text-[14px] font-medium transition-colors ${multiplier === m ? "bg-[var(--contrast)] text-[var(--contrast-fg)]" : "text-[var(--muted)]"}`}>{m}×</button>
