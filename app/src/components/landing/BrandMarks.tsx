@@ -36,17 +36,9 @@ export function PhantomMark({ className = "" }: { className?: string }) {
   );
 }
 
+// eslint-disable-next-line @next/next/no-img-element
 export function StripeMark({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="100 100 312 312" className={className} aria-hidden>
-      <path
-        fill="#635bff"
-        fillRule="evenodd"
-        d="m120 392 272-57.683V120l-272 58.357z"
-        clipRule="evenodd"
-      />
-    </svg>
-  );
+  return <img src="/logos/stripe.png" alt="Stripe" className={`rounded-[22%] object-contain ${className}`} />;
 }
 
 // eslint-disable-next-line @next/next/no-img-element
