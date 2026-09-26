@@ -133,25 +133,6 @@ const NAV: TabDef[] = [
   { id: "account", label: "Account", icon: UserIcon, hint: "Wallet & settings" },
 ];
 
-function CopyAddress({ value, label }: { value: string; label: string }) {
-  const [copied, setCopied] = useState(false);
-  return (
-    <button
-      type="button"
-      onClick={() => {
-        navigator.clipboard?.writeText(value);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1500);
-      }}
-      aria-label={`Copy ${label}`}
-      className="inline-flex items-center gap-1.5 rounded font-mono text-[var(--muted)] transition-colors hover:text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/50"
-    >
-      {copied ? <Check className="h-3.5 w-3.5 text-[var(--accent)]" aria-hidden /> : <Copy className="h-3.5 w-3.5" aria-hidden />}
-      {truncate(value)}
-    </button>
-  );
-}
-
 function ExplorerLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
     <a
@@ -867,139 +848,100 @@ export default function Home() {
           {/* ═══════════ GROW ═══════════ */}
           {tab === "grow" && (
             <div className="space-y-4">
-              <div className={`${PANEL} flex flex-wrap items-center justify-between gap-4 p-6`}>
-                <div>
-                  <h3 className="font-display text-[16px] font-semibold">Your money grows on-chain</h3>
-                  <p className="mt-1 text-[14px] text-[var(--muted)]">Held in your own vault, earning real yield you can withdraw anytime.</p>
-                </div>
-                <div className="flex items-baseline gap-2">
-                  <span className="font-mono text-3xl font-semibold text-[var(--accent-strong)]">{selectedVenue.apy.toFixed(1)}%</span>
-                  <span className="text-[13px] text-[var(--muted)]">APY · {selectedVenue.name}</span>
-                </div>
-              </div>
-
-              {/* Vault + safety/on-chain */}
+              {/* Vault first — the one thing that matters */}
               <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
                 <div className="[&>section]:mt-0">
                   <WalletVault onChanged={refreshVault} />
                 </div>
-                <div className="space-y-4">
-                  <section className={`${PANEL} p-6`}>
-                    <SectionLabel>Why it&rsquo;s safe</SectionLabel>
-                    <ul className="mt-4 space-y-4">
-                      {[
-                        { icon: ShieldCheck, t: "Only your key withdraws", d: "Orbit funds your vault but can never take money out." },
-                        { icon: ExternalLink, t: "On-chain & verifiable", d: "Check the vault on Solscan any time." },
-                        { icon: RefreshCw, t: "Withdraw anytime", d: "No lock-ups, no penalties." },
-                      ].map((s) => (
-                        <li key={s.t} className="flex gap-3">
-                          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[var(--accent-soft)]">
-                            <s.icon className="h-4 w-4 text-[var(--accent-strong)]" aria-hidden />
-                          </span>
-                          <span>
-                            <span className="block text-[14px] font-medium">{s.t}</span>
-                            <span className="block text-[13px] text-[var(--muted)]">{s.d}</span>
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </section>
 
-                  <section className={`${PANEL} p-6`}>
-                    <SectionLabel>On-chain</SectionLabel>
-                    {onchain ? (
-                      <dl className="mt-4 space-y-3 text-[14px]">
-                        {[{ k: "Vault", v: onchain.vaultAccount }, { k: "Yield reserve", v: onchain.reserveVault }, { k: "Program", v: onchain.programId }].map((row) => (
-                          <div key={row.k} className="flex items-center justify-between gap-3 border-b border-[var(--border)] pb-3">
-                            <dt className="text-[var(--muted)]">{row.k}</dt>
-                            <dd className="flex items-center gap-3"><CopyAddress value={row.v} label={row.k} /><ExplorerLink href={solAcct(row.v)}>Solscan</ExplorerLink></dd>
+                {/* Earning: big APY + venue picker + trust chips (was 3 text sections) */}
+                <section className={`${PANEL} p-6`}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <SectionLabel>Earning</SectionLabel>
+                      <div className="mt-2 flex items-baseline gap-1.5">
+                        <span className="font-mono text-4xl font-semibold text-[var(--accent-strong)]">{selectedVenue.apy.toFixed(1)}%</span>
+                        <span className="text-[13px] text-[var(--muted)]">APY</span>
+                      </div>
+                    </div>
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setVenueOpen((o) => !o)}
+                        aria-expanded={venueOpen}
+                        className="flex items-center gap-2 rounded-xl border border-[var(--border-strong)] bg-[var(--background)] px-3 py-2 transition-colors hover:bg-[var(--surface)]"
+                      >
+                        <VenueMark venue={selectedVenue} className="h-6 w-6" />
+                        <span className="max-w-[7rem] truncate text-[13px] font-medium">{selectedVenue.name}</span>
+                        <ChevronDown className={`h-4 w-4 shrink-0 text-[var(--muted)] transition-transform ${venueOpen ? "rotate-180" : ""}`} aria-hidden />
+                      </button>
+                      {venueOpen && (
+                        <>
+                          <button type="button" aria-hidden tabIndex={-1} className="fixed inset-0 z-10 cursor-default" onClick={() => setVenueOpen(false)} />
+                          <div className="absolute right-0 z-20 mt-2 w-[min(20rem,calc(100vw-3rem))] overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)] p-1 shadow-[0_16px_44px_-14px_rgba(2,6,23,0.4)]">
+                            {venues.map((v) => {
+                              const on = v.id === venueId;
+                              return (
+                                <button key={v.id} type="button" onClick={() => selectVenue(v.id)} className={`flex w-full items-center gap-3 rounded-lg px-2.5 py-2.5 text-left transition-colors ${on ? "bg-[var(--accent-soft)]" : "hover:bg-[var(--background)]"}`}>
+                                  <VenueMark venue={v} className="h-8 w-8" />
+                                  <span className="min-w-0 flex-1">
+                                    <span className="flex items-center gap-1.5">
+                                      <span className="truncate text-[14px] font-medium">{v.name}</span>
+                                      {v.live ? <span className="rounded-full bg-[var(--accent-soft)] px-1.5 py-0.5 text-[9px] font-medium text-[var(--accent-strong)]">Live</span> : <span className="rounded-full bg-[var(--background)] px-1.5 py-0.5 text-[9px] text-[var(--muted)]">Mainnet</span>}
+                                    </span>
+                                    <span className="block truncate text-[12px] text-[var(--muted)]">{v.apy.toFixed(1)}% APY · {v.tvl}</span>
+                                  </span>
+                                  {on && <Check className="h-4 w-4 shrink-0 text-[var(--accent-strong)]" aria-hidden />}
+                                </button>
+                              );
+                            })}
                           </div>
-                        ))}
-                        {lastSig && <div className="pt-1"><ExplorerLink href={solTx(lastSig)}>Last deposit transaction</ExplorerLink></div>}
-                      </dl>
-                    ) : (
-                      <p className="mt-4 text-[14px] text-[var(--muted)]">Open your vault to see it live on Solana.</p>
-                    )}
-                  </section>
-                </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    {[
+                      { icon: ShieldCheck, l: "Self-custody" },
+                      { icon: ExternalLink, l: "On-chain" },
+                      { icon: RefreshCw, l: "Withdraw anytime" },
+                    ].map((c) => (
+                      <span key={c.l} className="inline-flex items-center gap-1.5 rounded-full bg-[var(--accent-soft)] px-3 py-1.5 text-[12px] font-medium text-[var(--accent-strong)]">
+                        <c.icon className="h-3.5 w-3.5" aria-hidden /> {c.l}
+                      </span>
+                    ))}
+                  </div>
+
+                  {connected && onchain ? (
+                    <a href={solAcct(onchain.vaultAccount)} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-1.5 text-[13px] font-medium text-[var(--accent-strong)] hover:underline">
+                      View your vault on Solscan <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+                    </a>
+                  ) : (
+                    <p className="mt-4 text-[12px] text-[var(--faint)]">Open your vault to see it live on Solana.</p>
+                  )}
+                </section>
               </div>
 
-              {/* Venue chooser (dropdown) */}
+              {/* Projection — the visual payoff */}
               <section className={`${PANEL} p-6`}>
-                <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-[1fr_0.8fr] md:items-center">
                   <div>
-                    <h3 className="font-display text-[16px] font-semibold">Where it earns</h3>
-                    <p className="mt-0.5 text-[13px] text-[var(--muted)]">Which platform grows your USDC</p>
-                  </div>
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setVenueOpen((o) => !o)}
-                      aria-expanded={venueOpen}
-                      className="flex min-w-[260px] items-center gap-3 rounded-xl border border-[var(--border-strong)] bg-[var(--background)] px-3 py-2.5 text-left transition-colors hover:bg-[var(--surface)]"
-                    >
-                      <VenueMark venue={selectedVenue} className="h-8 w-8" />
-                      <span className="min-w-0 flex-1">
-                        <span className="flex items-center gap-1.5">
-                          <span className="text-[14px] font-medium">{selectedVenue.name}</span>
-                          {selectedVenue.live ? <span className="rounded-full bg-[var(--accent-soft)] px-1.5 py-0.5 text-[9px] font-medium text-[var(--accent-strong)]">Live</span> : <span className="rounded-full bg-[var(--surface)] px-1.5 py-0.5 text-[9px] text-[var(--muted)]">Mainnet</span>}
-                        </span>
-                        <span className="block text-[12px] text-[var(--muted)]">{selectedVenue.apy.toFixed(1)}% APY · TVL {selectedVenue.tvl}</span>
-                      </span>
-                      <ChevronDown className={`h-4 w-4 shrink-0 text-[var(--muted)] transition-transform ${venueOpen ? "rotate-180" : ""}`} aria-hidden />
-                    </button>
-                    {venueOpen && (
-                      <>
-                        <button type="button" aria-hidden tabIndex={-1} className="fixed inset-0 z-10 cursor-default" onClick={() => setVenueOpen(false)} />
-                        <div className="absolute right-0 z-20 mt-2 w-[340px] overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)] p-1 shadow-[0_16px_44px_-14px_rgba(2,6,23,0.4)]">
-                          {venues.map((v) => {
-                            const on = v.id === venueId;
-                            return (
-                              <button key={v.id} type="button" onClick={() => selectVenue(v.id)} className={`flex w-full items-center gap-3 rounded-lg px-2.5 py-2.5 text-left transition-colors ${on ? "bg-[var(--accent-soft)]" : "hover:bg-[var(--background)]"}`}>
-                                <VenueMark venue={v} className="h-8 w-8" />
-                                <span className="min-w-0 flex-1">
-                                  <span className="flex items-center gap-1.5">
-                                    <span className="text-[14px] font-medium">{v.name}</span>
-                                    {v.live ? <span className="rounded-full bg-[var(--accent-soft)] px-1.5 py-0.5 text-[9px] font-medium text-[var(--accent-strong)]">Live</span> : <span className="rounded-full bg-[var(--background)] px-1.5 py-0.5 text-[9px] text-[var(--muted)]">Mainnet</span>}
-                                  </span>
-                                  <span className="block truncate text-[12px] text-[var(--muted)]">{v.blurb}</span>
-                                </span>
-                                <span className="shrink-0 font-mono text-[14px] font-semibold text-[var(--accent-strong)]">{v.apy.toFixed(1)}%</span>
-                                {on && <Check className="h-4 w-4 shrink-0 text-[var(--accent-strong)]" aria-hidden />}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-                <p className="mt-4 text-[12px] leading-5 text-[var(--faint)]">
-                  On devnet, deposits earn in the audited Orbit reserve. Choosing a mainnet venue sets where Orbit routes in
-                  production. Live APY &amp; TVL from DefiLlama.
-                </p>
-              </section>
-
-              {/* Projection */}
-              <section className={`${PANEL} p-6`}>
-                <SectionLabel>What it could grow to</SectionLabel>
-                <div className="mt-5 grid grid-cols-1 gap-6 md:grid-cols-[1fr_0.7fr]">
-                  <div>
-                    <label htmlFor="proj" className="text-[13px] text-[var(--muted)]">Starting balance</label>
-                    <div className="mt-2 flex items-center rounded-xl border border-[var(--border)] bg-[var(--background)] px-3">
+                    <SectionLabel>If you saved</SectionLabel>
+                    <div className="mt-3 flex items-center rounded-xl border border-[var(--border)] bg-[var(--background)] px-3">
                       <span className="text-[var(--muted)]">$</span>
-                      <input id="proj" value={projAmt} onChange={(e) => setProjAmt(e.target.value)} inputMode="decimal" className="h-11 w-full bg-transparent px-1.5 font-mono text-sm tabular-nums focus:outline-none" />
+                      <input id="proj" value={projAmt} onChange={(e) => setProjAmt(e.target.value)} inputMode="decimal" className="h-11 w-full min-w-0 bg-transparent px-1.5 font-mono text-sm tabular-nums focus:outline-none" />
                     </div>
-                    <label htmlFor="years" className="mt-5 block text-[13px] text-[var(--muted)]">Time · <span className="font-mono text-[var(--foreground)]">{projYears} {projYears === 1 ? "year" : "years"}</span></label>
+                    <label htmlFor="years" className="mt-4 block text-[13px] text-[var(--muted)]">for <span className="font-mono text-[var(--foreground)]">{projYears} {projYears === 1 ? "year" : "years"}</span></label>
                     <input id="years" type="range" min={1} max={30} value={projYears} onChange={(e) => setProjYears(Number(e.target.value))} className="mt-3 w-full accent-[var(--accent)]" />
-                    <p className="mt-4 text-[12px] text-[var(--faint)]">Illustrative at {selectedVenue.name}&rsquo;s {selectedVenue.apy.toFixed(1)}% APY, compounded annually. Not a guarantee.</p>
                   </div>
-                  <div className="flex flex-col justify-center rounded-xl border border-[var(--border)] bg-[var(--background)] p-5">
-                    <div className="text-[13px] text-[var(--muted)]">Projected value</div>
-                    <div className="mt-1 font-mono text-[clamp(2rem,4vw,2.75rem)] font-semibold leading-none tabular-nums text-[var(--accent-strong)]">${projected.toLocaleString("en-US", { maximumFractionDigits: 0 })}</div>
-                    <div className="mt-2 text-[13px] text-[var(--muted)]">+${(projected - (Number(projAmt) || 0)).toLocaleString("en-US", { maximumFractionDigits: 0 })} in yield</div>
+                  <div className="rounded-xl border border-[var(--border)] bg-[var(--background)] p-5">
+                    <div className="text-[13px] text-[var(--muted)]">Could become</div>
+                    <div className="mt-1 font-mono text-[clamp(2.25rem,8vw,3rem)] font-semibold leading-none tabular-nums text-[var(--accent-strong)]">${projected.toLocaleString("en-US", { maximumFractionDigits: 0 })}</div>
+                    <div className="mt-2 text-[13px] text-[var(--muted)]">+${(projected - (Number(projAmt) || 0)).toLocaleString("en-US", { maximumFractionDigits: 0 })} earned</div>
                   </div>
                 </div>
+                <p className="mt-4 text-[11px] text-[var(--faint)]">Illustrative at {selectedVenue.apy.toFixed(1)}% APY, compounded yearly. Not a guarantee.</p>
               </section>
             </div>
           )}
