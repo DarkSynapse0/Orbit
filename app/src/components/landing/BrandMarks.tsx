@@ -48,7 +48,7 @@ export function AaveMark({ className = "" }: { className?: string }) {
 
 // eslint-disable-next-line @next/next/no-img-element
 export function KaminoMark({ className = "" }: { className?: string }) {
-  return <img src="/logos/kamino.png" alt="Kamino" className={`rounded-[22%] object-contain ${className}`} />;
+  return <img src="https://kamino.com/apple-touch-icon.png" alt="Kamino" className={`rounded-[22%] object-contain ${className}`} />;
 }
 
 // eslint-disable-next-line @next/next/no-img-element
