@@ -21,6 +21,7 @@ import {
   ArrowDownToLine,
   ArrowUpFromLine,
   ChevronRight,
+  ChevronDown,
   Coins,
   ShieldCheck,
   Wallet,
@@ -172,6 +173,7 @@ export default function Home() {
   const [projAmt, setProjAmt] = useState("2000");
   const [projYears, setProjYears] = useState(5);
   const [venueId, setVenueId] = useState("reserve");
+  const [venueOpen, setVenueOpen] = useState(false);
   useEffect(() => {
     try {
       const v = localStorage.getItem("orbit.venue");
@@ -180,6 +182,7 @@ export default function Home() {
   }, []);
   const selectVenue = (id: string) => {
     setVenueId(id);
+    setVenueOpen(false);
     try {
       localStorage.setItem("orbit.venue", id);
     } catch {}
@@ -781,33 +784,55 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Venue chooser */}
+              {/* Venue chooser (dropdown) */}
               <section className={`${PANEL} p-6`}>
-                <div className="flex items-center justify-between">
-                  <h3 className="font-display text-[15px] font-semibold">Where it earns</h3>
-                  <span className="text-[11px] text-[var(--faint)]">choose your venue</span>
-                </div>
-                <div className="mt-4 space-y-2">
-                  {VENUES.map((v) => {
-                    const on = v.id === venueId;
-                    return (
-                      <button key={v.id} type="button" onClick={() => selectVenue(v.id)} aria-pressed={on} className={`flex w-full items-center gap-4 rounded-xl border p-4 text-left transition-colors ${on ? "border-[var(--accent)] bg-[var(--accent-soft)]" : "border-[var(--border)] bg-[var(--background)] hover:border-[var(--border-strong)]"}`}>
-                        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-[var(--border)] bg-[var(--surface)] font-mono text-lg font-semibold">{v.mono}</span>
-                        <span className="min-w-0 flex-1">
-                          <span className="flex items-center gap-2">
-                            <span className="text-sm font-medium">{v.name}</span>
-                            {v.live ? <span className="rounded-full bg-[var(--accent-soft)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--accent-strong)]">Live · devnet</span> : <span className="rounded-full bg-[var(--surface)] px-1.5 py-0.5 text-[10px] text-[var(--muted)]">Mainnet</span>}
-                          </span>
-                          <span className="mt-0.5 block truncate text-[12px] text-[var(--muted)]">{v.blurb}</span>
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div>
+                    <h3 className="font-display text-[15px] font-semibold">Where it earns</h3>
+                    <p className="mt-0.5 text-[12px] text-[var(--muted)]">Which platform grows your USDC</p>
+                  </div>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setVenueOpen((o) => !o)}
+                      aria-expanded={venueOpen}
+                      className="flex min-w-[260px] items-center gap-3 rounded-xl border border-[var(--border-strong)] bg-[var(--background)] px-3 py-2.5 text-left transition-colors hover:bg-[var(--surface)]"
+                    >
+                      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-[var(--border)] bg-[var(--surface)] font-mono text-sm font-semibold">{selectedVenue.mono}</span>
+                      <span className="min-w-0 flex-1">
+                        <span className="flex items-center gap-1.5">
+                          <span className="text-[13px] font-medium">{selectedVenue.name}</span>
+                          {selectedVenue.live ? <span className="rounded-full bg-[var(--accent-soft)] px-1.5 py-0.5 text-[9px] font-medium text-[var(--accent-strong)]">Live</span> : <span className="rounded-full bg-[var(--surface)] px-1.5 py-0.5 text-[9px] text-[var(--muted)]">Mainnet</span>}
                         </span>
-                        <span className="shrink-0 text-right">
-                          <span className="block font-mono text-base font-semibold text-[var(--accent-strong)]">{v.apy.toFixed(1)}%</span>
-                          <span className="block text-[11px] text-[var(--muted)]">TVL {v.tvl}</span>
-                        </span>
-                        <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full border ${on ? "border-[var(--accent)] bg-[var(--accent)]" : "border-[var(--border-strong)]"}`}>{on && <Check className="h-3 w-3 text-white" aria-hidden />}</span>
-                      </button>
-                    );
-                  })}
+                        <span className="block text-[11px] text-[var(--muted)]">{selectedVenue.apy.toFixed(1)}% APY · TVL {selectedVenue.tvl}</span>
+                      </span>
+                      <ChevronDown className={`h-4 w-4 shrink-0 text-[var(--muted)] transition-transform ${venueOpen ? "rotate-180" : ""}`} aria-hidden />
+                    </button>
+                    {venueOpen && (
+                      <>
+                        <button type="button" aria-hidden tabIndex={-1} className="fixed inset-0 z-10 cursor-default" onClick={() => setVenueOpen(false)} />
+                        <div className="absolute right-0 z-20 mt-2 w-[340px] overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)] p-1 shadow-[0_16px_44px_-14px_rgba(2,6,23,0.4)]">
+                          {VENUES.map((v) => {
+                            const on = v.id === venueId;
+                            return (
+                              <button key={v.id} type="button" onClick={() => selectVenue(v.id)} className={`flex w-full items-center gap-3 rounded-lg px-2.5 py-2.5 text-left transition-colors ${on ? "bg-[var(--accent-soft)]" : "hover:bg-[var(--background)]"}`}>
+                                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-[var(--border)] bg-[var(--background)] font-mono text-sm font-semibold">{v.mono}</span>
+                                <span className="min-w-0 flex-1">
+                                  <span className="flex items-center gap-1.5">
+                                    <span className="text-[13px] font-medium">{v.name}</span>
+                                    {v.live ? <span className="rounded-full bg-[var(--accent-soft)] px-1.5 py-0.5 text-[9px] font-medium text-[var(--accent-strong)]">Live</span> : <span className="rounded-full bg-[var(--background)] px-1.5 py-0.5 text-[9px] text-[var(--muted)]">Mainnet</span>}
+                                  </span>
+                                  <span className="block truncate text-[11px] text-[var(--muted)]">{v.blurb}</span>
+                                </span>
+                                <span className="shrink-0 font-mono text-[13px] font-semibold text-[var(--accent-strong)]">{v.apy.toFixed(1)}%</span>
+                                {on && <Check className="h-4 w-4 shrink-0 text-[var(--accent-strong)]" aria-hidden />}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
                 <p className="mt-4 text-[11px] leading-5 text-[var(--faint)]">On devnet, deposits earn in the audited Orbit reserve. Choosing a mainnet venue sets where Orbit routes in production.</p>
               </section>

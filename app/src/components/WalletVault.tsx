@@ -6,7 +6,7 @@ import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { AnchorProvider, Program, BN, type Idl } from "@coral-xyz/anchor";
 import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { Wallet, Coins, ArrowDownToLine, ArrowUpFromLine, Copy, Check, ExternalLink, Loader2, ShieldCheck, Sparkles } from "lucide-react";
+import { Wallet, Coins, ArrowDownToLine, ArrowUpFromLine, Copy, Check, ExternalLink, Loader2, ShieldCheck, Sparkles, Power } from "lucide-react";
 import idl from "@/idl/orbit_vault.json";
 import { OrbitWalletName } from "@/lib/orbitWallet";
 
@@ -21,7 +21,7 @@ const solTx = (s: string) => `https://solscan.io/tx/${s}?cluster=devnet`;
 export function WalletVault({ onChanged }: { onChanged?: () => void }) {
   const { connection } = useConnection();
   const wallet = useAnchorWallet();
-  const { publicKey, connected, connecting, select, connect, wallet: activeWallet } = useWallet();
+  const { publicKey, connected, connecting, select, connect, disconnect, wallet: activeWallet } = useWallet();
   const isEmbedded = activeWallet?.adapter.name === OrbitWalletName;
 
   const [mint, setMint] = useState<string | null>(null);
@@ -295,7 +295,13 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
                   </div>
                 </div>
               </div>
-              <WalletMultiButton style={{ height: 32, borderRadius: 10, background: "rgba(255,255,255,0.06)", fontSize: 12, padding: "0 10px" }} />
+              <button
+                type="button"
+                onClick={() => disconnect().catch(() => {})}
+                className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-black/[0.1] px-3 text-[12px] font-medium text-neutral-600 transition-colors hover:bg-black/[0.04] hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/50 dark:border-white/[0.12] dark:text-neutral-300 dark:hover:bg-white/[0.06] dark:hover:text-white"
+              >
+                <Power className="h-3.5 w-3.5" aria-hidden /> Disconnect
+              </button>
             </div>
 
             <div className="mt-4 flex items-center gap-2">
