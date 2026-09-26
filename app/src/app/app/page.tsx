@@ -30,7 +30,7 @@ import { LineArea, HBars } from "@/components/dashboard/Charts";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletVault } from "@/components/WalletVault";
 import { OrbitMark } from "@/components/landing/OrbitMark";
-import { AaveMark, KaminoMark, SaveMark } from "@/components/landing/BrandMarks";
+import { AaveMark, KaminoMark, SaveMark, MarginfiMark } from "@/components/landing/BrandMarks";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 const API = "http://localhost:4000";
@@ -93,7 +93,7 @@ const VENUES: Venue[] = [
   { id: "kamino", name: "Kamino Lend", mono: "K", apy: 8.4, tvl: "$1.4B", blurb: "The most-used lending market on Solana.", live: false, Mark: KaminoMark },
   { id: "aave", name: "Aave v3", mono: "A", apy: 5.2, tvl: "$22B", blurb: "The largest lending protocol in DeFi.", live: false, Mark: AaveMark },
   { id: "save", name: "Save · Solend", mono: "S", apy: 6.9, tvl: "$380M", blurb: "Battle-tested Solana lending.", live: false, Mark: SaveMark },
-  { id: "marginfi", name: "marginfi", mono: "m", apy: 5.7, tvl: "$420M", blurb: "Permissionless Solana lending.", live: false },
+  { id: "marginfi", name: "marginfi", mono: "m", apy: 5.7, tvl: "$420M", blurb: "Permissionless Solana lending.", live: false, Mark: MarginfiMark },
 ];
 
 // Renders a venue's real logo when available, else a monogram tile.

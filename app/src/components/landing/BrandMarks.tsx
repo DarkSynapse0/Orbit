@@ -55,3 +55,8 @@ export function KaminoMark({ className = "" }: { className?: string }) {
 export function SaveMark({ className = "" }: { className?: string }) {
   return <img src="/logos/save.svg" alt="Save" className={`object-contain ${className}`} />;
 }
+
+// eslint-disable-next-line @next/next/no-img-element
+export function MarginfiMark({ className = "" }: { className?: string }) {
+  return <img src="/logos/marginfi.png" alt="marginfi" className={`rounded-[22%] object-contain ${className}`} />;
+}
