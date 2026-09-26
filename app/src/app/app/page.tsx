@@ -66,6 +66,9 @@ type Txn = { id: number; name: string; category: string; amountUsd: number; setA
 type TabId = "home" | "save" | "grow" | "activity" | "account";
 
 const usd = (n: number) => `$${n.toFixed(2)}`;
+// Live yield reads as money: clean $0.00 when there's nothing, otherwise enough
+// precision to watch it tick up on small balances.
+const fmtYield = (n: number) => (n > 0 ? `$${n.toFixed(6)}` : "$0.00");
 const fmtTvl = (n: number) =>
   n >= 1e9 ? `$${(n / 1e9).toFixed(1)}B` : n >= 1e6 ? `$${Math.round(n / 1e6)}M` : n >= 1e3 ? `$${Math.round(n / 1e3)}k` : `$${Math.round(n)}`;
 const truncate = (a: string, n = 4) => (a.length <= n * 2 + 1 ? a : `${a.slice(0, n)}…${a.slice(-n)}`);
@@ -604,7 +607,7 @@ export default function Home() {
                       <span className="inline-flex items-center gap-1 rounded-full bg-[var(--accent-soft)] px-2 py-0.5 font-medium text-[var(--accent-strong)]">
                         <TrendingUp className="h-3.5 w-3.5" aria-hidden /> 6% a year
                       </span>
-                      <span className="font-mono text-[var(--accent-strong)]">+{liveYield.toFixed(6)}</span>
+                      <span className="font-mono text-[var(--accent-strong)]">{liveYield > 0 ? "+" : ""}{fmtYield(liveYield)}</span>
                       <span className="text-[var(--muted)]">earned, live</span>
                     </div>
                     <div className="mt-auto flex flex-wrap gap-2 pt-8">
@@ -682,7 +685,7 @@ export default function Home() {
                 </div>
                 <div className={`${PANEL} p-5`}>
                   <div className="flex items-center gap-2 text-[13px] text-[var(--muted)]"><TrendingUp className="h-4 w-4 text-[var(--accent-strong)]" aria-hidden /> Interest earned</div>
-                  <div className="mt-2 font-mono text-xl font-semibold tabular-nums text-[var(--accent-strong)]">{liveYield.toFixed(6)}</div>
+                  <div className="mt-2 font-mono text-xl font-semibold tabular-nums text-[var(--accent-strong)]">{fmtYield(liveYield)}</div>
                   <div className="mt-1 text-[12px] text-[var(--faint)]">paid in tokens, live</div>
                 </div>
               </div>
