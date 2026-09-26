@@ -616,19 +616,19 @@ export default function Home() {
                 </div>
               </section>
 
-              {/* Breakdown */}
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <div className={`${PANEL} p-5`}>
-                  <div className="flex items-center gap-2 text-[13px] text-[var(--muted)]">
-                    <Coins className="h-4 w-4" aria-hidden /> In your vault
-                    {onchain && <span className="rounded-full bg-[var(--accent-soft)] px-1.5 py-0.5 text-[10px] text-[var(--accent-strong)]">on-chain</span>}
+              {/* Breakdown — two compact tiles (interest lives in the hero above) */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className={`${PANEL} p-4`}>
+                  <div className="flex items-center gap-1.5 text-[12px] text-[var(--muted)]">
+                    <Coins className="h-4 w-4 shrink-0" aria-hidden /> In vault
+                    {onchain && <span className="hidden rounded-full bg-[var(--accent-soft)] px-1.5 py-0.5 text-[10px] text-[var(--accent-strong)] sm:inline">on-chain</span>}
                   </div>
-                  <div className="mt-2 font-mono text-xl font-semibold tabular-nums text-[var(--accent-strong)]">{usd(principalUsd)}</div>
-                  <div className="mt-1 text-[12px] text-[var(--faint)]">invested, earning yield</div>
+                  <div className="mt-2 font-mono text-lg font-semibold tabular-nums text-[var(--accent-strong)] sm:text-xl">{usd(principalUsd)}</div>
+                  <div className="mt-1 hidden text-[12px] text-[var(--faint)] sm:block">invested, earning yield</div>
                 </div>
-                <div className={`${PANEL} p-5`}>
-                  <div className="flex items-center gap-2 text-[13px] text-[var(--muted)]"><Landmark className="h-4 w-4" aria-hidden /> Set aside</div>
-                  <div className="mt-2 font-mono text-xl font-semibold tabular-nums">{usd(state.pendingUsd)}</div>
+                <div className={`${PANEL} p-4`}>
+                  <div className="flex items-center gap-1.5 text-[12px] text-[var(--muted)]"><Landmark className="h-4 w-4 shrink-0" aria-hidden /> Set aside</div>
+                  <div className="mt-2 font-mono text-lg font-semibold tabular-nums sm:text-xl">{usd(state.pendingUsd)}</div>
                   <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[var(--border)]">
                     <div
                       className={`h-full rounded-full transition-[width] duration-300 ${state.pendingUsd >= THRESHOLD ? "bg-[var(--accent)]" : "bg-[var(--faint)]"}`}
@@ -657,17 +657,12 @@ export default function Home() {
                         onClick={() => setTab("grow")}
                         className="mt-2.5 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-[var(--border-strong)] px-3 py-1.5 text-[13px] font-medium transition-colors hover:bg-[var(--background)]"
                       >
-                        Connect a wallet to invest it
+                        Connect wallet
                       </button>
                     )
                   ) : (
-                    <div className="mt-1.5 font-mono text-[12px] tabular-nums text-[var(--faint)]">{usd(state.pendingUsd)} / {usd(THRESHOLD)} to auto-invest</div>
+                    <div className="mt-1.5 font-mono text-[11px] tabular-nums text-[var(--faint)] sm:text-[12px]">{usd(state.pendingUsd)} / {usd(THRESHOLD)}</div>
                   )}
-                </div>
-                <div className={`${PANEL} p-5`}>
-                  <div className="flex items-center gap-2 text-[13px] text-[var(--muted)]"><TrendingUp className="h-4 w-4 text-[var(--accent-strong)]" aria-hidden /> Interest earned</div>
-                  <div className="mt-2 font-mono text-xl font-semibold tabular-nums text-[var(--accent-strong)]">{fmtYield(liveYield)}</div>
-                  <div className="mt-1 text-[12px] text-[var(--faint)]">paid in tokens, live</div>
                 </div>
               </div>
 
