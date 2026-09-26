@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Orbit as OrbitIcon } from "lucide-react";
+import { OrbitLogo } from "@/components/OrbitLogo";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -28,8 +28,7 @@ export function SiteHeader() {
           href="/"
           className="flex items-center gap-2.5 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40"
         >
-          <OrbitIcon className="h-6 w-6 text-[var(--foreground)]" aria-hidden />
-          <span className="font-display text-xl font-semibold tracking-tight text-[var(--foreground)]">Orbit</span>
+          <OrbitLogo className="h-7" />
         </Link>
         <div className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-9 text-[15px] text-[var(--muted)] md:flex">
           <a href="#how" className="transition-colors hover:text-[var(--foreground)]">How it works</a>

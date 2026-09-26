@@ -11,6 +11,8 @@ type AuthCtx = {
   user: OrbitUser | null;
   ready: boolean;
   hasGoogle: boolean;
+  googleReady: boolean;
+  renderGoogleButton: (el: HTMLElement, opts?: Record<string, unknown>) => void;
   signInWithGoogle: () => void;
   signInDemo: () => void;
   signOut: () => void;
@@ -33,6 +35,7 @@ function decodeJwt(token: string): Record<string, string> {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<OrbitUser | null>(null);
   const [ready, setReady] = useState(false);
+  const [googleReady, setGoogleReady] = useState(false);
   const gsiReady = useRef(false);
 
   const persist = useCallback((u: OrbitUser | null) => {
@@ -66,6 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           },
         });
         gsiReady.current = true;
+        setGoogleReady(true);
       } catch {}
     };
     if (g()?.accounts?.id) {
@@ -102,6 +106,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [signInDemo]);
 
+  const renderGoogleButton = useCallback((el: HTMLElement, opts?: Record<string, unknown>) => {
+    const g = (window as unknown as { google?: any }).google;
+    if (!g?.accounts?.id) return;
+    try {
+      el.innerHTML = "";
+      g.accounts.id.renderButton(el, {
+        type: "standard",
+        theme: "outline",
+        size: "large",
+        text: "continue_with",
+        shape: "pill",
+        logo_alignment: "left",
+        width: 320,
+        ...opts,
+      });
+    } catch {}
+  }, []);
+
   const signOut = useCallback(() => {
     try {
       (window as unknown as { google?: any }).google?.accounts?.id?.disableAutoSelect?.();
@@ -110,7 +132,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [persist]);
 
   return (
-    <Ctx.Provider value={{ user, ready, hasGoogle: !!CLIENT_ID, signInWithGoogle, signInDemo, signOut }}>
+    <Ctx.Provider value={{ user, ready, hasGoogle: !!CLIENT_ID, googleReady, renderGoogleButton, signInWithGoogle, signInDemo, signOut }}>
       {children}
     </Ctx.Provider>
   );

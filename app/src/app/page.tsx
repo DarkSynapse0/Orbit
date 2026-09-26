@@ -17,6 +17,7 @@ import { GrowthChart } from "@/components/landing/GrowthChart";
 import { OrbitRings } from "@/components/landing/OrbitRings";
 import { SolanaMark, UsdcMark, AaveMark, StripeMark, PlaidMark, PhantomMark } from "@/components/landing/BrandMarks";
 import { SiteHeader } from "@/components/landing/SiteHeader";
+import { OrbitLogo } from "@/components/OrbitLogo";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -346,12 +347,9 @@ export default function Landing() {
       {/* ───────── Footer ───────── */}
       <footer className="mt-auto border-t border-[var(--border)]">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-10 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2.5">
-            <OrbitRings className="h-6 w-6 text-[var(--foreground)]" />
-            <div>
-              <div className="font-display text-[15px] font-semibold">Orbit</div>
-              <div className="text-[13px] text-[var(--muted)]">Self-driving savings on Solana</div>
-            </div>
+          <div className="flex items-center gap-3">
+            <OrbitLogo className="h-7" />
+            <div className="text-[13px] text-[var(--muted)]">Self-driving savings on Solana</div>
           </div>
           <div className="flex items-center gap-6 text-[14px] text-[var(--muted)]">
             <a href="#how" className="transition-colors hover:text-[var(--foreground)]">How it works</a>

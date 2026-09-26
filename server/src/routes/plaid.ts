@@ -120,6 +120,32 @@ plaidRouter.post('/simulate-purchase', async (req, res) => {
   res.json({ setAside: r.setAside, deposited: r.deposited, needsWallet: r.needsWallet, depositError: r.depositError, state: getState(userId) });
 });
 
+/** Flush the pending set-aside into the user's vault now, without waiting for a new
+ * purchase. Used when a wallet connects after money was already earmarked, or to
+ * retry a deposit that failed earlier. Deposits the whole pending batch. */
+plaidRouter.post('/invest-now', async (req, res) => {
+  const userId = (req.body?.userId as string) ?? 'demo';
+  const wallet = req.body?.wallet as string | undefined;
+  if (!wallet) {
+    res.status(400).json({ error: 'wallet required' });
+    return;
+  }
+  const batch = getState(userId).pendingUsd;
+  if (batch <= 0) {
+    res.json({ deposited: false, batch: 0, state: getState(userId) });
+    return;
+  }
+  try {
+    await simulateStripeDeposit(batch);
+    const sig = await depositToVault(wallet, batch);
+    moveToInvested(userId, batch, sig);
+    res.json({ deposited: true, sig, batch, state: getState(userId) });
+  } catch (e) {
+    // Keep the funds pending so it can be retried.
+    res.status(502).json({ error: (e as Error).message, deposited: false, state: getState(userId) });
+  }
+});
+
 /** Current saved state (pending + invested) so the dashboard survives reloads. */
 plaidRouter.get('/state', (req, res) => {
   const userId = (req.query?.userId as string) ?? 'demo';

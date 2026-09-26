@@ -29,11 +29,13 @@ import {
   LogOut,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { AuthScreen } from "@/components/AuthScreen";
 import { UserMenu, Avatar } from "@/components/UserMenu";
 import { LineArea, HBars } from "@/components/dashboard/Charts";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletVault } from "@/components/WalletVault";
 import { OrbitMark } from "@/components/landing/OrbitMark";
+import { OrbitLogo } from "@/components/OrbitLogo";
 import { AaveMark, KaminoMark, SaveMark, MarginfiMark } from "@/components/landing/BrandMarks";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -185,7 +187,7 @@ function Toggle({ on, onClick, label }: { on: boolean; onClick: () => void; labe
 }
 
 export default function Home() {
-  const { user, signInWithGoogle, signOut } = useAuth();
+  const { user, ready: authReady, signInWithGoogle, signOut } = useAuth();
   const [tab, setTab] = useState<TabId>("home");
   const [state, setState] = useState<SavingsState>({ userId: "demo", pendingUsd: 0, investedUsd: 0 });
   const [feed, setFeed] = useState<Entry[]>([]);
@@ -196,6 +198,7 @@ export default function Home() {
   const [lastSig, setLastSig] = useState<string | null>(null);
   const [plaid, setPlaid] = useState<{ configured: boolean; connected: boolean } | null>(null);
   const [syncing, setSyncing] = useState(false);
+  const [investing, setInvesting] = useState(false);
 
   // Automation (demo-local controls)
   const [autoInvest, setAutoInvest] = useState(true);
@@ -330,6 +333,49 @@ export default function Home() {
     [owner, refreshVault, refreshTxns],
   );
 
+  // Move whatever is already set aside into the vault now (no new purchase needed).
+  // Runs when a wallet connects with a backlog, or from the "Invest now" button.
+  const investNow = useCallback(async () => {
+    if (!owner) return;
+    setInvesting(true);
+    try {
+      const d = await (
+        await fetch(`${API}/plaid/invest-now`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: "demo", wallet: owner }),
+        })
+      ).json();
+      if (d.state) setState(d.state);
+      if (d.deposited) {
+        log("deposit", `Moved ${usd(d.batch)} into your vault on-chain`);
+        if (d.state?.lastDepositSig && !d.state.lastDepositSig.startsWith("mock-")) setLastSig(d.state.lastDepositSig);
+        refreshVault();
+      } else if (d.error) {
+        log("none", `Invest failed — kept pending, try again. (${String(d.error).slice(0, 80)})`);
+      }
+    } catch {
+      log("none", "Invest failed — try again");
+    } finally {
+      setInvesting(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [owner, refreshVault]);
+
+  // Auto-flush a backlog once per connection: if money was earmarked before a
+  // wallet existed (or a deposit failed), move it in as soon as we're connected.
+  const flushGuard = useRef(false);
+  useEffect(() => {
+    if (!connected) {
+      flushGuard.current = false;
+      return;
+    }
+    if (owner && !flushGuard.current && state.pendingUsd >= THRESHOLD && !investing) {
+      flushGuard.current = true;
+      investNow();
+    }
+  }, [connected, owner, state.pendingUsd, investing, investNow]);
+
   const connectBank = useCallback(async () => {
     setBusy(true);
     try {
@@ -452,17 +498,18 @@ export default function Home() {
   // Friendly transaction row helper.
   const txnDate = (ts: number) => new Date(ts).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
+  // Gate the dashboard behind sign-in. Wait for the stored session to load to
+  // avoid flashing the login screen for an already-signed-in user.
+  if (!authReady) return <div className="min-h-dvh bg-[var(--background)]" />;
+  if (!user) return <AuthScreen />;
 
   return (
     <div className="flex min-h-full flex-1">
       {/* ───────── Sidebar (desktop) ───────── */}
       <aside className="sticky top-0 hidden h-screen w-[15rem] shrink-0 flex-col border-r border-[var(--border)] px-4 py-6 lg:flex">
-        <Link href="/" className="flex items-center gap-2.5 px-1" aria-label="Orbit home">
-          <OrbitMark className="h-8 w-8" title="Orbit" />
-          <div>
-            <div className="font-display text-[16px] font-semibold leading-none tracking-tight">Orbit</div>
-            <div className="mt-1 text-[12px] leading-none text-[var(--muted)]">self-driving savings</div>
-          </div>
+        <Link href="/" className="flex flex-col items-start gap-1 px-1" aria-label="Orbit home">
+          <OrbitLogo className="h-7" />
+          <div className="text-[12px] leading-none text-[var(--muted)]">self-driving savings</div>
         </Link>
 
         <nav className="mt-9 flex-1 space-y-1">
@@ -520,7 +567,7 @@ export default function Home() {
         <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-4 border-b border-[var(--border)] bg-[var(--background)]/80 px-5 backdrop-blur-md lg:px-8">
           <div className="flex items-center gap-2.5">
             <Link href="/" className="flex items-center lg:hidden" aria-label="Orbit home">
-              <OrbitMark className="h-7 w-7" title="Orbit" />
+              <OrbitLogo mark className="h-7" />
             </Link>
             <div>
               <h1 className="font-display text-lg font-semibold leading-none tracking-tight">{activeNav.label}</h1>
@@ -597,9 +644,34 @@ export default function Home() {
                   <div className="flex items-center gap-2 text-[13px] text-[var(--muted)]"><Landmark className="h-4 w-4" aria-hidden /> Set aside</div>
                   <div className="mt-2 font-mono text-xl font-semibold tabular-nums">{usd(state.pendingUsd)}</div>
                   <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[var(--border)]">
-                    <div className="h-full rounded-full bg-[var(--faint)] transition-[width] duration-300" style={{ width: `${pct}%` }} />
+                    <div
+                      className={`h-full rounded-full transition-[width] duration-300 ${state.pendingUsd >= THRESHOLD ? "bg-[var(--accent)]" : "bg-[var(--faint)]"}`}
+                      style={{ width: `${pct}%` }}
+                    />
                   </div>
-                  <div className="mt-1.5 font-mono text-[12px] tabular-nums text-[var(--faint)]">{usd(state.pendingUsd)} / {usd(THRESHOLD)} to next deposit</div>
+                  {state.pendingUsd >= THRESHOLD ? (
+                    connected ? (
+                      <button
+                        type="button"
+                        onClick={investNow}
+                        disabled={investing}
+                        className="mt-2.5 inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-[var(--accent)] px-3 py-1.5 text-[13px] font-semibold text-[var(--on-accent)] transition-opacity hover:opacity-90 disabled:opacity-60"
+                      >
+                        <ArrowDownToLine className="h-3.5 w-3.5" aria-hidden />
+                        {investing ? "Investing…" : `Invest ${usd(state.pendingUsd)} now`}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setTab("grow")}
+                        className="mt-2.5 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-[var(--border-strong)] px-3 py-1.5 text-[13px] font-medium transition-colors hover:bg-[var(--background)]"
+                      >
+                        Connect wallet to invest
+                      </button>
+                    )
+                  ) : (
+                    <div className="mt-1.5 font-mono text-[12px] tabular-nums text-[var(--faint)]">{usd(state.pendingUsd)} / {usd(THRESHOLD)} to next deposit</div>
+                  )}
                 </div>
                 <div className={`${PANEL} p-5`}>
                   <div className="flex items-center gap-2 text-[13px] text-[var(--muted)]"><TrendingUp className="h-4 w-4 text-[var(--accent-strong)]" aria-hidden /> Interest earned</div>
