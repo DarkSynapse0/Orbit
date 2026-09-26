@@ -19,6 +19,7 @@ import {
   SlidersHorizontal,
   Percent,
   Settings as SettingsIcon,
+  User as UserIcon,
   ArrowDownToLine,
   ArrowUpFromLine,
   ChevronRight,
@@ -54,7 +55,7 @@ type OnChain = {
   cluster: string;
 };
 type Entry = { id: number; kind: "spend" | "deposit" | "none" | "info"; text: string };
-type TabId = "overview" | "activity" | "vault" | "bank" | "automation" | "earn" | "settings";
+type TabId = "overview" | "activity" | "vault" | "bank" | "automation" | "earn" | "account" | "settings";
 
 const usd = (n: number) => `$${n.toFixed(2)}`;
 const truncate = (a: string, n = 4) => (a.length <= n * 2 + 1 ? a : `${a.slice(0, n)}…${a.slice(-n)}`);
@@ -74,15 +75,22 @@ const VENUES: Venue[] = [
   { id: "marginfi", name: "marginfi", mono: "m", apy: 5.7, tvl: "$420M", blurb: "Permissionless Solana lending.", live: false },
 ];
 
-const TABS: { id: TabId; label: string; icon: typeof LayoutDashboard }[] = [
+type TabDef = { id: TabId; label: string; icon: typeof LayoutDashboard };
+// Working sections — shown as tabs across the top of the content.
+const SECTION_TABS: TabDef[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "activity", label: "Activity", icon: ActivityIcon },
   { id: "vault", label: "Vault", icon: Lock },
   { id: "bank", label: "Bank", icon: Landmark },
   { id: "automation", label: "Automation", icon: SlidersHorizontal },
   { id: "earn", label: "Earn", icon: Percent },
+];
+// Account-level destinations — kept in the sidebar.
+const SIDEBAR_TABS: TabDef[] = [
+  { id: "account", label: "Account", icon: UserIcon },
   { id: "settings", label: "Settings", icon: SettingsIcon },
 ];
+const ALL_TABS = [...SECTION_TABS, ...SIDEBAR_TABS];
 
 function CopyAddress({ value, label }: { value: string; label: string }) {
   const [copied, setCopied] = useState(false);
@@ -333,7 +341,8 @@ export default function Home() {
     return a * Math.pow(1 + rate, projYears);
   }, [projAmt, projYears, selectedVenue.apy]);
 
-  const activeTab = TABS.find((t) => t.id === tab)!;
+  const activeTab = ALL_TABS.find((t) => t.id === tab)!;
+  const isSection = SECTION_TABS.some((t) => t.id === tab);
 
   return (
     <div className="flex min-h-full flex-1">
@@ -348,7 +357,7 @@ export default function Home() {
         </Link>
 
         <nav className="mt-8 flex-1 space-y-0.5">
-          {TABS.map((t) => (
+          {SIDEBAR_TABS.map((t) => (
             <button
               key={t.id}
               type="button"
@@ -415,19 +424,20 @@ export default function Home() {
           </div>
         </header>
 
-        {/* Mobile tabs */}
-        <div className="flex gap-1 overflow-x-auto border-b border-[var(--border)] px-4 py-2 lg:hidden">
-          {TABS.map((t) => (
+        {/* Section tabs — the primary section nav, across the top of the content */}
+        <div className="sticky top-16 z-10 flex gap-1 overflow-x-auto border-b border-[var(--border)] bg-[var(--background)]/80 px-4 backdrop-blur-md lg:px-10">
+          {SECTION_TABS.map((t) => (
             <button
               key={t.id}
               type="button"
               onClick={() => setTab(t.id)}
-              className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] transition-colors ${
-                tab === t.id ? "bg-[var(--contrast)] text-[var(--contrast-fg)]" : "text-[var(--muted)]"
+              className={`relative inline-flex shrink-0 items-center gap-2 px-3 py-3.5 text-[14px] transition-colors focus-visible:outline-none ${
+                tab === t.id ? "font-medium text-[var(--foreground)]" : "text-[var(--muted)] hover:text-[var(--foreground)]"
               }`}
             >
               <t.icon className="h-4 w-4" aria-hidden />
               {t.label}
+              {tab === t.id && <span className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-[var(--foreground)]" aria-hidden />}
             </button>
           ))}
         </div>
@@ -896,21 +906,56 @@ export default function Home() {
             </div>
           )}
 
-          {/* ───────── Settings ───────── */}
-          {tab === "settings" && (
-            <div className="space-y-6">
+          {/* ───────── Account ───────── */}
+          {tab === "account" && (
+            <div className="grid items-start gap-4 lg:grid-cols-2">
+              <section className={`${PANEL} p-6`}>
+                <SectionLabel>Wallet</SectionLabel>
+                <div className="mt-4 flex items-center gap-3">
+                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--surface)] ring-1 ring-inset ring-[var(--border)]">
+                    <Wallet className="h-5 w-5 text-[var(--foreground)]" aria-hidden />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-medium">{connected ? "Orbit account" : "No wallet connected"}</div>
+                    <div className="mt-0.5 truncate font-mono text-[12px] text-[var(--muted)]">{owner ?? "Create or connect one in Vault"}</div>
+                  </div>
+                  {connected && <span className="h-2 w-2 rounded-full bg-[var(--accent)]" aria-hidden />}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setTab("vault")}
+                  className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-[var(--border-strong)] text-sm font-medium transition-colors hover:bg-[var(--surface)]"
+                >
+                  {connected ? "Manage in Vault" : "Connect or create a wallet"}
+                </button>
+              </section>
+
               <section className={`${PANEL} divide-y divide-[var(--border)]`}>
                 <div className="flex items-center justify-between gap-4 p-5">
                   <div>
-                    <div className="text-sm font-medium">Wallet</div>
-                    <div className="mt-0.5 font-mono text-[12px] text-[var(--muted)]">{owner ? owner : "Not connected"}</div>
+                    <div className="text-sm font-medium">Network</div>
+                    <div className="mt-0.5 text-[12px] text-[var(--muted)]">Solana devnet</div>
                   </div>
-                  {!connected && (
-                    <button type="button" onClick={() => setTab("vault")} className="rounded-full border border-[var(--border-strong)] px-3 py-1.5 text-[12px] font-medium transition-colors hover:bg-[var(--surface)]">
-                      Connect
-                    </button>
-                  )}
+                  <ExplorerLink href={solAcct(onchain?.programId ?? "8LEjyrMCKukhxA4q3DRaYGfkappxRayiTPM7saZG2Kgi")}>Program</ExplorerLink>
                 </div>
+                <div className="flex items-center justify-between gap-4 p-5">
+                  <div>
+                    <div className="text-sm font-medium">Backend</div>
+                    <div className="mt-0.5 text-[12px] text-[var(--muted)]">Detection &amp; deposit service</div>
+                  </div>
+                  <span className="inline-flex items-center gap-1.5 text-[12px] text-[var(--muted)]">
+                    <span className={`h-1.5 w-1.5 rounded-full ${online ? "bg-[var(--accent)]" : online === false ? "bg-red-500" : "bg-[var(--faint)]"}`} aria-hidden />
+                    {online === null ? "…" : online ? "Connected" : "Offline"}
+                  </span>
+                </div>
+              </section>
+            </div>
+          )}
+
+          {/* ───────── Settings ───────── */}
+          {tab === "settings" && (
+            <div className="space-y-4">
+              <section className={`${PANEL} divide-y divide-[var(--border)]`}>
                 <div className="flex items-center justify-between gap-4 p-5">
                   <div>
                     <div className="text-sm font-medium">Appearance</div>
@@ -920,27 +965,18 @@ export default function Home() {
                 </div>
                 <div className="flex items-center justify-between gap-4 p-5">
                   <div>
-                    <div className="text-sm font-medium">Network</div>
-                    <div className="mt-0.5 text-[12px] text-[var(--muted)]">Solana devnet</div>
+                    <div className="text-sm font-medium">Reset demo data</div>
+                    <div className="mt-0.5 text-[12px] text-[var(--muted)]">Clears set-asides and activity. Your on-chain vault is untouched.</div>
                   </div>
-                  <ExplorerLink href={solAcct(onchain?.programId ?? "8LEjyrMCKukhxA4q3DRaYGfkappxRayiTPM7saZG2Kgi")}>Program</ExplorerLink>
+                  <button
+                    type="button"
+                    onClick={reset}
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--border-strong)] px-3.5 py-2 text-[12px] font-medium transition-colors hover:bg-[var(--surface)]"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" aria-hidden /> Reset
+                  </button>
                 </div>
               </section>
-
-              <section className={`${PANEL} flex items-center justify-between gap-4 p-5`}>
-                <div>
-                  <div className="text-sm font-medium">Reset demo data</div>
-                  <div className="mt-0.5 text-[12px] text-[var(--muted)]">Clears set-asides and activity. Your on-chain vault is untouched.</div>
-                </div>
-                <button
-                  type="button"
-                  onClick={reset}
-                  className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--border-strong)] px-3.5 py-2 text-[12px] font-medium transition-colors hover:bg-[var(--surface)]"
-                >
-                  <RotateCcw className="h-3.5 w-3.5" aria-hidden /> Reset
-                </button>
-              </section>
-
               <p className="text-[11px] leading-5 text-[var(--faint)]">
                 Live on Solana devnet. Detection, threshold, and the vault deposit are real; the fiat→USDC step (Stripe)
                 is mocked. Not a bank. Not FDIC-insured — principal is not guaranteed.
