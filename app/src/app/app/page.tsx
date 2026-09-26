@@ -593,7 +593,7 @@ export default function Home() {
             <div className="space-y-4">
               {/* Hero: balance + growth curve */}
               <section className={`${PANEL} overflow-hidden`}>
-                <div className="grid divide-y divide-[var(--border)] lg:grid-cols-[0.82fr_1.18fr] lg:divide-x lg:divide-y-0">
+                <div className="grid grid-cols-1 divide-y divide-[var(--border)] lg:grid-cols-[0.82fr_1.18fr] lg:divide-x lg:divide-y-0">
                   <div className="flex flex-col p-6 lg:p-8">
                     <SectionLabel>Total saved</SectionLabel>
                     <div
@@ -636,7 +636,7 @@ export default function Home() {
               </section>
 
               {/* Breakdown */}
-              <div className="grid gap-4 sm:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div className={`${PANEL} p-5`}>
                   <div className="flex items-center gap-2 text-[13px] text-[var(--muted)]">
                     <Coins className="h-4 w-4" aria-hidden /> In your vault
@@ -691,7 +691,7 @@ export default function Home() {
               </div>
 
               {/* Recent activity + (setup checklist OR categories) */}
-              <div className="grid gap-4 lg:grid-cols-[1.1fr_1fr]">
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.1fr_1fr]">
                 <section className={`${PANEL} p-6`}>
                   <div className="flex items-center justify-between">
                     <h3 className="font-display text-[16px] font-semibold">Recent activity</h3>
@@ -776,7 +776,7 @@ export default function Home() {
                 </p>
               </div>
 
-              <div className="grid items-start gap-4 lg:grid-cols-2">
+              <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
                 {/* Bank */}
                 <section className={`${PANEL} p-6`}>
                   <SectionLabel>Your bank</SectionLabel>
@@ -816,14 +816,14 @@ export default function Home() {
                   </div>
                   <div className="mt-2 flex gap-2">
                     <label htmlFor="amount" className="sr-only">Purchase amount</label>
-                    <input id="amount" value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" placeholder="Custom amount" className="h-11 flex-1 rounded-xl border border-[var(--border)] bg-[var(--background)] px-3.5 text-sm tabular-nums text-[var(--foreground)] placeholder:text-[var(--faint)] focus:border-[var(--accent)]/50 focus:outline-none" />
+                    <input id="amount" value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" placeholder="Custom amount" className="h-11 min-w-0 flex-1 rounded-xl border border-[var(--border)] bg-[var(--background)] px-3.5 text-sm tabular-nums text-[var(--foreground)] placeholder:text-[var(--faint)] focus:border-[var(--accent)]/50 focus:outline-none" />
                     <button type="button" onClick={() => spend(Number(amount))} disabled={busy || !online || !connected} className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-[var(--border-strong)] px-5 text-sm font-medium transition-colors hover:bg-[var(--background)] disabled:pointer-events-none disabled:opacity-40">{busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null} Spend</button>
                   </div>
                 </section>
               </div>
 
               {/* Rule + automation */}
-              <div className="grid items-start gap-4 lg:grid-cols-2">
+              <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
                 <section className={`${PANEL} p-6`}>
                   <SectionLabel>The round-up rule</SectionLabel>
                   <div className="mt-4 grid grid-cols-2 gap-4">
@@ -879,7 +879,7 @@ export default function Home() {
               </div>
 
               {/* Vault + safety/on-chain */}
-              <div className="grid items-start gap-4 lg:grid-cols-2">
+              <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
                 <div className="[&>section]:mt-0">
                   <WalletVault onChanged={refreshVault} />
                 </div>
@@ -983,7 +983,7 @@ export default function Home() {
               {/* Projection */}
               <section className={`${PANEL} p-6`}>
                 <SectionLabel>What it could grow to</SectionLabel>
-                <div className="mt-5 grid gap-6 md:grid-cols-[1fr_0.7fr]">
+                <div className="mt-5 grid grid-cols-1 gap-6 md:grid-cols-[1fr_0.7fr]">
                   <div>
                     <label htmlFor="proj" className="text-[13px] text-[var(--muted)]">Starting balance</label>
                     <div className="mt-2 flex items-center rounded-xl border border-[var(--border)] bg-[var(--background)] px-3">
@@ -1102,7 +1102,7 @@ export default function Home() {
                 )}
               </section>
 
-              <div className="grid items-start gap-4 lg:grid-cols-2">
+              <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
                 <section className={`${PANEL} p-6`}>
                   <SectionLabel>Wallet</SectionLabel>
                   <div className="mt-4 flex items-center gap-3">
