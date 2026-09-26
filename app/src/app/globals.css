@@ -76,6 +76,22 @@ body {
   color: #fff;
 }
 
+/* Tailwind v4 no longer sets cursor:pointer on buttons — restore it for all
+   clickable elements (tabs, toggles, cards, summaries), site + dashboard. */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [role="switch"],
+  summary,
+  label[for] {
+    cursor: pointer;
+  }
+  button:disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+}
+
 /* ---- Landing: orbital motion system ---- */
 
 /* Concentric orbital rings rotate at calm, differing speeds (the "money in motion" motif). */
