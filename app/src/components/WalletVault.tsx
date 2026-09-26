@@ -226,7 +226,7 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
         {!mounted ? (
           <div className="h-24" aria-hidden />
         ) : !connected || !publicKey ? (
-          <div className="flex flex-col items-center gap-3 py-4 text-center">
+          <div className="mx-auto flex max-w-[300px] flex-col items-center gap-3 py-2 text-center">
             <span className="grid h-11 w-11 place-items-center rounded-2xl bg-green-500/10 ring-1 ring-inset ring-green-500/25">
               <Wallet className="h-5 w-5 text-green-600 dark:text-green-400" aria-hidden />
             </span>
@@ -238,16 +238,30 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
               type="button"
               onClick={createAccount}
               disabled={creating || connecting}
-              className="inline-flex h-11 w-full max-w-[260px] items-center justify-center gap-2 rounded-xl bg-green-600 text-sm font-semibold text-white transition-[background,transform] duration-150 ease-out hover:bg-green-500 active:scale-[0.99] disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/60"
+              className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-green-600 text-sm font-semibold text-white transition-[background,transform] duration-150 ease-out hover:bg-green-500 active:scale-[0.99] disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/60"
             >
               {creating || connecting ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Sparkles className="h-4 w-4" aria-hidden />}
               Create an account
             </button>
             <div className="text-[11px] text-neutral-600 dark:text-neutral-400">No wallet, no seed phrase — Orbit makes one for you.</div>
-            <div className="flex w-full max-w-[260px] items-center gap-3 py-0.5 text-[10px] uppercase tracking-wide text-neutral-600 dark:text-neutral-400">
+            <div className="flex w-full items-center gap-3 text-[10px] uppercase tracking-wide text-neutral-500">
               <span className="h-px flex-1 bg-black/[0.1] dark:bg-white/[0.1]" /> or <span className="h-px flex-1 bg-black/[0.1] dark:bg-white/[0.1]" />
             </div>
-            <WalletMultiButton style={{ height: 40, borderRadius: 12, background: "rgba(255,255,255,0.06)", fontSize: 13 }} />
+            <div className="wallet-adapter-fullwidth w-full">
+              <WalletMultiButton
+                style={{
+                  height: 44,
+                  width: "100%",
+                  borderRadius: 12,
+                  background: "var(--surface)",
+                  color: "var(--foreground)",
+                  border: "1px solid var(--border-strong)",
+                  fontSize: 13,
+                  fontWeight: 500,
+                  justifyContent: "center",
+                }}
+              />
+            </div>
             <div className="text-[11px] text-neutral-600 dark:text-neutral-400">Already have Phantom or Solflare? Connect it (Devnet).</div>
           </div>
         ) : (

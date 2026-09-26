@@ -735,7 +735,51 @@ export default function Home() {
                 </div>
               </div>
 
-              <WalletVault onChanged={refreshVault} />
+              {/* Vault + safety/on-chain */}
+              <div className="grid items-start gap-4 lg:grid-cols-2">
+                <div className="[&>section]:mt-0">
+                  <WalletVault onChanged={refreshVault} />
+                </div>
+                <div className="space-y-4">
+                  <section className={`${PANEL} p-6`}>
+                    <SectionLabel>Why it&rsquo;s safe</SectionLabel>
+                    <ul className="mt-4 space-y-4">
+                      {[
+                        { icon: ShieldCheck, t: "Only your key withdraws", d: "Orbit funds your vault but can never take money out." },
+                        { icon: ExternalLink, t: "On-chain & verifiable", d: "Check the vault on Solscan any time." },
+                        { icon: RefreshCw, t: "Withdraw anytime", d: "No lock-ups, no penalties." },
+                      ].map((s) => (
+                        <li key={s.t} className="flex gap-3">
+                          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[var(--accent-soft)]">
+                            <s.icon className="h-4 w-4 text-[var(--accent-strong)]" aria-hidden />
+                          </span>
+                          <span>
+                            <span className="block text-[13px] font-medium">{s.t}</span>
+                            <span className="block text-[12px] text-[var(--muted)]">{s.d}</span>
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+
+                  <section className={`${PANEL} p-6`}>
+                    <SectionLabel>On-chain</SectionLabel>
+                    {onchain ? (
+                      <dl className="mt-4 space-y-3 text-[13px]">
+                        {[{ k: "Vault", v: onchain.vaultAccount }, { k: "Yield reserve", v: onchain.reserveVault }, { k: "Program", v: onchain.programId }].map((row) => (
+                          <div key={row.k} className="flex items-center justify-between gap-3 border-b border-[var(--border)] pb-3">
+                            <dt className="text-[var(--muted)]">{row.k}</dt>
+                            <dd className="flex items-center gap-3"><CopyAddress value={row.v} label={row.k} /><ExplorerLink href={solAcct(row.v)}>Solscan</ExplorerLink></dd>
+                          </div>
+                        ))}
+                        {lastSig && <div className="pt-1"><ExplorerLink href={solTx(lastSig)}>Last deposit transaction</ExplorerLink></div>}
+                      </dl>
+                    ) : (
+                      <p className="mt-4 text-[13px] text-[var(--muted)]">Open your vault to see it live on Solana.</p>
+                    )}
+                  </section>
+                </div>
+              </div>
 
               {/* Venue chooser */}
               <section className={`${PANEL} p-6`}>
@@ -768,50 +812,27 @@ export default function Home() {
                 <p className="mt-4 text-[11px] leading-5 text-[var(--faint)]">On devnet, deposits earn in the audited Orbit reserve. Choosing a mainnet venue sets where Orbit routes in production.</p>
               </section>
 
-              {/* Projection + on-chain */}
-              <div className="grid items-start gap-4 lg:grid-cols-2">
-                <section className={`${PANEL} p-6`}>
-                  <SectionLabel>What it could grow to</SectionLabel>
-                  <div className="mt-5 grid gap-6 sm:grid-cols-2">
-                    <div>
-                      <label htmlFor="proj" className="text-[12px] text-[var(--muted)]">Starting balance</label>
-                      <div className="mt-2 flex items-center rounded-xl border border-[var(--border)] bg-[var(--background)] px-3">
-                        <span className="text-[var(--muted)]">$</span>
-                        <input id="proj" value={projAmt} onChange={(e) => setProjAmt(e.target.value)} inputMode="decimal" className="h-11 w-full bg-transparent px-1.5 font-mono text-sm tabular-nums focus:outline-none" />
-                      </div>
-                      <label htmlFor="years" className="mt-5 block text-[12px] text-[var(--muted)]">Time · <span className="font-mono text-[var(--foreground)]">{projYears} {projYears === 1 ? "year" : "years"}</span></label>
-                      <input id="years" type="range" min={1} max={30} value={projYears} onChange={(e) => setProjYears(Number(e.target.value))} className="mt-3 w-full accent-[var(--accent)]" />
+              {/* Projection */}
+              <section className={`${PANEL} p-6`}>
+                <SectionLabel>What it could grow to</SectionLabel>
+                <div className="mt-5 grid gap-6 md:grid-cols-[1fr_0.7fr]">
+                  <div>
+                    <label htmlFor="proj" className="text-[12px] text-[var(--muted)]">Starting balance</label>
+                    <div className="mt-2 flex items-center rounded-xl border border-[var(--border)] bg-[var(--background)] px-3">
+                      <span className="text-[var(--muted)]">$</span>
+                      <input id="proj" value={projAmt} onChange={(e) => setProjAmt(e.target.value)} inputMode="decimal" className="h-11 w-full bg-transparent px-1.5 font-mono text-sm tabular-nums focus:outline-none" />
                     </div>
-                    <div className="flex flex-col justify-center rounded-xl border border-[var(--border)] bg-[var(--background)] p-5">
-                      <div className="text-[12px] text-[var(--muted)]">Projected value</div>
-                      <div className="mt-1 font-mono text-3xl font-semibold tabular-nums text-[var(--accent-strong)]">${projected.toLocaleString("en-US", { maximumFractionDigits: 0 })}</div>
-                      <div className="mt-1 text-[12px] text-[var(--muted)]">+${(projected - (Number(projAmt) || 0)).toLocaleString("en-US", { maximumFractionDigits: 0 })} in yield</div>
-                    </div>
+                    <label htmlFor="years" className="mt-5 block text-[12px] text-[var(--muted)]">Time · <span className="font-mono text-[var(--foreground)]">{projYears} {projYears === 1 ? "year" : "years"}</span></label>
+                    <input id="years" type="range" min={1} max={30} value={projYears} onChange={(e) => setProjYears(Number(e.target.value))} className="mt-3 w-full accent-[var(--accent)]" />
+                    <p className="mt-4 text-[11px] text-[var(--faint)]">Illustrative at {selectedVenue.name}&rsquo;s {selectedVenue.apy.toFixed(1)}% APY, compounded annually. Not a guarantee.</p>
                   </div>
-                  <p className="mt-4 text-[11px] text-[var(--faint)]">Illustrative at {selectedVenue.name}&rsquo;s {selectedVenue.apy.toFixed(1)}% APY, compounded annually. Not a guarantee.</p>
-                </section>
-
-                <section className={`${PANEL} p-6`}>
-                  <SectionLabel>On-chain</SectionLabel>
-                  {onchain ? (
-                    <dl className="mt-4 space-y-3 text-[13px]">
-                      {[{ k: "Vault", v: onchain.vaultAccount }, { k: "Yield reserve", v: onchain.reserveVault }, { k: "Program", v: onchain.programId }].map((row) => (
-                        <div key={row.k} className="flex items-center justify-between gap-3 border-b border-[var(--border)] pb-3">
-                          <dt className="text-[var(--muted)]">{row.k}</dt>
-                          <dd className="flex items-center gap-3"><CopyAddress value={row.v} label={row.k} /><ExplorerLink href={solAcct(row.v)}>Solscan</ExplorerLink></dd>
-                        </div>
-                      ))}
-                      {lastSig && <div className="pt-1"><ExplorerLink href={solTx(lastSig)}>Last deposit transaction</ExplorerLink></div>}
-                    </dl>
-                  ) : (
-                    <p className="mt-4 text-[13px] text-[var(--muted)]">Open your vault above to see it on-chain.</p>
-                  )}
-                  <div className="mt-4 flex items-start gap-2 rounded-xl border border-[var(--border)] bg-[var(--background)] p-3">
-                    <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent)]" aria-hidden />
-                    <p className="text-[12px] leading-relaxed text-[var(--muted)]">Only your key can withdraw. Orbit funds your vault; it can never take money out.</p>
+                  <div className="flex flex-col justify-center rounded-xl border border-[var(--border)] bg-[var(--background)] p-5">
+                    <div className="text-[12px] text-[var(--muted)]">Projected value</div>
+                    <div className="mt-1 font-mono text-[clamp(2rem,4vw,2.75rem)] font-semibold leading-none tabular-nums text-[var(--accent-strong)]">${projected.toLocaleString("en-US", { maximumFractionDigits: 0 })}</div>
+                    <div className="mt-2 text-[12px] text-[var(--muted)]">+${(projected - (Number(projAmt) || 0)).toLocaleString("en-US", { maximumFractionDigits: 0 })} in yield</div>
                   </div>
-                </section>
-              </div>
+                </div>
+              </section>
             </div>
           )}
 
@@ -829,22 +850,50 @@ export default function Home() {
                   <p className="mt-0.5 text-[12px] text-[var(--faint)]">Simulate a purchase or sync a bank in Save.</p>
                 </div>
               ) : (
-                <section className={`${PANEL} divide-y divide-[var(--border)] p-2`}>
-                  {txns.map((t) => (
-                    <div key={t.id} className="flex items-center gap-3 px-3 py-3">
-                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[var(--background)]">
-                        {t.deposited ? <Zap className="h-4 w-4 text-[var(--accent)]" aria-hidden /> : <ShoppingBag className="h-4 w-4 text-[var(--muted)]" aria-hidden />}
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-[14px] font-medium">{t.name}</span>
-                        <span className="block text-[12px] text-[var(--muted)]">{t.category} · {txnDate(t.ts)}{t.deposited ? " · moved to vault" : ""}</span>
-                      </span>
-                      <span className="shrink-0 text-right">
-                        <span className={`block font-mono text-[13px] tabular-nums ${t.setAside > 0 ? "text-[var(--accent-strong)]" : "text-[var(--faint)]"}`}>{t.setAside > 0 ? `+${usd(t.setAside)}` : "—"}</span>
-                        <span className="block text-[11px] text-[var(--faint)]">{usd(t.amountUsd)} spent</span>
-                      </span>
-                    </div>
-                  ))}
+                <section className={`${PANEL} overflow-hidden`}>
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[560px] text-left text-[13px]">
+                      <thead>
+                        <tr className="border-b border-[var(--border)] text-[11px] uppercase tracking-[0.14em] text-[var(--faint)]">
+                          <th className="px-5 py-3 font-medium">Transaction</th>
+                          <th className="px-5 py-3 font-medium">Category</th>
+                          <th className="px-5 py-3 font-medium">Date</th>
+                          <th className="px-5 py-3 text-right font-medium">Spent</th>
+                          <th className="px-5 py-3 text-right font-medium">Set aside</th>
+                          <th className="px-5 py-3 text-right font-medium">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[var(--border)]">
+                        {txns.map((t) => (
+                          <tr key={t.id} className="transition-colors hover:bg-[var(--background)]">
+                            <td className="px-5 py-3">
+                              <div className="flex items-center gap-3">
+                                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[var(--background)]">
+                                  {t.deposited ? <Zap className="h-4 w-4 text-[var(--accent)]" aria-hidden /> : <ShoppingBag className="h-4 w-4 text-[var(--muted)]" aria-hidden />}
+                                </span>
+                                <span className="truncate font-medium">{t.name}</span>
+                              </div>
+                            </td>
+                            <td className="px-5 py-3 text-[var(--muted)]">{t.category}</td>
+                            <td className="px-5 py-3 font-mono text-[12px] text-[var(--muted)]">{txnDate(t.ts)}</td>
+                            <td className="px-5 py-3 text-right font-mono tabular-nums text-[var(--muted)]">{usd(t.amountUsd)}</td>
+                            <td className={`px-5 py-3 text-right font-mono tabular-nums ${t.setAside > 0 ? "text-[var(--accent-strong)]" : "text-[var(--faint)]"}`}>
+                              {t.setAside > 0 ? `+${usd(t.setAside)}` : "—"}
+                            </td>
+                            <td className="px-5 py-3 text-right">
+                              {t.deposited ? (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-[var(--accent-soft)] px-2 py-0.5 text-[11px] font-medium text-[var(--accent-strong)]">In vault</span>
+                              ) : t.setAside > 0 ? (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-[var(--surface)] px-2 py-0.5 text-[11px] text-[var(--muted)]">Set aside</span>
+                              ) : (
+                                <span className="text-[11px] text-[var(--faint)]">—</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </section>
               )}
             </div>
