@@ -238,7 +238,7 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
               type="button"
               onClick={createAccount}
               disabled={creating || connecting}
-              className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-green-600 text-sm font-semibold text-white transition-[background,transform] duration-150 ease-out hover:bg-green-500 active:scale-[0.99] disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/60"
+              className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--accent)] text-sm font-semibold text-[var(--on-accent)] transition-opacity duration-150 ease-out hover:opacity-90 active:scale-[0.99] disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/60"
             >
               {creating || connecting ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Sparkles className="h-4 w-4" aria-hidden />}
               Create an account
@@ -341,7 +341,7 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
                 type="button"
                 onClick={deposit}
                 disabled={busy !== null || usdc <= 0 || Number(depositAmt) <= 0}
-                className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl bg-green-600 text-[14px] font-semibold text-white transition-[background,transform] duration-150 ease-out hover:bg-green-500 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/60"
+                className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl bg-[var(--accent)] text-[14px] font-semibold text-[var(--on-accent)] transition-opacity duration-150 ease-out hover:opacity-90 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/60"
               >
                 {busy === "deposit" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <ArrowDownToLine className="h-4 w-4" aria-hidden />}
                 Deposit

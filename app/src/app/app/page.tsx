@@ -30,7 +30,7 @@ import { LineArea, HBars } from "@/components/dashboard/Charts";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletVault } from "@/components/WalletVault";
 import { OrbitMark } from "@/components/landing/OrbitMark";
-import { AaveMark } from "@/components/landing/BrandMarks";
+import { AaveMark, KaminoMark } from "@/components/landing/BrandMarks";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 const API = "http://localhost:4000";
@@ -90,7 +90,7 @@ type Venue = {
 };
 const VENUES: Venue[] = [
   { id: "reserve", name: "Orbit Reserve", mono: "O", apy: 6.0, tvl: "devnet", blurb: "Audited program vault. Live now.", live: true, Mark: OrbitMark },
-  { id: "kamino", name: "Kamino Lend", mono: "K", apy: 8.4, tvl: "$1.4B", blurb: "The most-used lending market on Solana.", live: false },
+  { id: "kamino", name: "Kamino Lend", mono: "K", apy: 8.4, tvl: "$1.4B", blurb: "The most-used lending market on Solana.", live: false, Mark: KaminoMark },
   { id: "aave", name: "Aave v3", mono: "A", apy: 5.2, tvl: "$22B", blurb: "The largest lending protocol in DeFi.", live: false, Mark: AaveMark },
   { id: "save", name: "Save · Solend", mono: "S", apy: 6.9, tvl: "$380M", blurb: "Battle-tested Solana lending.", live: false },
   { id: "marginfi", name: "marginfi", mono: "m", apy: 5.7, tvl: "$420M", blurb: "Permissionless Solana lending.", live: false },
@@ -492,7 +492,7 @@ export default function Home() {
               <button
                 type="button"
                 onClick={() => setTab("grow")}
-                className="inline-flex items-center gap-2 rounded-full bg-[var(--contrast)] px-3.5 py-2 text-[13px] font-semibold text-[var(--contrast-fg)] transition-opacity hover:opacity-90"
+                className="inline-flex items-center gap-2 rounded-full bg-[var(--accent)] px-3.5 py-2 text-[13px] font-semibold text-[var(--on-accent)] transition-opacity hover:opacity-90"
               >
                 <Wallet className="h-3.5 w-3.5" aria-hidden /> Connect
               </button>
@@ -527,7 +527,7 @@ export default function Home() {
                       <span className="text-[var(--muted)]">earned, live</span>
                     </div>
                     <div className="mt-auto flex flex-wrap gap-2 pt-8">
-                      <button type="button" onClick={() => setTab("grow")} className="inline-flex items-center gap-2 rounded-xl bg-[var(--contrast)] px-4 py-2.5 text-[14px] font-semibold text-[var(--contrast-fg)] transition-opacity hover:opacity-90">
+                      <button type="button" onClick={() => setTab("grow")} className="inline-flex items-center gap-2 rounded-xl bg-[var(--accent)] px-4 py-2.5 text-[14px] font-semibold text-[var(--on-accent)] transition-opacity hover:opacity-90">
                         <ArrowDownToLine className="h-4 w-4" aria-hidden /> Add money
                       </button>
                       <button type="button" onClick={() => setTab("grow")} className="inline-flex items-center gap-2 rounded-xl border border-[var(--border-strong)] px-4 py-2.5 text-[14px] font-medium transition-colors hover:bg-[var(--background)]">
@@ -683,7 +683,7 @@ export default function Home() {
                     </button>
                   )}
                   {plaid?.connected && (
-                    <button type="button" onClick={syncSpending} disabled={syncing} className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--accent)] text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-60">
+                    <button type="button" onClick={syncSpending} disabled={syncing} className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--accent)] text-sm font-semibold text-[var(--on-accent)] transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-60">
                       <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} aria-hidden /> {syncing ? "Pulling transactions…" : "Sync spending"}
                     </button>
                   )}
