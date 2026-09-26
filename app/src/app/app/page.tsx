@@ -25,7 +25,11 @@ import {
   Coins,
   ShieldCheck,
   Wallet,
+  LogIn,
+  LogOut,
 } from "lucide-react";
+import { useAuth } from "@/lib/auth";
+import { UserMenu, Avatar } from "@/components/UserMenu";
 import { LineArea, HBars } from "@/components/dashboard/Charts";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletVault } from "@/components/WalletVault";
@@ -179,6 +183,7 @@ function Toggle({ on, onClick, label }: { on: boolean; onClick: () => void; labe
 }
 
 export default function Home() {
+  const { user, signInWithGoogle, signOut } = useAuth();
   const [tab, setTab] = useState<TabId>("home");
   const [state, setState] = useState<SavingsState>({ userId: "demo", pendingUsd: 0, investedUsd: 0 });
   const [feed, setFeed] = useState<Entry[]>([]);
@@ -456,10 +461,27 @@ export default function Home() {
         </nav>
 
         <div className="space-y-3 border-t border-[var(--border)] px-1 pt-4">
-          <div className="flex items-center gap-2 text-[13px]">
-            <span className={`h-1.5 w-1.5 rounded-full ${connected ? "bg-[var(--accent)]" : "bg-[var(--faint)]"}`} aria-hidden />
-            <span className="truncate font-mono text-[var(--muted)]">{owner ? truncate(owner) : "No wallet"}</span>
-          </div>
+          {user ? (
+            <button
+              type="button"
+              onClick={() => setTab("account")}
+              className="flex w-full items-center gap-2.5 rounded-xl p-1.5 text-left transition-colors hover:bg-[var(--surface)]"
+            >
+              <Avatar user={user} size="h-8 w-8" />
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-[13px] font-medium">{user.name}</span>
+                <span className="block truncate text-[11px] text-[var(--muted)]">{user.email}</span>
+              </span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={signInWithGoogle}
+              className="flex w-full items-center gap-2 rounded-xl border border-[var(--border-strong)] px-3 py-2 text-[13px] font-medium transition-colors hover:bg-[var(--surface)]"
+            >
+              <LogIn className="h-4 w-4" aria-hidden /> Sign in
+            </button>
+          )}
           <div className="flex items-center justify-between">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--surface)] px-2 py-1 text-[12px] text-[var(--muted)]">
               <span className={`h-1.5 w-1.5 rounded-full ${online ? "bg-[var(--accent)]" : online === false ? "bg-red-500" : "bg-[var(--faint)]"}`} aria-hidden />
@@ -483,23 +505,10 @@ export default function Home() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {connected ? (
-              <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] px-3 py-1.5 text-[13px]">
-                <Wallet className="h-3.5 w-3.5 text-[var(--accent)]" aria-hidden />
-                <span className="font-mono">{truncate(owner!)}</span>
-              </span>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setTab("grow")}
-                className="inline-flex items-center gap-2 rounded-full bg-[var(--accent)] px-3.5 py-2 text-[13px] font-semibold text-[var(--on-accent)] transition-opacity hover:opacity-90"
-              >
-                <Wallet className="h-3.5 w-3.5" aria-hidden /> Connect
-              </button>
-            )}
             <span className="lg:hidden">
               <ThemeToggle />
             </span>
+            <UserMenu />
           </div>
         </header>
 
@@ -953,6 +962,38 @@ export default function Home() {
           {/* ═══════════ ACCOUNT ═══════════ */}
           {tab === "account" && (
             <div className="space-y-4">
+              {/* Profile (Google account) */}
+              <section className={`${PANEL} p-6`}>
+                <SectionLabel>Profile</SectionLabel>
+                {user ? (
+                  <div className="mt-4 flex flex-wrap items-center gap-4">
+                    <Avatar user={user} size="h-14 w-14" />
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-base font-medium">{user.name}</div>
+                      <div className="truncate text-[13px] text-[var(--muted)]">{user.email}</div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={signOut}
+                      className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--border-strong)] px-3.5 py-2 text-[13px] font-medium transition-colors hover:bg-[var(--background)]"
+                    >
+                      <LogOut className="h-3.5 w-3.5" aria-hidden /> Sign out
+                    </button>
+                  </div>
+                ) : (
+                  <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
+                    <p className="text-[13px] text-[var(--muted)]">Sign in to sync your savings across devices.</p>
+                    <button
+                      type="button"
+                      onClick={signInWithGoogle}
+                      className="inline-flex items-center gap-2 rounded-full bg-[var(--contrast)] px-4 py-2.5 text-[13px] font-semibold text-[var(--contrast-fg)] transition-opacity hover:opacity-90"
+                    >
+                      <LogIn className="h-4 w-4" aria-hidden /> Sign in with Google
+                    </button>
+                  </div>
+                )}
+              </section>
+
               <div className="grid items-start gap-4 lg:grid-cols-2">
                 <section className={`${PANEL} p-6`}>
                   <SectionLabel>Wallet</SectionLabel>
