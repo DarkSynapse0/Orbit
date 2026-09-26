@@ -64,6 +64,8 @@ type Txn = { id: number; name: string; category: string; amountUsd: number; setA
 type TabId = "home" | "save" | "grow" | "activity" | "account";
 
 const usd = (n: number) => `$${n.toFixed(2)}`;
+const fmtTvl = (n: number) =>
+  n >= 1e9 ? `$${(n / 1e9).toFixed(1)}B` : n >= 1e6 ? `$${Math.round(n / 1e6)}M` : n >= 1e3 ? `$${Math.round(n / 1e3)}k` : `$${Math.round(n)}`;
 const truncate = (a: string, n = 4) => (a.length <= n * 2 + 1 ? a : `${a.slice(0, n)}…${a.slice(-n)}`);
 const solTx = (s: string) => `https://solscan.io/tx/${s}?cluster=devnet`;
 const solAcct = (a: string) => `https://solscan.io/account/${a}?cluster=devnet`;
@@ -205,6 +207,13 @@ export default function Home() {
   const [projYears, setProjYears] = useState(5);
   const [venueId, setVenueId] = useState("reserve");
   const [venueOpen, setVenueOpen] = useState(false);
+  const [liveVenues, setLiveVenues] = useState<Record<string, { apy: number | null; tvl: number | null }>>({});
+  useEffect(() => {
+    fetch(`${API}/venues`)
+      .then((r) => r.json())
+      .then((d) => d.venues && setLiveVenues(d.venues))
+      .catch(() => {});
+  }, []);
   useEffect(() => {
     try {
       const v = localStorage.getItem("orbit.venue");
@@ -390,7 +399,21 @@ export default function Home() {
     return <ShoppingBag className="h-4 w-4 text-[var(--muted)]" aria-hidden />;
   };
 
-  const selectedVenue = VENUES.find((v) => v.id === venueId) ?? VENUES[0];
+  // Merge in live APY/TVL from DefiLlama where available (Orbit Reserve stays our rate).
+  const venues = useMemo(
+    () =>
+      VENUES.map((v) => {
+        const live = liveVenues[v.id];
+        return {
+          ...v,
+          apy: live && live.apy != null ? Math.round(live.apy * 10) / 10 : v.apy,
+          tvl: live && live.tvl != null ? fmtTvl(live.tvl) : v.tvl,
+          isLive: !!(live && live.apy != null),
+        };
+      }),
+    [liveVenues],
+  );
+  const selectedVenue = venues.find((v) => v.id === venueId) ?? venues[0];
   const projected = useMemo(() => {
     const a = Number(projAmt) || 0;
     const rate = selectedVenue.apy / 100;
@@ -847,7 +870,7 @@ export default function Home() {
                       <>
                         <button type="button" aria-hidden tabIndex={-1} className="fixed inset-0 z-10 cursor-default" onClick={() => setVenueOpen(false)} />
                         <div className="absolute right-0 z-20 mt-2 w-[340px] overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)] p-1 shadow-[0_16px_44px_-14px_rgba(2,6,23,0.4)]">
-                          {VENUES.map((v) => {
+                          {venues.map((v) => {
                             const on = v.id === venueId;
                             return (
                               <button key={v.id} type="button" onClick={() => selectVenue(v.id)} className={`flex w-full items-center gap-3 rounded-lg px-2.5 py-2.5 text-left transition-colors ${on ? "bg-[var(--accent-soft)]" : "hover:bg-[var(--background)]"}`}>
@@ -869,7 +892,10 @@ export default function Home() {
                     )}
                   </div>
                 </div>
-                <p className="mt-4 text-[12px] leading-5 text-[var(--faint)]">On devnet, deposits earn in the audited Orbit reserve. Choosing a mainnet venue sets where Orbit routes in production.</p>
+                <p className="mt-4 text-[12px] leading-5 text-[var(--faint)]">
+                  On devnet, deposits earn in the audited Orbit reserve. Choosing a mainnet venue sets where Orbit routes in
+                  production. Live APY &amp; TVL from DefiLlama.
+                </p>
               </section>
 
               {/* Projection */}

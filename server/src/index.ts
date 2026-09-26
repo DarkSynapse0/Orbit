@@ -78,6 +78,15 @@ app.post('/fund-sol', async (req, res) => {
   }
 });
 
+app.get('/venues', async (_req, res) => {
+  try {
+    const { getVenueStats } = await import('./defillama.js');
+    res.json({ venues: await getVenueStats() });
+  } catch (e) {
+    res.status(502).json({ error: (e as Error).message });
+  }
+});
+
 app.use('/plaid', plaidRouter);
 
 app.listen(config.port, () => {
