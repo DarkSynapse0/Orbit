@@ -50,3 +50,8 @@ export function AaveMark({ className = "" }: { className?: string }) {
 export function KaminoMark({ className = "" }: { className?: string }) {
   return <img src="/logos/kamino.png" alt="Kamino" className={`rounded-[22%] object-contain ${className}`} />;
 }
+
+// eslint-disable-next-line @next/next/no-img-element
+export function SaveMark({ className = "" }: { className?: string }) {
+  return <img src="/logos/save.svg" alt="Save" className={`object-contain ${className}`} />;
+}
