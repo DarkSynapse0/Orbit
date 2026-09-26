@@ -90,7 +90,6 @@ const SIDEBAR_TABS: TabDef[] = [
   { id: "account", label: "Account", icon: UserIcon },
   { id: "settings", label: "Settings", icon: SettingsIcon },
 ];
-const ALL_TABS = [...SECTION_TABS, ...SIDEBAR_TABS];
 
 function CopyAddress({ value, label }: { value: string; label: string }) {
   const [copied, setCopied] = useState(false);
@@ -341,8 +340,7 @@ export default function Home() {
     return a * Math.pow(1 + rate, projYears);
   }, [projAmt, projYears, selectedVenue.apy]);
 
-  const activeTab = ALL_TABS.find((t) => t.id === tab)!;
-  const isSection = SECTION_TABS.some((t) => t.id === tab);
+  const activeLabel = [...SECTION_TABS, ...SIDEBAR_TABS].find((t) => t.id === tab)?.label ?? "";
 
   return (
     <div className="flex min-h-full flex-1">
@@ -391,56 +389,50 @@ export default function Home() {
 
       {/* ───────── Main ───────── */}
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* Top bar */}
-        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-[var(--border)] bg-[var(--background)]/80 px-5 backdrop-blur-md lg:px-8">
-          <div className="flex items-center gap-2.5">
-            <Link href="/" className="lg:hidden" aria-label="Orbit home">
+        {/* Top bar — label on the left, section tabs on the right beside the wallet */}
+        <header className="sticky top-0 z-20 flex h-16 items-stretch justify-between gap-4 border-b border-[var(--border)] bg-[var(--background)]/80 px-5 backdrop-blur-md lg:px-8">
+          <div className="flex shrink-0 items-center gap-2.5">
+            <Link href="/" className="flex shrink-0 items-center lg:hidden" aria-label="Orbit home">
               <OrbitMark className="h-7 w-7" title="Orbit" />
             </Link>
-            <h1 className="font-display text-lg font-semibold tracking-tight">{activeTab.label}</h1>
+            <span className="font-display text-lg font-semibold tracking-tight">{activeLabel}</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="hidden items-center gap-1.5 rounded-full bg-[var(--surface)] px-2.5 py-1 text-[11px] text-[var(--muted)] sm:inline-flex">
-              <span className={`h-1.5 w-1.5 rounded-full ${online ? "bg-[var(--accent)]" : online === false ? "bg-red-500" : "bg-[var(--faint)]"}`} aria-hidden />
-              {online === null ? "…" : online ? "Devnet" : "offline"}
-            </span>
-            {connected ? (
-              <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] px-3 py-1.5 text-[12px]">
-                <Wallet className="h-3.5 w-3.5 text-[var(--accent)]" aria-hidden />
-                <span className="font-mono">{truncate(owner!)}</span>
+          <div className="flex min-w-0 items-stretch gap-4">
+            <nav className="flex items-center gap-5 overflow-x-auto px-1">
+              {SECTION_TABS.map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => setTab(t.id)}
+                  className={`shrink-0 text-[14px] transition-colors focus-visible:outline-none ${
+                    tab === t.id ? "font-medium text-[var(--accent-strong)]" : "text-[var(--muted)] hover:text-[var(--foreground)]"
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </nav>
+            <div className="flex shrink-0 items-center gap-2 border-l border-[var(--border)] pl-4">
+              {connected ? (
+                <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] px-3 py-1.5 text-[12px]">
+                  <Wallet className="h-3.5 w-3.5 text-[var(--accent)]" aria-hidden />
+                  <span className="font-mono">{truncate(owner!)}</span>
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setTab("vault")}
+                  className="inline-flex items-center gap-2 rounded-full bg-[var(--contrast)] px-3.5 py-2 text-[12px] font-semibold text-[var(--contrast-fg)] transition-opacity hover:opacity-90"
+                >
+                  <Wallet className="h-3.5 w-3.5" aria-hidden /> Connect
+                </button>
+              )}
+              <span className="lg:hidden">
+                <ThemeToggle />
               </span>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setTab("vault")}
-                className="inline-flex items-center gap-2 rounded-full bg-[var(--contrast)] px-3.5 py-2 text-[12px] font-semibold text-[var(--contrast-fg)] transition-opacity hover:opacity-90"
-              >
-                <Wallet className="h-3.5 w-3.5" aria-hidden /> Connect
-              </button>
-            )}
-            <span className="lg:hidden">
-              <ThemeToggle />
-            </span>
+            </div>
           </div>
         </header>
-
-        {/* Section tabs — the primary section nav, across the top of the content */}
-        <div className="sticky top-16 z-10 flex gap-1 overflow-x-auto border-b border-[var(--border)] bg-[var(--background)]/80 px-4 backdrop-blur-md lg:px-10">
-          {SECTION_TABS.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              onClick={() => setTab(t.id)}
-              className={`relative inline-flex shrink-0 items-center gap-2 px-3 py-3.5 text-[14px] transition-colors focus-visible:outline-none ${
-                tab === t.id ? "font-medium text-[var(--foreground)]" : "text-[var(--muted)] hover:text-[var(--foreground)]"
-              }`}
-            >
-              <t.icon className="h-4 w-4" aria-hidden />
-              {t.label}
-              {tab === t.id && <span className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-[var(--foreground)]" aria-hidden />}
-            </button>
-          ))}
-        </div>
 
         <main className="mx-auto w-full max-w-[1440px] flex-1 px-6 py-8 lg:px-10 lg:py-10">
           {/* ───────── Overview ───────── */}
