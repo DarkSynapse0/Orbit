@@ -220,162 +220,160 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
 
   return (
     <section className="mt-6">
-      <div className="mb-2 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-neutral-500">
+      <div className="mb-2 flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--faint)]">
         <ShieldCheck className="h-3.5 w-3.5" aria-hidden /> Your vault · you hold the keys
       </div>
-      <div className="rounded-2xl border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-white/[0.02] p-4">
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
         {!mounted ? (
           <div className="h-24" aria-hidden />
         ) : !connected || !publicKey ? (
-          <div className="mx-auto flex max-w-[300px] flex-col items-center gap-3 py-2 text-center">
-            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-green-500/10 ring-1 ring-inset ring-green-500/25">
-              <Wallet className="h-5 w-5 text-green-600 dark:text-green-400" aria-hidden />
+          /* ───────── Onboarding ───────── */
+          <div className="mx-auto flex max-w-[320px] flex-col items-center gap-3 py-2 text-center">
+            <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)]">
+              <Wallet className="h-5 w-5" aria-hidden />
             </span>
             <div>
-              <div className="text-sm font-medium">Open your vault</div>
-              <div className="mt-0.5 text-[13px] text-neutral-500">One vault, fully yours. Orbit funds it automatically; only you can withdraw.</div>
+              <div className="text-[15px] font-semibold">Open your vault</div>
+              <div className="mt-1 text-[13px] leading-relaxed text-[var(--muted)]">One vault, fully yours. Orbit funds it automatically; only you can withdraw.</div>
             </div>
             <button
               type="button"
               onClick={createAccount}
               disabled={creating || connecting}
-              className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--accent)] text-sm font-semibold text-[var(--on-accent)] transition-opacity duration-150 ease-out hover:opacity-90 active:scale-[0.99] disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/60"
+              className="mt-1 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--accent)] text-sm font-semibold text-[var(--on-accent)] transition-opacity hover:opacity-90 active:scale-[0.99] disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/50"
             >
               {creating || connecting ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Sparkles className="h-4 w-4" aria-hidden />}
               Create an account
             </button>
-            <div className="text-[12px] text-neutral-600 dark:text-neutral-400">No wallet, no seed phrase — Orbit makes one for you.</div>
-            <div className="flex w-full items-center gap-3 text-[10px] uppercase tracking-wide text-neutral-500">
-              <span className="h-px flex-1 bg-black/[0.1] dark:bg-white/[0.1]" /> or <span className="h-px flex-1 bg-black/[0.1] dark:bg-white/[0.1]" />
+            <div className="text-[12px] text-[var(--muted)]">No wallet, no seed phrase — Orbit makes one for you.</div>
+            <div className="flex w-full items-center gap-3 text-[10px] uppercase tracking-wide text-[var(--faint)]">
+              <span className="h-px flex-1 bg-[var(--border)]" /> or <span className="h-px flex-1 bg-[var(--border)]" />
             </div>
             <div className="wallet-adapter-fullwidth flex w-full items-center gap-2.5">
-              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-[var(--border-strong)] bg-[var(--surface)]">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-[var(--border-strong)] bg-[var(--background)]">
                 <PhantomMark className="h-5 w-5 text-[#ab9ff2]" />
               </span>
               <WalletMultiButton
-                style={{
-                  height: 44,
-                  flex: 1,
-                  borderRadius: 12,
-                  background: "var(--surface)",
-                  color: "var(--foreground)",
-                  border: "1px solid var(--border-strong)",
-                  fontSize: 13,
-                  fontWeight: 500,
-                  justifyContent: "center",
-                }}
+                style={{ height: 44, flex: 1, borderRadius: 12, background: "var(--background)", color: "var(--foreground)", border: "1px solid var(--border-strong)", fontSize: 13, fontWeight: 500, justifyContent: "center" }}
               />
             </div>
-            <div className="text-[12px] text-neutral-600 dark:text-neutral-400">Already have Phantom or Solflare? Connect it (Devnet).</div>
+            <div className="text-[12px] text-[var(--muted)]">Already have Phantom or Solflare? Connect it (Devnet).</div>
           </div>
         ) : (
-          <>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="grid h-9 w-9 place-items-center rounded-xl bg-black/[0.04] dark:bg-white/[0.04] ring-1 ring-inset ring-black/[0.08] dark:ring-white/[0.08]">
-                  <Wallet className="h-4 w-4 text-neutral-700 dark:text-neutral-300" aria-hidden />
+          /* ───────── Connected ───────── */
+          <div className="space-y-4">
+            {/* Identity */}
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-2.5">
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[var(--background)] ring-1 ring-inset ring-[var(--border)]">
+                  <Wallet className="h-4 w-4 text-[var(--foreground)]" aria-hidden />
                 </span>
-                <div>
+                <div className="min-w-0">
                   <button
                     type="button"
-                    onClick={() => {
-                      navigator.clipboard?.writeText(publicKey.toBase58());
-                      setCopied(true);
-                      setTimeout(() => setCopied(false), 1500);
-                    }}
-                    className="inline-flex items-center gap-1.5 rounded font-mono text-sm text-neutral-900 dark:text-neutral-100 transition-colors hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/60"
+                    onClick={() => { navigator.clipboard?.writeText(publicKey.toBase58()); setCopied(true); setTimeout(() => setCopied(false), 1500); }}
+                    className="flex items-center gap-1.5 rounded font-mono text-sm text-[var(--foreground)] transition-colors hover:text-[var(--accent-strong)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/50"
                     aria-label="Copy wallet address"
                   >
-                    {copied ? <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-300" aria-hidden /> : <Copy className="h-3.5 w-3.5 text-neutral-500" aria-hidden />}
                     {truncate(publicKey.toBase58())}
-                    {isEmbedded && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-green-500/15 px-1.5 py-0.5 text-[10px] font-medium text-green-600 dark:text-green-400">
-                        <Sparkles className="h-2.5 w-2.5" aria-hidden /> Orbit account
-                      </span>
-                    )}
+                    {copied ? <Check className="h-3.5 w-3.5 text-[var(--accent-strong)]" aria-hidden /> : <Copy className="h-3.5 w-3.5 text-[var(--muted)]" aria-hidden />}
                   </button>
-                  <div className="font-mono text-[12px] tabular-nums text-neutral-500">
-                    {sol.toFixed(2)} SOL{solPrice > 0 && ` · ≈ $${(sol * solPrice).toFixed(2)}`}
+                  <div className="font-mono text-[12px] text-[var(--muted)]">
+                    {isEmbedded ? "Orbit account · " : ""}{sol.toFixed(2)} SOL{solPrice > 0 && ` · ≈ $${(sol * solPrice).toFixed(2)}`}
                   </div>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => disconnect().catch(() => {})}
-                className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-black/[0.1] px-3 text-[13px] font-medium text-neutral-600 transition-colors hover:bg-black/[0.04] hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/50 dark:border-white/[0.12] dark:text-neutral-300 dark:hover:bg-white/[0.06] dark:hover:text-white"
+                className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-[var(--border-strong)] px-2.5 text-[13px] font-medium text-[var(--muted)] transition-colors hover:bg-[var(--background)] hover:text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40"
               >
-                <Power className="h-3.5 w-3.5" aria-hidden /> Disconnect
+                <Power className="h-3.5 w-3.5" aria-hidden /> <span className="hidden sm:inline">Disconnect</span>
               </button>
             </div>
 
-            <div className="mt-4 flex items-center gap-2">
-              <label htmlFor="deposit-amt" className="sr-only">Deposit amount in USDC</label>
+            {/* Balances */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-xl border border-[var(--border)] bg-[var(--background)] p-3.5">
+                <div className="text-[12px] text-[var(--muted)]">In your vault</div>
+                <div className="mt-1 font-mono text-xl font-semibold tabular-nums text-[var(--accent-strong)]">${(principal ?? 0).toFixed(2)}</div>
+              </div>
+              <div className="rounded-xl border border-[var(--border)] bg-[var(--background)] p-3.5">
+                <div className="text-[12px] text-[var(--muted)]">Wallet USDC</div>
+                <div className="mt-1 font-mono text-xl font-semibold tabular-nums">${usdc.toFixed(2)}</div>
+              </div>
+            </div>
+
+            {/* Deposit row */}
+            <div className="flex items-center gap-2">
               <div className="relative flex-1">
-                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[14px] text-neutral-500">$</span>
+                <label htmlFor="deposit-amt" className="sr-only">Deposit amount in USDC</label>
+                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[14px] text-[var(--muted)]">$</span>
                 <input
                   id="deposit-amt"
                   value={depositAmt}
                   onChange={(e) => setDepositAmt(e.target.value.replace(/[^0-9.]/g, ""))}
                   inputMode="decimal"
-                  className="h-11 w-full rounded-xl border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-white/[0.02] pl-6 pr-3 text-[14px] tabular-nums text-foreground placeholder:text-neutral-600 transition-colors focus:border-green-500/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500/40"
+                  className="h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] pl-6 pr-14 text-[14px] tabular-nums text-[var(--foreground)] placeholder:text-[var(--faint)] transition-colors focus:border-[var(--accent)]/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/30"
                   placeholder="Amount"
                 />
+                <button
+                  type="button"
+                  onClick={() => setDepositAmt(usdc > 0 ? String(Math.floor(usdc)) : "0")}
+                  disabled={busy !== null || usdc <= 0}
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-lg px-2 py-1 text-[12px] font-medium text-[var(--accent-strong)] transition-colors hover:bg-[var(--accent-soft)] disabled:pointer-events-none disabled:opacity-40"
+                >
+                  Max
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => setDepositAmt(usdc > 0 ? String(Math.floor(usdc)) : "0")}
-                disabled={busy !== null || usdc <= 0}
-                className="h-11 rounded-xl border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-white/[0.02] px-3 text-[13px] font-medium text-neutral-600 dark:text-neutral-400 transition-colors hover:text-neutral-900 disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/60"
-              >
-                Max
-              </button>
-            </div>
-
-            <div className="mt-2 grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={getUsdc}
-                disabled={busy !== null}
-                className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-white/[0.02] text-[14px] font-medium transition-[background,transform] duration-150 ease-out hover:bg-black/[0.05] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/60"
-              >
-                {busy === "faucet" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Coins className="h-4 w-4" aria-hidden />}
-                Get USDC
-              </button>
               <button
                 type="button"
                 onClick={deposit}
                 disabled={busy !== null || usdc <= 0 || Number(depositAmt) <= 0}
-                className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl bg-[var(--accent)] text-[14px] font-semibold text-[var(--on-accent)] transition-opacity duration-150 ease-out hover:opacity-90 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/60"
+                className="inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-[var(--accent)] px-5 text-[14px] font-semibold text-[var(--on-accent)] transition-opacity hover:opacity-90 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/50"
               >
                 {busy === "deposit" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <ArrowDownToLine className="h-4 w-4" aria-hidden />}
                 Deposit
+              </button>
+            </div>
+
+            {/* Secondary actions */}
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={getUsdc}
+                disabled={busy !== null}
+                className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl border border-[var(--border-strong)] text-[14px] font-medium transition-colors hover:bg-[var(--background)] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40"
+              >
+                {busy === "faucet" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Coins className="h-4 w-4" aria-hidden />}
+                Get test USDC
               </button>
               <button
                 type="button"
                 onClick={withdraw}
                 disabled={busy !== null || (principal ?? 0) <= 0}
-                className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-white/[0.02] text-[14px] font-medium transition-[background,transform] duration-150 ease-out hover:bg-black/[0.05] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/60"
+                className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl border border-[var(--border-strong)] text-[14px] font-medium transition-colors hover:bg-[var(--background)] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40"
               >
                 {busy === "withdraw" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <ArrowUpFromLine className="h-4 w-4" aria-hidden />}
                 Withdraw all
               </button>
             </div>
 
-            <p className="mt-3 text-[12px] text-neutral-500">
-              Manual deposit is optional — Orbit funds this same vault automatically when your set-aside hits the threshold.
+            <p className="text-[12px] leading-relaxed text-[var(--muted)]">
+              Depositing is optional — Orbit funds this same vault automatically when your set-aside hits the threshold.
             </p>
 
             {(status || lastSig) && (
-              <div className="mt-2 flex items-center justify-between text-[12px]">
-                <span className="text-neutral-600 dark:text-neutral-400">{status}</span>
+              <div className="flex items-center justify-between gap-3 text-[12px]">
+                <span className="min-w-0 truncate text-[var(--muted)]">{status}</span>
                 {lastSig && (
-                  <a href={solTx(lastSig)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-green-600 dark:text-green-400 hover:text-green-300">
+                  <a href={solTx(lastSig)} target="_blank" rel="noreferrer" className="inline-flex shrink-0 items-center gap-1 font-medium text-[var(--accent-strong)] hover:underline">
                     view tx <ExternalLink className="h-3 w-3" aria-hidden />
                   </a>
                 )}
               </div>
             )}
-          </>
+          </div>
         )}
       </div>
     </section>
