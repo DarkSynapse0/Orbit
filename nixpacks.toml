@@ -1,0 +1,15 @@
+# Railway/Nixpacks build config for the backend (server/).
+# - The corepack bundled with Node 24.10 crashes running pnpm
+#   (ERR_VM_DYNAMIC_IMPORT_CALLBACK_MISSING); updating corepack first fixes it.
+# - No build step: the server runs directly via tsx (see railway.json startCommand),
+#   so we skip the default `pnpm -r build` (which would try to `next build` the app).
+
+[phases.install]
+cmds = [
+  "npm install -g corepack@latest",
+  "corepack enable",
+  "pnpm install --frozen-lockfile",
+]
+
+[phases.build]
+cmds = []
