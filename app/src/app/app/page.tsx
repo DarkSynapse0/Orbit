@@ -23,12 +23,15 @@ import {
   ArrowDownToLine,
   ArrowUpFromLine,
   ChevronRight,
+  ChevronLeft,
+  ChevronDown,
+  Coins,
   ShieldCheck,
   Wallet,
 } from "lucide-react";
+import { StatCard, GroupedBars, Donut, Bars, HBars } from "@/components/dashboard/Charts";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletVault } from "@/components/WalletVault";
-import { GrowthChart } from "@/components/landing/GrowthChart";
 import { OrbitMark } from "@/components/landing/OrbitMark";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -63,6 +66,32 @@ const solTx = (s: string) => `https://solscan.io/tx/${s}?cluster=devnet`;
 const solAcct = (a: string) => `https://solscan.io/account/${a}?cluster=devnet`;
 
 const PANEL = "rounded-2xl border border-[var(--border)] bg-[var(--surface)]";
+
+// Illustrative analytics data for the dashboard (demo).
+const SAMPLE_WEEKLY = [
+  { x: "W1", a: 40, b: 90 },
+  { x: "W2", a: 65, b: 120 },
+  { x: "W3", a: 50, b: 150 },
+  { x: "W4", a: 85, b: 200 },
+  { x: "W5", a: 45, b: 230 },
+  { x: "W6", a: 70, b: 290 },
+  { x: "W7", a: 60, b: 340 },
+];
+const SAMPLE_MONTHLY = [
+  { x: "Jan", v: 45 },
+  { x: "Feb", v: 62 },
+  { x: "Mar", v: 38 },
+  { x: "Apr", v: 78 },
+  { x: "May", v: 52 },
+  { x: "Jun", v: 84 },
+];
+const SAMPLE_CATEGORIES = [
+  { label: "Groceries", v: 320 },
+  { label: "Dining", v: 180 },
+  { label: "Transport", v: 140 },
+  { label: "Shopping", v: 95 },
+  { label: "Bills", v: 60 },
+];
 
 // Yield venues the vault's USDC can be routed to. The Orbit reserve is live on devnet now;
 // the mainnet lenders are where deposits route in production. APY/TVL are indicative.
@@ -438,111 +467,139 @@ export default function Home() {
           {/* ───────── Overview ───────── */}
           {tab === "overview" && (
             <div className="space-y-4">
-              {/* Row 1: balance hero + breakdown */}
-              <div className="grid gap-4 lg:grid-cols-3">
-                <section className={`${PANEL} flex flex-col p-6 lg:col-span-2 lg:p-8`}>
-                  <SectionLabel>Total balance</SectionLabel>
-                  <div className="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                    <span
-                      className={`font-mono text-[clamp(3rem,7vw,4.5rem)] font-semibold leading-none tabular-nums transition-colors duration-700 ${
-                        flash ? "text-[var(--accent)]" : "text-[var(--foreground)]"
-                      }`}
-                    >
-                      {usd(total)}
-                    </span>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-[var(--accent-soft)] px-2 py-0.5 text-[12px] font-medium text-[var(--accent-strong)]">
-                      <TrendingUp className="h-3.5 w-3.5" aria-hidden /> 6% APY
-                    </span>
-                  </div>
-                  <div className="mt-3 font-mono text-[13px] text-[var(--accent-strong)]">
-                    +{liveYield.toFixed(6)} <span className="text-[var(--muted)]">earned, accruing live</span>
-                  </div>
-                  <div className="mt-auto flex flex-wrap gap-2 pt-8">
-                    <button
-                      type="button"
-                      onClick={() => setTab("vault")}
-                      className="inline-flex items-center gap-2 rounded-xl bg-[var(--contrast)] px-4 py-2.5 text-[13px] font-semibold text-[var(--contrast-fg)] transition-opacity hover:opacity-90"
-                    >
-                      <ArrowDownToLine className="h-4 w-4" aria-hidden /> Deposit
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setTab("vault")}
-                      className="inline-flex items-center gap-2 rounded-xl border border-[var(--border-strong)] px-4 py-2.5 text-[13px] font-medium transition-colors hover:bg-[var(--surface)]"
-                    >
-                      <ArrowUpFromLine className="h-4 w-4" aria-hidden /> Withdraw
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setTab("bank")}
-                      className="inline-flex items-center gap-2 rounded-xl border border-[var(--border-strong)] px-4 py-2.5 text-[13px] font-medium transition-colors hover:bg-[var(--surface)]"
-                    >
-                      <ShoppingBag className="h-4 w-4" aria-hidden /> Add spending
-                    </button>
-                  </div>
-                </section>
-
-                {/* Breakdown */}
-                <section className={`${PANEL} flex flex-col divide-y divide-[var(--border)] p-6`}>
-                  <SectionLabel>Breakdown</SectionLabel>
-                  <div className="flex-1 divide-y divide-[var(--border)]">
-                    <div className="py-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[12px] text-[var(--muted)]">Set aside · in bank</span>
-                        <span className="font-mono text-sm font-semibold tabular-nums">{usd(state.pendingUsd)}</span>
-                      </div>
-                      <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[var(--border)]">
-                        <div className="h-full rounded-full bg-[var(--faint)] transition-[width] duration-300" style={{ width: `${pct}%` }} />
-                      </div>
-                      <div className="mt-1.5 font-mono text-[11px] tabular-nums text-[var(--faint)]">{usd(state.pendingUsd)} / {usd(THRESHOLD)} to deposit</div>
-                    </div>
-                    <div className="flex items-center justify-between py-4">
-                      <span className="flex items-center gap-2 text-[12px] text-[var(--muted)]">
-                        In vault
-                        {onchain && <span className="rounded-full bg-[var(--accent-soft)] px-1.5 py-0.5 text-[10px] text-[var(--accent-strong)]">on-chain</span>}
-                      </span>
-                      <span className="font-mono text-sm font-semibold tabular-nums text-[var(--accent-strong)]">{usd(principalUsd)}</span>
-                    </div>
-                    <div className="flex items-center justify-between py-4">
-                      <span className="text-[12px] text-[var(--muted)]">Yield earned</span>
-                      <span className="font-mono text-sm font-semibold tabular-nums text-[var(--accent-strong)]">{liveYield.toFixed(6)}</span>
-                    </div>
-                  </div>
-                </section>
+              {/* Stat cards */}
+              <div className="grid gap-4 sm:grid-cols-3">
+                <StatCard
+                  highlight
+                  icon={<Wallet className="h-5 w-5 text-[var(--foreground)]" aria-hidden />}
+                  delta={{ up: true, value: "6.0%" }}
+                  value={usd(total)}
+                  label="Total balance"
+                />
+                <StatCard
+                  icon={<Coins className="h-5 w-5 text-[var(--foreground)]" aria-hidden />}
+                  delta={onchain ? { up: true, value: "on-chain" } : undefined}
+                  value={usd(principalUsd)}
+                  label="Invested in vault"
+                />
+                <StatCard
+                  icon={<TrendingUp className="h-5 w-5 text-[var(--accent-strong)]" aria-hidden />}
+                  delta={{ up: true, value: "live" }}
+                  value={liveYield.toFixed(6)}
+                  label="Yield earned"
+                />
               </div>
 
-              {/* Row 2: chart + recent activity */}
+              {/* Main + right analytics */}
               <div className="grid gap-4 lg:grid-cols-3">
-                <section className={`${PANEL} p-6 lg:col-span-2`}>
-                  <div className="flex items-center justify-between">
-                    <SectionLabel>Balance over time</SectionLabel>
-                    <span className="text-[11px] text-[var(--faint)]">illustrative</span>
-                  </div>
-                  <div className="mt-5">
-                    <GrowthChart />
-                  </div>
-                </section>
+                {/* Left column */}
+                <div className="space-y-4 lg:col-span-2">
+                  <section className={`${PANEL} p-6`}>
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-display text-[15px] font-semibold">Savings analytic</h3>
+                      <div className="flex items-center gap-1.5">
+                        <button type="button" className="inline-flex items-center gap-1 rounded-lg border border-[var(--border)] px-2.5 py-1 text-[12px] text-[var(--muted)] transition-colors hover:bg-[var(--background)]">
+                          7 weeks <ChevronDown className="h-3 w-3" aria-hidden />
+                        </button>
+                        <button type="button" aria-label="Previous" className="grid h-7 w-7 place-items-center rounded-lg border border-[var(--border)] text-[var(--muted)] transition-colors hover:bg-[var(--background)]"><ChevronLeft className="h-3.5 w-3.5" aria-hidden /></button>
+                        <button type="button" aria-label="Next" className="grid h-7 w-7 place-items-center rounded-lg border border-[var(--border)] text-[var(--muted)] transition-colors hover:bg-[var(--background)]"><ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>
+                      </div>
+                    </div>
+                    <div className="mt-6">
+                      <GroupedBars data={SAMPLE_WEEKLY} aLabel="Set aside" bLabel="In vault" />
+                    </div>
+                  </section>
 
-                <section className={`${PANEL} p-6`}>
-                  <div className="flex items-center justify-between">
-                    <SectionLabel>Recent activity</SectionLabel>
-                    <button type="button" onClick={() => setTab("activity")} className="inline-flex items-center gap-1 text-[12px] text-[var(--muted)] hover:text-[var(--foreground)]">
-                      View all <ChevronRight className="h-3.5 w-3.5" aria-hidden />
-                    </button>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <section className={`${PANEL} p-6`}>
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-display text-[15px] font-semibold">Allocation</h3>
+                        <span className="rounded-lg border border-[var(--border)] px-2.5 py-1 text-[12px] text-[var(--muted)]">This month</span>
+                      </div>
+                      <div className="mt-6">
+                        <Donut
+                          centerTop={usd(total)}
+                          centerBottom="total"
+                          segments={
+                            principalUsd + state.pendingUsd + liveYield > 0.001
+                              ? [
+                                  { label: "In vault", value: principalUsd, color: "var(--accent)" },
+                                  { label: "Set aside", value: state.pendingUsd, color: "var(--muted)" },
+                                  { label: "Yield", value: liveYield, color: "var(--faint)" },
+                                ]
+                              : [
+                                  { label: "In vault", value: 80, color: "var(--accent)" },
+                                  { label: "Set aside", value: 15, color: "var(--muted)" },
+                                  { label: "Yield", value: 5, color: "var(--faint)" },
+                                ]
+                          }
+                        />
+                      </div>
+                    </section>
+
+                    <section className={`${PANEL} p-6`}>
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-display text-[15px] font-semibold">Set-asides</h3>
+                        <span className="rounded-lg border border-[var(--border)] px-2.5 py-1 text-[12px] text-[var(--muted)]">6 months</span>
+                      </div>
+                      <div className="mt-6">
+                        <Bars data={SAMPLE_MONTHLY} />
+                      </div>
+                    </section>
                   </div>
-                  {feed.length === 0 ? (
-                    <p className="mt-4 text-[13px] text-[var(--muted)]">No activity yet. Sync a bank or add spending to start.</p>
-                  ) : (
-                    <ul className="mt-4 space-y-2.5">
-                      {feed.slice(0, 7).map((e) => (
-                        <li key={e.id} className="flex items-center gap-3 text-[13px]">
-                          {feedIcon(e.kind)}
-                          <span className="min-w-0 flex-1 text-[var(--foreground)]">{e.text}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </section>
+                </div>
+
+                {/* Right column */}
+                <div className="space-y-4">
+                  <section className={`${PANEL} p-6`}>
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-display text-[15px] font-semibold">By category</h3>
+                      <span className="rounded-lg border border-[var(--border)] px-2.5 py-1 text-[12px] text-[var(--muted)]">This month</span>
+                    </div>
+                    <p className="mt-1 text-[11px] text-[var(--faint)]">Where your set-asides come from</p>
+                    <div className="mt-5">
+                      <HBars rows={SAMPLE_CATEGORIES} />
+                    </div>
+                  </section>
+
+                  <section className={`${PANEL} p-6`}>
+                    <SectionLabel>Quick actions</SectionLabel>
+                    <div className="mt-4 space-y-2">
+                      <button type="button" onClick={() => setTab("vault")} className="flex w-full items-center gap-2 rounded-xl bg-[var(--contrast)] px-4 py-2.5 text-[13px] font-semibold text-[var(--contrast-fg)] transition-opacity hover:opacity-90">
+                        <ArrowDownToLine className="h-4 w-4" aria-hidden /> Deposit
+                      </button>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button type="button" onClick={() => setTab("vault")} className="flex items-center justify-center gap-2 rounded-xl border border-[var(--border-strong)] px-3 py-2.5 text-[13px] font-medium transition-colors hover:bg-[var(--background)]">
+                          <ArrowUpFromLine className="h-4 w-4" aria-hidden /> Withdraw
+                        </button>
+                        <button type="button" onClick={() => setTab("bank")} className="flex items-center justify-center gap-2 rounded-xl border border-[var(--border-strong)] px-3 py-2.5 text-[13px] font-medium transition-colors hover:bg-[var(--background)]">
+                          <ShoppingBag className="h-4 w-4" aria-hidden /> Spend
+                        </button>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section className={`${PANEL} p-6`}>
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-display text-[15px] font-semibold">Recent activity</h3>
+                      <button type="button" onClick={() => setTab("activity")} className="inline-flex items-center gap-1 text-[12px] text-[var(--muted)] hover:text-[var(--foreground)]">
+                        View all <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+                      </button>
+                    </div>
+                    {feed.length === 0 ? (
+                      <p className="mt-4 text-[13px] text-[var(--muted)]">No activity yet. Sync a bank or add spending to start.</p>
+                    ) : (
+                      <ul className="mt-4 space-y-2.5">
+                        {feed.slice(0, 5).map((e) => (
+                          <li key={e.id} className="flex items-center gap-3 text-[13px]">
+                            {feedIcon(e.kind)}
+                            <span className="min-w-0 flex-1 truncate text-[var(--foreground)]">{e.text}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </section>
+                </div>
               </div>
             </div>
           )}
