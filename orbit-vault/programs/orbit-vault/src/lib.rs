@@ -21,6 +21,7 @@ pub mod orbit_vault {
         let r = &mut ctx.accounts.reserve;
         r.mint = ctx.accounts.mint.key();
         r.apy_bps = apy_bps;
+        r.total_principal = 0;
         r.bump = ctx.bumps.reserve;
         Ok(())
     }
@@ -57,7 +58,10 @@ pub mod orbit_vault {
         token::transfer(cpi, amount)?;
 
         let vault = &mut ctx.accounts.vault;
-        vault.principal = vault.principal.checked_add(amount).unwrap();
+        vault.principal = vault.principal.checked_add(amount).ok_or(VaultError::MathOverflow)?;
+        // Track pooled principal so withdraw can guarantee it's always fully backed.
+        let reserve = &mut ctx.accounts.reserve;
+        reserve.total_principal = reserve.total_principal.checked_add(amount).ok_or(VaultError::MathOverflow)?;
         Ok(())
     }
 
@@ -73,8 +77,20 @@ pub mod orbit_vault {
 
         // Interest paid out is proportional to the principal being withdrawn.
         let accrued = ctx.accounts.vault.accrued_yield as u128;
-        let interest = (accrued * amount as u128 / principal as u128) as u64;
-        let payout = amount.checked_add(interest).unwrap();
+        let mut interest = (accrued * amount as u128 / principal as u128) as u64;
+
+        // Solvency guard: the reserve must never pay interest out of other users' principal.
+        // The interest buffer is whatever the reserve holds above all pooled principal; cap the
+        // payout to it so a principal withdrawal can ALWAYS be honored (no pool insolvency).
+        let buffer = ctx
+            .accounts
+            .reserve_vault
+            .amount
+            .saturating_sub(ctx.accounts.reserve.total_principal);
+        if interest > buffer {
+            interest = buffer;
+        }
+        let payout = amount.checked_add(interest).ok_or(VaultError::MathOverflow)?;
 
         let mint_key = ctx.accounts.mint.key();
         let bump = ctx.accounts.reserve.bump;
@@ -93,8 +109,10 @@ pub mod orbit_vault {
         token::transfer(cpi, payout)?;
 
         let vault = &mut ctx.accounts.vault;
-        vault.principal = vault.principal.checked_sub(amount).unwrap();
-        vault.accrued_yield = vault.accrued_yield.checked_sub(interest).unwrap();
+        vault.principal = vault.principal.checked_sub(amount).ok_or(VaultError::MathOverflow)?;
+        vault.accrued_yield = vault.accrued_yield.saturating_sub(interest);
+        let reserve = &mut ctx.accounts.reserve;
+        reserve.total_principal = reserve.total_principal.checked_sub(amount).ok_or(VaultError::MathOverflow)?;
         Ok(())
     }
 }
@@ -118,12 +136,13 @@ fn accrue(vault: &mut Account<Vault>) -> Result<()> {
 pub struct Reserve {
     pub mint: Pubkey,
     pub apy_bps: u16,
+    pub total_principal: u64,
     pub bump: u8,
 }
 
 impl Reserve {
-    // 8 discriminator + 32 + 2 + 1
-    pub const LEN: usize = 8 + 32 + 2 + 1;
+    // 8 discriminator + 32 + 2 + 8 + 1
+    pub const LEN: usize = 8 + 32 + 2 + 8 + 1;
 }
 
 #[account]
@@ -183,7 +202,7 @@ pub struct InitializeVault<'info> {
         init,
         payer = payer,
         space = Vault::LEN,
-        seeds = [b"vault", owner.key().as_ref()],
+        seeds = [b"vault", owner.key().as_ref(), mint.key().as_ref()],
         bump
     )]
     pub vault: Account<'info, Vault>,
@@ -203,13 +222,13 @@ pub struct Deposit<'info> {
 
     #[account(
         mut,
-        seeds = [b"vault", owner.key().as_ref()],
+        seeds = [b"vault", owner.key().as_ref(), mint.key().as_ref()],
         bump = vault.bump,
         has_one = mint
     )]
     pub vault: Account<'info, Vault>,
 
-    #[account(seeds = [b"reserve", mint.key().as_ref()], bump = reserve.bump)]
+    #[account(mut, seeds = [b"reserve", mint.key().as_ref()], bump = reserve.bump)]
     pub reserve: Account<'info, Reserve>,
 
     #[account(mut, seeds = [b"reserve_vault", mint.key().as_ref()], bump)]
@@ -230,14 +249,14 @@ pub struct Withdraw<'info> {
 
     #[account(
         mut,
-        seeds = [b"vault", authority.key().as_ref()],
+        seeds = [b"vault", authority.key().as_ref(), mint.key().as_ref()],
         bump = vault.bump,
         has_one = authority,
         has_one = mint
     )]
     pub vault: Account<'info, Vault>,
 
-    #[account(seeds = [b"reserve", mint.key().as_ref()], bump = reserve.bump)]
+    #[account(mut, seeds = [b"reserve", mint.key().as_ref()], bump = reserve.bump)]
     pub reserve: Account<'info, Reserve>,
 
     #[account(mut, seeds = [b"reserve_vault", mint.key().as_ref()], bump)]
@@ -257,4 +276,6 @@ pub enum VaultError {
     ZeroAmount,
     #[msg("Insufficient principal in vault")]
     InsufficientPrincipal,
+    #[msg("Arithmetic overflow")]
+    MathOverflow,
 }

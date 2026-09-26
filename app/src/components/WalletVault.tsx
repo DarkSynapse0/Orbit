@@ -76,7 +76,7 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
     if (!publicKey || !program || !mint) return null;
     const enc = new TextEncoder();
     const mintPk = new PublicKey(mint);
-    const [vault] = PublicKey.findProgramAddressSync([enc.encode("vault"), publicKey.toBytes()], program.programId);
+    const [vault] = PublicKey.findProgramAddressSync([enc.encode("vault"), publicKey.toBytes(), mintPk.toBytes()], program.programId);
     const [reserve] = PublicKey.findProgramAddressSync([enc.encode("reserve"), mintPk.toBytes()], program.programId);
     const [reserveVault] = PublicKey.findProgramAddressSync([enc.encode("reserve_vault"), mintPk.toBytes()], program.programId);
     return { vault, reserve, reserveVault, mintPk };

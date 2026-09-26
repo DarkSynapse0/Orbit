@@ -48,8 +48,11 @@ async function loadOrCreateMint(connection: Connection, wallet: Keypair): Promis
   return mint;
 }
 
-function vaultPda(program: anchor.Program, owner: PublicKey) {
-  const [vault] = PublicKey.findProgramAddressSync([Buffer.from('vault'), owner.toBuffer()], program.programId);
+function vaultPda(program: anchor.Program, owner: PublicKey, mint: PublicKey) {
+  const [vault] = PublicKey.findProgramAddressSync(
+    [Buffer.from('vault'), owner.toBuffer(), mint.toBuffer()],
+    program.programId,
+  );
   return vault;
 }
 
@@ -104,7 +107,7 @@ async function ensureReserve(c: Ctx) {
 
 /** Ensure a user's vault exists; if not, the server opens it (server pays rent, user owns it). */
 async function ensureVault(c: Ctx, owner: PublicKey) {
-  const vault = vaultPda(c.program, owner);
+  const vault = vaultPda(c.program, owner, c.mint);
   try {
     await c.program.account.vault.fetch(vault);
   } catch {
@@ -138,7 +141,7 @@ export async function depositOnChain(ownerAddress: string, usd: number): Promise
   const c = await ctx();
   const owner = new PublicKey(ownerAddress);
   await ensureVault(c, owner);
-  const vault = vaultPda(c.program, owner);
+  const vault = vaultPda(c.program, owner, c.mint);
   return c.program.methods
     .deposit(new anchor.BN(toBase(usd)))
     .accounts({
@@ -158,7 +161,7 @@ export async function depositOnChain(ownerAddress: string, usd: number): Promise
 export async function getVaultOnChain(ownerAddress: string) {
   const c = await ctx();
   const owner = new PublicKey(ownerAddress);
-  const vault = vaultPda(c.program, owner);
+  const vault = vaultPda(c.program, owner, c.mint);
   let principalUsd = 0;
   let accruedYieldUsd = 0;
   let lastUpdateTs = 0;
