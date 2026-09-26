@@ -13,10 +13,121 @@ const fontDisplay = Space_Grotesk({
 const fontSans = Inter({ variable: "--ff-sans", subsets: ["latin"], display: "swap" });
 const fontMono = JetBrains_Mono({ variable: "--ff-mono", subsets: ["latin"], display: "swap" });
 
+// Set NEXT_PUBLIC_SITE_URL to your production origin for correct canonical + OG URLs.
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://orbit.app";
+const TITLE = "Orbit — money that saves itself";
+const DESCRIPTION =
+  "Orbit sets aside a little from your everyday spending and grows it with on-chain USDC yield on Solana. Self-custodial, verifiable, withdraw anytime.";
+
 export const metadata: Metadata = {
-  title: "Orbit — money that saves itself",
-  description:
-    "Orbit sets aside a little from your everyday spending and grows it with on-chain yield. Self-custodial, verifiable, withdraw anytime.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: TITLE,
+    template: "%s · Orbit",
+  },
+  description: DESCRIPTION,
+  applicationName: "Orbit",
+  category: "finance",
+  keywords: [
+    "Orbit",
+    "self-driving savings",
+    "automatic savings",
+    "round-up savings",
+    "Solana savings app",
+    "on-chain yield",
+    "USDC yield",
+    "DeFi savings",
+    "self-custody",
+    "non-custodial savings",
+    "crypto savings",
+    "save and invest",
+  ],
+  authors: [{ name: "Orbit" }],
+  creator: "Orbit",
+  publisher: "Orbit",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    siteName: "Orbit",
+    title: TITLE,
+    description: DESCRIPTION,
+    url: SITE_URL,
+    locale: "en_US",
+    images: [
+      {
+        url: "/og.png",
+        width: 1200,
+        height: 630,
+        alt: "Orbit — self-driving savings on Solana",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: ["/og.png"],
+  },
+  icons: {
+    icon: [{ url: "/icon.png", type: "image/png" }],
+    shortcut: ["/favicon.ico"],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180" }],
+  },
+  manifest: "/manifest.webmanifest",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  formatDetection: { telephone: false, email: false, address: false },
+};
+
+export const viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b0d10" },
+  ],
+  colorScheme: "light dark" as const,
+};
+
+// Structured data so search engines understand what Orbit is.
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
+      name: "Orbit",
+      url: SITE_URL,
+      logo: `${SITE_URL}/icon.png`,
+      description: DESCRIPTION,
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      url: SITE_URL,
+      name: "Orbit",
+      description: DESCRIPTION,
+      publisher: { "@id": `${SITE_URL}/#organization` },
+    },
+    {
+      "@type": "SoftwareApplication",
+      name: "Orbit",
+      applicationCategory: "FinanceApplication",
+      operatingSystem: "Web",
+      url: SITE_URL,
+      description: DESCRIPTION,
+      offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+    },
+  ],
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -35,6 +146,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         />
       </head>
       <body className="min-h-full flex flex-col">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <Providers>{children}</Providers>
       </body>
     </html>
