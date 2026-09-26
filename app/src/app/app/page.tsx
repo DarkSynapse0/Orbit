@@ -362,16 +362,18 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [owner, refreshVault]);
 
-  // Auto-flush a backlog once per connection: if money was earmarked before a
-  // wallet existed (or a deposit failed), move it in as soon as we're connected.
-  const flushGuard = useRef(false);
+  // Self-driving: whenever a wallet is connected and the set-aside reaches the
+  // threshold, invest it automatically — no button press needed. We remember the
+  // amount we last auto-invested so a failed attempt doesn't loop, but any *new*
+  // threshold crossing (or a reconnect) triggers a fresh auto-invest.
+  const autoInvestedFor = useRef(0);
   useEffect(() => {
-    if (!connected) {
-      flushGuard.current = false;
+    if (!connected || !owner) {
+      autoInvestedFor.current = 0;
       return;
     }
-    if (owner && !flushGuard.current && state.pendingUsd >= THRESHOLD && !investing) {
-      flushGuard.current = true;
+    if (state.pendingUsd >= THRESHOLD && !investing && autoInvestedFor.current !== state.pendingUsd) {
+      autoInvestedFor.current = state.pendingUsd;
       investNow();
     }
   }, [connected, owner, state.pendingUsd, investing, investNow]);
@@ -651,26 +653,31 @@ export default function Home() {
                   </div>
                   {state.pendingUsd >= THRESHOLD ? (
                     connected ? (
-                      <button
-                        type="button"
-                        onClick={investNow}
-                        disabled={investing}
-                        className="mt-2.5 inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-[var(--accent)] px-3 py-1.5 text-[13px] font-semibold text-[var(--on-accent)] transition-opacity hover:opacity-90 disabled:opacity-60"
-                      >
-                        <ArrowDownToLine className="h-3.5 w-3.5" aria-hidden />
-                        {investing ? "Investing…" : `Invest ${usd(state.pendingUsd)} now`}
-                      </button>
+                      investing ? (
+                        <div className="mt-2.5 flex items-center gap-1.5 text-[12px] text-[var(--accent-strong)]">
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden /> Investing automatically…
+                        </div>
+                      ) : (
+                        // Auto-invests on its own; this is just a manual retry if that failed.
+                        <button
+                          type="button"
+                          onClick={investNow}
+                          className="mt-2.5 text-[12px] font-medium text-[var(--accent-strong)] underline-offset-2 hover:underline"
+                        >
+                          Invest now
+                        </button>
+                      )
                     ) : (
                       <button
                         type="button"
                         onClick={() => setTab("grow")}
                         className="mt-2.5 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-[var(--border-strong)] px-3 py-1.5 text-[13px] font-medium transition-colors hover:bg-[var(--background)]"
                       >
-                        Connect wallet to invest
+                        Connect a wallet to invest it
                       </button>
                     )
                   ) : (
-                    <div className="mt-1.5 font-mono text-[12px] tabular-nums text-[var(--faint)]">{usd(state.pendingUsd)} / {usd(THRESHOLD)} to next deposit</div>
+                    <div className="mt-1.5 font-mono text-[12px] tabular-nums text-[var(--faint)]">{usd(state.pendingUsd)} / {usd(THRESHOLD)} to auto-invest</div>
                   )}
                 </div>
                 <div className={`${PANEL} p-5`}>

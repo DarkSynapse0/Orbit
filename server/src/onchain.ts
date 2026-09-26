@@ -3,6 +3,12 @@ import os from 'node:os';
 import path from 'node:path';
 import bs58 from 'bs58';
 import * as anchor from '@coral-xyz/anchor';
+
+// Resolve BN across CJS/ESM interop shapes. Depending on the Node version / loader,
+// `anchor.BN` may live at the top level or under `.default` — the container hit the
+// latter, which threw "anchor.BN is not a constructor". Fall back to bn.js if needed.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const BN: any = (anchor as any).BN ?? (anchor as any).default?.BN;
 import { Connection, Keypair, PublicKey, SystemProgram, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
 import { createMint, getOrCreateAssociatedTokenAccount, mintTo, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { config } from './config.js';
@@ -169,7 +175,7 @@ export async function depositOnChain(ownerAddress: string, usd: number): Promise
   await ensureVault(c, owner);
   const vault = vaultPda(c.program, owner, c.mint);
   return c.program.methods
-    .deposit(new anchor.BN(toBase(usd)))
+    .deposit(new BN(toBase(usd)))
     .accounts({
       funder: c.wallet.publicKey,
       owner,
