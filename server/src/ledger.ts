@@ -1,6 +1,7 @@
 import { DatabaseSync } from 'node:sqlite';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import fs from 'node:fs';
 import type { SavingsState } from '@orbit/shared';
 import { config } from './config.js';
 
@@ -11,6 +12,11 @@ import { config } from './config.js';
 const dbPath = config.dataDir
   ? path.join(config.dataDir, 'orbit.db')
   : fileURLToPath(new URL('../.orbit.db', import.meta.url));
+// Make sure the directory exists (e.g. a mounted volume path) so SQLite can open the file
+// instead of crash-looping with "unable to open database file".
+try {
+  fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+} catch {}
 const db = new DatabaseSync(dbPath);
 db.exec(`
   CREATE TABLE IF NOT EXISTS savings (
