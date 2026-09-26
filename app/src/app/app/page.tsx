@@ -789,7 +789,7 @@ export default function Home() {
                     {plaid?.connected && <span className="h-2 w-2 rounded-full bg-[var(--accent)]" aria-hidden />}
                   </div>
                   {plaid && !plaid.configured && (
-                    <p className="mt-4 rounded-lg bg-[var(--background)] px-3 py-2 text-[13px] text-[var(--muted)]">Add <code className="font-mono">PLAID_CLIENT_ID</code> and <code className="font-mono">PLAID_SECRET</code> to <code className="font-mono">server/.env</code> for real detection.</p>
+                    <p className="mt-4 rounded-lg bg-[var(--background)] px-3 py-2 text-[13px] text-[var(--muted)]">Set <code className="font-mono">PLAID_CLIENT_ID</code> and <code className="font-mono">PLAID_SECRET</code> in the server environment to detect real spending.</p>
                   )}
                   {plaid?.configured && !plaid.connected && (
                     <button type="button" onClick={connectBank} disabled={busy} className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-[var(--border-strong)] text-sm font-medium transition-colors hover:bg-[var(--background)] disabled:pointer-events-none disabled:opacity-50">
