@@ -179,6 +179,28 @@ function Toggle({ on, onClick, label }: { on: boolean; onClick: () => void; labe
 export default function Home() {
   const { user, ready: authReady, signInWithGoogle, signOut } = useAuth();
   const [tab, setTab] = useState<TabId>("home");
+  const firstTabPersist = useRef(true);
+
+  // Restore the last-viewed tab after a refresh (client-only, avoids SSR mismatch).
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("orbit.tab.v1");
+      if (saved && NAV.some((t) => t.id === saved)) setTab(saved as TabId);
+    } catch {}
+  }, []);
+
+  // Remember the active tab so it survives a refresh. Skip the first run so the default
+  // "home" never overwrites a restored tab before the restore effect applies it.
+  useEffect(() => {
+    if (firstTabPersist.current) {
+      firstTabPersist.current = false;
+      return;
+    }
+    try {
+      localStorage.setItem("orbit.tab.v1", tab);
+    } catch {}
+  }, [tab]);
+
   const [state, setState] = useState<SavingsState>({ userId: "demo", pendingUsd: 0, investedUsd: 0 });
   const [feed, setFeed] = useState<Entry[]>([]);
   const [amount, setAmount] = useState("120");
