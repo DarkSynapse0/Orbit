@@ -35,7 +35,6 @@ import { UserMenu, Avatar } from "@/components/UserMenu";
 import { LineArea, HBars } from "@/components/dashboard/Charts";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletVault } from "@/components/WalletVault";
-import { OrbitMark } from "@/components/landing/OrbitMark";
 import { OrbitLogo } from "@/components/OrbitLogo";
 import { AaveMark, KaminoMark, SaveMark, MarginfiMark } from "@/components/landing/BrandMarks";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -99,8 +98,13 @@ type Venue = {
   live: boolean;
   Mark?: React.ComponentType<{ className?: string }>;
 };
+// Square Orbit app-icon so the reserve tile fills 1:1 like the other venue logos.
+const OrbitVenueMark = ({ className }: { className?: string }) => (
+  // eslint-disable-next-line @next/next/no-img-element
+  <img src="/icon.png" alt="Orbit Reserve" className={`${className ?? ""} rounded-lg object-cover`} draggable={false} />
+);
 const VENUES: Venue[] = [
-  { id: "reserve", name: "Orbit Reserve", mono: "O", apy: 6.0, tvl: "devnet", blurb: "Audited program vault. Live now.", live: true, Mark: OrbitMark },
+  { id: "reserve", name: "Orbit Reserve", mono: "O", apy: 6.0, tvl: "devnet", blurb: "Audited program vault. Live now.", live: true, Mark: OrbitVenueMark },
   { id: "kamino", name: "Kamino Lend", mono: "K", apy: 8.4, tvl: "$1.4B", blurb: "The most-used lending market on Solana.", live: false, Mark: KaminoMark },
   { id: "aave", name: "Aave v3", mono: "A", apy: 5.2, tvl: "$22B", blurb: "The largest lending protocol in DeFi.", live: false, Mark: AaveMark },
   { id: "save", name: "Save · Solend", mono: "S", apy: 6.9, tvl: "$380M", blurb: "Battle-tested Solana lending.", live: false, Mark: SaveMark },
