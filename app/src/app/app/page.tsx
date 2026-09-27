@@ -33,6 +33,7 @@ import { apiFetch } from "@/lib/api";
 import { AuthScreen } from "@/components/AuthScreen";
 import { UserMenu, Avatar } from "@/components/UserMenu";
 import { LineArea, HBars } from "@/components/dashboard/Charts";
+import { SavingsGoals } from "@/components/dashboard/SavingsGoals";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletVault } from "@/components/WalletVault";
 import { OrbitLogo } from "@/components/OrbitLogo";
@@ -947,6 +948,8 @@ export default function Home() {
                 </section>
                 </div>
               </div>
+
+              <SavingsGoals saved={principalUsd + state.pendingUsd} />
             </div>
           )}
 
