@@ -92,10 +92,10 @@ export default function Landing() {
       <section className="border-y border-[var(--border)]">
         <div className="mx-auto grid max-w-6xl grid-cols-2 divide-x divide-y divide-[var(--border)] sm:grid-cols-4 sm:divide-y-0">
           {[
-            { icon: ShieldCheck, k: "Non-custodial", v: "You hold the keys" },
-            { icon: Eye, k: "Transparent", v: "Every dollar on-chain" },
-            { icon: RefreshCw, k: "Liquid", v: "Withdraw anytime" },
-            { icon: TrendingUp, k: "Productive", v: "Earns real yield" },
+            { icon: ShieldCheck, k: "Yours, always", v: "Only you can withdraw" },
+            { icon: Eye, k: "Nothing hidden", v: "Every dollar on-chain" },
+            { icon: RefreshCw, k: "Cash out anytime", v: "No lock-ups or fees" },
+            { icon: TrendingUp, k: "It actually earns", v: "Real yield, paid to you" },
           ].map((p) => (
             <div key={p.k} className="flex items-center gap-3 px-6 py-6">
               <p.icon className="h-5 w-5 shrink-0 text-[var(--foreground)]" aria-hidden />
@@ -118,9 +118,9 @@ export default function Landing() {
         </Reveal>
         <div className="mt-16 grid grid-cols-1 gap-x-10 gap-y-12 sm:grid-cols-3">
           {[
-            { n: "01", icon: Landmark, t: "You spend", d: "Connect your bank. Orbit watches through Plaid. It never touches your money." },
-            { n: "02", icon: Coins, t: "Orbit invests", d: "A little per purchase, converted to USDC and deposited into your on-chain vault." },
-            { n: "03", icon: TrendingUp, t: "It grows", d: "Real yield, paid in tokens. Withdraw principal plus interest in one tap, anytime." },
+            { n: "01", icon: Landmark, t: "You spend", d: "Connect your bank and go about your day. Orbit notices your spending through Plaid — it can look, but never touch your money." },
+            { n: "02", icon: Coins, t: "Orbit saves", d: "It quietly tucks away a little from each purchase and moves it into a savings vault that’s yours alone." },
+            { n: "03", icon: TrendingUp, t: "It grows", d: "Your savings earn interest around the clock. Take out everything you saved, plus what it earned, in one tap — anytime." },
           ].map((s, i) => (
             <Reveal key={s.n} delay={i * 90}>
               <div className="border-t border-[var(--border-strong)] pt-6">
@@ -299,14 +299,17 @@ export default function Landing() {
       {/* ───────── FAQ ───────── */}
       <section id="faq" className="mx-auto w-full max-w-3xl scroll-mt-20 px-6 py-24 lg:py-32">
         <Reveal>
-          <h2 className="font-display text-[clamp(1.9rem,4vw,3rem)] font-semibold tracking-[-0.03em]">Questions</h2>
+          <h2 className="font-display text-[clamp(1.9rem,4vw,3rem)] font-semibold tracking-[-0.03em]">Good questions</h2>
+          <p className="mt-3 text-[16px] text-[var(--muted)]">Everything you&rsquo;re probably wondering, in plain English.</p>
         </Reveal>
         <Reveal delay={80} className="mt-10 divide-y divide-[var(--border)] border-y border-[var(--border)]">
           {[
-            { q: "Can Orbit take my money?", a: "No. The vault is self-custodial; only your key can withdraw. Orbit can add funds, never remove them." },
-            { q: "Can I withdraw anytime?", a: "Yes. No lock-ups or penalties. One tap returns your full balance plus yield." },
-            { q: "Do I need a crypto wallet?", a: "No. Create an account in one tap, no seed phrase. Or connect Phantom or Solflare." },
-            { q: "Where does the yield come from?", a: "An on-chain reserve paying interest in real tokens. On mainnet this routes to Aave, the largest lending market in DeFi." },
+            { q: "Is my money safe?", a: "Yes. Your savings live in a vault only you can open — Orbit can add to it, but can never take anything out. It all sits on Solana, so you can check your balance yourself anytime." },
+            { q: "Can I take my money out whenever I want?", a: "Anytime, instantly. No lock-ups, no penalties, no waiting period. One tap sends your full balance back to you, plus whatever it has earned." },
+            { q: "Do I need to know anything about crypto?", a: "Not a thing. Sign in and Orbit sets up your account for you — no wallet to install, no seed phrase to write down. Already use Phantom or Solflare? You can connect those instead." },
+            { q: "How does my money actually grow?", a: "Your savings earn interest on-chain, paid in real tokens. On mainnet that runs through Aave, one of the most-used and most-audited lending markets in crypto. Rates move with the market, so earnings can go up or down." },
+            { q: "What does it cost to use?", a: "Nothing to get started. You're trying Orbit on Solana's free test network right now, so there's no cost to open a vault and watch it work." },
+            { q: "Is Orbit a bank?", a: "No — Orbit isn't a bank and isn't FDIC-insured. Your money is held as USDC (a dollar-pegged stablecoin) in your own on-chain vault. Because it's a real investment, your balance can move and returns aren't guaranteed." },
           ].map((f) => (
             <details key={f.q} className="group py-1">
               <summary className="flex cursor-pointer list-none items-center justify-between py-5 text-[16px] font-medium transition-colors hover:text-[var(--accent-strong)] focus-visible:outline-none">
