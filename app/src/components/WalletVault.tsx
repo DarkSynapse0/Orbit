@@ -306,6 +306,7 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
               <div className="rounded-xl border border-[var(--border)] bg-[var(--background)] p-3.5">
                 <div className="text-[12px] text-[var(--muted)]">Wallet USDC</div>
                 <div className="mt-1 font-mono text-xl font-semibold tabular-nums">${usdc.toFixed(2)}</div>
+                {usdc <= 0 && <div className="mt-1 text-[11px] leading-snug text-[var(--faint)]">Devnet test token — tap Get test USDC to fund it.</div>}
               </div>
             </div>
 
