@@ -214,8 +214,13 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
         })
         .rpc();
       setLastSig(sig);
-      setStatus("Withdrew everything + yield");
       await refresh();
+      // Mocked off-ramp (mirrors the mocked Stripe deposit hop, in reverse):
+      // vault -> your wallet (USDC, real, above) -> Stripe converts USDC -> dollars -> your bank.
+      const amt = Number(principalBase.toString()) / 10 ** DECIMALS;
+      setStatus("Converting to dollars via Stripe…");
+      await new Promise((r) => setTimeout(r, 1300));
+      setStatus(`$${amt.toFixed(2)} on its way to your bank 🎉`);
     });
 
   return (
@@ -355,12 +360,13 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
                 className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl border border-[var(--border-strong)] text-[15px] font-medium transition-colors hover:bg-[var(--background)] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40"
               >
                 {busy === "withdraw" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <ArrowUpFromLine className="h-4 w-4" aria-hidden />}
-                Withdraw all
+                Withdraw to bank
               </button>
             </div>
 
             <p className="text-[12px] leading-relaxed text-[var(--muted)]">
-              Depositing is optional — Orbit funds this same vault automatically when your set-aside hits the threshold.
+              Depositing is optional — Orbit funds this vault automatically when your set-aside hits the threshold.
+              <span className="text-[var(--faint)]"> Withdraw to bank cashes out your balance plus yield and sends dollars to your bank (the USDC→dollars step via Stripe is mocked on devnet).</span>
             </p>
 
             {(status || lastSig) && (
