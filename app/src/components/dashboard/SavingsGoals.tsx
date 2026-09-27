@@ -13,7 +13,10 @@ const LS_KEY = "orbit.goals.v1";
 const SECONDS_PER_YEAR = 31_536_000;
 const EMOJIS = ["🏖️", "🚨", "🏠", "🚗", "🎁", "✈️", "🎓", "💍", "🐷", "💻"];
 
-type Goal = { id: string; emoji: string; name: string; target: number; allocated: number; since: number };
+// `earned` banks yield accrued before the last balance change, so topping up a goal
+// keeps its existing yield instead of resetting to 0. `since` clocks new accrual on the
+// current balance; live yield = earned + (allocated growing since `since`).
+type Goal = { id: string; emoji: string; name: string; target: number; allocated: number; earned?: number; since: number };
 
 const usd = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
@@ -60,12 +63,17 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
   const allocatedTotal = goals.reduce((s, g) => s + g.allocated, 0);
   const unallocated = Math.max(0, saved - allocatedTotal);
 
-  // Each goal's live yield = its allocated balance growing at 6% since it was set.
+  // Yield accrued on the current balance since the last change (not yet banked).
+  const accruedSince = (g: Goal) => {
+    const elapsed = g.since && now ? Math.max(0, now / 1000 - g.since / 1000) : 0;
+    return (g.allocated * apy * elapsed) / SECONDS_PER_YEAR;
+  };
+
+  // Live yield = yield banked at the last change + yield accruing on the current balance.
   const withYield = useMemo(
     () =>
       goals.map((g) => {
-        const elapsed = g.since && now ? Math.max(0, now / 1000 - g.since / 1000) : 0;
-        const yieldUsd = (g.allocated * apy * elapsed) / SECONDS_PER_YEAR;
+        const yieldUsd = (g.earned ?? 0) + accruedSince(g);
         return { ...g, balance: g.allocated + yieldUsd, yieldUsd };
       }),
     [goals, now, apy],
@@ -78,7 +86,7 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
     const alloc = Math.round(Math.min(Math.max(0, Number(initial) || 0), unallocated) * 100) / 100;
     idSeed.current += 1;
     const goalName = name.trim().slice(0, 24);
-    persist([...goals, { id: `g${now}${idSeed.current}`, emoji, name: goalName, target: t, allocated: alloc, since: now }]);
+    persist([...goals, { id: `g${now}${idSeed.current}`, emoji, name: goalName, target: t, allocated: alloc, earned: 0, since: now }]);
     logActivity("goal_create", `Created goal ${emoji} ${goalName}` + (alloc > 0 ? ` · allocated ${usd(alloc)}` : ""));
     setName("");
     setTarget("500");
@@ -97,9 +105,11 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
       goals.map((g) => {
         if (g.id !== id) return g;
         const max = g.allocated + unallocated; // can't allocate more than what's free
-        const next = Math.min(Math.max(0, g.allocated + delta), max);
-        // Reset the yield clock only when adding money in; keep it when trimming.
-        return { ...g, allocated: Math.round(next * 100) / 100, since: delta > 0 ? now : g.since };
+        const next = Math.round(Math.min(Math.max(0, g.allocated + delta), max) * 100) / 100;
+        // Bank the yield earned so far before restarting the clock on the new balance,
+        // so a top-up keeps existing yield. Emptying the pot clears its banked yield too.
+        const earned = next <= 0 ? 0 : (g.earned ?? 0) + accruedSince(g);
+        return { ...g, allocated: next, earned, since: now };
       }),
     );
   };

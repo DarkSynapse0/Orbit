@@ -916,7 +916,7 @@ export default function Home() {
                     ))}
                   </div>
 
-                  <div className="mt-auto pt-4">
+                  <div className="mt-5">
                     {connected && onchain ? (
                       <a href={solAcct(onchain.vaultAccount)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-[14px] font-medium text-[var(--accent-strong)] hover:underline">
                         View your vault on Solscan <ExternalLink className="h-3.5 w-3.5" aria-hidden />
