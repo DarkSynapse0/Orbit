@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LogIn, LogOut, ChevronDown } from "lucide-react";
 import { useAuth, type OrbitUser } from "@/lib/auth";
 
@@ -25,6 +25,23 @@ export function Avatar({ user, size = "h-8 w-8" }: { user: OrbitUser | null; siz
 export function UserMenu() {
   const { user, signInWithGoogle, signOut } = useAuth();
   const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Close on click outside or Escape. (A fixed-overlay approach fails here because
+  // this lives inside the sticky header's stacking context.)
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
 
   if (!user) {
     return (
@@ -39,7 +56,7 @@ export function UserMenu() {
   }
 
   return (
-    <div className="relative">
+    <div className="relative" ref={ref}>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
@@ -52,7 +69,6 @@ export function UserMenu() {
       </button>
       {open && (
         <>
-          <button type="button" aria-hidden tabIndex={-1} className="fixed inset-0 z-10 cursor-default" onClick={() => setOpen(false)} />
           <div className="absolute right-0 z-20 mt-2 w-64 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-2 shadow-[0_16px_44px_-14px_rgba(2,6,23,0.4)]">
             <div className="flex items-center gap-3 p-2">
               <Avatar user={user} size="h-10 w-10" />
