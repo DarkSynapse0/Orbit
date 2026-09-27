@@ -11,6 +11,7 @@ import { PhantomMark } from "@/components/landing/BrandMarks";
 import idl from "@/idl/orbit_vault.json";
 import { OrbitWalletName } from "@/lib/orbitWallet";
 import { apiFetch } from "@/lib/api";
+import { logActivity } from "@/lib/activity";
 
 const DECIMALS = 6;
 const base = (usd: number) => new BN(Math.round(usd * 10 ** DECIMALS));
@@ -64,7 +65,15 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ address: publicKey.toBase58() }),
     }).catch(() => {});
-  }, [connected, publicKey]);
+    // Log the connect once per wallet per session (so reloads don't spam it).
+    try {
+      const k = "orbit.connlog." + publicKey.toBase58();
+      if (!sessionStorage.getItem(k)) {
+        sessionStorage.setItem(k, "1");
+        logActivity("wallet_connect", `Connected ${isEmbedded ? "your Orbit account" : "a wallet"}`);
+      }
+    } catch {}
+  }, [connected, publicKey, isEmbedded]);
 
   const program = useMemo(() => {
     if (!wallet) return null;
@@ -139,6 +148,7 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
       const d = await r.json();
       if (d.error) throw new Error(d.error);
       setStatus("Received 100 test USDC");
+      logActivity("faucet", "Received 100 test USDC");
       // Refresh in the background (don't block the button on the RPC read); retry
       // once since a freshly-minted token account can lag a beat.
       refresh();
@@ -189,6 +199,7 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
       const sig = await (program.provider as AnchorProvider).sendAndConfirm(tx);
       setLastSig(sig);
       setStatus(exists ? `Deposited ${amt} USDC` : `Opened vault + deposited ${amt} USDC`);
+      logActivity("deposit", `Deposited $${amt.toFixed(2)} into your vault`);
       await refresh();
     });
 
@@ -224,6 +235,7 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
       setStatus("Converting to dollars via Stripe…");
       await new Promise((r) => setTimeout(r, 1300));
       setStatus(`$${amt.toFixed(2)} on its way to your bank 🎉`);
+      logActivity("withdraw", `Withdrew $${amt.toFixed(2)} to your bank`);
     });
 
   return (

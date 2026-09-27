@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Plus, Target, Trash2, TrendingUp } from "lucide-react";
+import { logActivity } from "@/lib/activity";
 
 // Named savings goals ("pots") layered over the single on-chain vault. Each goal has
 // its own allocated balance and earns the same 6% APY on that balance — mathematically
@@ -76,7 +77,9 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
     // Fund the goal on creation, capped at what's free in the vault.
     const alloc = Math.round(Math.min(Math.max(0, Number(initial) || 0), unallocated) * 100) / 100;
     idSeed.current += 1;
-    persist([...goals, { id: `g${now}${idSeed.current}`, emoji, name: name.trim().slice(0, 24), target: t, allocated: alloc, since: now }]);
+    const goalName = name.trim().slice(0, 24);
+    persist([...goals, { id: `g${now}${idSeed.current}`, emoji, name: goalName, target: t, allocated: alloc, since: now }]);
+    logActivity("goal_create", `Created goal ${emoji} ${goalName}` + (alloc > 0 ? ` · allocated ${usd(alloc)}` : ""));
     setName("");
     setTarget("500");
     setInitial("");
@@ -85,6 +88,11 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
   };
 
   const allocate = (id: string, delta: number) => {
+    const g0 = goals.find((g) => g.id === id);
+    if (g0) {
+      if (delta > 0) logActivity("goal_allocate", `Added ${usd(Math.min(delta, unallocated))} to ${g0.emoji} ${g0.name}`);
+      else if (g0.allocated > 0) logActivity("goal_empty", `Emptied ${g0.emoji} ${g0.name} (${usd(g0.allocated)})`);
+    }
     persist(
       goals.map((g) => {
         if (g.id !== id) return g;
@@ -96,7 +104,11 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
     );
   };
 
-  const remove = (id: string) => persist(goals.filter((g) => g.id !== id));
+  const remove = (id: string) => {
+    const g = goals.find((x) => x.id === id);
+    if (g) logActivity("goal_delete", `Deleted goal ${g.emoji} ${g.name}`);
+    persist(goals.filter((x) => x.id !== id));
+  };
 
   return (
     <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">

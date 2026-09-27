@@ -34,6 +34,7 @@ import { AuthScreen } from "@/components/AuthScreen";
 import { UserMenu, Avatar } from "@/components/UserMenu";
 import { LineArea, HBars } from "@/components/dashboard/Charts";
 import { SavingsGoals } from "@/components/dashboard/SavingsGoals";
+import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletVault } from "@/components/WalletVault";
 import { OrbitLogo } from "@/components/OrbitLogo";
@@ -955,8 +956,9 @@ export default function Home() {
           {/* ═══════════ ACTIVITY ═══════════ */}
           {tab === "activity" && (
             <div className="space-y-4">
+              <ActivityFeed />
               <div className="flex items-center justify-between">
-                <SectionLabel>Every transaction</SectionLabel>
+                <SectionLabel>Spending &amp; set-asides</SectionLabel>
                 <button type="button" onClick={reset} className="inline-flex items-center gap-1 rounded text-[14px] text-[var(--muted)] transition-colors hover:text-[var(--foreground)]"><RotateCcw className="h-3.5 w-3.5" aria-hidden /> reset</button>
               </div>
               {txns.length === 0 ? (
