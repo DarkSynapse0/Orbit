@@ -745,88 +745,89 @@ export default function Home() {
           {tab === "save" && (
             <div className="space-y-4">
               <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
-                {/* Bank */}
-                <section className={`${PANEL} p-6`}>
-                  <SectionLabel>Your bank</SectionLabel>
-                  <div className="mt-4 flex items-center gap-3">
-                    <span className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--background)] ring-1 ring-inset ring-[var(--border)]"><Landmark className="h-5 w-5 text-[var(--foreground)]" aria-hidden /></span>
-                    <div className="min-w-0 flex-1">
-                      <div className="text-sm font-medium">{plaid?.connected ? "First Platypus Bank" : "No bank connected"}</div>
-                      <div className="text-[13px] text-[var(--muted)]">{plaid?.connected ? "Plaid sandbox · detection only" : "Connect to detect spending"}</div>
-                    </div>
-                    {plaid?.connected && <span className="h-2 w-2 rounded-full bg-[var(--accent)]" aria-hidden />}
-                  </div>
-                  {plaid && !plaid.configured && (
-                    <p className="mt-4 rounded-lg bg-[var(--background)] px-3 py-2 text-[13px] text-[var(--muted)]">Set <code className="font-mono">PLAID_CLIENT_ID</code> and <code className="font-mono">PLAID_SECRET</code> in the server environment to detect real spending.</p>
-                  )}
-                  {plaid?.configured && !plaid.connected && (
-                    <button type="button" onClick={connectBank} disabled={busy} className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-[var(--border-strong)] text-sm font-medium transition-colors hover:bg-[var(--background)] disabled:pointer-events-none disabled:opacity-50">
-                      {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Landmark className="h-4 w-4" aria-hidden />} Connect a test bank
-                    </button>
-                  )}
-                  {plaid?.connected && (
-                    <button type="button" onClick={syncSpending} disabled={syncing} className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--accent)] text-sm font-semibold text-[var(--on-accent)] transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-60">
-                      <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} aria-hidden /> {syncing ? "Pulling transactions…" : "Sync spending"}
-                    </button>
-                  )}
-                </section>
-
-                {/* Try it */}
-                <section className={`${PANEL} p-6`}>
-                  <SectionLabel>Try it — simulate a purchase</SectionLabel>
-                  {!connected && (
-                    <p className="mt-3 rounded-lg bg-[var(--accent-soft)] px-3 py-2 text-[13px] text-[var(--accent-strong)]">Open your vault in Grow first — that&apos;s where set-asides land.</p>
-                  )}
-                  <div className="mt-4 flex gap-2">
-                    {[45, 120, 600].map((v) => (
-                      <button key={v} type="button" onClick={() => spend(v)} disabled={busy || !online || !connected} className="h-11 flex-1 rounded-xl border border-[var(--border)] bg-[var(--background)] text-sm font-medium tabular-nums transition-colors hover:border-[var(--accent)]/40 disabled:pointer-events-none disabled:opacity-40">${v}</button>
-                    ))}
-                  </div>
-                  <div className="mt-2 flex gap-2">
-                    <label htmlFor="amount" className="sr-only">Purchase amount</label>
-                    <input id="amount" value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" placeholder="Custom amount" className="h-11 min-w-0 flex-1 rounded-xl border border-[var(--border)] bg-[var(--background)] px-3.5 text-sm tabular-nums text-[var(--foreground)] placeholder:text-[var(--faint)] focus:border-[var(--accent)]/50 focus:outline-none" />
-                    <button type="button" onClick={() => spend(Number(amount))} disabled={busy || !online || !connected} className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-[var(--border-strong)] px-5 text-sm font-medium transition-colors hover:bg-[var(--background)] disabled:pointer-events-none disabled:opacity-40">{busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null} Spend</button>
-                  </div>
-                </section>
-              </div>
-
-              {/* Rule + automation */}
-              <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
-                <section className={`${PANEL} p-6`}>
-                  <SectionLabel>The round-up rule</SectionLabel>
-                  <div className="mt-4 grid grid-cols-2 gap-4">
-                    {[{ spend: "Over $100", set: "$5" }, { spend: "Over $500", set: "$10" }].map((t) => (
-                      <div key={t.spend} className="rounded-xl border border-[var(--border)] bg-[var(--background)] p-5">
-                        <div className="text-[13px] text-[var(--muted)]">{t.spend}</div>
-                        <div className="mt-2 font-mono text-3xl font-semibold text-[var(--accent-strong)]">{t.set}</div>
-                        <div className="mt-1 text-[12px] text-[var(--muted)]">set aside</div>
+                {/* Left column: your bank + the rule */}
+                <div className="space-y-4">
+                  <section className={`${PANEL} p-6`}>
+                    <SectionLabel>Your bank</SectionLabel>
+                    <div className="mt-4 flex items-center gap-3">
+                      <span className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--background)] ring-1 ring-inset ring-[var(--border)]"><Landmark className="h-5 w-5 text-[var(--foreground)]" aria-hidden /></span>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-medium">{plaid?.connected ? "First Platypus Bank" : "No bank connected"}</div>
+                        <div className="text-[13px] text-[var(--muted)]">{plaid?.connected ? "Plaid sandbox · detection only" : "Connect to detect spending"}</div>
                       </div>
-                    ))}
-                  </div>
-                  <div className="mt-5 flex items-center justify-between border-t border-[var(--border)] pt-4 text-[14px]">
-                    <span className="text-[var(--muted)]">Moves to vault at</span>
-                    <span className="font-mono">{usd(THRESHOLD)}</span>
-                  </div>
-                </section>
+                      {plaid?.connected && <span className="h-2 w-2 rounded-full bg-[var(--accent)]" aria-hidden />}
+                    </div>
+                    {plaid && !plaid.configured && (
+                      <p className="mt-4 rounded-lg bg-[var(--background)] px-3 py-2 text-[13px] text-[var(--muted)]">Set <code className="font-mono">PLAID_CLIENT_ID</code> and <code className="font-mono">PLAID_SECRET</code> in the server environment to detect real spending.</p>
+                    )}
+                    {plaid?.configured && !plaid.connected && (
+                      <button type="button" onClick={connectBank} disabled={busy} className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-[var(--border-strong)] text-sm font-medium transition-colors hover:bg-[var(--background)] disabled:pointer-events-none disabled:opacity-50">
+                        {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Landmark className="h-4 w-4" aria-hidden />} Connect a test bank
+                      </button>
+                    )}
+                    {plaid?.connected && (
+                      <button type="button" onClick={syncSpending} disabled={syncing} className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--accent)] text-sm font-semibold text-[var(--on-accent)] transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-60">
+                        <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} aria-hidden /> {syncing ? "Pulling transactions…" : "Sync spending"}
+                      </button>
+                    )}
+                  </section>
 
-                <section className={`${PANEL} divide-y divide-[var(--border)]`}>
-                  <div className="flex items-center justify-between gap-4 p-5">
-                    <div className="text-sm font-medium">Auto-invest at threshold</div>
-                    <Toggle on={autoInvest} onClick={() => setAutoInvest((v) => !v)} label="Auto-invest" />
-                  </div>
-                  <div className="flex items-center justify-between gap-4 p-5">
-                    <div className="text-sm font-medium">Pause saving</div>
-                    <Toggle on={paused} onClick={() => setPaused((v) => !v)} label="Pause" />
-                  </div>
-                  <div className="flex items-center justify-between gap-4 p-5">
-                    <div className="text-sm font-medium">Save more per purchase</div>
-                    <div className="flex rounded-full border border-[var(--border)] p-0.5">
-                      {[1, 2, 3].map((m) => (
-                        <button key={m} type="button" onClick={() => setMultiplier(m)} className={`rounded-full px-3 py-1 text-[14px] font-medium transition-colors ${multiplier === m ? "bg-[var(--contrast)] text-[var(--contrast-fg)]" : "text-[var(--muted)]"}`}>{m}×</button>
+                  <section className={`${PANEL} p-6`}>
+                    <SectionLabel>The round-up rule</SectionLabel>
+                    <div className="mt-4 grid grid-cols-2 gap-4">
+                      {[{ spend: "Over $100", set: "$5" }, { spend: "Over $500", set: "$10" }].map((t) => (
+                        <div key={t.spend} className="rounded-xl border border-[var(--border)] bg-[var(--background)] p-5">
+                          <div className="text-[13px] text-[var(--muted)]">{t.spend}</div>
+                          <div className="mt-2 font-mono text-3xl font-semibold text-[var(--accent-strong)]">{t.set}</div>
+                          <div className="mt-1 text-[12px] text-[var(--muted)]">set aside</div>
+                        </div>
                       ))}
                     </div>
-                  </div>
-                </section>
+                    <div className="mt-5 flex items-center justify-between border-t border-[var(--border)] pt-4 text-[14px]">
+                      <span className="text-[var(--muted)]">Moves to vault at</span>
+                      <span className="font-mono">{usd(THRESHOLD)}</span>
+                    </div>
+                  </section>
+                </div>
+
+                {/* Right column: try it + automation */}
+                <div className="space-y-4">
+                  <section className={`${PANEL} p-6`}>
+                    <SectionLabel>Try it — simulate a purchase</SectionLabel>
+                    {!connected && (
+                      <p className="mt-3 rounded-lg bg-[var(--accent-soft)] px-3 py-2 text-[13px] text-[var(--accent-strong)]">Open your vault in Grow first — that&apos;s where set-asides land.</p>
+                    )}
+                    <div className="mt-4 flex gap-2">
+                      {[45, 120, 600].map((v) => (
+                        <button key={v} type="button" onClick={() => spend(v)} disabled={busy || !online || !connected} className="h-11 flex-1 rounded-xl border border-[var(--border)] bg-[var(--background)] text-sm font-medium tabular-nums transition-colors hover:border-[var(--accent)]/40 disabled:pointer-events-none disabled:opacity-40">${v}</button>
+                      ))}
+                    </div>
+                    <div className="mt-2 flex gap-2">
+                      <label htmlFor="amount" className="sr-only">Purchase amount</label>
+                      <input id="amount" value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" placeholder="Custom amount" className="h-11 min-w-0 flex-1 rounded-xl border border-[var(--border)] bg-[var(--background)] px-3.5 text-sm tabular-nums text-[var(--foreground)] placeholder:text-[var(--faint)] focus:border-[var(--accent)]/50 focus:outline-none" />
+                      <button type="button" onClick={() => spend(Number(amount))} disabled={busy || !online || !connected} className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-[var(--border-strong)] px-5 text-sm font-medium transition-colors hover:bg-[var(--background)] disabled:pointer-events-none disabled:opacity-40">{busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null} Spend</button>
+                    </div>
+                  </section>
+
+                  <section className={`${PANEL} divide-y divide-[var(--border)]`}>
+                    <div className="flex items-center justify-between gap-4 p-5">
+                      <div className="text-sm font-medium">Auto-invest at threshold</div>
+                      <Toggle on={autoInvest} onClick={() => setAutoInvest((v) => !v)} label="Auto-invest" />
+                    </div>
+                    <div className="flex items-center justify-between gap-4 p-5">
+                      <div className="text-sm font-medium">Pause saving</div>
+                      <Toggle on={paused} onClick={() => setPaused((v) => !v)} label="Pause" />
+                    </div>
+                    <div className="flex items-center justify-between gap-4 p-5">
+                      <div className="text-sm font-medium">Save more per purchase</div>
+                      <div className="flex rounded-full border border-[var(--border)] p-0.5">
+                        {[1, 2, 3].map((m) => (
+                          <button key={m} type="button" onClick={() => setMultiplier(m)} className={`rounded-full px-3 py-1 text-[14px] font-medium transition-colors ${multiplier === m ? "bg-[var(--contrast)] text-[var(--contrast-fg)]" : "text-[var(--muted)]"}`}>{m}×</button>
+                        ))}
+                      </div>
+                    </div>
+                  </section>
+                </div>
               </div>
               <p className="text-[12px] text-[var(--faint)]">Automation controls are a demo preview; the live rule is fixed at the tiers above.</p>
             </div>
@@ -841,7 +842,9 @@ export default function Home() {
                   <WalletVault onChanged={refreshVault} />
                 </div>
 
-                {/* Earning: big APY + venue picker + trust chips (was 3 text sections) */}
+                {/* Right column: Earning + Projection stacked so it fills the vault's height */}
+                <div className="space-y-4">
+                {/* Earning: big APY + venue picker + trust chips */}
                 <section className={`${PANEL} p-6`}>
                   <div className="flex items-start justify-between gap-3">
                     <div>
@@ -908,28 +911,29 @@ export default function Home() {
                     <p className="mt-4 text-[12px] text-[var(--faint)]">Open your vault to see it live on Solana.</p>
                   )}
                 </section>
-              </div>
 
-              {/* Projection — the visual payoff */}
-              <section className={`${PANEL} p-6`}>
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-[1fr_0.8fr] md:items-center">
-                  <div>
-                    <SectionLabel>If you saved</SectionLabel>
-                    <div className="mt-3 flex items-center rounded-xl border border-[var(--border)] bg-[var(--background)] px-3">
-                      <span className="text-[var(--muted)]">$</span>
-                      <input id="proj" value={projAmt} onChange={(e) => setProjAmt(e.target.value)} inputMode="decimal" className="h-11 w-full min-w-0 bg-transparent px-1.5 font-mono text-sm tabular-nums focus:outline-none" />
+                {/* Projection — stacked under Earning so the column fills the vault's height */}
+                <section className={`${PANEL} p-6`}>
+                  <div className="space-y-4">
+                    <div>
+                      <SectionLabel>If you saved</SectionLabel>
+                      <div className="mt-3 flex items-center rounded-xl border border-[var(--border)] bg-[var(--background)] px-3">
+                        <span className="text-[var(--muted)]">$</span>
+                        <input id="proj" value={projAmt} onChange={(e) => setProjAmt(e.target.value)} inputMode="decimal" className="h-11 w-full min-w-0 bg-transparent px-1.5 font-mono text-[15px] tabular-nums focus:outline-none" />
+                      </div>
+                      <label htmlFor="years" className="mt-4 block text-[14px] text-[var(--muted)]">for <span className="font-mono text-[var(--foreground)]">{projYears} {projYears === 1 ? "year" : "years"}</span></label>
+                      <input id="years" type="range" min={1} max={30} value={projYears} onChange={(e) => setProjYears(Number(e.target.value))} className="mt-3 w-full accent-[var(--accent)]" />
                     </div>
-                    <label htmlFor="years" className="mt-4 block text-[13px] text-[var(--muted)]">for <span className="font-mono text-[var(--foreground)]">{projYears} {projYears === 1 ? "year" : "years"}</span></label>
-                    <input id="years" type="range" min={1} max={30} value={projYears} onChange={(e) => setProjYears(Number(e.target.value))} className="mt-3 w-full accent-[var(--accent)]" />
+                    <div className="rounded-xl border border-[var(--border)] bg-[var(--background)] p-5">
+                      <div className="text-[14px] text-[var(--muted)]">Could become</div>
+                      <div className="mt-1 font-mono text-[clamp(2.25rem,8vw,3rem)] font-semibold leading-none tabular-nums text-[var(--accent-strong)]">${projected.toLocaleString("en-US", { maximumFractionDigits: 0 })}</div>
+                      <div className="mt-2 text-[14px] text-[var(--muted)]">+${(projected - (Number(projAmt) || 0)).toLocaleString("en-US", { maximumFractionDigits: 0 })} earned</div>
+                    </div>
                   </div>
-                  <div className="rounded-xl border border-[var(--border)] bg-[var(--background)] p-5">
-                    <div className="text-[13px] text-[var(--muted)]">Could become</div>
-                    <div className="mt-1 font-mono text-[clamp(2.25rem,8vw,3rem)] font-semibold leading-none tabular-nums text-[var(--accent-strong)]">${projected.toLocaleString("en-US", { maximumFractionDigits: 0 })}</div>
-                    <div className="mt-2 text-[13px] text-[var(--muted)]">+${(projected - (Number(projAmt) || 0)).toLocaleString("en-US", { maximumFractionDigits: 0 })} earned</div>
-                  </div>
+                  <p className="mt-4 text-[12px] text-[var(--faint)]">Illustrative at {selectedVenue.apy.toFixed(1)}% APY, compounded yearly. Not a guarantee.</p>
+                </section>
                 </div>
-                <p className="mt-4 text-[11px] text-[var(--faint)]">Illustrative at {selectedVenue.apy.toFixed(1)}% APY, compounded yearly. Not a guarantee.</p>
-              </section>
+              </div>
             </div>
           )}
 
@@ -1032,6 +1036,7 @@ export default function Home() {
               </section>
 
               <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
+                <div className="space-y-4">
                 <section className={`${PANEL} p-6`}>
                   <SectionLabel>Wallet</SectionLabel>
                   <div className="mt-4 flex items-center gap-3">
@@ -1044,6 +1049,11 @@ export default function Home() {
                   </div>
                   <button type="button" onClick={() => setTab("grow")} className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-[var(--border-strong)] text-sm font-medium transition-colors hover:bg-[var(--background)]">{connected ? "Manage in Grow" : "Open or connect a wallet"}</button>
                 </section>
+                <section className={`${PANEL} flex items-center justify-between gap-4 p-5`}>
+                  <div><div className="text-sm font-medium">Reset demo data</div><div className="mt-0.5 text-[13px] text-[var(--muted)]">Clears set-asides and activity. Your on-chain vault is untouched.</div></div>
+                  <button type="button" onClick={reset} className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--border-strong)] px-3.5 py-2 text-[13px] font-medium transition-colors hover:bg-[var(--background)]"><RotateCcw className="h-3.5 w-3.5" aria-hidden /> Reset</button>
+                </section>
+                </div>
 
                 <section className={`${PANEL} divide-y divide-[var(--border)]`}>
                   <div className="flex items-center justify-between gap-4 p-5">
@@ -1060,11 +1070,6 @@ export default function Home() {
                   </div>
                 </section>
               </div>
-
-              <section className={`${PANEL} flex items-center justify-between gap-4 p-5`}>
-                <div><div className="text-sm font-medium">Reset demo data</div><div className="mt-0.5 text-[13px] text-[var(--muted)]">Clears set-asides and activity. Your on-chain vault is untouched.</div></div>
-                <button type="button" onClick={reset} className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--border-strong)] px-3.5 py-2 text-[13px] font-medium transition-colors hover:bg-[var(--background)]"><RotateCcw className="h-3.5 w-3.5" aria-hidden /> Reset</button>
-              </section>
 
               <p className="text-[12px] leading-5 text-[var(--faint)]">Live on Solana devnet. Detection, threshold, and the vault deposit are real; the fiat→USDC step (Stripe) is mocked. Not a bank. Not FDIC-insured — principal is not guaranteed.</p>
             </div>
