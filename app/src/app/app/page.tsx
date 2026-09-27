@@ -851,19 +851,13 @@ export default function Home() {
           {tab === "grow" && (
             <div className="space-y-4">
               {/* Vault first — the one thing that matters */}
-              <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
-                {/* Left column: the vault + its savings-goal pots */}
-                <div className="space-y-4">
-                  <div className="[&>section]:mt-0">
-                    <WalletVault onChanged={refreshVault} />
-                  </div>
-                  <SavingsGoals saved={principalUsd + state.pendingUsd} apy={selectedVenue.apy / 100} />
+              <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2">
+                {/* Row 1 — the vault + how it earns (equal height) */}
+                <div className="[&>section]:mt-0 [&>section]:h-full">
+                  <WalletVault onChanged={refreshVault} />
                 </div>
 
-                {/* Right column: how it earns + projection */}
-                <div className="space-y-4">
-                {/* Earning: big APY + venue picker + trust chips */}
-                <section className={`${PANEL} p-6`}>
+                <section className={`${PANEL} flex flex-col p-6`}>
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <SectionLabel>Earning</SectionLabel>
@@ -921,17 +915,21 @@ export default function Home() {
                     ))}
                   </div>
 
-                  {connected && onchain ? (
-                    <a href={solAcct(onchain.vaultAccount)} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-1.5 text-[14px] font-medium text-[var(--accent-strong)] hover:underline">
-                      View your vault on Solscan <ExternalLink className="h-3.5 w-3.5" aria-hidden />
-                    </a>
-                  ) : (
-                    <p className="mt-4 text-[12px] text-[var(--faint)]">Open your vault to see it live on Solana.</p>
-                  )}
+                  <div className="mt-auto pt-4">
+                    {connected && onchain ? (
+                      <a href={solAcct(onchain.vaultAccount)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-[14px] font-medium text-[var(--accent-strong)] hover:underline">
+                        View your vault on Solscan <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+                      </a>
+                    ) : (
+                      <p className="text-[12px] text-[var(--faint)]">Open your vault to see it live on Solana.</p>
+                    )}
+                  </div>
                 </section>
 
-                {/* Projection — stacked under Earning so the column fills the vault's height */}
-                <section className={`${PANEL} p-6`}>
+                {/* Row 2 — savings pots + projection (equal height) */}
+                <SavingsGoals saved={principalUsd + state.pendingUsd} apy={selectedVenue.apy / 100} />
+
+                <section className={`${PANEL} flex flex-col justify-center p-6`}>
                   <div className="space-y-4">
                     <div>
                       <SectionLabel>If you saved</SectionLabel>
@@ -950,7 +948,6 @@ export default function Home() {
                   </div>
                   <p className="mt-4 text-[12px] text-[var(--faint)]">Illustrative at {selectedVenue.apy.toFixed(1)}% APY, compounded yearly. Not a guarantee.</p>
                 </section>
-                </div>
               </div>
             </div>
           )}
