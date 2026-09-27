@@ -233,8 +233,8 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
               <Wallet className="h-5 w-5" aria-hidden />
             </span>
             <div>
-              <div className="text-[15px] font-semibold">Open your vault</div>
-              <div className="mt-1 text-[13px] leading-relaxed text-[var(--muted)]">One vault, fully yours. Orbit funds it automatically; only you can withdraw.</div>
+              <div className="text-[16px] font-semibold">Open your vault</div>
+              <div className="mt-1 text-[14px] leading-relaxed text-[var(--muted)]">One vault, fully yours. Orbit funds it automatically; only you can withdraw.</div>
             </div>
             <button
               type="button"
@@ -286,7 +286,7 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
               <button
                 type="button"
                 onClick={() => disconnect().catch(() => {})}
-                className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-[var(--border-strong)] px-2.5 text-[13px] font-medium text-[var(--muted)] transition-colors hover:bg-[var(--background)] hover:text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40"
+                className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-[var(--border-strong)] px-2.5 text-[14px] font-medium text-[var(--muted)] transition-colors hover:bg-[var(--background)] hover:text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40"
               >
                 <Power className="h-3.5 w-3.5" aria-hidden /> <span className="hidden sm:inline">Disconnect</span>
               </button>
@@ -308,13 +308,13 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
                 <label htmlFor="deposit-amt" className="sr-only">Deposit amount in USDC</label>
-                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[14px] text-[var(--muted)]">$</span>
+                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[15px] text-[var(--muted)]">$</span>
                 <input
                   id="deposit-amt"
                   value={depositAmt}
                   onChange={(e) => setDepositAmt(e.target.value.replace(/[^0-9.]/g, ""))}
                   inputMode="decimal"
-                  className="h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] pl-6 pr-14 text-[14px] tabular-nums text-[var(--foreground)] placeholder:text-[var(--faint)] transition-colors focus:border-[var(--accent)]/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/30"
+                  className="h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] pl-6 pr-14 text-[15px] tabular-nums text-[var(--foreground)] placeholder:text-[var(--faint)] transition-colors focus:border-[var(--accent)]/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/30"
                   placeholder="Amount"
                 />
                 <button
@@ -330,7 +330,7 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
                 type="button"
                 onClick={deposit}
                 disabled={busy !== null || usdc <= 0 || Number(depositAmt) <= 0}
-                className="inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-[var(--accent)] px-5 text-[14px] font-semibold text-[var(--on-accent)] transition-opacity hover:opacity-90 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/50"
+                className="inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-[var(--accent)] px-5 text-[15px] font-semibold text-[var(--on-accent)] transition-opacity hover:opacity-90 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/50"
               >
                 {busy === "deposit" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <ArrowDownToLine className="h-4 w-4" aria-hidden />}
                 Deposit
@@ -343,7 +343,7 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
                 type="button"
                 onClick={getUsdc}
                 disabled={busy !== null}
-                className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl border border-[var(--border-strong)] text-[14px] font-medium transition-colors hover:bg-[var(--background)] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40"
+                className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl border border-[var(--border-strong)] text-[15px] font-medium transition-colors hover:bg-[var(--background)] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40"
               >
                 {busy === "faucet" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Coins className="h-4 w-4" aria-hidden />}
                 Get test USDC
@@ -352,7 +352,7 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
                 type="button"
                 onClick={withdraw}
                 disabled={busy !== null || (principal ?? 0) <= 0}
-                className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl border border-[var(--border-strong)] text-[14px] font-medium transition-colors hover:bg-[var(--background)] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40"
+                className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl border border-[var(--border-strong)] text-[15px] font-medium transition-colors hover:bg-[var(--background)] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40"
               >
                 {busy === "withdraw" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <ArrowUpFromLine className="h-4 w-4" aria-hidden />}
                 Withdraw all
