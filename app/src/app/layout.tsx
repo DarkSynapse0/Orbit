@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
+import { Bricolage_Grotesque, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
-// Display: technical grotesque. Body: Inter. Numbers/addresses: JetBrains Mono.
-const fontDisplay = Space_Grotesk({
+// Display: Bricolage Grotesque — friendly, characterful grotesque for headlines.
+// Body: Inter (best-in-class UI legibility). Numbers/addresses: JetBrains Mono.
+const fontDisplay = Bricolage_Grotesque({
   variable: "--ff-display",
   subsets: ["latin"],
   weight: ["500", "600", "700"],

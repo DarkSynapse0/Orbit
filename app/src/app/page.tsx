@@ -83,7 +83,7 @@ export default function Landing() {
             <LiveYield principal={5980} apy={0.06} />
           </div>
           <div className="mt-4 text-[14px] text-[var(--muted)]">
-            A real on-chain balance, compounding every second at 6% APY.
+            A real balance on Solana, growing every second — 6% a year.
           </div>
         </Reveal>
       </section>
@@ -140,14 +140,14 @@ export default function Landing() {
       <section className="mx-auto w-full max-w-6xl px-6 pb-24 lg:pb-32">
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
           <Reveal className="min-w-0">
-            <div className={`${eyebrow} text-[var(--accent-strong)]`}>The output</div>
+            <div className={`${eyebrow} text-[var(--accent-strong)]`}>The payoff</div>
             <h2 className="mt-4 font-display text-[clamp(1.9rem,4vw,3.25rem)] font-semibold leading-[1.02] tracking-[-0.03em]">
-              Idle cash loses.
+              Money sitting still loses.
               <br />
-              Yours grows.
+              Yours grows instead.
             </h2>
             <p className="mt-5 max-w-sm text-[16px] leading-relaxed text-[var(--muted)]">
-              The same money, left in a bank versus working in Orbit. Real on-chain yield, compounding every second.
+              The same money, sitting in a bank versus growing in Orbit — earning real interest, every second.
             </p>
             <div className="mt-8 grid grid-cols-3 gap-6">
               {[
@@ -228,7 +228,7 @@ export default function Landing() {
         <Reveal>
           <div className={`${eyebrow} text-[var(--faint)]`}>Built on</div>
           <h2 className="mt-4 max-w-2xl font-display text-[clamp(1.7rem,3.5vw,2.75rem)] font-semibold leading-[1.05] tracking-[-0.03em]">
-            The rails the rest of finance runs on.
+            The same tools banks and big apps rely on.
           </h2>
         </Reveal>
         <Reveal delay={80}>
@@ -256,10 +256,10 @@ export default function Landing() {
           <Reveal className="min-w-0">
             <div className={`${eyebrow} text-[var(--accent-strong)]`}>Verifiable</div>
             <h2 className="mt-4 font-display text-[clamp(1.9rem,4vw,3.25rem)] font-semibold leading-[1.02] tracking-[-0.03em]">
-              Don&rsquo;t trust it. Check it.
+              See it for yourself.
             </h2>
             <p className="mt-5 max-w-sm text-[16px] leading-relaxed text-[var(--muted)]">
-              A live Solana program. The vault, deposits, and yield are all on-chain and open to inspect.
+              Your vault, your deposits, the interest you earn — it all lives on Solana, out in the open. Anyone can check it, including you.
             </p>
             <a
               href={solAcct(PROGRAM)}
