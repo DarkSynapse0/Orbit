@@ -852,11 +852,15 @@ export default function Home() {
             <div className="space-y-4">
               {/* Vault first — the one thing that matters */}
               <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
-                <div className="[&>section]:mt-0">
-                  <WalletVault onChanged={refreshVault} />
+                {/* Left column: the vault + its savings-goal pots */}
+                <div className="space-y-4">
+                  <div className="[&>section]:mt-0">
+                    <WalletVault onChanged={refreshVault} />
+                  </div>
+                  <SavingsGoals saved={principalUsd + state.pendingUsd} apy={selectedVenue.apy / 100} />
                 </div>
 
-                {/* Right column: Earning + Projection stacked so it fills the vault's height */}
+                {/* Right column: how it earns + projection */}
                 <div className="space-y-4">
                 {/* Earning: big APY + venue picker + trust chips */}
                 <section className={`${PANEL} p-6`}>
@@ -948,8 +952,6 @@ export default function Home() {
                 </section>
                 </div>
               </div>
-
-              <SavingsGoals saved={principalUsd + state.pendingUsd} apy={selectedVenue.apy / 100} />
             </div>
           )}
 
