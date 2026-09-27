@@ -25,6 +25,8 @@ const csp = [
     `https://*.solana.com`,
     `https://api.devnet.solana.com`,
     `https://api.mainnet-beta.solana.com`,
+    `https://*.helius-rpc.com`,
+    `https://*.quiknode.pro`,
     isDev ? "ws: http://localhost:* http://127.0.0.1:*" : "",
   ]
     .filter(Boolean)
