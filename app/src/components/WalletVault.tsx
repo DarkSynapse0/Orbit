@@ -240,10 +240,10 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
 
   return (
     <section className="mt-6">
-      <div className="mb-2 flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--faint)]">
-        <ShieldCheck className="h-3.5 w-3.5" aria-hidden /> Your vault · you hold the keys
-      </div>
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
+        <div className="mb-4 flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--faint)]">
+          <ShieldCheck className="h-3.5 w-3.5" aria-hidden /> Your vault · you hold the keys
+        </div>
         {!mounted ? (
           <div className="h-24" aria-hidden />
         ) : !connected || !publicKey ? (

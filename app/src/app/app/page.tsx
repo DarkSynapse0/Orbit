@@ -852,9 +852,9 @@ export default function Home() {
           {tab === "grow" && (
             <div className="space-y-4">
               {/* Vault first — the one thing that matters */}
-              <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2">
-                {/* Row 1 — the vault + how it earns (equal height) */}
-                <div className="[&>section]:mt-0 [&>section]:h-full">
+              <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
+                {/* Row 1 — the vault + how it earns (tops aligned) */}
+                <div className="[&>section]:mt-0">
                   <WalletVault onChanged={refreshVault} />
                 </div>
 
