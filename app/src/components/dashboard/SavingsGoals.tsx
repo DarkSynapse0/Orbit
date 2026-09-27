@@ -173,48 +173,64 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
       )}
 
       {adding ? (
-        <div className="mt-4 rounded-xl border border-[var(--border)] bg-[var(--background)] p-4">
-          <div className="flex flex-wrap gap-1.5">
-            {EMOJIS.map((e) => (
-              <button
-                key={e}
-                type="button"
-                onClick={() => setEmoji(e)}
-                className={`grid h-9 w-9 place-items-center rounded-lg text-[18px] transition-colors ${emoji === e ? "bg-[var(--accent-soft)] ring-1 ring-inset ring-[var(--accent)]/40" : "hover:bg-[var(--surface)]"}`}
-              >
-                {e}
-              </button>
-            ))}
-          </div>
-          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Goal name (e.g. Vacation)"
-              maxLength={24}
-              className="h-11 min-w-0 flex-1 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3.5 text-[15px] text-[var(--foreground)] placeholder:text-[var(--faint)] focus:border-[var(--accent)]/50 focus:outline-none"
-            />
-            <div className="flex h-11 items-center rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 sm:w-36">
-              <span className="text-[var(--muted)]">$</span>
-              <input
-                value={target}
-                onChange={(e) => setTarget(e.target.value.replace(/[^0-9.]/g, ""))}
-                inputMode="decimal"
-                placeholder="Target"
-                className="h-full w-full min-w-0 bg-transparent px-1.5 font-mono text-[15px] tabular-nums focus:outline-none"
-              />
+        <div className="mt-4 space-y-4 rounded-xl border border-[var(--border)] bg-[var(--background)] p-4">
+          <div>
+            <span className="mb-1.5 block text-[12px] font-medium text-[var(--muted)]">Icon</span>
+            <div className="flex flex-wrap gap-1.5">
+              {EMOJIS.map((e) => (
+                <button
+                  key={e}
+                  type="button"
+                  aria-label={`Icon ${e}`}
+                  onClick={() => setEmoji(e)}
+                  className={`grid h-9 w-9 place-items-center rounded-lg text-[18px] transition-colors ${emoji === e ? "bg-[var(--accent-soft)] ring-1 ring-inset ring-[var(--accent)]/40" : "hover:bg-[var(--surface)]"}`}
+                >
+                  {e}
+                </button>
+              ))}
             </div>
           </div>
-          <div className="mt-2 flex h-11 items-center rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3">
-            <span className="text-[var(--muted)]">$</span>
-            <input
-              value={initial}
-              onChange={(e) => setInitial(e.target.value.replace(/[^0-9.]/g, ""))}
-              inputMode="decimal"
-              placeholder="Allocate now (optional)"
-              className="h-full w-full min-w-0 bg-transparent px-1.5 font-mono text-[15px] tabular-nums focus:outline-none"
-            />
-            <span className="shrink-0 text-[12px] text-[var(--faint)]">of {usd(unallocated)} free</span>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="min-w-0 flex-1">
+              <label htmlFor="goal-name" className="mb-1.5 block text-[12px] font-medium text-[var(--muted)]">Goal name</label>
+              <input
+                id="goal-name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. Vacation"
+                maxLength={24}
+                className="h-11 w-full min-w-0 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3.5 text-[15px] text-[var(--foreground)] placeholder:text-[var(--faint)] focus:border-[var(--accent)]/50 focus:outline-none"
+              />
+            </div>
+            <div className="sm:w-40">
+              <label htmlFor="goal-target" className="mb-1.5 block text-[12px] font-medium text-[var(--muted)]">Target amount</label>
+              <div className="flex h-11 items-center rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3">
+                <span className="text-[var(--muted)]">$</span>
+                <input
+                  id="goal-target"
+                  value={target}
+                  onChange={(e) => setTarget(e.target.value.replace(/[^0-9.]/g, ""))}
+                  inputMode="decimal"
+                  placeholder="500"
+                  className="h-full w-full min-w-0 bg-transparent px-1.5 font-mono text-[15px] tabular-nums focus:outline-none"
+                />
+              </div>
+            </div>
+          </div>
+          <div>
+            <label htmlFor="goal-initial" className="mb-1.5 block text-[12px] font-medium text-[var(--muted)]">Allocate from vault now (optional)</label>
+            <div className="flex h-11 items-center rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3">
+              <span className="text-[var(--muted)]">$</span>
+              <input
+                id="goal-initial"
+                value={initial}
+                onChange={(e) => setInitial(e.target.value.replace(/[^0-9.]/g, ""))}
+                inputMode="decimal"
+                placeholder="0"
+                className="h-full w-full min-w-0 bg-transparent px-1.5 font-mono text-[15px] tabular-nums focus:outline-none"
+              />
+              <span className="shrink-0 text-[12px] text-[var(--faint)]">of {usd(unallocated)} free</span>
+            </div>
           </div>
           <div className="mt-3 flex gap-2">
             <button
