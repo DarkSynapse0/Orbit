@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Plus, Target, Trash2, TrendingUp } from "lucide-react";
+import { Plus, Sparkles, Target, Trash2, TrendingUp } from "lucide-react";
 import { logActivity } from "@/lib/activity";
 
 // Named savings goals ("pots") layered over the single on-chain vault. Each goal has
@@ -10,6 +10,7 @@ import { logActivity } from "@/lib/activity";
 // client-side (localStorage); the real funds + yield live in the one vault.
 
 const LS_KEY = "orbit.goals.v1";
+const UNALLOC_KEY = "orbit.unalloc.v1";
 const SECONDS_PER_YEAR = 31_536_000;
 const EMOJIS = ["🏖️", "🚨", "🏠", "🚗", "🎁", "✈️", "🎓", "💍", "🐷", "💻"];
 
@@ -17,6 +18,11 @@ const EMOJIS = ["🏖️", "🚨", "🏠", "🚗", "🎁", "✈️", "🎓", "�
 // keeps its existing yield instead of resetting to 0. `since` clocks new accrual on the
 // current balance; live yield = earned + (allocated growing since `since`).
 type Goal = { id: string; emoji: string; name: string; target: number; allocated: number; earned?: number; since: number };
+
+// The slice of the vault not yet in any goal. It still earns the same rate in the real
+// vault, so we track it as a pool (same bank-on-change model as goals) to show that
+// goals + unallocated always add up to the vault's total yield.
+type Pool = { amount: number; earned: number; since: number };
 
 const usd = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
@@ -39,10 +45,15 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
   const [name, setName] = useState("");
   const [target, setTarget] = useState("500");
   const [initial, setInitial] = useState("");
+  const [unallocPool, setUnallocPool] = useState<Pool | null>(null);
   const idSeed = useRef(0);
 
   useEffect(() => {
     setGoals(load());
+    try {
+      const raw = localStorage.getItem(UNALLOC_KEY);
+      if (raw) setUnallocPool(JSON.parse(raw) as Pool);
+    } catch {}
     setNow(Date.now());
   }, []);
 
@@ -63,6 +74,38 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
   const allocatedTotal = goals.reduce((s, g) => s + g.allocated, 0);
   const unallocated = Math.max(0, saved - allocatedTotal);
 
+  // Keep the unallocated pool's balance in sync: whenever it changes (deposit, or a goal
+  // is funded/emptied), bank the yield earned on the old amount, then clock the new one.
+  useEffect(() => {
+    if (!now) return; // wait until mounted
+    setUnallocPool((prev) => {
+      const t = Date.now();
+      const next: Pool =
+        !prev
+          ? { amount: unallocated, earned: 0, since: t }
+          : Math.abs(prev.amount - unallocated) < 0.005
+            ? prev
+            : {
+                amount: unallocated,
+                earned: prev.earned + (prev.amount * apy * Math.max(0, t / 1000 - prev.since / 1000)) / SECONDS_PER_YEAR,
+                since: t,
+              };
+      if (next !== prev) {
+        try {
+          localStorage.setItem(UNALLOC_KEY, JSON.stringify(next));
+        } catch {}
+      }
+      return next;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unallocated, now]);
+
+  // Live yield on the unallocated slice = banked + accruing on the current amount.
+  const unallocYield =
+    unallocPool && now
+      ? unallocPool.earned + (unallocPool.amount * apy * Math.max(0, now / 1000 - unallocPool.since / 1000)) / SECONDS_PER_YEAR
+      : 0;
+
   // Yield accrued on the current balance since the last change (not yet banked).
   const accruedSince = (g: Goal) => {
     const elapsed = g.since && now ? Math.max(0, now / 1000 - g.since / 1000) : 0;
@@ -78,6 +121,10 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
       }),
     [goals, now, apy],
   );
+
+  // goals + unallocated = the whole vault, so their yields sum to the vault's total yield.
+  const goalYieldTotal = withYield.reduce((s, g) => s + g.yieldUsd, 0);
+  const totalYield = goalYieldTotal + unallocYield;
 
   const addGoal = () => {
     const t = Math.max(1, Number(target) || 0);
@@ -192,6 +239,37 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
             );
           })}
         </ul>
+      )}
+
+      {unallocated > 0.005 && (
+        <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-dashed border-[var(--border-strong)] bg-[var(--background)] p-4">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[var(--surface)] text-[var(--muted)]">
+              <Sparkles className="h-4 w-4" aria-hidden />
+            </span>
+            <div className="min-w-0">
+              <div className="truncate text-[15px] font-medium">Not in a goal yet</div>
+              <div className="font-mono text-[12px] tabular-nums text-[var(--accent-strong)]">
+                +{unallocYield.toFixed(6)} <span className="text-[var(--faint)]">earning, live</span>
+              </div>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="font-mono text-[15px] font-semibold tabular-nums">{usd(unallocated)}</div>
+            <div className="text-[12px] text-[var(--faint)]">still earning</div>
+          </div>
+        </div>
+      )}
+
+      {saved > 0.005 && (withYield.length > 0 || unallocated > 0.005) && (
+        <div className="mt-4 flex items-center justify-between border-t border-[var(--border)] pt-3 text-[13px]">
+          <span className="text-[var(--muted)]">Vault total</span>
+          <span className="font-mono tabular-nums">
+            <span className="font-medium text-[var(--foreground)]">{usd(saved)}</span>
+            <span className="text-[var(--accent-strong)]"> · +{totalYield.toFixed(6)}</span>
+            <span className="text-[var(--faint)]"> earning</span>
+          </span>
+        </div>
       )}
 
       {adding ? (

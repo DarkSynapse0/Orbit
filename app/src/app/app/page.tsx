@@ -928,7 +928,9 @@ export default function Home() {
                 </section>
 
                 {/* Row 2 — savings pots + projection (equal height) */}
-                <SavingsGoals saved={principalUsd + state.pendingUsd} apy={selectedVenue.apy / 100} />
+                {/* Base goals on the invested vault balance only — pending set-aside is
+                    still in the bank and not earning yet, so it matches Home's liveYield. */}
+                <SavingsGoals saved={principalUsd} apy={selectedVenue.apy / 100} />
 
                 <section className={`${PANEL} flex flex-col justify-center p-6`}>
                   <div className="space-y-4">
