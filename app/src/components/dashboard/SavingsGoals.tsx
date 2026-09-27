@@ -9,7 +9,6 @@ import { Plus, Target, Trash2, TrendingUp } from "lucide-react";
 // client-side (localStorage); the real funds + yield live in the one vault.
 
 const LS_KEY = "orbit.goals.v1";
-const APY = 0.06;
 const SECONDS_PER_YEAR = 31_536_000;
 const EMOJIS = ["🏖️", "🚨", "🏠", "🚗", "🎁", "✈️", "🎓", "💍", "🐷", "💻"];
 
@@ -26,7 +25,9 @@ function load(): Goal[] {
   }
 }
 
-export function SavingsGoals({ saved }: { saved: number }) {
+// apy is a fraction (e.g. 0.06). All goals share the one vault, so they all earn this
+// same rate — when it moves, every goal moves with it.
+export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: number }) {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [now, setNow] = useState(() => 0);
   const [adding, setAdding] = useState(false);
@@ -62,10 +63,10 @@ export function SavingsGoals({ saved }: { saved: number }) {
     () =>
       goals.map((g) => {
         const elapsed = g.since && now ? Math.max(0, now / 1000 - g.since / 1000) : 0;
-        const yieldUsd = (g.allocated * APY * elapsed) / SECONDS_PER_YEAR;
+        const yieldUsd = (g.allocated * apy * elapsed) / SECONDS_PER_YEAR;
         return { ...g, balance: g.allocated + yieldUsd, yieldUsd };
       }),
-    [goals, now],
+    [goals, now, apy],
   );
 
   const addGoal = () => {
@@ -104,7 +105,7 @@ export function SavingsGoals({ saved }: { saved: number }) {
           Unallocated <span className="font-mono font-medium text-[var(--foreground)]">{usd(unallocated)}</span>
         </div>
       </div>
-      <p className="mt-1 text-[13px] text-[var(--muted)]">Split your vault into pots. Each earns 6% a year on its own balance.</p>
+      <p className="mt-1 text-[13px] text-[var(--muted)]">Split your vault into pots. Each earns the same {(apy * 100).toFixed(1)}% a year on its own balance.</p>
 
       {withYield.length > 0 && (
         <ul className="mt-5 space-y-3">

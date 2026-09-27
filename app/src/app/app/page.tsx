@@ -949,7 +949,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <SavingsGoals saved={principalUsd + state.pendingUsd} />
+              <SavingsGoals saved={principalUsd + state.pendingUsd} apy={selectedVenue.apy / 100} />
             </div>
           )}
 
