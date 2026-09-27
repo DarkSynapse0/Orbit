@@ -192,30 +192,30 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ───────── Inverted band: the set-aside rule ───────── */}
-      <section className="bg-[var(--contrast)] text-[var(--contrast-fg)]">
+      {/* ───────── The set-aside rule ───────── */}
+      <section className="border-y border-[var(--border)] bg-[var(--surface)]">
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-12 px-6 py-24 lg:grid-cols-2 lg:items-center lg:py-28">
           <Reveal>
-            <div className={`${eyebrow}`} style={{ color: "var(--accent)" }}>Automatic</div>
+            <div className={`${eyebrow} text-[var(--accent-strong)]`}>Automatic</div>
             <h2 className="mt-4 font-display text-[clamp(1.9rem,4vw,3.25rem)] font-semibold leading-[1.02] tracking-[-0.03em]">
               It saves on every purchase.
             </h2>
-            <p className="mt-5 max-w-sm text-[16px] leading-relaxed" style={{ color: "var(--contrast-muted)" }}>
+            <p className="mt-5 max-w-sm text-[16px] leading-relaxed text-[var(--muted)]">
               A small set-aside scales with what you spend. You never decide to save; it just happens.
             </p>
           </Reveal>
           <Reveal delay={100}>
-            <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border" style={{ borderColor: "var(--contrast-border)", backgroundColor: "var(--contrast-border)" }}>
+            <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--border)]">
               {[
                 { spend: "Over $100", set: "$5" },
                 { spend: "Over $500", set: "$10" },
               ].map((t) => (
-                <div key={t.spend} className="p-8" style={{ backgroundColor: "var(--contrast)" }}>
-                  <div className={`${eyebrow}`} style={{ color: "var(--contrast-muted)" }}>{t.spend}</div>
-                  <div className="mt-3 font-mono text-[clamp(2.4rem,6vw,4rem)] font-semibold leading-none text-[var(--accent)]">
+                <div key={t.spend} className="bg-[var(--background)] p-8">
+                  <div className={`${eyebrow} text-[var(--faint)]`}>{t.spend}</div>
+                  <div className="mt-3 font-mono text-[clamp(2.4rem,6vw,4rem)] font-semibold leading-none text-[var(--accent-strong)]">
                     {t.set}
                   </div>
-                  <div className="mt-2 text-[13px]" style={{ color: "var(--contrast-muted)" }}>set aside</div>
+                  <div className="mt-2 text-[13px] text-[var(--muted)]">set aside</div>
                 </div>
               ))}
             </div>
@@ -321,22 +321,22 @@ export default function Landing() {
         </Reveal>
       </section>
 
-      {/* ───────── CTA (inverted band) ───────── */}
-      <section className="relative overflow-hidden bg-[var(--contrast)] text-[var(--contrast-fg)]">
+      {/* ───────── CTA ───────── */}
+      <section className="relative overflow-hidden border-t border-[var(--border)] bg-[var(--surface)]">
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <OrbitRings className="h-[120vh] w-[120vh] max-w-none opacity-[0.06]" />
+          <OrbitRings className="h-[120vh] w-[120vh] max-w-none text-[var(--foreground)] opacity-[0.05]" />
         </div>
         <div className="relative mx-auto max-w-3xl px-6 py-28 text-center lg:py-36">
           <Reveal>
             <h2 className="mx-auto max-w-xl font-display text-[clamp(2.2rem,5vw,4rem)] font-semibold leading-[1.0] tracking-[-0.03em]">
               Put your money in orbit.
             </h2>
-            <p className="mx-auto mt-5 max-w-md text-[16px]" style={{ color: "var(--contrast-muted)" }}>
+            <p className="mx-auto mt-5 max-w-md text-[16px] text-[var(--muted)]">
               Under a minute to start. No wallet needed, nothing locked, everything verifiable.
             </p>
             <Link
               href="/app"
-              className="mt-9 inline-flex h-12 items-center gap-2 rounded-full bg-[var(--accent)] px-7 text-[16px] font-semibold text-white transition-opacity duration-150 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--contrast)]"
+              className="mt-9 inline-flex h-12 items-center gap-2 rounded-full bg-[var(--accent)] px-7 text-[16px] font-semibold text-[var(--on-accent)] transition-opacity duration-150 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface)]"
             >
               Open your vault <ArrowUpRight className="h-4 w-4" aria-hidden />
             </Link>
