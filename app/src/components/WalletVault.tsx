@@ -139,7 +139,10 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
       const d = await r.json();
       if (d.error) throw new Error(d.error);
       setStatus("Received 100 test USDC");
-      await refresh();
+      // Refresh in the background (don't block the button on the RPC read); retry
+      // once since a freshly-minted token account can lag a beat.
+      refresh();
+      setTimeout(refresh, 2500);
     });
 
   const deposit = () =>

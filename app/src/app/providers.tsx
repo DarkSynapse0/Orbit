@@ -19,7 +19,9 @@ import { AuthProvider } from "@/lib/auth";
 // own embedded wallet for non-crypto users (no extension needed). Devnet endpoint, autoConnect
 // so the wallet persists across refreshes.
 export function Providers({ children }: { children: React.ReactNode }) {
-  const endpoint = useMemo(() => clusterApiUrl("devnet"), []);
+  // Use a reliable RPC (Helius) when configured; the public devnet endpoint is too
+  // flaky and hangs browser reads (balances never load, buttons stay spinning).
+  const endpoint = useMemo(() => process.env.NEXT_PUBLIC_SOLANA_RPC ?? clusterApiUrl("devnet"), []);
   const wallets = useMemo(() => [new OrbitWalletAdapter()], []);
   return (
     <AuthProvider>
