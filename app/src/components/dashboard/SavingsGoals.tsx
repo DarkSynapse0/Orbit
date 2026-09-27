@@ -34,6 +34,7 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
   const [emoji, setEmoji] = useState(EMOJIS[0]);
   const [name, setName] = useState("");
   const [target, setTarget] = useState("500");
+  const [initial, setInitial] = useState("");
   const idSeed = useRef(0);
 
   useEffect(() => {
@@ -72,10 +73,13 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
   const addGoal = () => {
     const t = Math.max(1, Number(target) || 0);
     if (!name.trim()) return;
+    // Fund the goal on creation, capped at what's free in the vault.
+    const alloc = Math.round(Math.min(Math.max(0, Number(initial) || 0), unallocated) * 100) / 100;
     idSeed.current += 1;
-    persist([...goals, { id: `g${now}${idSeed.current}`, emoji, name: name.trim().slice(0, 24), target: t, allocated: 0, since: now }]);
+    persist([...goals, { id: `g${now}${idSeed.current}`, emoji, name: name.trim().slice(0, 24), target: t, allocated: alloc, since: now }]);
     setName("");
     setTarget("500");
+    setInitial("");
     setEmoji(EMOJIS[0]);
     setAdding(false);
   };
@@ -200,6 +204,17 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
                 className="h-full w-full min-w-0 bg-transparent px-1.5 font-mono text-[15px] tabular-nums focus:outline-none"
               />
             </div>
+          </div>
+          <div className="mt-2 flex h-11 items-center rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3">
+            <span className="text-[var(--muted)]">$</span>
+            <input
+              value={initial}
+              onChange={(e) => setInitial(e.target.value.replace(/[^0-9.]/g, ""))}
+              inputMode="decimal"
+              placeholder="Allocate now (optional)"
+              className="h-full w-full min-w-0 bg-transparent px-1.5 font-mono text-[15px] tabular-nums focus:outline-none"
+            />
+            <span className="shrink-0 text-[12px] text-[var(--faint)]">of {usd(unallocated)} free</span>
           </div>
           <div className="mt-3 flex gap-2">
             <button
