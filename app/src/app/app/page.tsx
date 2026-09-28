@@ -1194,14 +1194,14 @@ export default function Home() {
                       key={t.id}
                       type="button"
                       onClick={() => setHistoryTab(t.id)}
-                      className={`relative -mb-px flex shrink-0 items-center gap-1.5 border-b-2 px-3.5 pb-2.5 pt-2 text-[15px] font-semibold transition-colors ${on ? "border-[var(--primary)] bg-[var(--primary-soft)] text-[var(--primary-strong)]" : "border-transparent text-[var(--muted)] hover:bg-[var(--surface)] hover:text-[var(--foreground)]"}`}
+                      className={`relative -mb-px flex shrink-0 items-center gap-1.5 border-b-2 px-5 pb-3 pt-2.5 text-[15px] font-semibold transition-colors ${on ? "border-[var(--primary)] bg-[var(--primary-soft)] text-[var(--primary-strong)]" : "border-transparent text-[var(--muted)] hover:bg-[var(--surface)] hover:text-[var(--foreground)]"}`}
                     >
                       {t.label}
-                      <span className={`font-mono text-[11px] ${on ? "text-[var(--primary-strong)]" : "text-[var(--faint)]"}`}>{historyCounts[t.id] ?? 0}</span>
+                      <span className={`grid min-w-[1.3rem] place-items-center rounded-full px-1.5 py-0.5 font-mono text-[11px] ${on ? "bg-[var(--primary)] text-[var(--primary-fg)]" : "bg-[var(--surface)] text-[var(--muted)]"}`}>{historyCounts[t.id] ?? 0}</span>
                     </button>
                   );
                 })}
-                <button type="button" onClick={() => { reset(); clearActivity(); }} className="ml-auto inline-flex shrink-0 items-center gap-1 pb-3 text-[13px] text-[var(--muted)] transition-colors hover:text-[var(--foreground)]"><RotateCcw className="h-3.5 w-3.5" aria-hidden /> reset</button>
+                <button type="button" onClick={() => { reset(); clearActivity(); }} className="mb-1.5 ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-transparent px-3 py-1.5 text-[13px] text-[var(--muted)] transition-colors hover:bg-[var(--surface)] hover:text-[var(--foreground)]"><RotateCcw className="h-3.5 w-3.5" aria-hidden /> reset</button>
               </div>
 
               {q && <p className="mt-4 text-[13px] text-[var(--muted)]">Results for “{query}” · {filteredHistory.length} {filteredHistory.length === 1 ? "match" : "matches"}</p>}
