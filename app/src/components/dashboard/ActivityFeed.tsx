@@ -30,7 +30,7 @@ const FILTERS: { id: string; label: string; kinds: ActivityKind[] | null }[] = [
 
 const when = (ts: number) => new Date(ts).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 
-export function ActivityFeed() {
+export function ActivityFeed({ showTitle = true }: { showTitle?: boolean }) {
   const [events, setEvents] = useState<ActivityEvent[]>([]);
   const [filter, setFilter] = useState("all");
 
@@ -52,11 +52,13 @@ export function ActivityFeed() {
 
   return (
     <section>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5 font-display text-[16px] font-bold">
-          <ActivityIcon className="h-4 w-4 text-[var(--primary-strong)]" aria-hidden />
-          Activity
-        </div>
+      <div className={`flex items-center ${showTitle ? "justify-between" : "justify-end"}`}>
+        {showTitle && (
+          <div className="flex items-center gap-1.5 font-display text-[16px] font-bold">
+            <ActivityIcon className="h-4 w-4 text-[var(--primary-strong)]" aria-hidden />
+            Activity
+          </div>
+        )}
         {events.length > 0 && (
           <button type="button" onClick={clearActivity} className="text-[13px] text-[var(--muted)] transition-colors hover:text-[var(--foreground)]">
             Clear

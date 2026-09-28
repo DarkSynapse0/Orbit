@@ -207,6 +207,7 @@ export default function Home() {
   const [navId, setNavId] = useState<string>("dashboard");
   const [invited, setInvited] = useState(false);
   const [query, setQuery] = useState("");
+  const [historyTab, setHistoryTab] = useState<"transactions" | "activity">("transactions");
   const firstNavPersist = useRef(true);
 
   // "Invite & Earn" (Finora parity): copy an invite link to the clipboard for now.
@@ -1145,53 +1146,66 @@ export default function Home() {
           {/* ═══════════ ACTIVITY ═══════════ */}
           {tab === "activity" && (
             <div>
-              {/* Transactions */}
-              <div className="flex items-center justify-between gap-3">
-                <h2 className="font-display text-[16px] font-bold">{q ? `Results for “${query}”` : "Transactions"}</h2>
-                <button type="button" onClick={reset} className="inline-flex items-center gap-1 rounded text-[13px] text-[var(--muted)] transition-colors hover:text-[var(--foreground)]"><RotateCcw className="h-3.5 w-3.5" aria-hidden /> reset</button>
+              {/* Underline tabs: Transactions / Activity */}
+              <div className="flex items-center gap-6 border-b border-[var(--border)]">
+                {([["transactions", "Transactions"], ["activity", "Activity"]] as const).map(([id, label]) => {
+                  const on = (q ? "transactions" : historyTab) === id;
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => { setHistoryTab(id); if (id !== "transactions") setQuery(""); }}
+                      className={`relative -mb-px border-b-2 pb-3 text-[15px] font-semibold transition-colors ${on ? "border-[var(--primary)] text-[var(--foreground)]" : "border-transparent text-[var(--muted)] hover:text-[var(--foreground)]"}`}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+                <button type="button" onClick={reset} className="ml-auto inline-flex items-center gap-1 pb-3 text-[13px] text-[var(--muted)] transition-colors hover:text-[var(--foreground)]"><RotateCcw className="h-3.5 w-3.5" aria-hidden /> reset</button>
               </div>
-              {q && <p className="mt-1 text-[13px] text-[var(--muted)]">{filteredTxns.length} {filteredTxns.length === 1 ? "match" : "matches"}</p>}
 
-              {filteredTxns.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-center">
-                  <ShoppingBag className="h-6 w-6 text-[var(--muted)]" aria-hidden />
-                  <p className="mt-2 text-[15px] text-[var(--muted)]">{q ? `No transactions match “${query}”` : "No transactions yet"}</p>
-                  <p className="mt-0.5 text-[13px] text-[var(--faint)]">{q ? "Try a merchant or category." : "Simulate a purchase or sync a bank in Budget."}</p>
+              {(q ? "transactions" : historyTab) === "transactions" ? (
+                <div className="mt-5">
+                  {q && <p className="mb-1 text-[13px] text-[var(--muted)]">Results for “{query}” · {filteredTxns.length} {filteredTxns.length === 1 ? "match" : "matches"}</p>}
+                  {filteredTxns.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-16 text-center">
+                      <ShoppingBag className="h-6 w-6 text-[var(--muted)]" aria-hidden />
+                      <p className="mt-2 text-[15px] text-[var(--muted)]">{q ? `No transactions match “${query}”` : "No transactions yet"}</p>
+                      <p className="mt-0.5 text-[13px] text-[var(--faint)]">{q ? "Try a merchant or category." : "Simulate a purchase or sync a bank in Budget."}</p>
+                    </div>
+                  ) : (
+                    <ul className="divide-y divide-[var(--border)]">
+                      {filteredTxns.map((t) => {
+                        const Icon = txnIcon(t);
+                        return (
+                          <li key={t.id} className="flex items-center gap-3.5 py-3.5">
+                            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--surface)] text-[var(--muted)]">
+                              <Icon className="h-[18px] w-[18px]" aria-hidden />
+                            </span>
+                            <div className="min-w-0 flex-1">
+                              <div className="truncate text-[15px] font-medium">{t.name}</div>
+                              <div className="text-[12px] text-[var(--muted)]">{t.category} · {txnDate(t.ts)}</div>
+                            </div>
+                            <div className="shrink-0 text-right">
+                              <div className="font-mono text-[15px] tabular-nums text-[var(--foreground)]">{usd(t.amountUsd)}</div>
+                              {t.setAside > 0 ? (
+                                <div className="mt-1 inline-flex items-center gap-1 rounded-full bg-[var(--primary-soft)] px-2 py-0.5 text-[11px] font-medium text-[var(--primary-strong)]">
+                                  {t.deposited ? <Zap className="h-3 w-3" aria-hidden /> : <Coins className="h-3 w-3" aria-hidden />}
+                                  +{usd(t.setAside)} {t.deposited ? "invested" : "saved"}
+                                </div>
+                              ) : (
+                                <div className="mt-1 text-[11px] text-[var(--faint)]">not saved</div>
+                              )}
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
                 </div>
               ) : (
-                <ul className="mt-3 divide-y divide-[var(--border)]">
-                  {filteredTxns.map((t) => {
-                    const Icon = txnIcon(t);
-                    return (
-                      <li key={t.id} className="flex items-center gap-3.5 py-3.5">
-                        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--surface)] text-[var(--muted)]">
-                          <Icon className="h-[18px] w-[18px]" aria-hidden />
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <div className="truncate text-[15px] font-medium">{t.name}</div>
-                          <div className="text-[12px] text-[var(--muted)]">{t.category} · {txnDate(t.ts)}</div>
-                        </div>
-                        <div className="shrink-0 text-right">
-                          <div className="font-mono text-[15px] tabular-nums text-[var(--foreground)]">{usd(t.amountUsd)}</div>
-                          {t.setAside > 0 ? (
-                            <div className="mt-1 inline-flex items-center gap-1 rounded-full bg-[var(--primary-soft)] px-2 py-0.5 text-[11px] font-medium text-[var(--primary-strong)]">
-                              {t.deposited ? <Zap className="h-3 w-3" aria-hidden /> : <Coins className="h-3 w-3" aria-hidden />}
-                              +{usd(t.setAside)} {t.deposited ? "invested" : "saved"}
-                            </div>
-                          ) : (
-                            <div className="mt-1 text-[11px] text-[var(--faint)]">not saved</div>
-                          )}
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-
-              {/* App activity (goals, deposits, withdrawals…) — hidden while searching transactions */}
-              {!q && (
-                <div className="mt-8 border-t border-[var(--line)] pt-6">
-                  <ActivityFeed />
+                <div className="mt-5">
+                  <ActivityFeed showTitle={false} />
                 </div>
               )}
             </div>
