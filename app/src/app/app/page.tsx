@@ -884,111 +884,113 @@ export default function Home() {
 
           {/* ═══════════ SAVE ═══════════ */}
           {tab === "save" && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
-                {/* Left column: your bank + the rule */}
-                <div className="space-y-4">
-                  <section className={`${PANEL} p-6`}>
-                    <SectionLabel>Your bank</SectionLabel>
-                    <div className="mt-4 flex items-center gap-3">
-                      <span className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--background)] ring-1 ring-inset ring-[var(--border)]"><Landmark className="h-5 w-5 text-[var(--foreground)]" aria-hidden /></span>
-                      <div className="min-w-0 flex-1">
-                        <div className="text-sm font-medium">{plaid?.connected ? "First Platypus Bank" : "No bank connected"}</div>
-                        <div className="text-[14px] text-[var(--muted)]">{plaid?.connected ? "Plaid sandbox · detection only" : "Connect to detect spending"}</div>
-                      </div>
-                      {plaid?.connected && <span className="h-2 w-2 rounded-full bg-[var(--accent)]" aria-hidden />}
+            <div className="lg:grid lg:grid-cols-2 lg:gap-10">
+              {/* LEFT — the rule + your bank */}
+              <div className="flex flex-col">
+                {/* Set-aside rate (the rule) */}
+                <section>
+                  <div className="flex items-center gap-1.5 font-display text-[16px] font-bold">
+                    Set-aside rate
+                    <InfoDot label="Orbit sets aside this share of every purchase. Pick anywhere from 0.5% to 5%." />
+                  </div>
+                  <div className="mt-3 flex items-end justify-between gap-4">
+                    <div className="font-mono text-[clamp(2.5rem,6vw,3.5rem)] font-semibold leading-none tabular-nums text-[var(--primary-strong)]">{rate.toFixed(1)}%</div>
+                    <div className="text-right text-[13px] text-[var(--muted)]">
+                      On a <span className="font-mono text-[var(--foreground)]">$50</span> purchase<br />
+                      you&apos;d save <span className="font-mono font-medium text-[var(--primary-strong)]">{usd((50 * rate) / 100)}</span>
                     </div>
-                    {plaid && !plaid.configured && (
-                      <p className="mt-4 rounded-lg bg-[var(--background)] px-3 py-2 text-[14px] text-[var(--muted)]">Set <code className="font-mono">PLAID_CLIENT_ID</code> and <code className="font-mono">PLAID_SECRET</code> in the server environment to detect real spending.</p>
-                    )}
-                    {plaid?.configured && !plaid.connected && (
-                      <button type="button" onClick={connectBank} disabled={busy} className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-[var(--border-strong)] text-sm font-medium transition-colors hover:bg-[var(--background)] disabled:pointer-events-none disabled:opacity-50">
-                        {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Landmark className="h-4 w-4" aria-hidden />} Connect a test bank
-                      </button>
-                    )}
-                    {plaid?.connected && (
-                      <button type="button" onClick={syncSpending} disabled={syncing} className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--accent)] text-sm font-semibold text-[var(--on-accent)] transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-60">
-                        <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} aria-hidden /> {syncing ? "Pulling transactions…" : "Sync spending"}
-                      </button>
-                    )}
-                  </section>
+                  </div>
+                  <input
+                    type="range"
+                    min={MIN_PCT}
+                    max={MAX_PCT}
+                    step={0.1}
+                    value={rate}
+                    onChange={(e) => changeRate(Number(e.target.value))}
+                    aria-label="Set-aside rate"
+                    className="mt-5 w-full accent-[var(--primary)]"
+                  />
+                  <div className="mt-1 flex justify-between font-mono text-[12px] text-[var(--faint)]">
+                    <span>{MIN_PCT}%</span>
+                    <span>{MAX_PCT}%</span>
+                  </div>
+                  <div className="mt-5 flex items-center justify-between text-[14px]">
+                    <span className="flex items-center gap-1.5 text-[var(--muted)]">
+                      Moves to vault at
+                      <InfoDot label="Set-asides wait in your bank and batch up. Once they reach this amount, they convert to USDC and move into your vault." />
+                    </span>
+                    <span className="font-mono font-medium">{usd(THRESHOLD)}</span>
+                  </div>
+                </section>
 
-                  <section className={`${PANEL} p-6`}>
-                    <SectionLabel>Your set-aside rate</SectionLabel>
-                    <p className="mt-2 text-[14px] text-[var(--muted)]">Orbit sets aside this share of every purchase.</p>
-                    <div className="mt-4 flex items-end justify-between">
-                      <div className="font-mono text-4xl font-semibold tabular-nums text-[var(--accent-strong)]">{rate.toFixed(1)}%</div>
-                      <div className="text-right text-[13px] text-[var(--muted)]">
-                        On a <span className="font-mono text-[var(--foreground)]">$50</span> purchase<br />
-                        you&apos;d save <span className="font-mono font-medium text-[var(--accent-strong)]">{usd((50 * rate) / 100)}</span>
-                      </div>
+                {/* Your bank */}
+                <div className="mt-6 border-t border-[var(--line)] pt-6">
+                  <div className="font-display text-[16px] font-bold">Your bank</div>
+                  <div className="mt-3 flex items-center gap-3">
+                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[var(--surface)] text-[var(--muted)]"><Landmark className="h-5 w-5" aria-hidden /></span>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-[15px] font-medium">{plaid?.connected ? "First Platypus Bank" : "No bank connected"}</div>
+                      <div className="text-[13px] text-[var(--muted)]">{plaid?.connected ? "Plaid sandbox · detection only" : "Connect to detect spending"}</div>
                     </div>
-                    <input
-                      type="range"
-                      min={MIN_PCT}
-                      max={MAX_PCT}
-                      step={0.1}
-                      value={rate}
-                      onChange={(e) => changeRate(Number(e.target.value))}
-                      aria-label="Set-aside rate"
-                      className="mt-4 w-full accent-[var(--accent)]"
-                    />
-                    <div className="mt-1 flex justify-between font-mono text-[12px] text-[var(--faint)]">
-                      <span>{MIN_PCT}%</span>
-                      <span>{MAX_PCT}%</span>
-                    </div>
-                    <div className="mt-5 flex items-center justify-between border-t border-[var(--border)] pt-4 text-[15px]">
-                      <span className="text-[var(--muted)]">Moves to vault at</span>
-                      <span className="font-mono">{usd(THRESHOLD)}</span>
-                    </div>
-                  </section>
+                    {plaid?.connected && <span className="flex items-center gap-1.5 text-[12px] font-medium text-[var(--primary-strong)]"><span className="h-1.5 w-1.5 rounded-full bg-[var(--primary)]" aria-hidden /> Connected</span>}
+                  </div>
+                  {plaid && !plaid.configured && (
+                    <p className="mt-3 text-[13px] text-[var(--muted)]">Set <code className="font-mono text-[12px]">PLAID_CLIENT_ID</code> and <code className="font-mono text-[12px]">PLAID_SECRET</code> in the server to detect real spending.</p>
+                  )}
+                  {plaid?.configured && !plaid.connected && (
+                    <button type="button" onClick={connectBank} disabled={busy} className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-[var(--border-strong)] text-[14px] font-medium transition-colors hover:bg-[var(--surface)] disabled:pointer-events-none disabled:opacity-50">
+                      {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Landmark className="h-4 w-4" aria-hidden />} Connect a test bank
+                    </button>
+                  )}
+                  {plaid?.connected && (
+                    <button type="button" onClick={syncSpending} disabled={syncing} className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--primary)] text-[14px] font-semibold text-[var(--primary-fg)] transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-60">
+                      <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} aria-hidden /> {syncing ? "Pulling transactions…" : "Sync spending"}
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* RIGHT — try it + automation */}
+              <div className="mt-6 border-t border-[var(--line)] pt-6 lg:mt-0 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
+                <div>
+                  <div className="font-display text-[16px] font-bold">Try it</div>
+                  <p className="mt-1 text-[14px] text-[var(--muted)]">Simulate a purchase and watch a slice get set aside.</p>
+                  {!connected && (
+                    <p className="mt-3 rounded-lg bg-[var(--primary-soft)] px-3 py-2 text-[13px] text-[var(--primary-strong)]">Open your vault in Wallet first, that&apos;s where set-asides land.</p>
+                  )}
+                  <div className="mt-4 flex gap-2">
+                    {[45, 120, 600].map((v) => (
+                      <button key={v} type="button" onClick={() => spend(v)} disabled={busy || !online || !connected} className="h-11 flex-1 rounded-xl border border-[var(--border-strong)] text-[14px] font-medium tabular-nums transition-colors hover:bg-[var(--surface)] disabled:pointer-events-none disabled:opacity-40">${v}</button>
+                    ))}
+                  </div>
+                  <div className="mt-2 flex gap-2">
+                    <label htmlFor="amount" className="sr-only">Purchase amount</label>
+                    <input id="amount" value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" placeholder="Custom amount" className="h-11 min-w-0 flex-1 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3.5 text-[14px] tabular-nums text-[var(--foreground)] placeholder:text-[var(--faint)] focus:border-[var(--border-strong)] focus:outline-none" />
+                    <button type="button" onClick={() => spend(Number(amount))} disabled={busy || !online || !connected} className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--primary)] px-5 text-[14px] font-semibold text-[var(--primary-fg)] transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-40">{busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null} Spend</button>
+                  </div>
                 </div>
 
-                {/* Right column: try it + automation */}
-                <div className="space-y-4">
-                  <section className={`${PANEL} p-6`}>
-                    <SectionLabel>Try it — simulate a purchase</SectionLabel>
-                    {!connected && (
-                      <p className="mt-3 rounded-lg bg-[var(--accent-soft)] px-3 py-2 text-[14px] text-[var(--accent-strong)]">Open your vault in Grow first — that&apos;s where set-asides land.</p>
-                    )}
-                    <div className="mt-4 flex gap-2">
-                      {[45, 120, 600].map((v) => (
-                        <button key={v} type="button" onClick={() => spend(v)} disabled={busy || !online || !connected} className="h-11 flex-1 rounded-xl border border-[var(--border)] bg-[var(--background)] text-sm font-medium tabular-nums transition-colors hover:border-[var(--accent)]/40 disabled:pointer-events-none disabled:opacity-40">${v}</button>
-                      ))}
-                    </div>
-                    <div className="mt-2 flex gap-2">
-                      <label htmlFor="amount" className="sr-only">Purchase amount</label>
-                      <input id="amount" value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" placeholder="Custom amount" className="h-11 min-w-0 flex-1 rounded-xl border border-[var(--border)] bg-[var(--background)] px-3.5 text-sm tabular-nums text-[var(--foreground)] placeholder:text-[var(--faint)] focus:border-[var(--accent)]/50 focus:outline-none" />
-                      <button type="button" onClick={() => spend(Number(amount))} disabled={busy || !online || !connected} className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-[var(--border-strong)] px-5 text-sm font-medium transition-colors hover:bg-[var(--background)] disabled:pointer-events-none disabled:opacity-40">{busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null} Spend</button>
-                    </div>
-                  </section>
-
-                  <section className={`${PANEL} divide-y divide-[var(--border)]`}>
-                    <div className="flex items-center justify-between gap-4 p-5">
+                <div className="mt-6 border-t border-[var(--line)] pt-6">
+                  <div className="font-display text-[16px] font-bold">Automation</div>
+                  <div className="mt-2 divide-y divide-[var(--border)]">
+                    <div className="flex items-center justify-between gap-4 py-4">
                       <div className="pr-2">
-                        <div className="text-sm font-medium">Auto-invest at threshold</div>
-                        <div className="mt-0.5 text-[13px] text-[var(--muted)]">Once your set-aside reaches {usd(THRESHOLD)}, it moves into your vault on its own.</div>
+                        <div className="flex items-center gap-1.5 text-[15px] font-medium">Auto-invest at threshold <InfoDot label={`When your set-aside reaches ${usd(THRESHOLD)}, Orbit moves it into your vault on its own.`} /></div>
+                        <div className="mt-0.5 text-[13px] text-[var(--muted)]">Moves money into your vault without you lifting a finger.</div>
                       </div>
                       <Toggle on={autoInvest} onClick={() => setAutoInvest((v) => !v)} label="Auto-invest" />
                     </div>
-                    <div className="flex items-center justify-between gap-4 p-5">
+                    <div className="flex items-center justify-between gap-4 py-4">
                       <div className="pr-2">
-                        <div className="text-sm font-medium">Pause saving</div>
+                        <div className="text-[15px] font-medium">Pause saving</div>
                         <div className="mt-0.5 text-[13px] text-[var(--muted)]">Keep watching your spending, but stop setting money aside for now.</div>
                       </div>
                       <Toggle on={paused} onClick={() => setPaused((v) => !v)} label="Pause" />
                     </div>
-                    <div className="flex items-center justify-between gap-4 p-5">
-                      <div className="pr-2">
-                        <div className="text-sm font-medium">Set-aside rate</div>
-                        <div className="mt-0.5 text-[13px] text-[var(--muted)]">Currently {rate.toFixed(1)}% of each purchase. Adjust it in the panel on the left.</div>
-                      </div>
-                      <span className="shrink-0 rounded-full bg-[var(--accent-soft)] px-3 py-1 font-mono text-[15px] font-medium text-[var(--accent-strong)]">{rate.toFixed(1)}%</span>
-                    </div>
-                  </section>
+                  </div>
+                  <p className="mt-4 text-[12px] text-[var(--faint)]">Auto-invest and pause are a demo preview; the set-aside rate is live and used for every purchase.</p>
                 </div>
               </div>
-              <p className="text-[12px] text-[var(--faint)]">Auto-invest and pause are a demo preview; the set-aside rate is live and used for every purchase.</p>
             </div>
           )}
 
