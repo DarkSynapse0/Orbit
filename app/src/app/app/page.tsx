@@ -82,7 +82,7 @@ type OnChain = {
 };
 type Entry = { id: number; kind: "spend" | "deposit" | "none" | "info"; text: string };
 type Txn = { id: number; name: string; category: string; amountUsd: number; setAside: number; deposited: boolean; ts: number };
-type TabId = "home" | "save" | "grow" | "activity" | "account";
+type TabId = "home" | "save" | "grow" | "goals" | "activity" | "account";
 
 const usd = (n: number) => `$${n.toFixed(2)}`;
 // Live yield reads as money: clean $0.00 when there's nothing, otherwise enough
@@ -151,7 +151,7 @@ const NAV: NavItem[] = [
   { id: "transactions", label: "Activity", icon: ArrowLeftRight, hint: "Spending & activity", tab: "activity" },
   { id: "wallet", label: "Wallet", icon: Wallet, hint: "Your vault & yield", tab: "grow" },
   { id: "budget", label: "Budget", icon: PiggyBank, hint: "How money is set aside", tab: "save" },
-  { id: "goals", label: "Savings Goals", icon: Target, hint: "Your vault & yield", tab: "grow" },
+  { id: "goals", label: "Savings Goals", icon: Target, hint: "Your savings pots", tab: "goals" },
 ];
 const NAV_SECONDARY: NavItem[] = [
   { id: "settings", label: "Settings", icon: Settings, hint: "Wallet & settings", tab: "account" },
@@ -1050,11 +1050,6 @@ export default function Home() {
                 <div className="[&>section]:mt-0">
                   <WalletVault onChanged={refreshVault} />
                 </div>
-
-                {/* Savings goals */}
-                <div className="mt-6 border-t border-[var(--line)] pt-6">
-                  <SavingsGoals saved={principalUsd} apy={selectedVenue.apy / 100} />
-                </div>
               </div>
 
               {/* RIGHT — how it earns + projection */}
@@ -1190,6 +1185,13 @@ export default function Home() {
                   </div>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* ═══════════ SAVINGS GOALS ═══════════ */}
+          {tab === "goals" && (
+            <div className="mx-auto w-full max-w-2xl">
+              <SavingsGoals saved={principalUsd} apy={selectedVenue.apy / 100} />
             </div>
           )}
 
