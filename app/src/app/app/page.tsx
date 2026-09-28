@@ -27,6 +27,7 @@ import {
   Wallet,
   LogIn,
   LogOut,
+  Plus,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { apiFetch } from "@/lib/api";
@@ -77,6 +78,8 @@ const solTx = (s: string) => `https://solscan.io/tx/${s}?cluster=devnet`;
 const solAcct = (a: string) => `https://solscan.io/account/${a}?cluster=devnet`;
 
 const PANEL = "rounded-2xl border border-[var(--border)] bg-[var(--surface)]";
+// Soft, elevated card (Finora-style): hairline border for dark mode + gentle shadow, no hard box lines.
+const CARD = "rounded-3xl border border-[var(--border)] bg-[var(--surface)] shadow-[0_1px_2px_rgba(2,6,23,0.03),0_18px_40px_-24px_rgba(2,6,23,0.22)]";
 
 // Placeholder shown only until there are real transactions (fresh account).
 const SAMPLE_LINE = [15, 25, 30, 45, 55, 75, 90, 110, 130, 160];
@@ -599,40 +602,89 @@ export default function Home() {
         <main className="mx-auto w-full max-w-[1200px] flex-1 px-5 py-6 lg:px-8 lg:py-8">
           {/* ═══════════ HOME ═══════════ */}
           {tab === "home" && (
-            <div className="space-y-8">
-              {/* Hero: balance + growth curve — flat, no card */}
-              <div className="grid grid-cols-1 gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:gap-12">
-                <div className="flex flex-col">
-                  <SectionLabel>Total saved</SectionLabel>
-                  <div
-                    className={`mt-3 font-mono text-[clamp(2.75rem,6vw,4.25rem)] font-semibold leading-none tabular-nums transition-colors duration-700 ${
-                      flash ? "text-[var(--accent)]" : "text-[var(--foreground)]"
-                    }`}
-                  >
-                    {usd(total)}
+            <div className="space-y-4 lg:space-y-5">
+              {/* Top row — balance + vault (narrow) beside the savings chart (wide) */}
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-[0.92fr_1.7fr] lg:gap-5">
+                <div className="space-y-4 lg:space-y-5">
+                  {/* Total saved (Finora: Total Balance) */}
+                  <div className={`${CARD} p-6`}>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[13px] font-medium text-[var(--muted)]">Total saved</span>
+                      <span className="rounded-full border border-[var(--border)] px-2 py-0.5 text-[11px] font-medium text-[var(--muted)]">USD</span>
+                    </div>
+                    <div
+                      className={`mt-3 font-mono text-[clamp(2rem,5vw,2.9rem)] font-semibold leading-none tabular-nums transition-colors duration-700 ${
+                        flash ? "text-[var(--accent)]" : "text-[var(--foreground)]"
+                      }`}
+                    >
+                      {usd(total)}
+                    </div>
+                    <div className="mt-2.5 flex flex-wrap items-center gap-1.5 text-[13px]">
+                      <TrendingUp className="h-4 w-4 text-[var(--accent-strong)]" aria-hidden />
+                      <span className="font-mono font-medium text-[var(--accent-strong)]">{liveYield > 0 ? "+" : ""}{fmtYield(liveYield)}</span>
+                      <span className="text-[var(--muted)]">earned · 6% a year</span>
+                    </div>
+                    <div className="mt-5 grid grid-cols-2 gap-2.5">
+                      <button type="button" onClick={() => setTab("grow")} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--accent)] px-4 py-2.5 text-[14px] font-semibold text-[var(--on-accent)] transition-opacity hover:opacity-90">
+                        <ArrowDownToLine className="h-4 w-4" aria-hidden /> Add money
+                      </button>
+                      <button type="button" onClick={() => setTab("grow")} className="inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--border-strong)] px-4 py-2.5 text-[14px] font-medium transition-colors hover:bg-[var(--background)]">
+                        <ArrowUpFromLine className="h-4 w-4" aria-hidden /> Take out
+                      </button>
+                    </div>
                   </div>
-                  <div className="mt-3 flex flex-wrap items-center gap-2 text-[15px]">
-                    <span className="inline-flex items-center gap-1 rounded-full bg-[var(--accent-soft)] px-2 py-0.5 font-medium text-[var(--accent-strong)]">
-                      <TrendingUp className="h-3.5 w-3.5" aria-hidden /> 6% a year
-                    </span>
-                    <span className="font-mono text-[var(--accent-strong)]">{liveYield > 0 ? "+" : ""}{fmtYield(liveYield)}</span>
-                    <span className="text-[var(--muted)]">earned, live</span>
-                  </div>
-                  <div className="mt-6 flex flex-wrap gap-2">
-                    <button type="button" onClick={() => setTab("grow")} className="inline-flex items-center gap-2 rounded-xl bg-[var(--accent)] px-4 py-2.5 text-[15px] font-semibold text-[var(--on-accent)] transition-opacity hover:opacity-90">
-                      <ArrowDownToLine className="h-4 w-4" aria-hidden /> Add money
-                    </button>
-                    <button type="button" onClick={() => setTab("grow")} className="inline-flex items-center gap-2 rounded-xl border border-[var(--border-strong)] px-4 py-2.5 text-[15px] font-medium transition-colors hover:bg-[var(--surface)]">
-                      <ArrowUpFromLine className="h-4 w-4" aria-hidden /> Take out
+
+                  {/* Your vault (Finora: Your Cards) */}
+                  <div className={`${CARD} p-6`}>
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-display text-[16px] font-semibold">Your vault</h3>
+                      <button type="button" onClick={() => setTab("grow")} className="text-[13px] text-[var(--muted)] transition-colors hover:text-[var(--foreground)]">Manage</button>
+                    </div>
+                    <div className="mt-4 space-y-1">
+                      <div className="flex items-center gap-3 py-1.5">
+                        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[var(--accent-soft)] text-[var(--accent-strong)]"><Coins className="h-4 w-4" aria-hidden /></span>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-[14px] font-medium">In vault</div>
+                          <div className="text-[12px] text-[var(--muted)]">{onchain ? "on-chain, earning yield" : "invested, earning yield"}</div>
+                        </div>
+                        <div className="shrink-0 font-mono text-[15px] font-semibold tabular-nums text-[var(--accent-strong)]">{usd(principalUsd)}</div>
+                      </div>
+                      <div className="flex items-center gap-3 py-1.5">
+                        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[var(--background)] text-[var(--muted)] ring-1 ring-inset ring-[var(--border)]"><Landmark className="h-4 w-4" aria-hidden /></span>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-[14px] font-medium">Set aside</div>
+                          <div className="text-[12px] text-[var(--muted)]">{usd(state.pendingUsd)} / {usd(THRESHOLD)} to invest</div>
+                        </div>
+                        <div className="shrink-0 font-mono text-[15px] font-semibold tabular-nums">{usd(state.pendingUsd)}</div>
+                      </div>
+                    </div>
+                    {state.pendingUsd >= THRESHOLD && connected && investing && (
+                      <div className="mt-2 flex items-center gap-1.5 text-[12px] text-[var(--accent-strong)]"><Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden /> Investing automatically…</div>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setTab("grow")}
+                      className="mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-[var(--border-strong)] px-3 py-2.5 text-[13px] font-medium text-[var(--muted)] transition-colors hover:bg-[var(--background)] hover:text-[var(--foreground)]"
+                    >
+                      <Plus className="h-4 w-4" aria-hidden /> Manage vault &amp; goals
                     </button>
                   </div>
                 </div>
-                <div className="lg:border-l lg:border-[var(--border)] lg:pl-12">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-display text-[17px] font-semibold">Your savings over time</h3>
-                    <span className="text-[12px] text-[var(--faint)]">{analytics.hasData ? "all time" : "sample"}</span>
+
+                {/* Savings chart (Finora: Money Management Overview) */}
+                <div className={`${CARD} flex flex-col p-6`}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h3 className="font-display text-[16px] font-semibold">Savings over time</h3>
+                      <div className="mt-3 text-[13px] text-[var(--muted)]">Total saved so far</div>
+                      <div className="mt-1 font-mono text-[clamp(1.6rem,4vw,2.25rem)] font-semibold leading-none tabular-nums">{usd(total)}</div>
+                      <div className="mt-1.5 text-[13px]">
+                        <span className="font-mono text-[var(--accent-strong)]">{liveYield > 0 ? "+" : ""}{fmtYield(liveYield)}</span> <span className="text-[var(--muted)]">earned, live</span>
+                      </div>
+                    </div>
+                    <span className="rounded-lg border border-[var(--border)] px-2.5 py-1 text-[12px] text-[var(--muted)]">{analytics.hasData ? "all time" : "sample"}</span>
                   </div>
-                  <div className="mt-5">
+                  <div className="mt-5 flex-1">
                     <LineArea
                       series={[{ label: "Saved", points: analytics.hasData ? analytics.savingsLine : SAMPLE_LINE }]}
                       xLabels={analytics.hasData ? analytics.savingsLabels : SAMPLE_LINE_LABELS}
@@ -642,104 +694,79 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Breakdown — flat stats split by a divider (interest lives in the hero above) */}
-              <div className="grid grid-cols-2 gap-4 border-t border-[var(--border)] pt-6">
-                <div>
-                  <div className="flex items-center gap-1.5 text-[12px] text-[var(--muted)]">
-                    <Coins className="h-4 w-4 shrink-0" aria-hidden /> In vault
-                    {onchain && <span className="hidden rounded-full bg-[var(--accent-soft)] px-1.5 py-0.5 text-[10px] text-[var(--accent-strong)] sm:inline">on-chain</span>}
-                  </div>
-                  <div className="mt-2 font-mono text-xl font-semibold tabular-nums text-[var(--accent-strong)] sm:text-2xl">{usd(principalUsd)}</div>
-                  <div className="mt-1 hidden text-[12px] text-[var(--faint)] sm:block">invested, earning yield</div>
-                </div>
-                <div className="border-l border-[var(--border)] pl-4 sm:pl-6">
-                  <div className="flex items-center gap-1.5 text-[12px] text-[var(--muted)]"><Landmark className="h-4 w-4 shrink-0" aria-hidden /> Set aside</div>
-                  <div className="mt-2 font-mono text-xl font-semibold tabular-nums sm:text-2xl">{usd(state.pendingUsd)}</div>
-                  <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[var(--border)]">
-                    <div
-                      className={`h-full rounded-full transition-[width] duration-300 ${state.pendingUsd >= THRESHOLD ? "bg-[var(--accent)]" : "bg-[var(--faint)]"}`}
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                  {state.pendingUsd >= THRESHOLD ? (
-                    connected ? (
-                      investing ? (
-                        <div className="mt-2.5 flex items-center gap-1.5 text-[12px] text-[var(--accent-strong)]">
-                          <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden /> Investing automatically…
-                        </div>
-                      ) : (
-                        // Auto-invests on its own; this is just a manual retry if that failed.
-                        <button
-                          type="button"
-                          onClick={investNow}
-                          className="mt-2.5 text-[12px] font-medium text-[var(--accent-strong)] underline-offset-2 hover:underline"
-                        >
-                          Invest now
-                        </button>
-                      )
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => setTab("grow")}
-                        className="mt-2.5 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-[var(--border-strong)] px-3 py-1.5 text-[14px] font-medium transition-colors hover:bg-[var(--surface)]"
-                      >
-                        Connect wallet
-                      </button>
-                    )
-                  ) : (
-                    <div className="mt-1.5 font-mono text-[11px] tabular-nums text-[var(--faint)] sm:text-[12px]">{usd(state.pendingUsd)} / {usd(THRESHOLD)}</div>
-                  )}
-                </div>
-              </div>
-
-              {/* Recent activity + (setup checklist OR categories) — flat, divided */}
-              <div className="grid grid-cols-1 gap-8 border-t border-[var(--border)] pt-6 lg:grid-cols-[1.1fr_1fr] lg:gap-12">
-                <div>
+              {/* Bottom row — activity table (wide) beside a side panel (narrow) */}
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.7fr_0.92fr] lg:gap-5">
+                {/* Recent activity (Finora: Recent Transactions) */}
+                <div className={`${CARD} p-6`}>
                   <div className="flex items-center justify-between">
-                    <h3 className="font-display text-[17px] font-semibold">Recent activity</h3>
-                    <button type="button" onClick={() => setTab("activity")} className="inline-flex items-center gap-1 text-[14px] text-[var(--muted)] hover:text-[var(--foreground)]">
+                    <h3 className="font-display text-[16px] font-semibold">Recent activity</h3>
+                    <button type="button" onClick={() => setTab("activity")} className="inline-flex items-center gap-1 text-[13px] text-[var(--muted)] transition-colors hover:text-[var(--foreground)]">
                       See all <ChevronRight className="h-3.5 w-3.5" aria-hidden />
                     </button>
                   </div>
                   {txns.length === 0 ? (
-                    <div className="mt-6 flex flex-col items-center justify-center py-8 text-center">
-                      <span className="grid h-10 w-10 place-items-center rounded-full bg-[var(--surface)] ring-1 ring-inset ring-[var(--border)]"><ShoppingBag className="h-5 w-5 text-[var(--muted)]" aria-hidden /></span>
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                      <span className="grid h-10 w-10 place-items-center rounded-full bg-[var(--background)] ring-1 ring-inset ring-[var(--border)]"><ShoppingBag className="h-5 w-5 text-[var(--muted)]" aria-hidden /></span>
                       <p className="mt-3 text-[15px] text-[var(--muted)]">Nothing yet</p>
                       <p className="mt-0.5 text-[14px] text-[var(--faint)]">Spend or sync a bank to start saving.</p>
                     </div>
                   ) : (
-                    <ul className="mt-3 divide-y divide-[var(--border)]">
-                      {txns.slice(0, 5).map((t) => (
-                        <li key={t.id} className="flex items-center gap-3 py-3">
-                          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[var(--surface)]">
-                            {t.deposited ? <Zap className="h-4 w-4 text-[var(--accent)]" aria-hidden /> : <ShoppingBag className="h-4 w-4 text-[var(--muted)]" aria-hidden />}
-                          </span>
-                          <span className="min-w-0 flex-1">
-                            <span className="block truncate text-[15px] font-medium">{t.name}</span>
-                            <span className="block text-[12px] text-[var(--muted)]">{t.category} · {txnDate(t.ts)}</span>
-                          </span>
-                          <span className={`shrink-0 font-mono text-[15px] tabular-nums ${t.setAside > 0 ? "text-[var(--accent-strong)]" : "text-[var(--faint)]"}`}>
-                            {t.setAside > 0 ? `+${usd(t.setAside)}` : "—"}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
+                    <div className="mt-4 overflow-x-auto">
+                      <table className="w-full text-left">
+                        <thead>
+                          <tr className="text-[11px] uppercase tracking-wide text-[var(--faint)]">
+                            <th className="pb-3 font-medium">Description</th>
+                            <th className="hidden pb-3 font-medium sm:table-cell">Category</th>
+                            <th className="hidden pb-3 font-medium md:table-cell">Date</th>
+                            <th className="pb-3 text-right font-medium">Set aside</th>
+                            <th className="hidden pb-3 pl-4 text-right font-medium sm:table-cell">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-[var(--border)]">
+                          {txns.slice(0, 6).map((t) => {
+                            const status = t.deposited ? { label: "Invested", cls: "bg-[var(--accent-soft)] text-[var(--accent-strong)]" } : t.setAside > 0 ? { label: "Saved", cls: "bg-[var(--accent-soft)] text-[var(--accent-strong)]" } : { label: "Skipped", cls: "bg-[var(--background)] text-[var(--faint)] ring-1 ring-inset ring-[var(--border)]" };
+                            return (
+                              <tr key={t.id}>
+                                <td className="py-3 pr-3">
+                                  <div className="flex items-center gap-2.5">
+                                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[var(--background)]">
+                                      {t.deposited ? <Zap className="h-4 w-4 text-[var(--accent)]" aria-hidden /> : <ShoppingBag className="h-4 w-4 text-[var(--muted)]" aria-hidden />}
+                                    </span>
+                                    <span className="min-w-0">
+                                      <span className="block truncate text-[14px] font-medium">{t.name}</span>
+                                      <span className="block text-[12px] text-[var(--muted)] sm:hidden">{t.category} · {txnDate(t.ts)}</span>
+                                    </span>
+                                  </div>
+                                </td>
+                                <td className="hidden py-3 text-[13px] text-[var(--muted)] sm:table-cell">{t.category}</td>
+                                <td className="hidden py-3 font-mono text-[13px] text-[var(--muted)] md:table-cell">{txnDate(t.ts)}</td>
+                                <td className={`py-3 text-right font-mono text-[14px] tabular-nums ${t.setAside > 0 ? "text-[var(--accent-strong)]" : "text-[var(--faint)]"}`}>{t.setAside > 0 ? `+${usd(t.setAside)}` : "—"}</td>
+                                <td className="hidden py-3 pl-4 text-right sm:table-cell">
+                                  <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-medium ${status.cls}`}>{status.label}</span>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
                   )}
                 </div>
 
+                {/* Side panel (Finora: Invoice) — categories once set up, else the setup checklist */}
                 {setup.bank && setup.vault ? (
-                  <div className="lg:border-l lg:border-[var(--border)] lg:pl-12">
-                    <h3 className="font-display text-[17px] font-semibold">Where your savings come from</h3>
-                    <p className="mt-0.5 text-[14px] text-[var(--muted)]">Set aside from your spending</p>
+                  <div className={`${CARD} p-6`}>
+                    <h3 className="font-display text-[16px] font-semibold">Where savings come from</h3>
+                    <p className="mt-0.5 text-[13px] text-[var(--muted)]">Set aside from your spending</p>
                     <div className="mt-5">
                       <HBars rows={analytics.categories.length ? analytics.categories : SAMPLE_CATEGORIES} />
                     </div>
                   </div>
                 ) : (
-                  <div className="lg:border-l lg:border-[var(--border)] lg:pl-12">
-                    <h3 className="font-display text-[17px] font-semibold">Get set up</h3>
-                    <p className="mt-0.5 text-[14px] text-[var(--muted)]">Two quick steps to start saving on autopilot</p>
-                    <div className="mt-4 divide-y divide-[var(--border)]">
+                  <div className={`${CARD} p-6`}>
+                    <h3 className="font-display text-[16px] font-semibold">Get set up</h3>
+                    <p className="mt-0.5 text-[13px] text-[var(--muted)]">Two quick steps to save on autopilot</p>
+                    <div className="mt-3 divide-y divide-[var(--border)]">
                       {[
                         { done: setup.vault, label: "Open your vault", desc: "Create an account in one tap", go: "grow" as TabId },
                         { done: setup.bank, label: "Connect your bank", desc: "So Orbit can watch your spending", go: "save" as TabId },
@@ -748,14 +775,14 @@ export default function Home() {
                           key={s.label}
                           type="button"
                           onClick={() => setTab(s.go)}
-                          className="-mx-2 flex w-[calc(100%+1rem)] items-center gap-3 rounded-xl px-2 py-4 text-left transition-colors hover:bg-[var(--surface)]"
+                          className="-mx-2 flex w-[calc(100%+1rem)] items-center gap-3 rounded-xl px-2 py-4 text-left transition-colors hover:bg-[var(--background)]"
                         >
-                          <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full ${s.done ? "bg-[var(--accent)] text-white" : "bg-[var(--surface)] text-[var(--muted)] ring-1 ring-inset ring-[var(--border)]"}`}>
+                          <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full ${s.done ? "bg-[var(--accent)] text-white" : "bg-[var(--background)] text-[var(--muted)] ring-1 ring-inset ring-[var(--border)]"}`}>
                             {s.done ? <Check className="h-4 w-4" aria-hidden /> : <span className="h-1.5 w-1.5 rounded-full bg-current" />}
                           </span>
                           <span className="min-w-0 flex-1">
-                            <span className={`block text-[16px] font-medium ${s.done ? "text-[var(--muted)] line-through" : ""}`}>{s.label}</span>
-                            <span className="block text-[14px] text-[var(--muted)]">{s.desc}</span>
+                            <span className={`block text-[15px] font-medium ${s.done ? "text-[var(--muted)] line-through" : ""}`}>{s.label}</span>
+                            <span className="block text-[13px] text-[var(--muted)]">{s.desc}</span>
                           </span>
                           {!s.done && <ChevronRight className="h-4 w-4 shrink-0 text-[var(--faint)]" aria-hidden />}
                         </button>
