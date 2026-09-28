@@ -42,14 +42,14 @@ import { AuthScreen } from "@/components/AuthScreen";
 import { UserMenu, Avatar } from "@/components/UserMenu";
 import { LineArea } from "@/components/dashboard/Charts";
 import { SavingsGoals } from "@/components/dashboard/SavingsGoals";
-import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletVault } from "@/components/WalletVault";
 import { OrbitLogo } from "@/components/OrbitLogo";
 import { AaveMark, KaminoMark, SaveMark, MarginfiMark } from "@/components/landing/BrandMarks";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { InfoDot } from "@/components/ui/InfoDot";
-import { txnIcon } from "@/lib/visuals";
+import { txnIcon, ACTIVITY_ICON, activityCategory } from "@/lib/visuals";
+import { getActivity, onActivity, clearActivity, type ActivityEvent } from "@/lib/activity";
 
 const THRESHOLD = 10;
 const APY = 0.06;
@@ -145,7 +145,7 @@ function VenueMark({ venue, className = "h-8 w-8" }: { venue: Venue; className?:
 type NavItem = { id: string; label: string; icon: typeof Wallet; hint: string; tab?: TabId; href?: string };
 const NAV: NavItem[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, hint: "Your money at a glance", tab: "home" },
-  { id: "transactions", label: "Transactions", icon: ArrowLeftRight, hint: "Every transaction", tab: "activity" },
+  { id: "transactions", label: "Activity", icon: ArrowLeftRight, hint: "Spending & activity", tab: "activity" },
   { id: "wallet", label: "Wallet", icon: Wallet, hint: "Your vault & yield", tab: "grow" },
   { id: "budget", label: "Budget", icon: PiggyBank, hint: "How money is set aside", tab: "save" },
   { id: "goals", label: "Savings Goals", icon: Target, hint: "Your vault & yield", tab: "grow" },
@@ -207,7 +207,8 @@ export default function Home() {
   const [navId, setNavId] = useState<string>("dashboard");
   const [invited, setInvited] = useState(false);
   const [query, setQuery] = useState("");
-  const [historyTab, setHistoryTab] = useState<"transactions" | "activity">("transactions");
+  const [historyTab, setHistoryTab] = useState<string>("all");
+  const [acts, setActs] = useState<ActivityEvent[]>([]);
   const firstNavPersist = useRef(true);
 
   // "Invite & Earn" (Finora parity): copy an invite link to the clipboard for now.
@@ -599,10 +600,37 @@ export default function Home() {
   ];
   // Friendly transaction row helper.
   const txnDate = (ts: number) => new Date(ts).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const actWhen = (ts: number) => new Date(ts).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+
+  // App-activity events (deposits, goals, wallet…), live.
+  useEffect(() => {
+    const sync = () => setActs(getActivity());
+    sync();
+    return onActivity(sync);
+  }, []);
 
   // Header search filters your history by merchant or category.
   const q = query.trim().toLowerCase();
   const filteredTxns = q ? txns.filter((t) => t.name.toLowerCase().includes(q) || t.category.toLowerCase().includes(q)) : txns;
+
+  // Unified history: spending transactions + app activity, newest first.
+  const historyItems = useMemo(() => {
+    const items = [
+      ...txns.map((t) => ({ id: `t${t.id}`, ts: t.ts, cat: "spending" as const, type: "txn" as const, t })),
+      ...acts.map((a) => ({ id: a.id, ts: a.ts, cat: activityCategory(a.kind), type: "act" as const, a })),
+    ];
+    return items.sort((x, y) => y.ts - x.ts);
+  }, [txns, acts]);
+  const historyCounts = useMemo(() => {
+    const c: Record<string, number> = { all: historyItems.length };
+    for (const it of historyItems) c[it.cat] = (c[it.cat] ?? 0) + 1;
+    return c;
+  }, [historyItems]);
+  const filteredHistory = historyItems.filter((it) => {
+    if (historyTab !== "all" && it.cat !== historyTab) return false;
+    if (q) return (it.type === "txn" ? `${it.t.name} ${it.t.category}` : it.a.text).toLowerCase().includes(q);
+    return true;
+  });
 
   // Gate the dashboard behind sign-in. Wait for the stored session to load to
   // avoid flashing the login screen for an already-signed-in user.
@@ -1146,67 +1174,85 @@ export default function Home() {
           {/* ═══════════ ACTIVITY ═══════════ */}
           {tab === "activity" && (
             <div>
-              {/* Underline tabs: Transactions / Activity */}
-              <div className="flex items-center gap-6 border-b border-[var(--border)]">
-                {([["transactions", "Transactions"], ["activity", "Activity"]] as const).map(([id, label]) => {
-                  const on = (q ? "transactions" : historyTab) === id;
+              {/* Category underline tabs */}
+              <div className="flex items-center gap-5 overflow-x-auto border-b border-[var(--border)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                {[
+                  { id: "all", label: "All" },
+                  { id: "spending", label: "Spending" },
+                  { id: "deposits", label: "Deposits" },
+                  { id: "withdrawals", label: "Withdrawals" },
+                  { id: "goals", label: "Goals" },
+                  { id: "wallet", label: "Wallet" },
+                ].map((t) => {
+                  const on = historyTab === t.id;
                   return (
                     <button
-                      key={id}
+                      key={t.id}
                       type="button"
-                      onClick={() => { setHistoryTab(id); if (id !== "transactions") setQuery(""); }}
-                      className={`relative -mb-px border-b-2 pb-3 text-[15px] font-semibold transition-colors ${on ? "border-[var(--primary)] text-[var(--foreground)]" : "border-transparent text-[var(--muted)] hover:text-[var(--foreground)]"}`}
+                      onClick={() => setHistoryTab(t.id)}
+                      className={`relative -mb-px flex shrink-0 items-center gap-1.5 border-b-2 pb-3 text-[15px] font-semibold transition-colors ${on ? "border-[var(--primary)] text-[var(--foreground)]" : "border-transparent text-[var(--muted)] hover:text-[var(--foreground)]"}`}
                     >
-                      {label}
+                      {t.label}
+                      <span className={`font-mono text-[11px] ${on ? "text-[var(--primary-strong)]" : "text-[var(--faint)]"}`}>{historyCounts[t.id] ?? 0}</span>
                     </button>
                   );
                 })}
-                <button type="button" onClick={reset} className="ml-auto inline-flex items-center gap-1 pb-3 text-[13px] text-[var(--muted)] transition-colors hover:text-[var(--foreground)]"><RotateCcw className="h-3.5 w-3.5" aria-hidden /> reset</button>
+                <button type="button" onClick={() => { reset(); clearActivity(); }} className="ml-auto inline-flex shrink-0 items-center gap-1 pb-3 text-[13px] text-[var(--muted)] transition-colors hover:text-[var(--foreground)]"><RotateCcw className="h-3.5 w-3.5" aria-hidden /> reset</button>
               </div>
 
-              {(q ? "transactions" : historyTab) === "transactions" ? (
-                <div className="mt-5">
-                  {q && <p className="mb-1 text-[13px] text-[var(--muted)]">Results for “{query}” · {filteredTxns.length} {filteredTxns.length === 1 ? "match" : "matches"}</p>}
-                  {filteredTxns.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-16 text-center">
-                      <ShoppingBag className="h-6 w-6 text-[var(--muted)]" aria-hidden />
-                      <p className="mt-2 text-[15px] text-[var(--muted)]">{q ? `No transactions match “${query}”` : "No transactions yet"}</p>
-                      <p className="mt-0.5 text-[13px] text-[var(--faint)]">{q ? "Try a merchant or category." : "Simulate a purchase or sync a bank in Budget."}</p>
-                    </div>
-                  ) : (
-                    <ul className="divide-y divide-[var(--border)]">
-                      {filteredTxns.map((t) => {
-                        const Icon = txnIcon(t);
-                        return (
-                          <li key={t.id} className="flex items-center gap-3.5 py-3.5">
-                            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--surface)] text-[var(--muted)]">
-                              <Icon className="h-[18px] w-[18px]" aria-hidden />
-                            </span>
-                            <div className="min-w-0 flex-1">
-                              <div className="truncate text-[15px] font-medium">{t.name}</div>
-                              <div className="text-[12px] text-[var(--muted)]">{t.category} · {txnDate(t.ts)}</div>
-                            </div>
-                            <div className="shrink-0 text-right">
-                              <div className="font-mono text-[15px] tabular-nums text-[var(--foreground)]">{usd(t.amountUsd)}</div>
-                              {t.setAside > 0 ? (
-                                <div className="mt-1 inline-flex items-center gap-1 rounded-full bg-[var(--primary-soft)] px-2 py-0.5 text-[11px] font-medium text-[var(--primary-strong)]">
-                                  {t.deposited ? <Zap className="h-3 w-3" aria-hidden /> : <Coins className="h-3 w-3" aria-hidden />}
-                                  +{usd(t.setAside)} {t.deposited ? "invested" : "saved"}
-                                </div>
-                              ) : (
-                                <div className="mt-1 text-[11px] text-[var(--faint)]">not saved</div>
-                              )}
-                            </div>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  )}
+              {q && <p className="mt-4 text-[13px] text-[var(--muted)]">Results for “{query}” · {filteredHistory.length} {filteredHistory.length === 1 ? "match" : "matches"}</p>}
+
+              {filteredHistory.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <ShoppingBag className="h-6 w-6 text-[var(--muted)]" aria-hidden />
+                  <p className="mt-2 text-[15px] text-[var(--muted)]">{q ? `Nothing matches “${query}”` : "Nothing here yet"}</p>
+                  <p className="mt-0.5 text-[13px] text-[var(--faint)]">Simulate a purchase or use your vault to see activity.</p>
                 </div>
               ) : (
-                <div className="mt-5">
-                  <ActivityFeed showTitle={false} />
-                </div>
+                <ul className="mt-2 divide-y divide-[var(--border)]">
+                  {filteredHistory.map((it) => {
+                    if (it.type === "txn") {
+                      const t = it.t;
+                      const Icon = txnIcon(t);
+                      return (
+                        <li key={it.id} className="flex items-center gap-3.5 py-3.5">
+                          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--surface)] text-[var(--muted)]">
+                            <Icon className="h-[18px] w-[18px]" aria-hidden />
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <div className="truncate text-[15px] font-medium">{t.name}</div>
+                            <div className="text-[12px] text-[var(--muted)]">{t.category} · {txnDate(t.ts)}</div>
+                          </div>
+                          <div className="shrink-0 text-right">
+                            <div className="font-mono text-[15px] tabular-nums text-[var(--foreground)]">{usd(t.amountUsd)}</div>
+                            {t.setAside > 0 ? (
+                              <div className="mt-1 inline-flex items-center gap-1 rounded-full bg-[var(--primary-soft)] px-2 py-0.5 text-[11px] font-medium text-[var(--primary-strong)]">
+                                {t.deposited ? <Zap className="h-3 w-3" aria-hidden /> : <Coins className="h-3 w-3" aria-hidden />}
+                                +{usd(t.setAside)} {t.deposited ? "invested" : "saved"}
+                              </div>
+                            ) : (
+                              <div className="mt-1 text-[11px] text-[var(--faint)]">not saved</div>
+                            )}
+                          </div>
+                        </li>
+                      );
+                    }
+                    const a = it.a;
+                    const AIcon = ACTIVITY_ICON[a.kind];
+                    const money = a.kind === "deposit" || a.kind === "withdraw" || a.kind === "faucet";
+                    return (
+                      <li key={it.id} className="flex items-center gap-3.5 py-3.5">
+                        <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${money ? "bg-[var(--primary-soft)] text-[var(--primary-strong)]" : "bg-[var(--surface)] text-[var(--muted)]"}`}>
+                          <AIcon className="h-[18px] w-[18px]" aria-hidden />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate text-[15px] font-medium">{a.text}</div>
+                        </div>
+                        <div className="shrink-0 font-mono text-[12px] text-[var(--faint)]">{actWhen(a.ts)}</div>
+                      </li>
+                    );
+                  })}
+                </ul>
               )}
             </div>
           )}

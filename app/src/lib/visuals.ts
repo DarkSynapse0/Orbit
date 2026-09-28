@@ -8,8 +8,16 @@ import {
   Receipt,
   CircleDollarSign,
   Zap,
+  Target,
+  Trash2,
+  ArrowDownToLine,
+  ArrowUpFromLine,
+  Coins,
+  Wallet,
+  LogIn,
   type LucideIcon,
 } from "lucide-react";
+import type { ActivityKind } from "./activity";
 
 // Spending category -> icon. Falls back to a receipt for anything uncategorized.
 const CATEGORY_ICON: Record<string, LucideIcon> = {
@@ -39,3 +47,26 @@ export const TONE_ICON: Record<Tone, string> = {
   destructive: "bg-[var(--destructive-soft)] text-[var(--destructive)]",
   muted: "bg-transparent text-[var(--faint)]",
 };
+
+// App-activity events (deposits, goals, wallet…) -> icon + coarse category for filtering.
+export const ACTIVITY_ICON: Record<ActivityKind, LucideIcon> = {
+  goal_create: Target,
+  goal_allocate: Target,
+  goal_empty: Target,
+  goal_delete: Trash2,
+  deposit: ArrowDownToLine,
+  withdraw: ArrowUpFromLine,
+  faucet: Coins,
+  wallet_connect: Wallet,
+  wallet_disconnect: Wallet,
+  sign_in: LogIn,
+};
+
+export type HistoryCategory = "spending" | "deposits" | "withdrawals" | "goals" | "wallet";
+
+export function activityCategory(kind: ActivityKind): HistoryCategory {
+  if (kind === "deposit" || kind === "faucet") return "deposits";
+  if (kind === "withdraw") return "withdrawals";
+  if (kind.startsWith("goal")) return "goals";
+  return "wallet";
+}
