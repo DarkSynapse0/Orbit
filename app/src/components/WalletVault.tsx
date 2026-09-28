@@ -398,7 +398,7 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
               <button
                 type="button"
                 onClick={() => disconnect().catch(() => {})}
-                className="inline-flex shrink-0 items-center gap-1 transition-colors hover:text-[var(--destructive)]"
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[var(--destructive)]/40 px-2.5 py-1 font-medium text-[var(--destructive)] transition-colors hover:bg-[var(--destructive-soft)]"
               >
                 <Power className="h-3.5 w-3.5" aria-hidden /> <span className="hidden sm:inline">Disconnect</span>
               </button>
