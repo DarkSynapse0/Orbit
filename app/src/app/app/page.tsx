@@ -32,6 +32,8 @@ import {
   Gift,
   Settings,
   HelpCircle,
+  Info,
+  MoreHorizontal,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { apiFetch } from "@/lib/api";
@@ -527,6 +529,8 @@ export default function Home() {
     vault: connected,
     saving: state.pendingUsd > 0 || principalUsd > 0,
   };
+  // A simple "savings health" score for the side panel (Finora "Payment Score" parity).
+  const savingsScore = (setup.vault ? 40 : 0) + (setup.bank ? 40 : 0) + (setup.saving ? 20 : 0);
   // Friendly transaction row helper.
   const txnDate = (ts: number) => new Date(ts).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
@@ -665,7 +669,7 @@ export default function Home() {
                   <div className={`${CARD} p-6`}>
                     <div className="flex items-center justify-between">
                       <span className="text-[13px] font-medium text-[var(--muted)]">Total saved</span>
-                      <span className="rounded-full border border-[var(--border)] px-2 py-0.5 text-[11px] font-medium text-[var(--muted)]">USD</span>
+                      <span className="inline-flex items-center gap-1 rounded-full border border-[var(--border)] px-2.5 py-1 text-[11px] font-medium text-[var(--muted)]">USD <ChevronDown className="h-3 w-3" aria-hidden /></span>
                     </div>
                     <div
                       className={`mt-3 font-mono text-[clamp(2rem,5vw,2.9rem)] font-semibold leading-none tabular-nums transition-colors duration-700 ${
@@ -730,14 +734,17 @@ export default function Home() {
                 <div className={`${CARD} flex flex-col p-6`}>
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <h3 className="font-display text-[16px] font-semibold">Savings over time</h3>
+                      <div className="flex items-center gap-1.5">
+                        <h3 className="font-display text-[16px] font-semibold">Savings over time</h3>
+                        <Info className="h-3.5 w-3.5 text-[var(--faint)]" aria-hidden />
+                      </div>
                       <div className="mt-3 text-[13px] text-[var(--muted)]">Total saved so far</div>
                       <div className="mt-1 font-mono text-[clamp(1.6rem,4vw,2.25rem)] font-semibold leading-none tabular-nums">{usd(total)}</div>
                       <div className="mt-1.5 text-[13px]">
-                        <span className="font-mono text-[var(--accent-strong)]">{liveYield > 0 ? "+" : ""}{fmtYield(liveYield)}</span> <span className="text-[var(--muted)]">earned, live</span>
+                        <span className="font-mono text-[var(--accent-strong)]">{liveYield > 0 ? "+" : ""}{fmtYield(liveYield)}</span> <span className="text-[var(--muted)]">earned, live{analytics.hasData ? "" : " · sample"}</span>
                       </div>
                     </div>
-                    <span className="rounded-lg border border-[var(--border)] px-2.5 py-1 text-[12px] text-[var(--muted)]">{analytics.hasData ? "all time" : "sample"}</span>
+                    <span className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-2.5 py-1.5 text-[12px] font-medium text-[var(--muted)]">Yearly <ChevronDown className="h-3.5 w-3.5" aria-hidden /></span>
                   </div>
                   <div className="mt-5 flex-1">
                     <LineArea
@@ -808,43 +815,57 @@ export default function Home() {
                   )}
                 </div>
 
-                {/* Side panel (Finora: Invoice) — categories once set up, else the setup checklist */}
-                {setup.bank && setup.vault ? (
-                  <div className={`${CARD} p-6`}>
-                    <h3 className="font-display text-[16px] font-semibold">Where savings come from</h3>
-                    <p className="mt-0.5 text-[13px] text-[var(--muted)]">Set aside from your spending</p>
+                {/* Side panel (Finora: Invoice) — a savings score + a list */}
+                <div className={`${CARD} p-6`}>
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-display text-[16px] font-semibold">Savings health</h3>
+                    <MoreHorizontal className="h-4 w-4 text-[var(--faint)]" aria-hidden />
+                  </div>
+
+                  {/* Savings score (Finora: Payment Score) */}
+                  <div className="mt-4">
+                    <div className="flex items-center justify-between text-[13px]">
+                      <span className="text-[var(--muted)]">Savings score</span>
+                      <span className="font-mono"><span className="font-semibold text-[var(--accent-strong)]">{savingsScore}</span><span className="text-[var(--faint)]"> /100</span></span>
+                    </div>
+                    <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-[var(--border)]">
+                      <div className="h-full rounded-full bg-[var(--accent)] transition-[width] duration-500" style={{ width: `${savingsScore}%` }} />
+                    </div>
+                  </div>
+
+                  {setup.bank && setup.vault ? (
                     <div className="mt-5">
+                      <div className="mb-3 text-[12px] font-medium uppercase tracking-wide text-[var(--faint)]">Where savings come from</div>
                       <HBars rows={analytics.categories.length ? analytics.categories : SAMPLE_CATEGORIES} />
                     </div>
-                  </div>
-                ) : (
-                  <div className={`${CARD} p-6`}>
-                    <h3 className="font-display text-[16px] font-semibold">Get set up</h3>
-                    <p className="mt-0.5 text-[13px] text-[var(--muted)]">Two quick steps to save on autopilot</p>
-                    <div className="mt-3 divide-y divide-[var(--border)]">
-                      {[
-                        { done: setup.vault, label: "Open your vault", desc: "Create an account in one tap", go: "grow" as TabId },
-                        { done: setup.bank, label: "Connect your bank", desc: "So Orbit can watch your spending", go: "save" as TabId },
-                      ].map((s) => (
-                        <button
-                          key={s.label}
-                          type="button"
-                          onClick={() => setTab(s.go)}
-                          className="-mx-2 flex w-[calc(100%+1rem)] items-center gap-3 rounded-xl px-2 py-4 text-left transition-colors hover:bg-[var(--background)]"
-                        >
-                          <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full ${s.done ? "bg-[var(--accent)] text-white" : "bg-[var(--background)] text-[var(--muted)] ring-1 ring-inset ring-[var(--border)]"}`}>
-                            {s.done ? <Check className="h-4 w-4" aria-hidden /> : <span className="h-1.5 w-1.5 rounded-full bg-current" />}
-                          </span>
-                          <span className="min-w-0 flex-1">
-                            <span className={`block text-[15px] font-medium ${s.done ? "text-[var(--muted)] line-through" : ""}`}>{s.label}</span>
-                            <span className="block text-[13px] text-[var(--muted)]">{s.desc}</span>
-                          </span>
-                          {!s.done && <ChevronRight className="h-4 w-4 shrink-0 text-[var(--faint)]" aria-hidden />}
-                        </button>
-                      ))}
+                  ) : (
+                    <div className="mt-5">
+                      <div className="mb-1 text-[12px] font-medium uppercase tracking-wide text-[var(--faint)]">Finish setup</div>
+                      <div className="divide-y divide-[var(--border)]">
+                        {[
+                          { done: setup.vault, label: "Open your vault", desc: "Create an account in one tap", go: "grow" as TabId },
+                          { done: setup.bank, label: "Connect your bank", desc: "So Orbit can watch your spending", go: "save" as TabId },
+                        ].map((s) => (
+                          <button
+                            key={s.label}
+                            type="button"
+                            onClick={() => setTab(s.go)}
+                            className="-mx-2 flex w-[calc(100%+1rem)] items-center gap-3 rounded-xl px-2 py-3.5 text-left transition-colors hover:bg-[var(--background)]"
+                          >
+                            <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full ${s.done ? "bg-[var(--accent)] text-white" : "bg-[var(--background)] text-[var(--muted)] ring-1 ring-inset ring-[var(--border)]"}`}>
+                              {s.done ? <Check className="h-4 w-4" aria-hidden /> : <span className="h-1.5 w-1.5 rounded-full bg-current" />}
+                            </span>
+                            <span className="min-w-0 flex-1">
+                              <span className={`block text-[15px] font-medium ${s.done ? "text-[var(--muted)] line-through" : ""}`}>{s.label}</span>
+                              <span className="block text-[13px] text-[var(--muted)]">{s.desc}</span>
+                            </span>
+                            {!s.done && <ChevronRight className="h-4 w-4 shrink-0 text-[var(--faint)]" aria-hidden />}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
           )}
