@@ -778,7 +778,7 @@ export default function Home() {
 
                 <div className="mt-6 flex min-h-0 flex-1 flex-col border-t border-[var(--line)] pt-6">
                   <div className="flex items-center justify-between">
-                    <h2 className="font-display text-[15px] font-semibold">Recent activity</h2>
+                    <h2 className="font-display text-[15px] font-semibold">Recent transactions</h2>
                     {txns.length > 0 && (
                       <button type="button" onClick={() => setTab("activity")} className="inline-flex items-center gap-1 text-[13px] text-[var(--muted)] transition-colors hover:text-[var(--foreground)]">
                         See all <ChevronRight className="h-3.5 w-3.5" aria-hidden />
@@ -788,7 +788,7 @@ export default function Home() {
                   {txns.length === 0 ? (
                     <div className="flex flex-1 flex-col items-center justify-center py-10 text-center">
                       <ShoppingBag className="h-6 w-6 text-[var(--muted)]" aria-hidden />
-                      <p className="mt-2 text-[15px] text-[var(--muted)]">Nothing yet</p>
+                      <p className="mt-2 text-[15px] text-[var(--muted)]">No transactions yet</p>
                       <p className="mt-0.5 text-[13px] text-[var(--faint)]">Simulate a purchase in Budget to see it here.</p>
                     </div>
                   ) : (
@@ -796,17 +796,24 @@ export default function Home() {
                       {txns.slice(0, 10).map((t) => {
                         const Icon = txnIcon(t);
                         return (
-                          <li key={t.id} className="flex items-center gap-3 py-3">
-                            <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[var(--surface)] ${t.deposited ? "text-[var(--primary-strong)]" : "text-[var(--muted)]"}`}>
-                              <Icon className="h-4 w-4" aria-hidden />
+                          <li key={t.id} className="flex items-center gap-3.5 py-3">
+                            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--surface)] text-[var(--muted)]">
+                              <Icon className="h-[18px] w-[18px]" aria-hidden />
                             </span>
                             <div className="min-w-0 flex-1">
                               <div className="truncate text-[15px] font-medium">{t.name}</div>
                               <div className="text-[12px] text-[var(--muted)]">{t.category} · {txnDate(t.ts)}</div>
                             </div>
                             <div className="shrink-0 text-right">
-                              <div className={`font-mono text-[15px] tabular-nums ${t.setAside > 0 ? "text-[var(--primary-strong)]" : "text-[var(--faint)]"}`}>{t.setAside > 0 ? `+${usd(t.setAside)}` : "—"}</div>
-                              {t.deposited && <div className="text-[11px] text-[var(--primary-strong)]">in vault</div>}
+                              <div className="font-mono text-[15px] tabular-nums text-[var(--foreground)]">{usd(t.amountUsd)}</div>
+                              {t.setAside > 0 ? (
+                                <div className="mt-1 inline-flex items-center gap-1 rounded-full bg-[var(--primary-soft)] px-2 py-0.5 text-[11px] font-medium text-[var(--primary-strong)]">
+                                  {t.deposited ? <Zap className="h-3 w-3" aria-hidden /> : <Coins className="h-3 w-3" aria-hidden />}
+                                  +{usd(t.setAside)} {t.deposited ? "invested" : "saved"}
+                                </div>
+                              ) : (
+                                <div className="mt-1 text-[11px] text-[var(--faint)]">not saved</div>
+                              )}
                             </div>
                           </li>
                         );
