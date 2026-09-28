@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Plus, Sparkles, Trash2, TrendingUp } from "lucide-react";
+import { Plus, Trash2, TrendingUp } from "lucide-react";
 import { logActivity } from "@/lib/activity";
 
 // Named savings goals ("pots") layered over the single on-chain vault. Each goal has
@@ -123,8 +123,14 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
 
   return (
     <section>
-      <div className="flex items-center justify-end text-[13px] text-[var(--muted)]">
-        Unallocated <span className="ml-1 font-mono font-medium text-[var(--foreground)]">{usd(unallocated)}</span>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="inline-flex items-baseline gap-2 rounded-xl bg-[var(--surface)] px-4 py-2.5">
+          <span className="text-[13px] text-[var(--muted)]">Unallocated</span>
+          <span className="font-mono text-[15px] font-semibold tabular-nums text-[var(--foreground)]">{usd(unallocated)}</span>
+        </div>
+        <button type="button" onClick={() => setAdding((v) => !v)} className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-[var(--primary)] px-4 text-[14px] font-semibold text-[var(--primary-fg)] transition-opacity hover:opacity-90">
+          <Plus className="h-4 w-4" aria-hidden /> New goal
+        </button>
       </div>
 
       {withYield.length > 0 && (
@@ -177,14 +183,7 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
         </div>
       )}
 
-      {unallocated > 0.005 && (
-        <div className="mt-3 flex items-center justify-between gap-3 border-t border-[var(--border)] pt-3 text-[13px]">
-          <span className="flex items-center gap-2 text-[var(--muted)]"><Sparkles className="h-4 w-4 text-[var(--faint)]" aria-hidden /> Not in a goal yet</span>
-          <span className="font-mono font-medium tabular-nums">{usd(unallocated)}</span>
-        </div>
-      )}
-
-      {adding ? (
+      {adding && (
         <div className="mt-4 space-y-4 rounded-xl border border-[var(--border)] bg-[var(--background)] p-4">
           <div>
             <span className="mb-1.5 block text-[12px] font-medium text-[var(--muted)]">Icon</span>
@@ -262,14 +261,6 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
             </button>
           </div>
         </div>
-      ) : (
-        <button
-          type="button"
-          onClick={() => setAdding(true)}
-          className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-dashed border-[var(--border-strong)] text-[14px] font-medium text-[var(--muted)] transition-colors hover:bg-[var(--background)] hover:text-[var(--foreground)]"
-        >
-          <Plus className="h-4 w-4" aria-hidden /> New goal
-        </button>
       )}
 
       {withYield.length === 0 && !adding && (
