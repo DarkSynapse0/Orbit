@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import type { Response } from 'express';
-import { computeSetAside, DEFAULT_TIERS } from '@orbit/shared';
-import { addPending, moveToInvested, getState, resetState, recordTxn, getTransactions } from '../ledger.js';
+import { computeSetAside } from '@orbit/shared';
+import { addPending, moveToInvested, getState, resetState, recordTxn, getTransactions, setSetAsidePct } from '../ledger.js';
 import { simulateStripeDeposit, depositToVault } from '../solana.js';
 import { isConfigured, hasItem, connectSandbox, syncTransactions, clearItem } from '../plaidClient.js';
 import { config } from '../config.js';
@@ -36,7 +36,8 @@ function categorize(name: string): string {
 // `wallet` is the connected user's address (the vault owner). Without it we can still earmark,
 // but the deposit waits until a wallet is connected — the money stays in the bank until then.
 async function runPipeline(userId: string, amountUsd: number, wallet?: string, name = 'Purchase', ts = Date.now()) {
-  const setAside = computeSetAside(amountUsd, DEFAULT_TIERS);
+  // Set aside the user's chosen percentage of the purchase.
+  const setAside = computeSetAside(amountUsd, getState(userId).setAsidePct);
   if (setAside > 0) addPending(userId, setAside);
 
   const state = getState(userId);
@@ -175,6 +176,17 @@ plaidRouter.post('/invest-now', requireAuth, async (req, res) => {
 /** Current saved state (pending + invested) so the dashboard survives reloads. */
 plaidRouter.get('/state', requireAuth, (req, res) => {
   res.json({ state: getState(req.userId!) });
+});
+
+/** Update the user's set-aside rate (% of each purchase). Clamped to 0.5%–5% server-side. */
+plaidRouter.post('/set-aside-pct', requireAuth, (req, res) => {
+  try {
+    const pct = Number(req.body?.pct);
+    if (!Number.isFinite(pct)) throw new BadRequest('pct must be a number');
+    res.json({ state: setSetAsidePct(req.userId!, pct) });
+  } catch (e) {
+    fail(res, e);
+  }
 });
 
 /** Real transaction history for the dashboard charts. */

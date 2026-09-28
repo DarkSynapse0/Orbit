@@ -52,11 +52,16 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 const THRESHOLD = 10;
 const APY = 0.06;
 const SECONDS_PER_YEAR = 31_536_000;
+// Set-aside rate band (mirrors @orbit/shared). Orbit sets aside this % of each purchase.
+const MIN_PCT = 0.5;
+const MAX_PCT = 5;
+const DEFAULT_PCT = 1;
 
 type SavingsState = {
   userId: string;
   pendingUsd: number;
   investedUsd: number;
+  setAsidePct?: number;
   lastDepositSig?: string;
 };
 type OnChain = {
@@ -273,7 +278,30 @@ export default function Home() {
   // Automation (demo-local controls)
   const [autoInvest, setAutoInvest] = useState(true);
   const [paused, setPaused] = useState(false);
-  const [multiplier, setMultiplier] = useState(1);
+
+  // Set-aside rate: % of each purchase (server-backed, 0.5–5%).
+  const [rate, setRate] = useState<number>(DEFAULT_PCT);
+  const rateSynced = useRef(false);
+  const rateTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Adopt the server's saved rate once, then let the slider drive it.
+  useEffect(() => {
+    if (!rateSynced.current && typeof state.setAsidePct === "number") {
+      setRate(state.setAsidePct);
+      rateSynced.current = true;
+    }
+  }, [state.setAsidePct]);
+  // Update the rate locally now, persist (debounced) so dragging doesn't spam the server.
+  const changeRate = (next: number) => {
+    const p = Math.min(MAX_PCT, Math.max(MIN_PCT, Math.round(next * 10) / 10));
+    setRate(p);
+    if (rateTimer.current) clearTimeout(rateTimer.current);
+    rateTimer.current = setTimeout(() => {
+      apiFetch(`/plaid/set-aside-pct`, { method: "POST", body: JSON.stringify({ pct: p }) })
+        .then((r) => r.json())
+        .then((d) => { if (d.state) setState(d.state); })
+        .catch(() => {});
+    }, 400);
+  };
 
   // Earn projection + yield venue
   const [projAmt, setProjAmt] = useState("2000");
@@ -921,15 +949,28 @@ export default function Home() {
                   </section>
 
                   <section className={`${PANEL} p-6`}>
-                    <SectionLabel>The round-up rule</SectionLabel>
-                    <div className="mt-4 grid grid-cols-2 gap-4">
-                      {[{ spend: "Over $100", set: "$5" }, { spend: "Over $500", set: "$10" }].map((t) => (
-                        <div key={t.spend} className="rounded-xl border border-[var(--border)] bg-[var(--background)] p-5">
-                          <div className="text-[14px] text-[var(--muted)]">{t.spend}</div>
-                          <div className="mt-2 font-mono text-3xl font-semibold text-[var(--accent-strong)]">{t.set}</div>
-                          <div className="mt-1 text-[12px] text-[var(--muted)]">set aside</div>
-                        </div>
-                      ))}
+                    <SectionLabel>Your set-aside rate</SectionLabel>
+                    <p className="mt-2 text-[14px] text-[var(--muted)]">Orbit sets aside this share of every purchase.</p>
+                    <div className="mt-4 flex items-end justify-between">
+                      <div className="font-mono text-4xl font-semibold tabular-nums text-[var(--accent-strong)]">{rate.toFixed(1)}%</div>
+                      <div className="text-right text-[13px] text-[var(--muted)]">
+                        On a <span className="font-mono text-[var(--foreground)]">$50</span> purchase<br />
+                        you&apos;d save <span className="font-mono font-medium text-[var(--accent-strong)]">{usd((50 * rate) / 100)}</span>
+                      </div>
+                    </div>
+                    <input
+                      type="range"
+                      min={MIN_PCT}
+                      max={MAX_PCT}
+                      step={0.1}
+                      value={rate}
+                      onChange={(e) => changeRate(Number(e.target.value))}
+                      aria-label="Set-aside rate"
+                      className="mt-4 w-full accent-[var(--accent)]"
+                    />
+                    <div className="mt-1 flex justify-between font-mono text-[12px] text-[var(--faint)]">
+                      <span>{MIN_PCT}%</span>
+                      <span>{MAX_PCT}%</span>
                     </div>
                     <div className="mt-5 flex items-center justify-between border-t border-[var(--border)] pt-4 text-[15px]">
                       <span className="text-[var(--muted)]">Moves to vault at</span>
@@ -974,19 +1015,15 @@ export default function Home() {
                     </div>
                     <div className="flex items-center justify-between gap-4 p-5">
                       <div className="pr-2">
-                        <div className="text-sm font-medium">Save more per purchase</div>
-                        <div className="mt-0.5 text-[13px] text-[var(--muted)]">Set aside 2× or 3× as much on every purchase.</div>
+                        <div className="text-sm font-medium">Set-aside rate</div>
+                        <div className="mt-0.5 text-[13px] text-[var(--muted)]">Currently {rate.toFixed(1)}% of each purchase. Adjust it in the panel on the left.</div>
                       </div>
-                      <div className="flex shrink-0 rounded-full border border-[var(--border)] p-0.5">
-                        {[1, 2, 3].map((m) => (
-                          <button key={m} type="button" onClick={() => setMultiplier(m)} className={`rounded-full px-3 py-1 text-[15px] font-medium transition-colors ${multiplier === m ? "bg-[var(--contrast)] text-[var(--contrast-fg)]" : "text-[var(--muted)]"}`}>{m}×</button>
-                        ))}
-                      </div>
+                      <span className="shrink-0 rounded-full bg-[var(--accent-soft)] px-3 py-1 font-mono text-[15px] font-medium text-[var(--accent-strong)]">{rate.toFixed(1)}%</span>
                     </div>
                   </section>
                 </div>
               </div>
-              <p className="text-[12px] text-[var(--faint)]">Automation controls are a demo preview; the live rule is fixed at the tiers above.</p>
+              <p className="text-[12px] text-[var(--faint)]">Auto-invest and pause are a demo preview; the set-aside rate is live and used for every purchase.</p>
             </div>
           )}
 
