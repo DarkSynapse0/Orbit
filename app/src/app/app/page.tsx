@@ -826,7 +826,7 @@ export default function Home() {
                     <h2 className="font-display text-[15px] font-semibold">Savings over time</h2>
                     <InfoDot label={analytics.hasData ? "Your set-aside balance building up over time." : "Sample data. Your real curve appears once you start saving."} />
                   </div>
-                  <div className="mt-3 h-[240px] lg:h-[300px]">
+                  <div className="mt-3 h-[280px] lg:h-[360px]">
                     <LineArea
                       fill
                       series={[{ label: "Saved", points: analytics.hasData ? analytics.savingsLine : SAMPLE_LINE }]}
