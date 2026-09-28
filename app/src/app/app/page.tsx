@@ -724,117 +724,155 @@ export default function Home() {
         <main className="w-full flex-1 px-5 py-6 lg:min-h-0 lg:overflow-y-auto lg:px-8 lg:py-6">
           {/* ═══════════ HOME ═══════════ */}
           {tab === "home" && (
-            <div className="lg:flex lg:h-full lg:flex-col">
-              {/* Balance — the one moment of emphasis */}
-              <section>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[13px] font-medium text-[var(--muted)]">Total saved</span>
-                  <InfoDot label="Everything you've set aside plus the yield it's earning on-chain." />
-                </div>
-                <div
-                  className={`mt-2 font-mono text-[clamp(2.5rem,7vw,4rem)] font-semibold leading-none tabular-nums transition-colors duration-700 ${
-                    flash ? "text-[var(--primary)]" : "text-[var(--foreground)]"
-                  }`}
-                >
-                  {usd(total)}
-                </div>
-                <div className="mt-3 flex items-center gap-1.5 text-[14px]">
-                  <TrendingUp className="h-4 w-4 text-[var(--primary-strong)]" aria-hidden />
-                  <span className="font-mono font-medium text-[var(--primary-strong)]">{liveYield > 0 ? "+" : ""}{fmtYield(liveYield)}</span>
-                  <span className="text-[var(--muted)]">earned · 6% a year</span>
-                </div>
-                <div className="mt-5 flex flex-wrap gap-2.5">
-                  <button type="button" onClick={() => setTab("grow")} className="inline-flex items-center gap-2 rounded-xl bg-[var(--primary)] px-4 py-2.5 text-[14px] font-semibold text-[var(--primary-fg)] transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/40">
-                    <ArrowDownToLine className="h-4 w-4" aria-hidden /> Add money
-                  </button>
-                  <button type="button" onClick={() => setTab("grow")} className="inline-flex items-center gap-2 rounded-xl border border-[var(--border-strong)] px-4 py-2.5 text-[14px] font-medium text-[var(--secondary-fg)] transition-colors hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/30">
-                    <ArrowUpFromLine className="h-4 w-4" aria-hidden /> Withdraw to bank
-                  </button>
-                </div>
-              </section>
-
-              {/* Vault + set-aside, split by a hairline */}
-              <div className="mt-6 grid grid-cols-2 gap-6 border-t border-[var(--border)] pt-6 sm:gap-10">
-                <div>
-                  <div className="flex items-center gap-1.5 text-[13px] text-[var(--muted)]">
-                    <Coins className="h-4 w-4" aria-hidden /> In vault
-                    <InfoDot label="Invested on-chain and earning yield. Only you can withdraw it." />
+            <div className="lg:grid lg:h-full lg:grid-cols-[0.85fr_1.15fr] lg:gap-10">
+              {/* LEFT — balance, stats, savings health */}
+              <div className="flex flex-col">
+                {/* Balance — the one moment of emphasis */}
+                <section>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[13px] font-medium text-[var(--muted)]">Total saved</span>
+                    <InfoDot label="Everything you've set aside plus the yield it's earning on-chain." />
                   </div>
-                  <div className="mt-1.5 font-mono text-2xl font-semibold tabular-nums text-[var(--primary-strong)] sm:text-3xl">{usd(principalUsd)}</div>
-                </div>
-                <div className="border-l border-[var(--border)] pl-6 sm:pl-10">
-                  <div className="flex items-center gap-1.5 text-[13px] text-[var(--muted)]">
-                    <Landmark className="h-4 w-4" aria-hidden /> Set aside
-                    <InfoDot label={`Waiting in your bank. It moves to your vault once it reaches ${usd(THRESHOLD)}.`} />
+                  <div
+                    className={`mt-2 font-mono text-[clamp(2.25rem,5vw,3.25rem)] font-semibold leading-none tabular-nums transition-colors duration-700 ${
+                      flash ? "text-[var(--primary)]" : "text-[var(--foreground)]"
+                    }`}
+                  >
+                    {usd(total)}
                   </div>
-                  <div className="mt-1.5 font-mono text-2xl font-semibold tabular-nums sm:text-3xl">{usd(state.pendingUsd)}</div>
-                  <div className="mt-2 h-1.5 w-full max-w-[11rem] overflow-hidden rounded-full bg-[var(--border)]">
-                    <div className={`h-full rounded-full transition-[width] duration-300 ${state.pendingUsd >= THRESHOLD ? "bg-[var(--primary)]" : "bg-[var(--disabled)]"}`} style={{ width: `${pct}%` }} />
+                  <div className="mt-3 flex items-center gap-1.5 text-[14px]">
+                    <TrendingUp className="h-4 w-4 text-[var(--primary-strong)]" aria-hidden />
+                    <span className="font-mono font-medium text-[var(--primary-strong)]">{liveYield > 0 ? "+" : ""}{fmtYield(liveYield)}</span>
+                    <span className="text-[var(--muted)]">earned · 6% a year</span>
                   </div>
-                  {state.pendingUsd >= THRESHOLD && connected && investing && (
-                    <div className="mt-1.5 flex items-center gap-1.5 text-[12px] text-[var(--primary-strong)]"><Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden /> Investing…</div>
-                  )}
-                </div>
-              </div>
-
-              {/* Recent activity — clean list, fills the rest */}
-              <div className="mt-6 flex min-h-0 flex-1 flex-col border-t border-[var(--border)] pt-6">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-[12px] font-medium uppercase tracking-[0.14em] text-[var(--faint)]">Recent activity</h2>
-                  {txns.length > 0 && (
-                    <button type="button" onClick={() => setTab("activity")} className="inline-flex items-center gap-1 text-[13px] text-[var(--muted)] transition-colors hover:text-[var(--foreground)]">
-                      See all <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+                  <div className="mt-5 flex flex-wrap gap-2.5">
+                    <button type="button" onClick={() => setTab("grow")} className="inline-flex items-center gap-2 rounded-xl bg-[var(--primary)] px-4 py-2.5 text-[14px] font-semibold text-[var(--primary-fg)] transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/40">
+                      <ArrowDownToLine className="h-4 w-4" aria-hidden /> Add money
                     </button>
-                  )}
+                    <button type="button" onClick={() => setTab("grow")} className="inline-flex items-center gap-2 rounded-xl border border-[var(--border-strong)] px-4 py-2.5 text-[14px] font-medium text-[var(--secondary-fg)] transition-colors hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/30">
+                      <ArrowUpFromLine className="h-4 w-4" aria-hidden /> Withdraw to bank
+                    </button>
+                  </div>
+                </section>
+
+                {/* In vault | Set aside */}
+                <div className="mt-6 grid grid-cols-2 gap-6 border-t border-[var(--border)] pt-6">
+                  <div>
+                    <div className="flex items-center gap-1.5 text-[13px] text-[var(--muted)]">
+                      <Coins className="h-4 w-4" aria-hidden /> In vault
+                      <InfoDot label="Invested on-chain and earning yield. Only you can withdraw it." />
+                    </div>
+                    <div className="mt-1.5 font-mono text-2xl font-semibold tabular-nums text-[var(--primary-strong)]">{usd(principalUsd)}</div>
+                  </div>
+                  <div className="border-l border-[var(--border)] pl-6">
+                    <div className="flex items-center gap-1.5 text-[13px] text-[var(--muted)]">
+                      <Landmark className="h-4 w-4" aria-hidden /> Set aside
+                      <InfoDot label={`Waiting in your bank. It moves to your vault once it reaches ${usd(THRESHOLD)}.`} />
+                    </div>
+                    <div className="mt-1.5 font-mono text-2xl font-semibold tabular-nums">{usd(state.pendingUsd)}</div>
+                    <div className="mt-2 h-1.5 w-full max-w-[10rem] overflow-hidden rounded-full bg-[var(--border)]">
+                      <div className={`h-full rounded-full transition-[width] duration-300 ${state.pendingUsd >= THRESHOLD ? "bg-[var(--primary)]" : "bg-[var(--disabled)]"}`} style={{ width: `${pct}%` }} />
+                    </div>
+                    {state.pendingUsd >= THRESHOLD && connected && investing && (
+                      <div className="mt-1.5 flex items-center gap-1.5 text-[12px] text-[var(--primary-strong)]"><Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden /> Investing…</div>
+                    )}
+                  </div>
                 </div>
-                {txns.length === 0 ? (
-                  !setup.vault || !setup.bank ? (
-                    <div className="mt-2 divide-y divide-[var(--border)]">
+
+                {/* Savings health */}
+                <div className="mt-6 border-t border-[var(--border)] pt-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-[12px] font-medium uppercase tracking-[0.14em] text-[var(--faint)]">
+                      Savings health
+                      <InfoDot label="A quick read on how set up you are: open a vault, connect a bank, start saving." />
+                    </div>
+                    <span className="font-mono text-[14px]"><span className="font-semibold text-[var(--primary-strong)]">{savingsScore}</span><span className="text-[var(--faint)]"> / 100</span></span>
+                  </div>
+                  <div className="mt-2.5 h-2 w-full overflow-hidden rounded-full bg-[var(--border)]">
+                    <div className="h-full rounded-full bg-[var(--primary)] transition-[width] duration-500" style={{ width: `${savingsScore}%` }} />
+                  </div>
+                  {!setup.vault || !setup.bank ? (
+                    <div className="mt-3 divide-y divide-[var(--border)]">
                       {[
                         { done: setup.vault, label: "Open your vault", desc: "One tap, no seed phrase", go: "grow" as TabId },
                         { done: setup.bank, label: "Connect your bank", desc: "So Orbit can watch your spending", go: "save" as TabId },
                       ].map((s) => (
-                        <button key={s.label} type="button" onClick={() => setTab(s.go)} className="flex w-full items-center gap-3 py-3.5 text-left">
-                          <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full ${s.done ? "bg-[var(--primary)] text-[var(--primary-fg)]" : "bg-[var(--surface)] text-[var(--muted)]"}`}>
+                        <button key={s.label} type="button" onClick={() => setTab(s.go)} className="flex w-full items-center gap-3 py-3 text-left">
+                          <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full ${s.done ? "bg-[var(--primary)] text-[var(--primary-fg)]" : "bg-[var(--surface)] text-[var(--muted)]"}`}>
                             {s.done ? <Check className="h-4 w-4" aria-hidden /> : <span className="h-1.5 w-1.5 rounded-full bg-current" />}
                           </span>
                           <span className="min-w-0 flex-1">
-                            <span className={`block text-[15px] font-medium ${s.done ? "text-[var(--muted)] line-through" : ""}`}>{s.label}</span>
-                            <span className="block text-[13px] text-[var(--muted)]">{s.desc}</span>
+                            <span className={`block text-[14px] font-medium ${s.done ? "text-[var(--muted)] line-through" : ""}`}>{s.label}</span>
+                            <span className="block text-[12px] text-[var(--muted)]">{s.desc}</span>
                           </span>
                           {!s.done && <ChevronRight className="h-4 w-4 shrink-0 text-[var(--faint)]" aria-hidden />}
                         </button>
                       ))}
                     </div>
                   ) : (
+                    <div className="mt-5">
+                      <div className="mb-2.5 text-[12px] font-medium text-[var(--muted)]">Where your savings come from</div>
+                      <HBars rows={analytics.categories.length ? analytics.categories : SAMPLE_CATEGORIES} />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* RIGHT — growth chart + recent activity */}
+              <div className="mt-6 flex min-h-0 flex-col border-t border-[var(--border)] pt-6 lg:mt-0 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
+                <div className="shrink-0">
+                  <div className="flex items-center gap-1.5">
+                    <h2 className="font-display text-[15px] font-semibold">Savings over time</h2>
+                    <InfoDot label={analytics.hasData ? "Your set-aside balance building up over time." : "Sample data. Your real curve appears once you start saving."} />
+                  </div>
+                  <div className="mt-3 h-[168px]">
+                    <LineArea
+                      fill
+                      series={[{ label: "Saved", points: analytics.hasData ? analytics.savingsLine : SAMPLE_LINE }]}
+                      xLabels={analytics.hasData ? analytics.savingsLabels : SAMPLE_LINE_LABELS}
+                      fmtY={(v) => `$${v >= 1000 ? `${Math.round(v / 1000)}k` : Math.round(v)}`}
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-6 flex min-h-0 flex-1 flex-col border-t border-[var(--border)] pt-6">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-[12px] font-medium uppercase tracking-[0.14em] text-[var(--faint)]">Recent activity</h2>
+                    {txns.length > 0 && (
+                      <button type="button" onClick={() => setTab("activity")} className="inline-flex items-center gap-1 text-[13px] text-[var(--muted)] transition-colors hover:text-[var(--foreground)]">
+                        See all <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+                      </button>
+                    )}
+                  </div>
+                  {txns.length === 0 ? (
                     <div className="flex flex-1 flex-col items-center justify-center py-10 text-center">
                       <ShoppingBag className="h-6 w-6 text-[var(--muted)]" aria-hidden />
                       <p className="mt-2 text-[15px] text-[var(--muted)]">Nothing yet</p>
                       <p className="mt-0.5 text-[13px] text-[var(--faint)]">Simulate a purchase in Budget to see it here.</p>
                     </div>
-                  )
-                ) : (
-                  <ul className="mt-1 min-h-0 flex-1 divide-y divide-[var(--border)] overflow-y-auto">
-                    {txns.slice(0, 8).map((t) => {
-                      const Icon = txnIcon(t);
-                      return (
-                        <li key={t.id} className="flex items-center gap-3 py-3">
-                          <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${t.deposited ? TONE_ICON.primary : TONE_ICON.neutral}`}>
-                            <Icon className="h-4 w-4" aria-hidden />
-                          </span>
-                          <div className="min-w-0 flex-1">
-                            <div className="truncate text-[15px] font-medium">{t.name}</div>
-                            <div className="text-[12px] text-[var(--muted)]">{t.category} · {txnDate(t.ts)}</div>
-                          </div>
-                          <div className="shrink-0 text-right">
-                            <div className={`font-mono text-[15px] tabular-nums ${t.setAside > 0 ? "text-[var(--primary-strong)]" : "text-[var(--faint)]"}`}>{t.setAside > 0 ? `+${usd(t.setAside)}` : "—"}</div>
-                            {t.deposited && <div className="text-[11px] text-[var(--primary-strong)]">in vault</div>}
-                          </div>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
+                  ) : (
+                    <ul className="mt-1 min-h-0 flex-1 divide-y divide-[var(--border)] overflow-y-auto">
+                      {txns.slice(0, 10).map((t) => {
+                        const Icon = txnIcon(t);
+                        return (
+                          <li key={t.id} className="flex items-center gap-3 py-3">
+                            <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${t.deposited ? TONE_ICON.primary : TONE_ICON.neutral}`}>
+                              <Icon className="h-4 w-4" aria-hidden />
+                            </span>
+                            <div className="min-w-0 flex-1">
+                              <div className="truncate text-[15px] font-medium">{t.name}</div>
+                              <div className="text-[12px] text-[var(--muted)]">{t.category} · {txnDate(t.ts)}</div>
+                            </div>
+                            <div className="shrink-0 text-right">
+                              <div className={`font-mono text-[15px] tabular-nums ${t.setAside > 0 ? "text-[var(--primary-strong)]" : "text-[var(--faint)]"}`}>{t.setAside > 0 ? `+${usd(t.setAside)}` : "—"}</div>
+                              {t.deposited && <div className="text-[11px] text-[var(--primary-strong)]">in vault</div>}
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </div>
               </div>
             </div>
           )}
