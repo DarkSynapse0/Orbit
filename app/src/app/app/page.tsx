@@ -581,10 +581,16 @@ export default function Home() {
     <div className="flex min-h-full flex-1">
       {/* ───────── Sidebar (desktop) ───────── */}
       <aside className="sticky top-0 hidden h-screen w-[18rem] shrink-0 flex-col border-r border-[var(--border)] bg-[var(--surface)] px-4 py-6 lg:flex">
-        <Link href="/" className="flex flex-col items-start gap-1 px-2" aria-label="Orbit home">
-          <OrbitLogo className="h-7" />
-          <div className="text-[12px] leading-none text-[var(--muted)]">self-driving savings</div>
-        </Link>
+        <div className="flex items-start justify-between gap-2 px-2">
+          <Link href="/" className="flex flex-col items-start gap-1" aria-label="Orbit home">
+            <OrbitLogo className="h-7" />
+            <div className="text-[12px] leading-none text-[var(--muted)]">self-driving savings</div>
+          </Link>
+          <span className="mt-0.5 inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[var(--background)] px-2 py-1 text-[11px] font-medium text-[var(--muted)]">
+            <span className={`h-1.5 w-1.5 rounded-full ${online ? "bg-[var(--accent)]" : online === false ? "bg-red-500" : "bg-[var(--faint)]"}`} aria-hidden />
+            {online === null ? "…" : online ? "Devnet · live" : "offline"}
+          </span>
+        </div>
 
         <nav className="mt-8 flex-1 space-y-1">
           <div className="px-3 pb-1.5 text-[11px] font-medium uppercase tracking-wider text-[var(--faint)]">Menu</div>
@@ -608,8 +614,10 @@ export default function Home() {
             );
           })}
 
-          <div className="my-3 h-px bg-[var(--border)]" />
+        </nav>
 
+        {/* Secondary nav pinned to the bottom */}
+        <div className="space-y-1 border-t border-[var(--border)] pt-4">
           {NAV_SECONDARY.map((t) => {
             const on = navId === t.id;
             const cls = `relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40 ${
@@ -628,37 +636,6 @@ export default function Home() {
               </button>
             );
           })}
-        </nav>
-
-        <div className="space-y-3 border-t border-[var(--border)] px-1 pt-4">
-          {user ? (
-            <button
-              type="button"
-              onClick={() => setTab("account")}
-              className="flex w-full items-center gap-2.5 rounded-xl p-1.5 text-left transition-colors hover:bg-[var(--surface)]"
-            >
-              <Avatar user={user} size="h-8 w-8" />
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-[14px] font-medium">{user.name}</span>
-                <span className="block truncate text-[11px] text-[var(--muted)]">{user.email}</span>
-              </span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={signInWithGoogle}
-              className="flex w-full items-center gap-2 rounded-xl border border-[var(--border-strong)] px-3 py-2 text-[14px] font-medium transition-colors hover:bg-[var(--surface)]"
-            >
-              <LogIn className="h-4 w-4" aria-hidden /> Sign in
-            </button>
-          )}
-          <div className="flex items-center justify-between">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--surface)] px-2 py-1 text-[12px] text-[var(--muted)]">
-              <span className={`h-1.5 w-1.5 rounded-full ${online ? "bg-[var(--accent)]" : online === false ? "bg-red-500" : "bg-[var(--faint)]"}`} aria-hidden />
-              {online === null ? "…" : online ? "Devnet · live" : "offline"}
-            </span>
-            <ThemeToggle />
-          </div>
         </div>
       </aside>
 
@@ -694,9 +671,7 @@ export default function Home() {
               {invited ? <Check className="h-4 w-4 text-[var(--accent-strong)]" aria-hidden /> : <Gift className="h-4 w-4" aria-hidden />}
               {invited ? "Link copied" : "Invite & Earn"}
             </button>
-            <span className="lg:hidden">
-              <ThemeToggle />
-            </span>
+            <ThemeToggle />
             <UserMenu />
           </div>
         </header>
