@@ -168,11 +168,11 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
   };
 
   return (
-    <section className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[0_1px_2px_rgba(2,6,23,0.03),0_18px_40px_-24px_rgba(2,6,23,0.22)]">
+    <section>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <Target className="h-4 w-4 text-[var(--accent-strong)]" aria-hidden />
-          <h3 className="font-display text-[17px] font-semibold">Savings goals</h3>
+        <div className="flex items-center gap-1.5 font-display text-[16px] font-bold">
+          <Target className="h-4 w-4 text-[var(--primary-strong)]" aria-hidden />
+          Savings goals
         </div>
         <div className="text-[13px] text-[var(--muted)]">
           Unallocated <span className="font-mono font-medium text-[var(--foreground)]">{usd(unallocated)}</span>

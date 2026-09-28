@@ -996,20 +996,22 @@ export default function Home() {
 
           {/* ═══════════ GROW ═══════════ */}
           {tab === "grow" && (
-            <div className="space-y-4">
-              {/* Vault first — the one thing that matters */}
-              <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
-                {/* Row 1 — the vault + how it earns (tops aligned) */}
+            <div className="lg:grid lg:grid-cols-2 lg:gap-10">
+              {/* LEFT — the vault + how it earns */}
+              <div className="flex flex-col">
                 <div className="[&>section]:mt-0">
                   <WalletVault onChanged={refreshVault} />
                 </div>
 
-                <section className={`${PANEL} flex flex-col p-6`}>
+                <div className="mt-6 border-t border-[var(--line)] pt-6">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <SectionLabel>Earning</SectionLabel>
+                      <div className="flex items-center gap-1.5 font-display text-[16px] font-bold">
+                        Earning
+                        <InfoDot label="The yearly rate your vault earns, paid in real tokens on-chain. Rates move with the market." />
+                      </div>
                       <div className="mt-2 flex items-baseline gap-1.5">
-                        <span className="font-mono text-4xl font-semibold text-[var(--accent-strong)]">{selectedVenue.apy.toFixed(1)}%</span>
+                        <span className="font-mono text-4xl font-semibold text-[var(--primary-strong)]">{selectedVenue.apy.toFixed(1)}%</span>
                         <span className="text-[14px] text-[var(--muted)]">APY</span>
                       </div>
                     </div>
@@ -1018,7 +1020,7 @@ export default function Home() {
                         type="button"
                         onClick={() => setVenueOpen((o) => !o)}
                         aria-expanded={venueOpen}
-                        className="flex items-center gap-2 rounded-xl border border-[var(--border-strong)] bg-[var(--background)] px-3 py-2 transition-colors hover:bg-[var(--surface)]"
+                        className="flex items-center gap-2 rounded-xl border border-[var(--border-strong)] px-3 py-2 transition-colors hover:bg-[var(--surface)]"
                       >
                         <VenueMark venue={selectedVenue} className="h-6 w-6" />
                         <span className="max-w-[7rem] truncate text-[14px] font-medium">{selectedVenue.name}</span>
@@ -1031,16 +1033,16 @@ export default function Home() {
                             {venues.map((v) => {
                               const on = v.id === venueId;
                               return (
-                                <button key={v.id} type="button" onClick={() => selectVenue(v.id)} className={`flex w-full items-center gap-3 rounded-lg px-2.5 py-2.5 text-left transition-colors ${on ? "bg-[var(--accent-soft)]" : "hover:bg-[var(--background)]"}`}>
+                                <button key={v.id} type="button" onClick={() => selectVenue(v.id)} className={`flex w-full items-center gap-3 rounded-lg px-2.5 py-2.5 text-left transition-colors ${on ? "bg-[var(--primary-soft)]" : "hover:bg-[var(--background)]"}`}>
                                   <VenueMark venue={v} className="h-8 w-8" />
                                   <span className="min-w-0 flex-1">
                                     <span className="flex items-center gap-1.5">
                                       <span className="truncate text-[15px] font-medium">{v.name}</span>
-                                      {v.live ? <span className="rounded-full bg-[var(--accent-soft)] px-1.5 py-0.5 text-[9px] font-medium text-[var(--accent-strong)]">Live</span> : <span className="rounded-full bg-[var(--background)] px-1.5 py-0.5 text-[9px] text-[var(--muted)]">Mainnet</span>}
+                                      {v.live ? <span className="rounded-full bg-[var(--primary-soft)] px-1.5 py-0.5 text-[9px] font-medium text-[var(--primary-strong)]">Live</span> : <span className="rounded-full bg-[var(--background)] px-1.5 py-0.5 text-[9px] text-[var(--muted)]">Mainnet</span>}
                                     </span>
                                     <span className="block truncate text-[12px] text-[var(--muted)]">{v.apy.toFixed(1)}% APY · {v.tvl}</span>
                                   </span>
-                                  {on && <Check className="h-4 w-4 shrink-0 text-[var(--accent-strong)]" aria-hidden />}
+                                  {on && <Check className="h-4 w-4 shrink-0 text-[var(--primary-strong)]" aria-hidden />}
                                 </button>
                               );
                             })}
@@ -1056,7 +1058,7 @@ export default function Home() {
                       { icon: ExternalLink, l: "On-chain" },
                       { icon: RefreshCw, l: "Withdraw anytime" },
                     ].map((c) => (
-                      <span key={c.l} className="inline-flex items-center gap-1.5 rounded-full bg-[var(--accent-soft)] px-3 py-1.5 text-[12px] font-medium text-[var(--accent-strong)]">
+                      <span key={c.l} className="inline-flex items-center gap-1.5 rounded-full bg-[var(--primary-soft)] px-3 py-1.5 text-[12px] font-medium text-[var(--primary-strong)]">
                         <c.icon className="h-3.5 w-3.5" aria-hidden /> {c.l}
                       </span>
                     ))}
@@ -1064,39 +1066,37 @@ export default function Home() {
 
                   <div className="mt-5">
                     {connected && onchain ? (
-                      <a href={solAcct(onchain.vaultAccount)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-[14px] font-medium text-[var(--accent-strong)] hover:underline">
+                      <a href={solAcct(onchain.vaultAccount)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-[14px] font-medium text-[var(--primary-strong)] hover:underline">
                         View your vault on Solscan <ExternalLink className="h-3.5 w-3.5" aria-hidden />
                       </a>
                     ) : (
                       <p className="text-[12px] text-[var(--faint)]">Open your vault to see it live on Solana.</p>
                     )}
                   </div>
-                </section>
+                </div>
+              </div>
 
-                {/* Row 2 — savings pots + projection (equal height) */}
-                {/* Base goals on the invested vault balance only — pending set-aside is
-                    still in the bank and not earning yet, so it matches Home's liveYield. */}
+              {/* RIGHT — savings pots + projection */}
+              <div className="mt-6 border-t border-[var(--line)] pt-6 lg:mt-0 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
                 <SavingsGoals saved={principalUsd} apy={selectedVenue.apy / 100} />
 
-                <section className={`${PANEL} flex flex-col justify-center p-6`}>
-                  <div className="space-y-4">
-                    <div>
-                      <SectionLabel>If you saved</SectionLabel>
-                      <div className="mt-3 flex items-center rounded-xl border border-[var(--border)] bg-[var(--background)] px-3">
-                        <span className="text-[var(--muted)]">$</span>
-                        <input id="proj" value={projAmt} onChange={(e) => setProjAmt(e.target.value)} inputMode="decimal" className="h-11 w-full min-w-0 bg-transparent px-1.5 font-mono text-[16px] tabular-nums focus:outline-none" />
-                      </div>
-                      <label htmlFor="years" className="mt-4 block text-[15px] text-[var(--muted)]">for <span className="font-mono text-[var(--foreground)]">{projYears} {projYears === 1 ? "year" : "years"}</span></label>
-                      <input id="years" type="range" min={1} max={30} value={projYears} onChange={(e) => setProjYears(Number(e.target.value))} className="mt-3 w-full accent-[var(--accent)]" />
-                    </div>
-                    <div className="rounded-xl border border-[var(--border)] bg-[var(--background)] p-5">
-                      <div className="text-[15px] text-[var(--muted)]">Could become</div>
-                      <div className="mt-1 font-mono text-[clamp(2.25rem,8vw,3rem)] font-semibold leading-none tabular-nums text-[var(--accent-strong)]">${projected.toLocaleString("en-US", { maximumFractionDigits: 0 })}</div>
-                      <div className="mt-2 text-[15px] text-[var(--muted)]">+${(projected - (Number(projAmt) || 0)).toLocaleString("en-US", { maximumFractionDigits: 0 })} earned</div>
-                    </div>
+                <div className="mt-6 border-t border-[var(--line)] pt-6">
+                  <div className="flex items-center gap-1.5 font-display text-[16px] font-bold">
+                    If you saved
+                    <InfoDot label="A rough projection of what a one-time amount could grow to at this rate, compounded yearly. Not a guarantee." />
                   </div>
-                  <p className="mt-4 text-[12px] text-[var(--faint)]">Illustrative at {selectedVenue.apy.toFixed(1)}% APY, compounded yearly. Not a guarantee.</p>
-                </section>
+                  <div className="mt-3 flex items-center rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3">
+                    <span className="text-[var(--muted)]">$</span>
+                    <input id="proj" value={projAmt} onChange={(e) => setProjAmt(e.target.value)} inputMode="decimal" className="h-11 w-full min-w-0 bg-transparent px-1.5 font-mono text-[16px] tabular-nums focus:outline-none" />
+                  </div>
+                  <label htmlFor="years" className="mt-4 block text-[15px] text-[var(--muted)]">for <span className="font-mono text-[var(--foreground)]">{projYears} {projYears === 1 ? "year" : "years"}</span></label>
+                  <input id="years" type="range" min={1} max={30} value={projYears} onChange={(e) => setProjYears(Number(e.target.value))} className="mt-3 w-full accent-[var(--primary)]" />
+                  <div className="mt-5">
+                    <div className="text-[14px] text-[var(--muted)]">Could become</div>
+                    <div className="mt-1 font-mono text-[clamp(2.25rem,8vw,3rem)] font-semibold leading-none tabular-nums text-[var(--primary-strong)]">${projected.toLocaleString("en-US", { maximumFractionDigits: 0 })}</div>
+                    <div className="mt-2 text-[15px] text-[var(--muted)]">+${(projected - (Number(projAmt) || 0)).toLocaleString("en-US", { maximumFractionDigits: 0 })} earned at {selectedVenue.apy.toFixed(1)}% APY</div>
+                  </div>
+                </div>
               </div>
             </div>
           )}
