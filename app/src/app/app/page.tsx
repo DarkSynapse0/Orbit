@@ -981,7 +981,7 @@ export default function Home() {
 
               {/* RIGHT — try it + automation */}
               <div className="mt-6 border-t border-[var(--line)] pt-6 lg:mt-0 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
-                <div>
+                <div className="hidden lg:block">
                   <div className="font-display text-[16px] font-bold">Try it</div>
                   <p className="mt-1 text-[14px] text-[var(--muted)]">Simulate a purchase and watch a slice get set aside.</p>
                   {!connected && (
@@ -999,7 +999,7 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div className="mt-6 border-t border-[var(--line)] pt-6">
+                <div className="lg:mt-6 lg:border-t lg:border-[var(--line)] lg:pt-6">
                   <div className="font-display text-[16px] font-bold">Automation</div>
                   <div className="mt-2 divide-y divide-[var(--border)]">
                     <div className="flex items-center justify-between gap-4 py-4">
