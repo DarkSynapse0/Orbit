@@ -1026,8 +1026,21 @@ export default function Home() {
           {/* ═══════════ GROW ═══════════ */}
           {tab === "grow" && (
             <div className="lg:grid lg:grid-cols-2 lg:gap-10">
-              {/* LEFT — the vault + how it earns */}
+              {/* LEFT — the vault + goals */}
               <div className="flex flex-col">
+                {/* The vault */}
+                <div className="[&>section]:mt-0">
+                  <WalletVault onChanged={refreshVault} />
+                </div>
+
+                {/* Savings goals */}
+                <div className="mt-6 border-t border-[var(--line)] pt-6">
+                  <SavingsGoals saved={principalUsd} apy={selectedVenue.apy / 100} />
+                </div>
+              </div>
+
+              {/* RIGHT — how it earns + projection */}
+              <div className="mt-6 border-t border-[var(--line)] pt-6 lg:mt-0 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
                 {/* Earning + where it's invested */}
                 <div>
                   <div className="flex items-start justify-between gap-3">
@@ -1157,19 +1170,6 @@ export default function Home() {
                     <div className="mt-1 font-mono text-[clamp(2.25rem,8vw,3rem)] font-semibold leading-none tabular-nums text-[var(--primary-strong)]">${projected.toLocaleString("en-US", { maximumFractionDigits: 0 })}</div>
                     <div className="mt-2 text-[15px] text-[var(--muted)]">+${(projected - (Number(projAmt) || 0)).toLocaleString("en-US", { maximumFractionDigits: 0 })} earned at {selectedVenue.apy.toFixed(1)}% APY</div>
                   </div>
-                </div>
-              </div>
-
-              {/* RIGHT — savings pots + projection */}
-              <div className="mt-6 border-t border-[var(--line)] pt-6 lg:mt-0 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
-                {/* The vault */}
-                <div className="[&>section]:mt-0">
-                  <WalletVault onChanged={refreshVault} />
-                </div>
-
-                {/* Savings goals */}
-                <div className="mt-6 border-t border-[var(--line)] pt-6">
-                  <SavingsGoals saved={principalUsd} apy={selectedVenue.apy / 100} />
                 </div>
               </div>
             </div>
