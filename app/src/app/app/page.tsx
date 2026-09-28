@@ -628,18 +628,17 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Center search (Finora parity) */}
-          <div className="mx-auto hidden w-full max-w-md items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-[var(--muted)] transition-colors focus-within:border-[var(--border-strong)] md:flex">
-            <Search className="h-4 w-4 shrink-0 text-[var(--faint)]" aria-hidden />
-            <input
-              type="text"
-              placeholder="Search here…"
-              aria-label="Search"
-              className="w-full min-w-0 bg-transparent text-[14px] text-[var(--foreground)] placeholder:text-[var(--faint)] focus:outline-none"
-            />
-          </div>
-
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="ml-auto flex shrink-0 items-center gap-2">
+            {/* Search (Finora parity) — sits beside the actions */}
+            <div className="hidden w-56 items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-[var(--muted)] transition-colors focus-within:border-[var(--border-strong)] md:flex lg:w-72">
+              <Search className="h-4 w-4 shrink-0 text-[var(--faint)]" aria-hidden />
+              <input
+                type="text"
+                placeholder="Search here…"
+                aria-label="Search"
+                className="w-full min-w-0 bg-transparent text-[14px] text-[var(--foreground)] placeholder:text-[var(--faint)] focus:outline-none"
+              />
+            </div>
             <button
               type="button"
               onClick={invite}
