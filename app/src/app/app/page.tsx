@@ -128,10 +128,6 @@ const VENUES: Venue[] = [
   { id: "save", name: "Save · Solend", mono: "S", apy: 6.9, tvl: "$380M", blurb: "Battle-tested Solana lending.", live: false, Mark: SaveMark },
   { id: "marginfi", name: "marginfi", mono: "m", apy: 5.7, tvl: "$420M", blurb: "Permissionless Solana lending.", live: false, Mark: MarginfiMark },
 ];
-// Yield-market aggregates for the Analytics tab (highest rate first).
-const VENUES_BY_APY = [...VENUES].sort((a, b) => b.apy - a.apy);
-const MAX_VENUE_APY = Math.max(...VENUES.map((v) => v.apy));
-const AVG_VENUE_APY = VENUES.reduce((s, v) => s + v.apy, 0) / VENUES.length;
 
 // Renders a venue's real logo when available, else a monogram tile.
 function VenueMark({ venue, className = "h-8 w-8" }: { venue: Venue; className?: string }) {
@@ -566,6 +562,11 @@ export default function Home() {
     [liveVenues],
   );
   const selectedVenue = venues.find((v) => v.id === venueId) ?? venues[0];
+  // Live yield-market aggregates for the Analytics tab (uses the DefiLlama-merged venues).
+  const marketVenues = useMemo(() => [...venues].sort((a, b) => b.apy - a.apy), [venues]);
+  const marketMaxApy = Math.max(...venues.map((v) => v.apy));
+  const marketAvgApy = venues.reduce((s, v) => s + v.apy, 0) / venues.length;
+  const ratesLive = venues.some((v) => v.isLive);
   const projected = useMemo(() => {
     const a = Number(projAmt) || 0;
     const rate = selectedVenue.apy / 100;
@@ -1186,21 +1187,27 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* DeFi yield markets — data from the crypto space */}
+              {/* DeFi yield markets — live rates from the crypto space */}
               <div className={`${CARD} p-6`}>
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
-                    <h3 className="font-display text-[16px] font-semibold">DeFi yield markets</h3>
-                    <p className="mt-0.5 text-[13px] text-[var(--muted)]">Live lending rates across Solana &amp; Ethereum. Orbit routes savings to the audited ones.</p>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-display text-[16px] font-semibold">DeFi yield markets</h3>
+                      <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ${ratesLive ? "bg-[var(--accent-soft)] text-[var(--accent-strong)]" : "bg-[var(--background)] text-[var(--muted)]"}`}>
+                        <span className={`h-1.5 w-1.5 rounded-full ${ratesLive ? "bg-[var(--accent)]" : "bg-[var(--faint)]"}`} aria-hidden />
+                        {ratesLive ? "Live" : "Loading…"}
+                      </span>
+                    </div>
+                    <p className="mt-0.5 text-[13px] text-[var(--muted)]">Live USDC lending rates from DefiLlama. Orbit routes savings to the audited ones.</p>
                   </div>
                   <div className="flex gap-5">
                     <div>
                       <div className="text-[12px] text-[var(--muted)]">Best rate</div>
-                      <div className="font-mono text-lg font-semibold text-[var(--accent-strong)]">{MAX_VENUE_APY.toFixed(1)}%</div>
+                      <div className="font-mono text-lg font-semibold text-[var(--accent-strong)]">{marketMaxApy.toFixed(1)}%</div>
                     </div>
                     <div>
                       <div className="text-[12px] text-[var(--muted)]">Avg rate</div>
-                      <div className="font-mono text-lg font-semibold">{AVG_VENUE_APY.toFixed(1)}%</div>
+                      <div className="font-mono text-lg font-semibold">{marketAvgApy.toFixed(1)}%</div>
                     </div>
                     <div>
                       <div className="text-[12px] text-[var(--muted)]">SOL price</div>
@@ -1209,20 +1216,22 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="mt-5 space-y-3">
-                  {VENUES_BY_APY.map((v) => (
+                  {marketVenues.map((v) => (
                     <div key={v.id} className="flex items-center gap-3">
                       <VenueMark venue={v} className="h-8 w-8 shrink-0" />
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <span className="truncate text-[14px] font-medium">{v.name}</span>
                           {v.live ? (
-                            <span className="rounded-full bg-[var(--accent-soft)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--accent-strong)]">Live</span>
+                            <span className="rounded-full bg-[var(--accent-soft)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--accent-strong)]">Orbit · devnet</span>
+                          ) : v.isLive ? (
+                            <span className="rounded-full bg-[var(--accent-soft)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--accent-strong)]">Live rate</span>
                           ) : (
                             <span className="rounded-full bg-[var(--background)] px-1.5 py-0.5 text-[10px] text-[var(--muted)]">Mainnet</span>
                           )}
                         </div>
                         <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-[var(--border)]">
-                          <div className={`h-full rounded-full ${v.live ? "bg-[var(--accent)]" : "bg-[var(--faint)]"}`} style={{ width: `${(v.apy / MAX_VENUE_APY) * 100}%` }} />
+                          <div className={`h-full rounded-full ${v.live || v.isLive ? "bg-[var(--accent)]" : "bg-[var(--faint)]"}`} style={{ width: `${marketMaxApy > 0 ? (v.apy / marketMaxApy) * 100 : 0}%` }} />
                         </div>
                       </div>
                       <div className="shrink-0 text-right">
@@ -1232,7 +1241,7 @@ export default function Home() {
                     </div>
                   ))}
                 </div>
-                <p className="mt-4 text-[12px] text-[var(--faint)]">Rates are indicative. Orbit runs on the Reserve on devnet today; mainnet routes to audited venues like Aave and Kamino.</p>
+                <p className="mt-4 text-[12px] text-[var(--faint)]">Rates refresh from DefiLlama (cached ~10 min). Orbit Reserve is Orbit&apos;s own on-chain rate on devnet; mainnet routes to audited venues like Aave and Kamino.</p>
               </div>
 
               {/* User activity */}
