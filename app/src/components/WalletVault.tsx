@@ -120,7 +120,13 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
   }, [program, publicKey, mint, pdas, connection]);
 
   useEffect(() => {
-    if (connected) refresh();
+    if (!connected) return;
+    refresh();
+    // Keep the wallet USDC + vault balance live (e.g. after a faucet or auto-invest elsewhere).
+    const t = setInterval(refresh, 12000);
+    const onVisible = () => document.visibilityState === "visible" && refresh();
+    document.addEventListener("visibilitychange", onVisible);
+    return () => { clearInterval(t); document.removeEventListener("visibilitychange", onVisible); };
   }, [connected, refresh]);
 
   const run = async (label: string, fn: () => Promise<void>) => {
