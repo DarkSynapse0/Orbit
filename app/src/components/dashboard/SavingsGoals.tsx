@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Plus, Sparkles, Target, Trash2, TrendingUp } from "lucide-react";
+import { Plus, Sparkles, Trash2, TrendingUp } from "lucide-react";
 import { logActivity } from "@/lib/activity";
 
 // Named savings goals ("pots") layered over the single on-chain vault. Each goal has
@@ -123,47 +123,58 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
 
   return (
     <section>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-1.5 font-display text-[16px] font-bold">
-          <Target className="h-4 w-4 text-[var(--primary-strong)]" aria-hidden />
-          Savings goals
-        </div>
-        <div className="text-[13px] text-[var(--muted)]">
-          Unallocated <span className="font-mono font-medium text-[var(--foreground)]">{usd(unallocated)}</span>
-        </div>
+      <div className="flex items-center justify-end text-[13px] text-[var(--muted)]">
+        Unallocated <span className="ml-1 font-mono font-medium text-[var(--foreground)]">{usd(unallocated)}</span>
       </div>
-      <p className="mt-1 text-[13px] text-[var(--muted)]">Split your vault into pots. Each earns the same {(apy * 100).toFixed(1)}% a year on its own balance.</p>
 
       {withYield.length > 0 && (
-        <ul className="mt-4 divide-y divide-[var(--border)]">
-          {withYield.map((g) => {
-            const pct = Math.min(100, (g.balance / g.target) * 100);
-            return (
-              <li key={g.id} className="flex items-start gap-3 py-3.5">
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--surface)] text-[19px]">{g.emoji}</span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="truncate text-[15px] font-medium">{g.name}</span>
-                    <span className="shrink-0 font-mono text-[14px] tabular-nums">
-                      <span className="font-semibold text-[var(--primary-strong)]">{usd(g.balance)}</span>
-                      <span className="text-[var(--faint)]"> / {usd(g.target)}</span>
-                    </span>
-                  </div>
-                  <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[var(--border)]">
-                    <div className="h-full rounded-full bg-[var(--primary)] transition-[width] duration-300" style={{ width: `${pct}%` }} />
-                  </div>
-                  <div className="mt-2 flex items-center gap-1.5">
-                    {[10, 50].map((d) => (
-                      <button key={d} type="button" onClick={() => allocate(g.id, d)} disabled={unallocated <= 0} className="rounded-md border border-[var(--border-strong)] px-2 py-0.5 text-[12px] font-medium transition-colors hover:bg-[var(--surface)] disabled:pointer-events-none disabled:opacity-40">+${d}</button>
-                    ))}
-                    <button type="button" onClick={() => allocate(g.id, -g.allocated)} disabled={g.allocated <= 0} className="rounded-md border border-[var(--border-strong)] px-2 py-0.5 text-[12px] font-medium transition-colors hover:bg-[var(--surface)] disabled:pointer-events-none disabled:opacity-40">Empty</button>
-                    <button type="button" onClick={() => remove(g.id)} aria-label={`Delete ${g.name}`} className="ml-auto grid h-6 w-6 place-items-center rounded-md text-[var(--faint)] transition-colors hover:bg-[var(--destructive-soft)] hover:text-[var(--destructive)]"><Trash2 className="h-3.5 w-3.5" aria-hidden /></button>
-                  </div>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full min-w-[560px] text-left">
+            <thead>
+              <tr className="border-b border-[var(--border)] text-[14px] font-bold text-[var(--foreground)]">
+                <th className="pb-3">Goal</th>
+                <th className="pb-3">Progress</th>
+                <th className="pb-3 text-right">Saved</th>
+                <th className="pb-3 text-right">Target</th>
+                <th className="pb-3 pl-3 text-right">Add</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[var(--border)]">
+              {withYield.map((g) => {
+                const pct = Math.min(100, (g.balance / g.target) * 100);
+                return (
+                  <tr key={g.id}>
+                    <td className="py-3 pr-3">
+                      <div className="flex items-center gap-2.5">
+                        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[var(--surface)] text-[18px]">{g.emoji}</span>
+                        <span className="truncate text-[15px] font-medium">{g.name}</span>
+                      </div>
+                    </td>
+                    <td className="py-3 pr-4">
+                      <div className="flex items-center gap-2">
+                        <div className="h-1.5 w-full min-w-[80px] overflow-hidden rounded-full bg-[var(--border)]">
+                          <div className="h-full rounded-full bg-[var(--primary)] transition-[width] duration-300" style={{ width: `${pct}%` }} />
+                        </div>
+                        <span className="shrink-0 font-mono text-[11px] tabular-nums text-[var(--faint)]">{Math.round(pct)}%</span>
+                      </div>
+                    </td>
+                    <td className="py-3 text-right font-mono text-[14px] font-semibold tabular-nums text-[var(--primary-strong)]">{usd(g.balance)}</td>
+                    <td className="py-3 text-right font-mono text-[14px] tabular-nums text-[var(--muted)]">{usd(g.target)}</td>
+                    <td className="py-3 pl-3">
+                      <div className="flex items-center justify-end gap-1.5">
+                        {[10, 50].map((d) => (
+                          <button key={d} type="button" onClick={() => allocate(g.id, d)} disabled={unallocated <= 0} className="rounded-md border border-[var(--border-strong)] px-2 py-0.5 text-[12px] font-medium transition-colors hover:bg-[var(--surface)] disabled:pointer-events-none disabled:opacity-40">+${d}</button>
+                        ))}
+                        <button type="button" onClick={() => allocate(g.id, -g.allocated)} disabled={g.allocated <= 0} className="rounded-md border border-[var(--border-strong)] px-2 py-0.5 text-[12px] font-medium transition-colors hover:bg-[var(--surface)] disabled:pointer-events-none disabled:opacity-40">Empty</button>
+                        <button type="button" onClick={() => remove(g.id)} aria-label={`Delete ${g.name}`} className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[var(--faint)] transition-colors hover:bg-[var(--destructive-soft)] hover:text-[var(--destructive)]"><Trash2 className="h-3.5 w-3.5" aria-hidden /></button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       )}
 
       {unallocated > 0.005 && (

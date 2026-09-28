@@ -1190,7 +1190,7 @@ export default function Home() {
 
           {/* ═══════════ SAVINGS GOALS ═══════════ */}
           {tab === "goals" && (
-            <div className="mx-auto w-full max-w-2xl">
+            <div className="w-full">
               <SavingsGoals saved={principalUsd} apy={selectedVenue.apy / 100} />
             </div>
           )}
