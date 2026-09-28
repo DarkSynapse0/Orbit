@@ -1179,7 +1179,7 @@ export default function Home() {
           {tab === "activity" && (
             <div>
               {/* Category underline tabs */}
-              <div className="flex items-center gap-5 overflow-x-auto border-b border-[var(--border)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div className="flex items-center overflow-x-auto border-b border-[var(--border)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {[
                   { id: "all", label: "All" },
                   { id: "spending", label: "Spending" },
@@ -1194,7 +1194,7 @@ export default function Home() {
                       key={t.id}
                       type="button"
                       onClick={() => setHistoryTab(t.id)}
-                      className={`relative -mb-px flex shrink-0 items-center gap-1.5 border-b-2 pb-3 text-[15px] font-semibold transition-colors ${on ? "border-[var(--primary)] text-[var(--foreground)]" : "border-transparent text-[var(--muted)] hover:text-[var(--foreground)]"}`}
+                      className={`relative -mb-px flex shrink-0 items-center gap-1.5 border-b-2 px-3.5 pb-2.5 pt-2 text-[15px] font-semibold transition-colors ${on ? "border-[var(--primary)] bg-[var(--primary-soft)] text-[var(--primary-strong)]" : "border-transparent text-[var(--muted)] hover:bg-[var(--surface)] hover:text-[var(--foreground)]"}`}
                     >
                       {t.label}
                       <span className={`font-mono text-[11px] ${on ? "text-[var(--primary-strong)]" : "text-[var(--faint)]"}`}>{historyCounts[t.id] ?? 0}</span>
