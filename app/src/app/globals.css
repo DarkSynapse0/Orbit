@@ -21,6 +21,23 @@
   --on-accent: #ffffff; /* text/icon on a filled accent button */
   --accent-soft: rgba(22, 163, 74, 0.1);
 
+  /* Semantic roles (product palette). Primary = brand green; the rest are status-only. */
+  --primary: #16a34a;
+  --primary-strong: #15803d;
+  --primary-fg: #ffffff;
+  --primary-soft: rgba(22, 163, 74, 0.1);
+  --secondary-fg: #0a0a0a; /* neutral/outline action text */
+  --disabled: #c4c4cc; /* inactive text/controls */
+  --destructive: #dc2626; /* withdraw-out, reset, delete only */
+  --destructive-fg: #ffffff;
+  --destructive-soft: rgba(220, 38, 38, 0.1);
+  --success: #16a34a;
+  --success-soft: rgba(22, 163, 74, 0.1);
+  --warning: #b45309;
+  --warning-soft: rgba(180, 83, 9, 0.1);
+  --info: #2563eb;
+  --info-soft: rgba(37, 99, 235, 0.1);
+
   --chart-grid: rgba(10, 10, 10, 0.07);
   --chart-axis: rgba(10, 10, 10, 0.38);
   --chart-dash: rgba(10, 10, 10, 0.22);
@@ -48,6 +65,23 @@
   --accent-strong: #4ade80;
   --on-accent: #052e16;
   --accent-soft: rgba(52, 211, 153, 0.12);
+
+  /* Semantic roles — dark. */
+  --primary: #34d399;
+  --primary-strong: #4ade80;
+  --primary-fg: #052e16;
+  --primary-soft: rgba(52, 211, 153, 0.12);
+  --secondary-fg: #fafafa;
+  --disabled: #52525b;
+  --destructive: #f87171;
+  --destructive-fg: #1a0505;
+  --destructive-soft: rgba(248, 113, 113, 0.14);
+  --success: #34d399;
+  --success-soft: rgba(52, 211, 153, 0.12);
+  --warning: #fbbf24;
+  --warning-soft: rgba(251, 191, 36, 0.14);
+  --info: #60a5fa;
+  --info-soft: rgba(96, 165, 250, 0.14);
 
   --chart-grid: rgba(255, 255, 255, 0.07);
   --chart-axis: rgba(255, 255, 255, 0.34);
