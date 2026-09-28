@@ -1140,16 +1140,7 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* The vault */}
-                <div className="mt-6 border-t border-[var(--line)] pt-6 [&>section]:mt-0">
-                  <WalletVault onChanged={refreshVault} />
-                </div>
-              </div>
-
-              {/* RIGHT — savings pots + projection */}
-              <div className="mt-6 border-t border-[var(--line)] pt-6 lg:mt-0 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
-                <SavingsGoals saved={principalUsd} apy={selectedVenue.apy / 100} />
-
+                {/* If you saved */}
                 <div className="mt-6 border-t border-[var(--line)] pt-6">
                   <div className="flex items-center gap-1.5 font-display text-[16px] font-bold">
                     If you saved
@@ -1166,6 +1157,19 @@ export default function Home() {
                     <div className="mt-1 font-mono text-[clamp(2.25rem,8vw,3rem)] font-semibold leading-none tabular-nums text-[var(--primary-strong)]">${projected.toLocaleString("en-US", { maximumFractionDigits: 0 })}</div>
                     <div className="mt-2 text-[15px] text-[var(--muted)]">+${(projected - (Number(projAmt) || 0)).toLocaleString("en-US", { maximumFractionDigits: 0 })} earned at {selectedVenue.apy.toFixed(1)}% APY</div>
                   </div>
+                </div>
+              </div>
+
+              {/* RIGHT — savings pots + projection */}
+              <div className="mt-6 border-t border-[var(--line)] pt-6 lg:mt-0 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
+                {/* The vault */}
+                <div className="[&>section]:mt-0">
+                  <WalletVault onChanged={refreshVault} />
+                </div>
+
+                {/* Savings goals */}
+                <div className="mt-6 border-t border-[var(--line)] pt-6">
+                  <SavingsGoals saved={principalUsd} apy={selectedVenue.apy / 100} />
                 </div>
               </div>
             </div>
