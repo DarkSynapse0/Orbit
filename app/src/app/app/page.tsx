@@ -725,7 +725,7 @@ export default function Home() {
           {/* ═══════════ HOME ═══════════ */}
           {tab === "home" && (
             <div className="lg:grid lg:h-full lg:grid-cols-[0.85fr_1.15fr] lg:gap-10">
-              {/* LEFT — balance, stats, savings health */}
+              {/* LEFT — balance, stats, recent activity */}
               <div className="flex flex-col">
                 {/* Balance — the one moment of emphasis */}
                 <section>
@@ -779,62 +779,6 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Savings health */}
-                <div className="mt-6 border-t border-[var(--border)] pt-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-[12px] font-medium uppercase tracking-[0.14em] text-[var(--faint)]">
-                      Savings health
-                      <InfoDot label="A quick read on how set up you are: open a vault, connect a bank, start saving." />
-                    </div>
-                    <span className="font-mono text-[14px]"><span className="font-semibold text-[var(--primary-strong)]">{savingsScore}</span><span className="text-[var(--faint)]"> / 100</span></span>
-                  </div>
-                  <div className="mt-2.5 h-2 w-full overflow-hidden rounded-full bg-[var(--border)]">
-                    <div className="h-full rounded-full bg-[var(--primary)] transition-[width] duration-500" style={{ width: `${savingsScore}%` }} />
-                  </div>
-                  {!setup.vault || !setup.bank ? (
-                    <div className="mt-3 divide-y divide-[var(--border)]">
-                      {[
-                        { done: setup.vault, label: "Open your vault", desc: "One tap, no seed phrase", go: "grow" as TabId },
-                        { done: setup.bank, label: "Connect your bank", desc: "So Orbit can watch your spending", go: "save" as TabId },
-                      ].map((s) => (
-                        <button key={s.label} type="button" onClick={() => setTab(s.go)} className="flex w-full items-center gap-3 py-3 text-left">
-                          <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full ${s.done ? "bg-[var(--primary)] text-[var(--primary-fg)]" : "bg-[var(--surface)] text-[var(--muted)]"}`}>
-                            {s.done ? <Check className="h-4 w-4" aria-hidden /> : <span className="h-1.5 w-1.5 rounded-full bg-current" />}
-                          </span>
-                          <span className="min-w-0 flex-1">
-                            <span className={`block text-[14px] font-medium ${s.done ? "text-[var(--muted)] line-through" : ""}`}>{s.label}</span>
-                            <span className="block text-[12px] text-[var(--muted)]">{s.desc}</span>
-                          </span>
-                          {!s.done && <ChevronRight className="h-4 w-4 shrink-0 text-[var(--faint)]" aria-hidden />}
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="mt-5">
-                      <div className="mb-2.5 text-[12px] font-medium text-[var(--muted)]">Where your savings come from</div>
-                      <HBars rows={analytics.categories.length ? analytics.categories : SAMPLE_CATEGORIES} />
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* RIGHT — growth chart + recent activity */}
-              <div className="mt-6 flex min-h-0 flex-col border-t border-[var(--border)] pt-6 lg:mt-0 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
-                <div className="shrink-0">
-                  <div className="flex items-center gap-1.5">
-                    <h2 className="font-display text-[15px] font-semibold">Savings over time</h2>
-                    <InfoDot label={analytics.hasData ? "Your set-aside balance building up over time." : "Sample data. Your real curve appears once you start saving."} />
-                  </div>
-                  <div className="mt-3 h-[168px]">
-                    <LineArea
-                      fill
-                      series={[{ label: "Saved", points: analytics.hasData ? analytics.savingsLine : SAMPLE_LINE }]}
-                      xLabels={analytics.hasData ? analytics.savingsLabels : SAMPLE_LINE_LABELS}
-                      fmtY={(v) => `$${v >= 1000 ? `${Math.round(v / 1000)}k` : Math.round(v)}`}
-                    />
-                  </div>
-                </div>
-
                 <div className="mt-6 flex min-h-0 flex-1 flex-col border-t border-[var(--border)] pt-6">
                   <div className="flex items-center justify-between">
                     <h2 className="text-[12px] font-medium uppercase tracking-[0.14em] text-[var(--faint)]">Recent activity</h2>
@@ -871,6 +815,62 @@ export default function Home() {
                         );
                       })}
                     </ul>
+                  )}
+                </div>
+              </div>
+
+              {/* RIGHT — growth chart + savings health */}
+              <div className="mt-6 flex min-h-0 flex-col border-t border-[var(--border)] pt-6 lg:mt-0 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
+                <div className="shrink-0">
+                  <div className="flex items-center gap-1.5">
+                    <h2 className="font-display text-[15px] font-semibold">Savings over time</h2>
+                    <InfoDot label={analytics.hasData ? "Your set-aside balance building up over time." : "Sample data. Your real curve appears once you start saving."} />
+                  </div>
+                  <div className="mt-3 h-[168px]">
+                    <LineArea
+                      fill
+                      series={[{ label: "Saved", points: analytics.hasData ? analytics.savingsLine : SAMPLE_LINE }]}
+                      xLabels={analytics.hasData ? analytics.savingsLabels : SAMPLE_LINE_LABELS}
+                      fmtY={(v) => `$${v >= 1000 ? `${Math.round(v / 1000)}k` : Math.round(v)}`}
+                    />
+                  </div>
+                </div>
+
+                {/* Savings health */}
+                <div className="mt-6 border-t border-[var(--border)] pt-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-[12px] font-medium uppercase tracking-[0.14em] text-[var(--faint)]">
+                      Savings health
+                      <InfoDot label="A quick read on how set up you are: open a vault, connect a bank, start saving." />
+                    </div>
+                    <span className="font-mono text-[14px]"><span className="font-semibold text-[var(--primary-strong)]">{savingsScore}</span><span className="text-[var(--faint)]"> / 100</span></span>
+                  </div>
+                  <div className="mt-2.5 h-2 w-full overflow-hidden rounded-full bg-[var(--border)]">
+                    <div className="h-full rounded-full bg-[var(--primary)] transition-[width] duration-500" style={{ width: `${savingsScore}%` }} />
+                  </div>
+                  {!setup.vault || !setup.bank ? (
+                    <div className="mt-3 divide-y divide-[var(--border)]">
+                      {[
+                        { done: setup.vault, label: "Open your vault", desc: "One tap, no seed phrase", go: "grow" as TabId },
+                        { done: setup.bank, label: "Connect your bank", desc: "So Orbit can watch your spending", go: "save" as TabId },
+                      ].map((s) => (
+                        <button key={s.label} type="button" onClick={() => setTab(s.go)} className="flex w-full items-center gap-3 py-3 text-left">
+                          <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full ${s.done ? "bg-[var(--primary)] text-[var(--primary-fg)]" : "bg-[var(--surface)] text-[var(--muted)]"}`}>
+                            {s.done ? <Check className="h-4 w-4" aria-hidden /> : <span className="h-1.5 w-1.5 rounded-full bg-current" />}
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className={`block text-[14px] font-medium ${s.done ? "text-[var(--muted)] line-through" : ""}`}>{s.label}</span>
+                            <span className="block text-[12px] text-[var(--muted)]">{s.desc}</span>
+                          </span>
+                          {!s.done && <ChevronRight className="h-4 w-4 shrink-0 text-[var(--faint)]" aria-hidden />}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="mt-5">
+                      <div className="mb-2.5 text-[12px] font-medium text-[var(--muted)]">Where your savings come from</div>
+                      <HBars rows={analytics.categories.length ? analytics.categories : SAMPLE_CATEGORIES} />
+                    </div>
                   )}
                 </div>
               </div>
