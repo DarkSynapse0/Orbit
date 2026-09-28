@@ -999,11 +999,8 @@ export default function Home() {
             <div className="lg:grid lg:grid-cols-2 lg:gap-10">
               {/* LEFT — the vault + how it earns */}
               <div className="flex flex-col">
-                <div className="[&>section]:mt-0">
-                  <WalletVault onChanged={refreshVault} />
-                </div>
-
-                <div className="mt-6 border-t border-[var(--line)] pt-6">
+                {/* Earning + where it's invested */}
+                <div>
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <div className="flex items-center gap-1.5 font-display text-[16px] font-bold">
@@ -1015,7 +1012,8 @@ export default function Home() {
                         <span className="text-[14px] text-[var(--muted)]">APY</span>
                       </div>
                     </div>
-                    <div className="relative">
+                    {/* Mobile: pick venue from a dropdown */}
+                    <div className="relative lg:hidden">
                       <button
                         type="button"
                         onClick={() => setVenueOpen((o) => !o)}
@@ -1064,6 +1062,44 @@ export default function Home() {
                     ))}
                   </div>
 
+                  {/* Desktop: pick venue from a list */}
+                  <div className="mt-6 hidden lg:block">
+                    <div className="mb-1 text-[13px] font-medium text-[var(--muted)]">Where your USDC earns</div>
+                    <div className="divide-y divide-[var(--border)]">
+                      {venues.map((v) => {
+                        const on = v.id === venueId;
+                        return (
+                          <button
+                            key={v.id}
+                            type="button"
+                            onClick={() => selectVenue(v.id)}
+                            className="-mx-2 flex w-[calc(100%+1rem)] items-center gap-3 rounded-lg px-2 py-3 text-left transition-colors hover:bg-[var(--surface)]"
+                          >
+                            <VenueMark venue={v} className="h-9 w-9" />
+                            <span className="min-w-0 flex-1">
+                              <span className="flex items-center gap-1.5">
+                                <span className="truncate text-[15px] font-medium">{v.name}</span>
+                                {v.live ? (
+                                  <span className="rounded-full bg-[var(--primary-soft)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--primary-strong)]">Live</span>
+                                ) : (
+                                  <span className="rounded-full bg-[var(--surface)] px-1.5 py-0.5 text-[10px] text-[var(--muted)]">Mainnet</span>
+                                )}
+                              </span>
+                              <span className="block truncate text-[12px] text-[var(--muted)]">{v.tvl} TVL</span>
+                            </span>
+                            <span className="shrink-0 text-right">
+                              <span className="block font-mono text-[15px] font-semibold tabular-nums text-[var(--primary-strong)]">{v.apy.toFixed(1)}%</span>
+                              <span className="block text-[11px] text-[var(--faint)]">APY</span>
+                            </span>
+                            <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full border-2 ${on ? "border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-fg)]" : "border-[var(--border-strong)]"}`}>
+                              {on && <Check className="h-3 w-3" aria-hidden />}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
                   <div className="mt-5">
                     {connected && onchain ? (
                       <a href={solAcct(onchain.vaultAccount)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-[14px] font-medium text-[var(--primary-strong)] hover:underline">
@@ -1073,6 +1109,11 @@ export default function Home() {
                       <p className="text-[12px] text-[var(--faint)]">Open your vault to see it live on Solana.</p>
                     )}
                   </div>
+                </div>
+
+                {/* The vault */}
+                <div className="mt-6 border-t border-[var(--line)] pt-6 [&>section]:mt-0">
+                  <WalletVault onChanged={refreshVault} />
                 </div>
               </div>
 
