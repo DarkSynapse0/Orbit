@@ -3,9 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
-  Home as HomeIcon,
   PiggyBank,
-  Sprout,
   Landmark,
   Zap,
   ShoppingBag,
@@ -16,7 +14,6 @@ import {
   RotateCcw,
   TrendingUp,
   Loader2,
-  Activity as ActivityIcon,
   User as UserIcon,
   ArrowDownToLine,
   ArrowUpFromLine,
@@ -34,6 +31,10 @@ import {
   HelpCircle,
   Info,
   MoreHorizontal,
+  LayoutDashboard,
+  ArrowLeftRight,
+  LineChart,
+  Target,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { apiFetch } from "@/lib/api";
@@ -139,14 +140,29 @@ function VenueMark({ venue, className = "h-8 w-8" }: { venue: Venue; className?:
   );
 }
 
-// The product story: money comes in (Save) → it grows (Grow) → see it (Activity) → your stuff (Account).
-type TabDef = { id: TabId; label: string; icon: typeof HomeIcon; hint: string };
-const NAV: TabDef[] = [
-  { id: "home", label: "Home", icon: HomeIcon, hint: "Your money at a glance" },
-  { id: "save", label: "Save", icon: PiggyBank, hint: "How money is set aside" },
-  { id: "grow", label: "Grow", icon: Sprout, hint: "Your vault & yield" },
-  { id: "activity", label: "Activity", icon: ActivityIcon, hint: "Every transaction" },
-  { id: "account", label: "Account", icon: UserIcon, hint: "Wallet & settings" },
+// Finora-style sidebar. Each label maps to one of Orbit's real views (`tab`); a few
+// Finora labels point at the same underlying view (Orbit has fewer sections).
+type NavItem = { id: string; label: string; icon: typeof Wallet; hint: string; tab?: TabId; href?: string };
+const NAV: NavItem[] = [
+  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, hint: "Your money at a glance", tab: "home" },
+  { id: "transactions", label: "Transactions", icon: ArrowLeftRight, hint: "Every transaction", tab: "activity" },
+  { id: "wallet", label: "Wallet", icon: Wallet, hint: "Your vault & yield", tab: "grow" },
+  { id: "analytics", label: "Analytics", icon: LineChart, hint: "Your money at a glance", tab: "home" },
+  { id: "budget", label: "Budget", icon: PiggyBank, hint: "How money is set aside", tab: "save" },
+  { id: "goals", label: "Savings Goals", icon: Target, hint: "Your vault & yield", tab: "grow" },
+];
+const NAV_SECONDARY: NavItem[] = [
+  { id: "settings", label: "Settings", icon: Settings, hint: "Wallet & settings", tab: "account" },
+  { id: "security", label: "Security", icon: ShieldCheck, hint: "Wallet & settings", tab: "account" },
+  { id: "help", label: "Help Center", icon: HelpCircle, hint: "Wallet & settings", href: "/" },
+];
+// Mobile bottom bar: one entry per real view.
+const MOBILE_NAV: NavItem[] = [
+  { id: "dashboard", label: "Home", icon: LayoutDashboard, hint: "", tab: "home" },
+  { id: "transactions", label: "Activity", icon: ArrowLeftRight, hint: "", tab: "activity" },
+  { id: "wallet", label: "Wallet", icon: Wallet, hint: "", tab: "grow" },
+  { id: "budget", label: "Budget", icon: PiggyBank, hint: "", tab: "save" },
+  { id: "settings", label: "Account", icon: UserIcon, hint: "", tab: "account" },
 ];
 
 function ExplorerLink({ href, children }: { href: string; children: React.ReactNode }) {
@@ -189,8 +205,9 @@ function Toggle({ on, onClick, label }: { on: boolean; onClick: () => void; labe
 export default function Home() {
   const { user, ready: authReady, signInWithGoogle, signOut } = useAuth();
   const [tab, setTab] = useState<TabId>("home");
+  const [navId, setNavId] = useState<string>("dashboard");
   const [invited, setInvited] = useState(false);
-  const firstTabPersist = useRef(true);
+  const firstNavPersist = useRef(true);
 
   // "Invite & Earn" (Finora parity): copy an invite link to the clipboard for now.
   const invite = () => {
@@ -201,24 +218,45 @@ export default function Home() {
     } catch {}
   };
 
-  // Restore the last-viewed tab after a refresh (client-only, avoids SSR mismatch).
+  // Navigate via a sidebar item: highlight it and show its underlying view.
+  const selectNav = (item: NavItem) => {
+    if (item.href) return;
+    setNavId(item.id);
+    if (item.tab) setTab(item.tab);
+  };
+
+  // Restore the last view after a refresh (client-only, avoids SSR mismatch).
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("orbit.tab.v1");
-      if (saved && NAV.some((t) => t.id === saved)) setTab(saved as TabId);
+      const saved = localStorage.getItem("orbit.nav.v1");
+      const item = [...NAV, ...NAV_SECONDARY].find((n) => n.id === saved);
+      if (item?.tab) {
+        setNavId(item.id);
+        setTab(item.tab);
+      }
     } catch {}
   }, []);
 
-  // Remember the active tab so it survives a refresh. Skip the first run so the default
-  // "home" never overwrites a restored tab before the restore effect applies it.
+  // Remember the active view. Skip the first run so the default never overwrites a
+  // restored selection before the restore effect applies it.
   useEffect(() => {
-    if (firstTabPersist.current) {
-      firstTabPersist.current = false;
+    if (firstNavPersist.current) {
+      firstNavPersist.current = false;
       return;
     }
     try {
-      localStorage.setItem("orbit.tab.v1", tab);
+      localStorage.setItem("orbit.nav.v1", navId);
     } catch {}
+  }, [navId]);
+
+  // Keep the sidebar highlight in sync when an in-content button switches tabs.
+  useEffect(() => {
+    const cur = [...NAV, ...NAV_SECONDARY].find((n) => n.id === navId);
+    if (!cur || cur.tab !== tab) {
+      const match = NAV.find((n) => n.tab === tab) ?? NAV_SECONDARY.find((n) => n.tab === tab);
+      if (match) setNavId(match.id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab]);
 
   const [state, setState] = useState<SavingsState>({ userId: "demo", pendingUsd: 0, investedUsd: 0 });
@@ -522,7 +560,7 @@ export default function Home() {
     return { hasData: txns.length > 0, savingsLine, savingsLabels, categories, totalSaved: Math.round(cum) };
   }, [txns]);
 
-  const activeNav = NAV.find((t) => t.id === tab) ?? NAV[0];
+  const activeNav = [...NAV, ...NAV_SECONDARY, ...MOBILE_NAV].find((n) => n.id === navId) ?? NAV[0];
   // Setup status for the Home checklist.
   const setup = {
     bank: !!plaid?.connected,
@@ -551,12 +589,12 @@ export default function Home() {
         <nav className="mt-8 flex-1 space-y-1">
           <div className="px-3 pb-1.5 text-[11px] font-medium uppercase tracking-wider text-[var(--faint)]">Menu</div>
           {NAV.map((t) => {
-            const on = tab === t.id;
+            const on = navId === t.id;
             return (
               <button
                 key={t.id}
                 type="button"
-                onClick={() => setTab(t.id)}
+                onClick={() => selectNav(t)}
                 className={`relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40 ${
                   on
                     ? "bg-[var(--background)] font-medium text-[var(--foreground)] shadow-[0_1px_2px_rgba(2,6,23,0.06)]"
@@ -572,19 +610,24 @@ export default function Home() {
 
           <div className="my-3 h-px bg-[var(--border)]" />
 
-          <button
-            type="button"
-            onClick={() => setTab("account")}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[var(--muted)] transition-colors hover:bg-[var(--background)]/60 hover:text-[var(--foreground)]"
-          >
-            <Settings className="h-[18px] w-[18px]" aria-hidden /> Settings
-          </button>
-          <a
-            href="/"
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[var(--muted)] transition-colors hover:bg-[var(--background)]/60 hover:text-[var(--foreground)]"
-          >
-            <HelpCircle className="h-[18px] w-[18px]" aria-hidden /> Help Center
-          </a>
+          {NAV_SECONDARY.map((t) => {
+            const on = navId === t.id;
+            const cls = `relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40 ${
+              on
+                ? "bg-[var(--background)] font-medium text-[var(--foreground)] shadow-[0_1px_2px_rgba(2,6,23,0.06)]"
+                : "text-[var(--muted)] hover:bg-[var(--background)]/60 hover:text-[var(--foreground)]"
+            }`;
+            return t.href ? (
+              <a key={t.id} href={t.href} className={cls}>
+                <t.icon className="h-[18px] w-[18px]" aria-hidden /> {t.label}
+              </a>
+            ) : (
+              <button key={t.id} type="button" onClick={() => selectNav(t)} className={cls}>
+                {on && <span className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-[var(--accent)]" aria-hidden />}
+                <t.icon className={`h-[18px] w-[18px] ${on ? "text-[var(--accent-strong)]" : ""}`} aria-hidden /> {t.label}
+              </button>
+            );
+          })}
         </nav>
 
         <div className="space-y-3 border-t border-[var(--border)] px-1 pt-4">
@@ -1221,12 +1264,12 @@ export default function Home() {
 
       {/* ───────── Mobile bottom nav ───────── */}
       <nav className="fixed inset-x-0 bottom-0 z-30 flex border-t border-[var(--border)] bg-[var(--background)]/90 backdrop-blur-md lg:hidden">
-        {NAV.map((t) => (
+        {MOBILE_NAV.map((t) => (
           <button
             key={t.id}
             type="button"
-            onClick={() => setTab(t.id)}
-            className={`flex flex-1 flex-col items-center gap-1 py-2.5 text-[12px] transition-colors ${tab === t.id ? "text-[var(--accent-strong)]" : "text-[var(--muted)]"}`}
+            onClick={() => selectNav(t)}
+            className={`flex flex-1 flex-col items-center gap-1 py-2.5 text-[12px] transition-colors ${navId === t.id ? "text-[var(--accent-strong)]" : "text-[var(--muted)]"}`}
           >
             <t.icon className="h-5 w-5" aria-hidden />
             {t.label}
