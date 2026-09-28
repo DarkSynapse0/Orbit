@@ -8,7 +8,7 @@ import { Providers } from "./providers";
 const fontDisplay = Bricolage_Grotesque({
   variable: "--ff-display",
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
+  weight: ["500", "600", "700", "800"],
   display: "swap",
 });
 const fontSans = Inter({ variable: "--ff-sans", subsets: ["latin"], display: "swap" });
