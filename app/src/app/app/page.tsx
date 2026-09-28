@@ -33,7 +33,6 @@ import {
   MoreHorizontal,
   LayoutDashboard,
   ArrowLeftRight,
-  LineChart,
   Target,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
@@ -77,7 +76,7 @@ type OnChain = {
 };
 type Entry = { id: number; kind: "spend" | "deposit" | "none" | "info"; text: string };
 type Txn = { id: number; name: string; category: string; amountUsd: number; setAside: number; deposited: boolean; ts: number };
-type TabId = "home" | "save" | "grow" | "analytics" | "activity" | "account";
+type TabId = "home" | "save" | "grow" | "activity" | "account";
 
 const usd = (n: number) => `$${n.toFixed(2)}`;
 // Live yield reads as money: clean $0.00 when there's nothing, otherwise enough
@@ -152,7 +151,6 @@ const NAV: NavItem[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, hint: "Your money at a glance", tab: "home" },
   { id: "transactions", label: "Transactions", icon: ArrowLeftRight, hint: "Every transaction", tab: "activity" },
   { id: "wallet", label: "Wallet", icon: Wallet, hint: "Your vault & yield", tab: "grow" },
-  { id: "analytics", label: "Analytics", icon: LineChart, hint: "Growth, spending & market", tab: "analytics" },
   { id: "budget", label: "Budget", icon: PiggyBank, hint: "How money is set aside", tab: "save" },
   { id: "goals", label: "Savings Goals", icon: Target, hint: "Your vault & yield", tab: "grow" },
 ];
@@ -272,7 +270,6 @@ export default function Home() {
   const [onchain, setOnchain] = useState<OnChain | null>(null);
   const [lastSig, setLastSig] = useState<string | null>(null);
   const [plaid, setPlaid] = useState<{ configured: boolean; connected: boolean } | null>(null);
-  const [solPrice, setSolPrice] = useState(0);
   const [syncing, setSyncing] = useState(false);
   const [investing, setInvesting] = useState(false);
 
@@ -363,7 +360,6 @@ export default function Home() {
   useEffect(() => {
     apiFetch(`/health`).then((r) => setOnline(r.ok)).catch(() => setOnline(false));
     apiFetch(`/plaid/status`).then((r) => r.json()).then(setPlaid).catch(() => {});
-    apiFetch(`/price/sol`).then((r) => r.json()).then((p) => { if (p.usd) setSolPrice(p.usd); }).catch(() => {});
   }, []);
 
   const log = (kind: Entry["kind"], text: string) =>
@@ -562,11 +558,6 @@ export default function Home() {
     [liveVenues],
   );
   const selectedVenue = venues.find((v) => v.id === venueId) ?? venues[0];
-  // Live yield-market aggregates for the Analytics tab (uses the DefiLlama-merged venues).
-  const marketVenues = useMemo(() => [...venues].sort((a, b) => b.apy - a.apy), [venues]);
-  const marketMaxApy = Math.max(...venues.map((v) => v.apy));
-  const marketAvgApy = venues.reduce((s, v) => s + v.apy, 0) / venues.length;
-  const ratesLive = venues.some((v) => v.isLive);
   const projected = useMemo(() => {
     const a = Number(projAmt) || 0;
     const rate = selectedVenue.apy / 100;
@@ -1138,114 +1129,6 @@ export default function Home() {
                   <p className="mt-4 text-[12px] text-[var(--faint)]">Illustrative at {selectedVenue.apy.toFixed(1)}% APY, compounded yearly. Not a guarantee.</p>
                 </section>
               </div>
-            </div>
-          )}
-
-          {/* ═══════════ ANALYTICS ═══════════ */}
-          {tab === "analytics" && (
-            <div className="space-y-4 lg:space-y-5">
-              {/* Summary — money growth at a glance */}
-              <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-                {[
-                  { label: "Total saved", value: usd(total), sub: "principal + yield", accent: true },
-                  { label: "Yield earned", value: fmtYield(liveYield), sub: "live, on-chain", accent: true },
-                  { label: "In vault", value: usd(principalUsd), sub: "invested" },
-                  { label: "Set-aside rate", value: `${rate.toFixed(1)}%`, sub: "of each purchase" },
-                ].map((s) => (
-                  <div key={s.label} className={`${CARD} p-5`}>
-                    <div className="text-[12px] font-medium text-[var(--muted)]">{s.label}</div>
-                    <div className={`mt-2 font-mono text-2xl font-semibold tabular-nums ${s.accent ? "text-[var(--accent-strong)]" : ""}`}>{s.value}</div>
-                    <div className="mt-1 text-[12px] text-[var(--faint)]">{s.sub}</div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Money growth + spending breakdown */}
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.6fr_1fr] lg:gap-5">
-                <div className={`${CARD} p-6`}>
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <h3 className="font-display text-[16px] font-semibold">Money growth</h3>
-                      <p className="mt-0.5 text-[13px] text-[var(--muted)]">What you&apos;ve set aside over time</p>
-                    </div>
-                    <span className="rounded-lg border border-[var(--border)] px-2.5 py-1 text-[12px] text-[var(--muted)]">{analytics.hasData ? "all time" : "sample"}</span>
-                  </div>
-                  <div className="mt-5">
-                    <LineArea
-                      series={[{ label: "Saved", points: analytics.hasData ? analytics.savingsLine : SAMPLE_LINE }]}
-                      xLabels={analytics.hasData ? analytics.savingsLabels : SAMPLE_LINE_LABELS}
-                      fmtY={(v) => `$${v >= 1000 ? `${Math.round(v / 1000)}k` : Math.round(v)}`}
-                    />
-                  </div>
-                </div>
-                <div className={`${CARD} p-6`}>
-                  <h3 className="font-display text-[16px] font-semibold">Spending by category</h3>
-                  <p className="mt-0.5 text-[13px] text-[var(--muted)]">Where your set-asides come from</p>
-                  <div className="mt-5">
-                    <HBars rows={analytics.categories.length ? analytics.categories : SAMPLE_CATEGORIES} />
-                  </div>
-                </div>
-              </div>
-
-              {/* DeFi yield markets — live rates from the crypto space */}
-              <div className={`${CARD} p-6`}>
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-display text-[16px] font-semibold">DeFi yield markets</h3>
-                      <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ${ratesLive ? "bg-[var(--accent-soft)] text-[var(--accent-strong)]" : "bg-[var(--background)] text-[var(--muted)]"}`}>
-                        <span className={`h-1.5 w-1.5 rounded-full ${ratesLive ? "bg-[var(--accent)]" : "bg-[var(--faint)]"}`} aria-hidden />
-                        {ratesLive ? "Live" : "Loading…"}
-                      </span>
-                    </div>
-                    <p className="mt-0.5 text-[13px] text-[var(--muted)]">Live USDC lending rates from DefiLlama. Orbit routes savings to the audited ones.</p>
-                  </div>
-                  <div className="flex gap-5">
-                    <div>
-                      <div className="text-[12px] text-[var(--muted)]">Best rate</div>
-                      <div className="font-mono text-lg font-semibold text-[var(--accent-strong)]">{marketMaxApy.toFixed(1)}%</div>
-                    </div>
-                    <div>
-                      <div className="text-[12px] text-[var(--muted)]">Avg rate</div>
-                      <div className="font-mono text-lg font-semibold">{marketAvgApy.toFixed(1)}%</div>
-                    </div>
-                    <div>
-                      <div className="text-[12px] text-[var(--muted)]">SOL price</div>
-                      <div className="font-mono text-lg font-semibold">{solPrice > 0 ? `$${solPrice.toFixed(2)}` : "—"}</div>
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-5 space-y-3">
-                  {marketVenues.map((v) => (
-                    <div key={v.id} className="flex items-center gap-3">
-                      <VenueMark venue={v} className="h-8 w-8 shrink-0" />
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="truncate text-[14px] font-medium">{v.name}</span>
-                          {v.live ? (
-                            <span className="rounded-full bg-[var(--accent-soft)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--accent-strong)]">Orbit · devnet</span>
-                          ) : v.isLive ? (
-                            <span className="rounded-full bg-[var(--accent-soft)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--accent-strong)]">Live rate</span>
-                          ) : (
-                            <span className="rounded-full bg-[var(--background)] px-1.5 py-0.5 text-[10px] text-[var(--muted)]">Mainnet</span>
-                          )}
-                        </div>
-                        <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-[var(--border)]">
-                          <div className={`h-full rounded-full ${v.live || v.isLive ? "bg-[var(--accent)]" : "bg-[var(--faint)]"}`} style={{ width: `${marketMaxApy > 0 ? (v.apy / marketMaxApy) * 100 : 0}%` }} />
-                        </div>
-                      </div>
-                      <div className="shrink-0 text-right">
-                        <div className="font-mono text-[14px] font-semibold text-[var(--accent-strong)]">{v.apy.toFixed(1)}%</div>
-                        <div className="font-mono text-[11px] text-[var(--faint)]">{v.tvl}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <p className="mt-4 text-[12px] text-[var(--faint)]">Rates refresh from DefiLlama (cached ~10 min). Orbit Reserve is Orbit&apos;s own on-chain rate on devnet; mainnet routes to audited venues like Aave and Kamino.</p>
-              </div>
-
-              {/* User activity */}
-              <ActivityFeed />
             </div>
           )}
 
