@@ -134,7 +134,7 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
       </div>
 
       {withYield.length > 0 && (
-        <div className="mt-5 overflow-x-auto border-t border-[var(--line)] pt-5">
+        <div className="mt-4 overflow-x-auto rounded-2xl bg-[var(--surface)] px-5 py-2">
           <table className="w-full min-w-[560px] text-left">
             <thead>
               <tr className="border-b border-[var(--border)] text-[14px] font-bold text-[var(--foreground)]">
@@ -152,7 +152,7 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
                   <tr key={g.id}>
                     <td className="py-3 pr-3">
                       <div className="flex items-center gap-2.5">
-                        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[var(--surface)] text-[18px]">{g.emoji}</span>
+                        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[var(--background)] text-[18px]">{g.emoji}</span>
                         <span className="truncate text-[15px] font-medium">{g.name}</span>
                       </div>
                     </td>
