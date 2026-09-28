@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     "Orbit",
     "self-driving savings",
     "automatic savings",
-    "round-up savings",
+    "percentage savings",
     "Solana savings app",
     "on-chain yield",
     "USDC yield",

@@ -201,21 +201,21 @@ export default function Landing() {
               It saves on every purchase.
             </h2>
             <p className="mt-5 max-w-sm text-[17px] leading-relaxed text-[var(--muted)]">
-              A small set-aside scales with what you spend. You never decide to save; it just happens.
+              Orbit sets aside a small percentage of everything you spend. Pick your rate, anywhere from 0.5% to 5%. You never decide to save; it just happens.
             </p>
           </Reveal>
           <Reveal delay={100}>
             <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--border)]">
               {[
-                { spend: "Over $100", set: "$5" },
-                { spend: "Over $500", set: "$10" },
+                { spend: "You spend $50", set: "$0.50" },
+                { spend: "You spend $500", set: "$5.00" },
               ].map((t) => (
                 <div key={t.spend} className="bg-[var(--background)] p-8">
                   <div className={`${eyebrow} text-[var(--faint)]`}>{t.spend}</div>
                   <div className="mt-3 font-mono text-[clamp(2.4rem,6vw,4rem)] font-semibold leading-none text-[var(--accent-strong)]">
                     {t.set}
                   </div>
-                  <div className="mt-2 text-[14px] text-[var(--muted)]">set aside</div>
+                  <div className="mt-2 text-[14px] text-[var(--muted)]">set aside at 1%</div>
                 </div>
               ))}
             </div>
@@ -305,6 +305,7 @@ export default function Landing() {
         <Reveal delay={80} className="mt-10 divide-y divide-[var(--border)] border-y border-[var(--border)]">
           {[
             { q: "Is my money safe?", a: "Yes. Your savings live in a vault only you can open — Orbit can add to it, but can never take anything out. It all sits on Solana, so you can check your balance yourself anytime." },
+            { q: "How much does Orbit set aside?", a: "A small percentage of each purchase, and you pick the rate — anywhere from 0.5% to 5%. Spend $50 at 1% and 50 cents gets set aside. It scales with your spending, so you save a little more in busy months and less in quiet ones. Nothing leaves your bank until it adds up to a small batch." },
             { q: "Can I take my money out whenever I want?", a: "Anytime, instantly. No lock-ups, no penalties, no waiting period. One tap sends your full balance back to you, plus whatever it has earned." },
             { q: "Do I need to know anything about crypto?", a: "Not a thing. Sign in and Orbit sets up your account for you — no wallet to install, no seed phrase to write down. Already use Phantom or Solflare? You can connect those instead." },
             { q: "How does my money actually grow?", a: "Your savings earn interest on-chain, paid in real tokens. On mainnet that runs through Aave, one of the most-used and most-audited lending markets in crypto. Rates move with the market, so earnings can go up or down." },
