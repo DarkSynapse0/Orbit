@@ -29,7 +29,6 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
   const [mint, setMint] = useState<string | null>(null);
   const [usdc, setUsdc] = useState(0);
   const [sol, setSol] = useState(0);
-  const [solPrice, setSolPrice] = useState(0);
   const [principal, setPrincipal] = useState<number | null>(null);
   const [depositAmt, setDepositAmt] = useState("10");
   const [busy, setBusy] = useState<string | null>(null);
@@ -93,7 +92,6 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
 
   useEffect(() => {
     apiFetch(`/config`).then((r) => r.json()).then((c) => { if (c.mint) setMint(c.mint); }).catch(() => {});
-    apiFetch(`/price/sol`).then((r) => r.json()).then((p) => { if (p.usd) setSolPrice(p.usd); }).catch(() => {});
   }, []);
 
   const refresh = useCallback(async () => {
@@ -281,81 +279,52 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
           </div>
         ) : (
           /* ───────── Connected ───────── */
-          <div className="space-y-4">
-            {/* Identity */}
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex min-w-0 items-center gap-2.5">
-                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[var(--background)] ring-1 ring-inset ring-[var(--border)]">
-                  <Wallet className="h-4 w-4 text-[var(--foreground)]" aria-hidden />
-                </span>
-                <div className="min-w-0">
+          <div className="space-y-5">
+            {/* Your savings — the headline */}
+            <div>
+              <div className="text-[13px] font-medium text-[var(--muted)]">Your savings</div>
+              <div className="mt-1 font-mono text-[clamp(2rem,5vw,2.75rem)] font-semibold leading-none tabular-nums text-[var(--primary-strong)]">${(principal ?? 0).toFixed(2)}</div>
+              <div className="mt-1.5 text-[13px] text-[var(--muted)]">Earning 6% a year on-chain. Only you can withdraw.</div>
+            </div>
+
+            {/* Add money */}
+            <div>
+              <div className="mb-1.5 flex items-center justify-between gap-2 text-[13px]">
+                <span className="font-medium text-[var(--muted)]">Add to your savings</span>
+                <span className="text-[var(--faint)]">Ready to add <span className="font-mono text-[var(--foreground)]">${usdc.toFixed(2)}</span></span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1">
+                  <label htmlFor="deposit-amt" className="sr-only">Amount to add</label>
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[15px] text-[var(--muted)]">$</span>
+                  <input
+                    id="deposit-amt"
+                    value={depositAmt}
+                    onChange={(e) => setDepositAmt(e.target.value.replace(/[^0-9.]/g, ""))}
+                    inputMode="decimal"
+                    className="h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] pl-6 pr-14 text-[15px] tabular-nums text-[var(--foreground)] placeholder:text-[var(--faint)] transition-colors focus:border-[var(--border-strong)] focus:outline-none"
+                    placeholder="Amount"
+                  />
                   <button
                     type="button"
-                    onClick={() => { navigator.clipboard?.writeText(publicKey.toBase58()); setCopied(true); setTimeout(() => setCopied(false), 1500); }}
-                    className="flex items-center gap-1.5 rounded font-mono text-sm text-[var(--foreground)] transition-colors hover:text-[var(--accent-strong)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/50"
-                    aria-label="Copy wallet address"
+                    onClick={() => setDepositAmt(usdc > 0 ? String(Math.floor(usdc)) : "0")}
+                    disabled={busy !== null || usdc <= 0}
+                    className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-lg px-2 py-1 text-[12px] font-medium text-[var(--primary-strong)] transition-colors hover:bg-[var(--primary-soft)] disabled:pointer-events-none disabled:opacity-40"
                   >
-                    {truncate(publicKey.toBase58())}
-                    {copied ? <Check className="h-3.5 w-3.5 text-[var(--accent-strong)]" aria-hidden /> : <Copy className="h-3.5 w-3.5 text-[var(--muted)]" aria-hidden />}
+                    Max
                   </button>
-                  <div className="font-mono text-[12px] text-[var(--muted)]">
-                    {isEmbedded ? "Orbit account · " : ""}{sol.toFixed(2)} SOL{solPrice > 0 && ` · ≈ $${(sol * solPrice).toFixed(2)}`}
-                  </div>
                 </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => disconnect().catch(() => {})}
-                className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-[var(--border-strong)] px-2.5 text-[14px] font-medium text-[var(--muted)] transition-colors hover:bg-[var(--background)] hover:text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40"
-              >
-                <Power className="h-3.5 w-3.5" aria-hidden /> <span className="hidden sm:inline">Disconnect</span>
-              </button>
-            </div>
-
-            {/* Balances */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-xl border border-[var(--border)] bg-[var(--background)] p-3.5">
-                <div className="text-[12px] text-[var(--muted)]">In your vault</div>
-                <div className="mt-1 font-mono text-xl font-semibold tabular-nums text-[var(--accent-strong)]">${(principal ?? 0).toFixed(2)}</div>
-              </div>
-              <div className="rounded-xl border border-[var(--border)] bg-[var(--background)] p-3.5">
-                <div className="text-[12px] text-[var(--muted)]">Wallet USDC</div>
-                <div className="mt-1 font-mono text-xl font-semibold tabular-nums">${usdc.toFixed(2)}</div>
-                {usdc <= 0 && <div className="mt-1 text-[11px] leading-snug text-[var(--faint)]">Devnet test token — tap Get test USDC to fund it.</div>}
-              </div>
-            </div>
-
-            {/* Deposit row */}
-            <div className="flex items-center gap-2">
-              <div className="relative flex-1">
-                <label htmlFor="deposit-amt" className="sr-only">Deposit amount in USDC</label>
-                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[15px] text-[var(--muted)]">$</span>
-                <input
-                  id="deposit-amt"
-                  value={depositAmt}
-                  onChange={(e) => setDepositAmt(e.target.value.replace(/[^0-9.]/g, ""))}
-                  inputMode="decimal"
-                  className="h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] pl-6 pr-14 text-[15px] tabular-nums text-[var(--foreground)] placeholder:text-[var(--faint)] transition-colors focus:border-[var(--accent)]/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/30"
-                  placeholder="Amount"
-                />
                 <button
                   type="button"
-                  onClick={() => setDepositAmt(usdc > 0 ? String(Math.floor(usdc)) : "0")}
-                  disabled={busy !== null || usdc <= 0}
-                  className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-lg px-2 py-1 text-[12px] font-medium text-[var(--accent-strong)] transition-colors hover:bg-[var(--accent-soft)] disabled:pointer-events-none disabled:opacity-40"
+                  onClick={deposit}
+                  disabled={busy !== null || usdc <= 0 || Number(depositAmt) <= 0}
+                  className="inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-[var(--primary)] px-5 text-[15px] font-semibold text-[var(--primary-fg)] transition-opacity hover:opacity-90 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40"
                 >
-                  Max
+                  {busy === "deposit" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <ArrowDownToLine className="h-4 w-4" aria-hidden />}
+                  Add
                 </button>
               </div>
-              <button
-                type="button"
-                onClick={deposit}
-                disabled={busy !== null || usdc <= 0 || Number(depositAmt) <= 0}
-                className="inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-[var(--accent)] px-5 text-[15px] font-semibold text-[var(--on-accent)] transition-opacity hover:opacity-90 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/50"
-              >
-                {busy === "deposit" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <ArrowDownToLine className="h-4 w-4" aria-hidden />}
-                Deposit
-              </button>
+              {usdc <= 0 && <p className="mt-1.5 text-[12px] text-[var(--faint)]">No test money yet. Tap “Get test money” below to fund your account first.</p>}
             </div>
 
             {/* Secondary actions */}
@@ -364,16 +333,16 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
                 type="button"
                 onClick={getUsdc}
                 disabled={busy !== null}
-                className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl border border-[var(--border-strong)] text-[15px] font-medium transition-colors hover:bg-[var(--background)] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40"
+                className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl border border-[var(--border-strong)] text-[14px] font-medium transition-colors hover:bg-[var(--surface)] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40"
               >
                 {busy === "faucet" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Coins className="h-4 w-4" aria-hidden />}
-                Get test USDC
+                Get test money
               </button>
               <button
                 type="button"
                 onClick={withdraw}
                 disabled={busy !== null || (principal ?? 0) <= 0}
-                className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl border border-[var(--border-strong)] text-[15px] font-medium transition-colors hover:bg-[var(--background)] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40"
+                className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl border border-[var(--border-strong)] text-[14px] font-medium transition-colors hover:bg-[var(--surface)] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40"
               >
                 {busy === "withdraw" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <ArrowUpFromLine className="h-4 w-4" aria-hidden />}
                 Withdraw to bank
@@ -381,20 +350,40 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
             </div>
 
             <p className="text-[12px] leading-relaxed text-[var(--muted)]">
-              Depositing is optional — Orbit funds this vault automatically when your set-aside hits the threshold.
-              <span className="text-[var(--faint)]"> Withdraw to bank cashes out your balance plus yield and sends dollars to your bank (the USDC→dollars step via Stripe is mocked on devnet).</span>
+              You don&apos;t have to add money yourself, Orbit fills this automatically from your everyday spending. Withdraw sends dollars back to your bank anytime.
             </p>
 
             {(status || lastSig) && (
               <div className="flex items-center justify-between gap-3 text-[12px]">
                 <span className="min-w-0 truncate text-[var(--muted)]">{status}</span>
                 {lastSig && (
-                  <a href={solTx(lastSig)} target="_blank" rel="noreferrer" className="inline-flex shrink-0 items-center gap-1 font-medium text-[var(--accent-strong)] hover:underline">
-                    view tx <ExternalLink className="h-3 w-3" aria-hidden />
+                  <a href={solTx(lastSig)} target="_blank" rel="noreferrer" className="inline-flex shrink-0 items-center gap-1 font-medium text-[var(--primary-strong)] hover:underline">
+                    view receipt <ExternalLink className="h-3 w-3" aria-hidden />
                   </a>
                 )}
               </div>
             )}
+
+            {/* Account details, de-emphasized */}
+            <div className="flex items-center justify-between gap-3 border-t border-[var(--border)] pt-3.5 text-[12px] text-[var(--muted)]">
+              <button
+                type="button"
+                onClick={() => { navigator.clipboard?.writeText(publicKey.toBase58()); setCopied(true); setTimeout(() => setCopied(false), 1500); }}
+                className="flex min-w-0 items-center gap-1.5 rounded transition-colors hover:text-[var(--foreground)]"
+                aria-label="Copy account address"
+              >
+                <Wallet className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                <span className="truncate">{isEmbedded ? "Orbit account" : "Wallet"} · <span className="font-mono">{truncate(publicKey.toBase58())}</span></span>
+                {copied ? <Check className="h-3.5 w-3.5 shrink-0 text-[var(--primary-strong)]" aria-hidden /> : <Copy className="h-3.5 w-3.5 shrink-0" aria-hidden />}
+              </button>
+              <button
+                type="button"
+                onClick={() => disconnect().catch(() => {})}
+                className="inline-flex shrink-0 items-center gap-1 transition-colors hover:text-[var(--foreground)]"
+              >
+                <Power className="h-3.5 w-3.5" aria-hidden /> <span className="hidden sm:inline">Disconnect</span>
+              </button>
+            </div>
           </div>
         )}
       </div>
