@@ -805,7 +805,7 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div className="mt-6 flex min-h-0 flex-1 flex-col border-t border-[var(--line)] pt-6">
+                <div className="mt-6 hidden min-h-0 flex-1 flex-col border-t border-[var(--line)] pt-6 lg:flex">
                   <div className="flex items-center justify-between">
                     <h2 className="font-display text-[16px] font-bold">Recent transactions</h2>
                     {txns.length > 0 && (
