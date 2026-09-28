@@ -1144,67 +1144,55 @@ export default function Home() {
 
           {/* ═══════════ ACTIVITY ═══════════ */}
           {tab === "activity" && (
-            <div className="space-y-4">
-              <ActivityFeed />
-              <div className="flex items-center justify-between">
-                <SectionLabel>Spending &amp; set-asides</SectionLabel>
-                <button type="button" onClick={reset} className="inline-flex items-center gap-1 rounded text-[14px] text-[var(--muted)] transition-colors hover:text-[var(--foreground)]"><RotateCcw className="h-3.5 w-3.5" aria-hidden /> reset</button>
+            <div>
+              {/* Transactions */}
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="font-display text-[16px] font-bold">{q ? `Results for “${query}”` : "Transactions"}</h2>
+                <button type="button" onClick={reset} className="inline-flex items-center gap-1 rounded text-[13px] text-[var(--muted)] transition-colors hover:text-[var(--foreground)]"><RotateCcw className="h-3.5 w-3.5" aria-hidden /> reset</button>
               </div>
+              {q && <p className="mt-1 text-[13px] text-[var(--muted)]">{filteredTxns.length} {filteredTxns.length === 1 ? "match" : "matches"}</p>}
+
               {filteredTxns.length === 0 ? (
-                <div className={`${PANEL} border-dashed px-4 py-16 text-center`}>
-                  <ShoppingBag className="mx-auto h-6 w-6 text-[var(--muted)]" aria-hidden />
-                  <p className="mt-2 text-sm text-[var(--muted)]">{q ? `No transactions match “${query}”` : "No transactions yet"}</p>
-                  <p className="mt-0.5 text-[14px] text-[var(--faint)]">{q ? "Try a merchant or category." : "Simulate a purchase or sync a bank in Save."}</p>
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <ShoppingBag className="h-6 w-6 text-[var(--muted)]" aria-hidden />
+                  <p className="mt-2 text-[15px] text-[var(--muted)]">{q ? `No transactions match “${query}”` : "No transactions yet"}</p>
+                  <p className="mt-0.5 text-[13px] text-[var(--faint)]">{q ? "Try a merchant or category." : "Simulate a purchase or sync a bank in Budget."}</p>
                 </div>
               ) : (
-                <section className={`${PANEL} overflow-hidden`}>
-                  <div className="overflow-x-auto">
-                    <table className="w-full min-w-[560px] text-left text-[15px]">
-                      <thead>
-                        <tr className="border-b border-[var(--border)] text-[12px] uppercase tracking-[0.14em] text-[var(--faint)]">
-                          <th className="px-5 py-3 font-medium">Transaction</th>
-                          <th className="px-5 py-3 font-medium">Category</th>
-                          <th className="px-5 py-3 font-medium">Date</th>
-                          <th className="px-5 py-3 text-right font-medium">Spent</th>
-                          <th className="px-5 py-3 text-right font-medium">Set aside</th>
-                          <th className="px-5 py-3 text-right font-medium">Status</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-[var(--border)]">
-                        {filteredTxns.map((t) => {
-                          const Icon = txnIcon(t);
-                          return (
-                          <tr key={t.id} className="transition-colors hover:bg-[var(--background)]">
-                            <td className="px-5 py-3">
-                              <div className="flex items-center gap-3">
-                                <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[var(--surface)] ${t.deposited ? "text-[var(--primary-strong)]" : "text-[var(--muted)]"}`}>
-                                  <Icon className="h-4 w-4" aria-hidden />
-                                </span>
-                                <span className="truncate font-medium">{t.name}</span>
-                              </div>
-                            </td>
-                            <td className="px-5 py-3 text-[var(--muted)]">{t.category}</td>
-                            <td className="px-5 py-3 font-mono text-[14px] text-[var(--muted)]">{txnDate(t.ts)}</td>
-                            <td className="px-5 py-3 text-right font-mono tabular-nums text-[var(--muted)]">{usd(t.amountUsd)}</td>
-                            <td className={`px-5 py-3 text-right font-mono tabular-nums ${t.setAside > 0 ? "text-[var(--primary-strong)]" : "text-[var(--faint)]"}`}>
-                              {t.setAside > 0 ? `+${usd(t.setAside)}` : "—"}
-                            </td>
-                            <td className="px-5 py-3 text-right">
-                              {t.deposited ? (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-[var(--primary-soft)] px-2 py-0.5 text-[12px] font-medium text-[var(--primary-strong)]">In vault</span>
-                              ) : t.setAside > 0 ? (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-[var(--surface)] px-2 py-0.5 text-[12px] text-[var(--muted)]">Set aside</span>
-                              ) : (
-                                <span className="text-[12px] text-[var(--faint)]">—</span>
-                              )}
-                            </td>
-                          </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                </section>
+                <ul className="mt-3 divide-y divide-[var(--border)]">
+                  {filteredTxns.map((t) => {
+                    const Icon = txnIcon(t);
+                    return (
+                      <li key={t.id} className="flex items-center gap-3.5 py-3.5">
+                        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--surface)] text-[var(--muted)]">
+                          <Icon className="h-[18px] w-[18px]" aria-hidden />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate text-[15px] font-medium">{t.name}</div>
+                          <div className="text-[12px] text-[var(--muted)]">{t.category} · {txnDate(t.ts)}</div>
+                        </div>
+                        <div className="shrink-0 text-right">
+                          <div className="font-mono text-[15px] tabular-nums text-[var(--foreground)]">{usd(t.amountUsd)}</div>
+                          {t.setAside > 0 ? (
+                            <div className="mt-1 inline-flex items-center gap-1 rounded-full bg-[var(--primary-soft)] px-2 py-0.5 text-[11px] font-medium text-[var(--primary-strong)]">
+                              {t.deposited ? <Zap className="h-3 w-3" aria-hidden /> : <Coins className="h-3 w-3" aria-hidden />}
+                              +{usd(t.setAside)} {t.deposited ? "invested" : "saved"}
+                            </div>
+                          ) : (
+                            <div className="mt-1 text-[11px] text-[var(--faint)]">not saved</div>
+                          )}
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+
+              {/* App activity (goals, deposits, withdrawals…) — hidden while searching transactions */}
+              {!q && (
+                <div className="mt-8 border-t border-[var(--line)] pt-6">
+                  <ActivityFeed />
+                </div>
               )}
             </div>
           )}

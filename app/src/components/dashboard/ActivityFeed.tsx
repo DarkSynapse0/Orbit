@@ -51,11 +51,11 @@ export function ActivityFeed() {
   const shown = active.kinds === null ? events : events.filter((e) => active.kinds!.includes(e.kind));
 
   return (
-    <section className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[0_1px_2px_rgba(2,6,23,0.03),0_18px_40px_-24px_rgba(2,6,23,0.22)]">
+    <section>
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <ActivityIcon className="h-4 w-4 text-[var(--accent-strong)]" aria-hidden />
-          <h3 className="font-display text-[17px] font-semibold">Activity</h3>
+        <div className="flex items-center gap-1.5 font-display text-[16px] font-bold">
+          <ActivityIcon className="h-4 w-4 text-[var(--primary-strong)]" aria-hidden />
+          Activity
         </div>
         {events.length > 0 && (
           <button type="button" onClick={clearActivity} className="text-[13px] text-[var(--muted)] transition-colors hover:text-[var(--foreground)]">
