@@ -16,7 +16,7 @@ export interface Purchase {
  * literal round-ups — those are too small to matter). The user picks their own rate
  * within a safe band; higher saves faster, lower is gentler on cash flow.
  */
-export const DEFAULT_SET_ASIDE_PCT = 1; // 1% of each purchase
+export const DEFAULT_SET_ASIDE_PCT = 2; // 2% of each purchase
 export const MIN_SET_ASIDE_PCT = 0.5;
 export const MAX_SET_ASIDE_PCT = 5;
 

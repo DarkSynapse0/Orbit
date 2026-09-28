@@ -57,7 +57,9 @@ const SECONDS_PER_YEAR = 31_536_000;
 // Set-aside rate band (mirrors @orbit/shared). Orbit sets aside this % of each purchase.
 const MIN_PCT = 0.5;
 const MAX_PCT = 5;
-const DEFAULT_PCT = 1;
+const DEFAULT_PCT = 2;
+// Fixed rate options the user picks from (instead of a free slider).
+const RATE_OPTIONS = [0.5, 1, 2, 3, 5];
 
 type SavingsState = {
   userId: string;
@@ -929,19 +931,22 @@ export default function Home() {
                       you&apos;d save <span className="font-mono font-medium text-[var(--primary-strong)]">{usd((50 * rate) / 100)}</span>
                     </div>
                   </div>
-                  <input
-                    type="range"
-                    min={MIN_PCT}
-                    max={MAX_PCT}
-                    step={0.1}
-                    value={rate}
-                    onChange={(e) => changeRate(Number(e.target.value))}
-                    aria-label="Set-aside rate"
-                    className="mt-5 w-full accent-[var(--primary)]"
-                  />
-                  <div className="mt-1 flex justify-between font-mono text-[12px] text-[var(--faint)]">
-                    <span>{MIN_PCT}%</span>
-                    <span>{MAX_PCT}%</span>
+                  <div className="mt-5 grid grid-cols-5 gap-2" role="radiogroup" aria-label="Set-aside rate">
+                    {RATE_OPTIONS.map((v) => {
+                      const on = Math.abs(rate - v) < 0.001;
+                      return (
+                        <button
+                          key={v}
+                          type="button"
+                          role="radio"
+                          aria-checked={on}
+                          onClick={() => changeRate(v)}
+                          className={`h-11 rounded-xl border font-mono text-[15px] font-semibold tabular-nums transition-colors ${on ? "border-[var(--primary)] bg-[var(--primary-soft)] text-[var(--primary-strong)]" : "border-[var(--border-strong)] text-[var(--foreground)] hover:bg-[var(--surface)]"}`}
+                        >
+                          {v}%
+                        </button>
+                      );
+                    })}
                   </div>
                   <div className="mt-5 flex items-center justify-between text-[14px]">
                     <span className="flex items-center gap-1.5 text-[var(--muted)]">
