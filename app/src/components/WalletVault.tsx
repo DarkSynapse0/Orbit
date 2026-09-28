@@ -289,16 +289,22 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
           <div className="space-y-5">
             {/* Account */}
             <div className="flex items-center justify-between gap-3 border-b border-[var(--border)] pb-4 text-[12px] text-[var(--muted)]">
-              <button
-                type="button"
-                onClick={() => { navigator.clipboard?.writeText(publicKey.toBase58()); setCopied(true); setTimeout(() => setCopied(false), 1500); }}
-                className="flex min-w-0 items-center gap-1.5 rounded transition-colors hover:text-[var(--foreground)]"
-                aria-label="Copy account address"
-              >
-                <Wallet className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                <span className="truncate">{isEmbedded ? "Orbit account" : "Wallet"} · <span className="font-mono">{truncate(publicKey.toBase58())}</span></span>
-                {copied ? <Check className="h-3.5 w-3.5 shrink-0 text-[var(--primary-strong)]" aria-hidden /> : <Copy className="h-3.5 w-3.5 shrink-0" aria-hidden />}
-              </button>
+              <div className="flex min-w-0 items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => { navigator.clipboard?.writeText(publicKey.toBase58()); setCopied(true); setTimeout(() => setCopied(false), 1500); }}
+                  className="flex min-w-0 items-center gap-1.5 rounded transition-colors hover:text-[var(--foreground)]"
+                  aria-label="Copy account address"
+                >
+                  <Wallet className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                  <span className="truncate">{isEmbedded ? "Orbit account" : "Wallet"} · <span className="font-mono">{truncate(publicKey.toBase58())}</span></span>
+                  {copied ? <Check className="h-3.5 w-3.5 shrink-0 text-[var(--primary-strong)]" aria-hidden /> : <Copy className="h-3.5 w-3.5 shrink-0" aria-hidden />}
+                </button>
+                <span className="flex shrink-0 items-center gap-1 font-mono text-[var(--foreground)]">
+                  · {sol.toFixed(2)} SOL
+                  <InfoDot label="SOL is Solana's coin, used for tiny network fees. Your savings are held separately in USDC (dollars), which is what 'In your wallet' and your vault track." />
+                </span>
+              </div>
               <button
                 type="button"
                 onClick={() => disconnect().catch(() => {})}
