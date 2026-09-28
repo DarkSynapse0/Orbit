@@ -542,7 +542,7 @@ export default function Home() {
   return (
     <div className="flex min-h-full flex-1">
       {/* ───────── Sidebar (desktop) ───────── */}
-      <aside className="sticky top-0 hidden h-screen w-[15.5rem] shrink-0 flex-col border-r border-[var(--border)] bg-[var(--surface)] px-4 py-6 lg:flex">
+      <aside className="sticky top-0 hidden h-screen w-[18rem] shrink-0 flex-col border-r border-[var(--border)] bg-[var(--surface)] px-4 py-6 lg:flex">
         <Link href="/" className="flex flex-col items-start gap-1 px-2" aria-label="Orbit home">
           <OrbitLogo className="h-7" />
           <div className="text-[12px] leading-none text-[var(--muted)]">self-driving savings</div>
@@ -658,7 +658,7 @@ export default function Home() {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-[1200px] flex-1 px-5 py-6 lg:px-8 lg:py-8">
+        <main className="w-full flex-1 px-5 py-6 lg:px-8 lg:py-8">
           {/* ═══════════ HOME ═══════════ */}
           {tab === "home" && (
             <div className="space-y-4 lg:space-y-5">
