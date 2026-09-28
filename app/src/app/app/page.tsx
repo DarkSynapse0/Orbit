@@ -40,7 +40,7 @@ import { useAuth } from "@/lib/auth";
 import { apiFetch } from "@/lib/api";
 import { AuthScreen } from "@/components/AuthScreen";
 import { UserMenu, Avatar } from "@/components/UserMenu";
-import { LineArea, HBars } from "@/components/dashboard/Charts";
+import { LineArea } from "@/components/dashboard/Charts";
 import { SavingsGoals } from "@/components/dashboard/SavingsGoals";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -99,13 +99,6 @@ const PANEL = CARD;
 // Placeholder shown only until there are real transactions (fresh account).
 const SAMPLE_LINE = [15, 25, 30, 45, 55, 75, 90, 110, 130, 160];
 const SAMPLE_LINE_LABELS = ["", "", "", "", "", "", "", "", "", "now"];
-const SAMPLE_CATEGORIES = [
-  { label: "Groceries", v: 25 },
-  { label: "Dining", v: 20 },
-  { label: "Transport", v: 15 },
-  { label: "Shopping", v: 10 },
-];
-
 // Yield venues the vault's USDC can be routed to. The Orbit reserve is live on devnet now;
 // the mainnet lenders are where deposits route in production. APY/TVL are indicative.
 type Venue = {
@@ -597,8 +590,12 @@ export default function Home() {
     vault: connected,
     saving: state.pendingUsd > 0 || principalUsd > 0,
   };
-  // A simple "savings health" score for the side panel (Finora "Payment Score" parity).
-  const savingsScore = (setup.vault ? 40 : 0) + (setup.bank ? 40 : 0) + (setup.saving ? 20 : 0);
+  // Savings health = three steps to fully automatic saving.
+  const healthSteps = [
+    { done: setup.vault, label: "Open your vault", desc: "One tap, no seed phrase", go: "grow" as TabId },
+    { done: setup.bank, label: "Connect your bank", desc: "So Orbit can watch your spending", go: "save" as TabId },
+    { done: setup.saving, label: "Start saving", desc: "Set aside from your spending", go: "save" as TabId },
+  ];
   // Friendly transaction row helper.
   const txnDate = (ts: number) => new Date(ts).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
@@ -838,40 +835,41 @@ export default function Home() {
 
                 {/* Savings health */}
                 <div className="mt-6 border-t border-[var(--line)] pt-6">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-baseline justify-between">
                     <div className="flex items-center gap-1.5 font-display text-[15px] font-semibold">
                       Savings health
-                      <InfoDot label="A quick read on how set up you are: open a vault, connect a bank, start saving." />
+                      <InfoDot label="Three steps to fully automatic saving: open a vault, connect a bank, start saving." />
                     </div>
-                    <span className="font-mono text-[14px]"><span className="font-semibold text-[var(--primary-strong)]">{savingsScore}</span><span className="text-[var(--faint)]"> / 100</span></span>
+                    <span className="text-[13px] font-medium text-[var(--muted)]">
+                      {healthSteps.filter((s) => s.done).length === 3 ? "All set" : `${healthSteps.filter((s) => s.done).length} of 3`}
+                    </span>
                   </div>
-                  <div className="mt-2.5 h-2 w-full overflow-hidden rounded-full bg-[var(--border)]">
-                    <div className="h-full rounded-full bg-[var(--primary)] transition-[width] duration-500" style={{ width: `${savingsScore}%` }} />
+                  {/* progress: fill one segment per completed step, left to right */}
+                  <div className="mt-3 flex gap-1.5" aria-hidden>
+                    {healthSteps.map((_, i) => (
+                      <span key={i} className={`h-1.5 flex-1 rounded-full transition-colors duration-500 ${i < healthSteps.filter((s) => s.done).length ? "bg-[var(--primary)]" : "bg-[var(--border)]"}`} />
+                    ))}
                   </div>
-                  {!setup.vault || !setup.bank ? (
-                    <div className="mt-3 divide-y divide-[var(--border)]">
-                      {[
-                        { done: setup.vault, label: "Open your vault", desc: "One tap, no seed phrase", go: "grow" as TabId },
-                        { done: setup.bank, label: "Connect your bank", desc: "So Orbit can watch your spending", go: "save" as TabId },
-                      ].map((s) => (
-                        <button key={s.label} type="button" onClick={() => setTab(s.go)} className="flex w-full items-center gap-3 py-3 text-left">
-                          <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full ${s.done ? "bg-[var(--primary)] text-[var(--primary-fg)]" : "bg-[var(--surface)] text-[var(--muted)]"}`}>
-                            {s.done ? <Check className="h-4 w-4" aria-hidden /> : <span className="h-1.5 w-1.5 rounded-full bg-current" />}
-                          </span>
-                          <span className="min-w-0 flex-1">
-                            <span className={`block text-[14px] font-medium ${s.done ? "text-[var(--muted)] line-through" : ""}`}>{s.label}</span>
-                            <span className="block text-[12px] text-[var(--muted)]">{s.desc}</span>
-                          </span>
-                          {!s.done && <ChevronRight className="h-4 w-4 shrink-0 text-[var(--faint)]" aria-hidden />}
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="mt-5">
-                      <div className="mb-2.5 text-[12px] font-medium text-[var(--muted)]">Where your savings come from</div>
-                      <HBars rows={analytics.categories.length ? analytics.categories : SAMPLE_CATEGORIES} />
-                    </div>
-                  )}
+                  {/* the three steps as a clean checklist */}
+                  <div className="mt-4 space-y-0.5">
+                    {healthSteps.map((s) => (
+                      <button
+                        key={s.label}
+                        type="button"
+                        onClick={() => setTab(s.go)}
+                        className="-mx-2 flex w-[calc(100%+1rem)] items-center gap-3 rounded-lg px-2 py-2.5 text-left transition-colors hover:bg-[var(--surface)]"
+                      >
+                        <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full transition-colors ${s.done ? "bg-[var(--primary)] text-[var(--primary-fg)]" : "border-2 border-[var(--border-strong)]"}`}>
+                          {s.done && <Check className="h-3.5 w-3.5" aria-hidden />}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className={`block text-[14px] font-medium ${s.done ? "text-[var(--muted)] line-through" : ""}`}>{s.label}</span>
+                          <span className="block text-[12px] text-[var(--muted)]">{s.desc}</span>
+                        </span>
+                        {!s.done && <ChevronRight className="h-4 w-4 shrink-0 text-[var(--faint)]" aria-hidden />}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
