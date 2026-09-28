@@ -958,7 +958,7 @@ export default function Home() {
                 </section>
 
                 {/* Your bank */}
-                <div className="mt-6 border-t border-[var(--line)] pt-6">
+                <div className="mt-6 rounded-2xl bg-[var(--surface)] p-5">
                   <div className="font-display text-[16px] font-bold">Your bank</div>
                   <div className="mt-3 flex items-center gap-3">
                     <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[var(--surface)] text-[var(--muted)]"><Landmark className="h-5 w-5" aria-hidden /></span>
