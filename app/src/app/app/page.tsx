@@ -1201,7 +1201,7 @@ export default function Home() {
                     </button>
                   );
                 })}
-                <button type="button" onClick={() => { reset(); clearActivity(); }} className="mb-1.5 ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-transparent px-3 py-1.5 text-[13px] text-[var(--muted)] transition-colors hover:bg-[var(--surface)] hover:text-[var(--foreground)]"><RotateCcw className="h-3.5 w-3.5" aria-hidden /> reset</button>
+                <button type="button" onClick={() => { reset(); clearActivity(); }} className="mb-1.5 ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[var(--border-strong)] bg-transparent px-3 py-1.5 text-[13px] text-[var(--muted)] transition-colors hover:bg-[var(--surface)] hover:text-[var(--foreground)]"><RotateCcw className="h-3.5 w-3.5" aria-hidden /> reset</button>
               </div>
 
               {q && <p className="mt-4 text-[13px] text-[var(--muted)]">Results for “{query}” · {filteredHistory.length} {filteredHistory.length === 1 ? "match" : "matches"}</p>}
