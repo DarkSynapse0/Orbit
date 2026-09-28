@@ -245,7 +245,7 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
 
   return (
     <section className="mt-6">
-      <div>
+      <div className="rounded-2xl bg-[var(--surface)] p-5">
         <div className="mb-4 flex items-center gap-1.5 font-display text-[16px] font-bold">
           <ShieldCheck className="h-4 w-4 text-[var(--primary-strong)]" aria-hidden /> Your vault
         </div>
@@ -314,7 +314,7 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
               </button>
             </div>
             {/* Your savings — the headline (the one card we allow) */}
-            <div className="rounded-2xl bg-[var(--surface)] p-4">
+            <div className="rounded-2xl bg-[var(--background)] p-4">
               <div className="flex items-center gap-1.5 text-[13px] font-medium text-[var(--muted)]">
                 Your savings
                 <InfoDot label="Held on-chain as USDC, converted from your dollars via Stripe. Earns 6% a year; only you can withdraw." />
