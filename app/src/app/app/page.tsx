@@ -727,7 +727,7 @@ export default function Home() {
                 {/* Balance — the one moment of emphasis */}
                 <section>
                   <div className="flex items-center gap-1.5">
-                    <span className="font-display text-[16px] font-extrabold text-[var(--primary-strong)]">Total saved</span>
+                    <span className="font-display text-[16px] font-bold">Total saved</span>
                     <InfoDot label="Everything you've set aside plus the yield it's earning on-chain." />
                   </div>
                   <div
@@ -755,14 +755,14 @@ export default function Home() {
                 {/* In vault | Set aside */}
                 <div className="mt-6 grid grid-cols-2 gap-6 border-t border-[var(--line)] pt-6">
                   <div>
-                    <div className="flex items-center gap-1.5 font-display text-[16px] font-extrabold text-[var(--primary-strong)]">
+                    <div className="flex items-center gap-1.5 font-display text-[16px] font-bold">
                       <Coins className="h-4 w-4" aria-hidden /> In vault
                       <InfoDot label="Invested on-chain and earning yield. Only you can withdraw it." />
                     </div>
                     <div className="mt-1.5 font-mono text-2xl font-semibold tabular-nums text-[var(--primary-strong)]">{usd(principalUsd)}</div>
                   </div>
                   <div className="border-l border-[var(--line)] pl-6">
-                    <div className="flex items-center gap-1.5 font-display text-[16px] font-extrabold text-[var(--primary-strong)]">
+                    <div className="flex items-center gap-1.5 font-display text-[16px] font-bold">
                       <Landmark className="h-4 w-4" aria-hidden /> Set aside
                       <InfoDot label={`Waiting in your bank. It moves to your vault once it reaches ${usd(THRESHOLD)}.`} />
                     </div>
@@ -778,7 +778,7 @@ export default function Home() {
 
                 <div className="mt-6 flex min-h-0 flex-1 flex-col border-t border-[var(--line)] pt-6">
                   <div className="flex items-center justify-between">
-                    <h2 className="font-display text-[16px] font-extrabold text-[var(--primary-strong)]">Recent transactions</h2>
+                    <h2 className="font-display text-[16px] font-bold">Recent transactions</h2>
                     {txns.length > 0 && (
                       <button type="button" onClick={() => setTab("activity")} className="inline-flex items-center gap-1 text-[13px] text-[var(--muted)] transition-colors hover:text-[var(--foreground)]">
                         See all <ChevronRight className="h-3.5 w-3.5" aria-hidden />
@@ -827,7 +827,7 @@ export default function Home() {
               <div className="mt-6 flex min-h-0 flex-col border-t border-[var(--line)] pt-6 lg:mt-0 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
                 <div className="shrink-0">
                   <div className="flex items-center gap-1.5">
-                    <h2 className="font-display text-[16px] font-extrabold text-[var(--primary-strong)]">Savings over time</h2>
+                    <h2 className="font-display text-[16px] font-bold">Savings over time</h2>
                     <InfoDot label={analytics.hasData ? "Your set-aside balance building up over time." : "Sample data. Your real curve appears once you start saving."} />
                   </div>
                   <div className="mt-3 h-[280px] lg:h-[360px]">
@@ -843,7 +843,7 @@ export default function Home() {
                 {/* Savings health */}
                 <div className="mt-6 border-t border-[var(--line)] pt-6">
                   <div className="flex items-baseline justify-between">
-                    <div className="flex items-center gap-1.5 font-display text-[16px] font-extrabold text-[var(--primary-strong)]">
+                    <div className="flex items-center gap-1.5 font-display text-[16px] font-bold">
                       Savings health
                       <InfoDot label="Three steps to fully automatic saving: open a vault, connect a bank, start saving." />
                     </div>
