@@ -8,6 +8,7 @@ import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { Wallet, Coins, ArrowDownToLine, ArrowUpFromLine, Copy, Check, ExternalLink, Loader2, ShieldCheck, Sparkles, Power } from "lucide-react";
 import { PhantomMark } from "@/components/landing/BrandMarks";
+import { InfoDot } from "@/components/ui/InfoDot";
 import idl from "@/idl/orbit_vault.json";
 import { OrbitWalletName } from "@/lib/orbitWallet";
 import { apiFetch } from "@/lib/api";
@@ -280,11 +281,29 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
         ) : (
           /* ───────── Connected ───────── */
           <div className="space-y-5">
-            {/* Your savings — the headline */}
-            <div>
-              <div className="text-[13px] font-medium text-[var(--muted)]">Your savings</div>
+            {/* Your savings — the headline (the one card we allow) */}
+            <div className="rounded-2xl bg-[var(--surface)] p-4">
+              <div className="flex items-center gap-1.5 text-[13px] font-medium text-[var(--muted)]">
+                Your savings
+                <InfoDot label="Held on-chain as USDC, converted from your dollars via Stripe. Earns 6% a year; only you can withdraw." />
+              </div>
               <div className="mt-1 font-mono text-[clamp(2rem,5vw,2.75rem)] font-semibold leading-none tabular-nums text-[var(--primary-strong)]">${(principal ?? 0).toFixed(2)}</div>
-              <div className="mt-1.5 text-[13px] text-[var(--muted)]">Earning 6% a year on-chain. Only you can withdraw.</div>
+              <div className="mt-3 grid grid-cols-2 gap-3 border-t border-[var(--border)] pt-3">
+                <div>
+                  <div className="flex items-center gap-1 text-[12px] text-[var(--muted)]">
+                    In your wallet
+                    <InfoDot label="Test USDC sitting in your wallet, ready to add to savings." />
+                  </div>
+                  <div className="mt-0.5 font-mono text-[15px] font-semibold tabular-nums">${usdc.toFixed(2)}</div>
+                </div>
+                <div>
+                  <div className="flex items-center gap-1 text-[12px] text-[var(--muted)]">
+                    Converted via Stripe
+                    <InfoDot label="Total dollars Orbit converted to USDC and deposited into your vault (Stripe is mocked on devnet)." />
+                  </div>
+                  <div className="mt-0.5 font-mono text-[15px] font-semibold tabular-nums text-[var(--primary-strong)]">${(principal ?? 0).toFixed(2)}</div>
+                </div>
+              </div>
             </div>
 
             {/* Add money */}
