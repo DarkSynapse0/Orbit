@@ -581,7 +581,7 @@ export default function Home() {
     <div className="flex min-h-full flex-1">
       {/* ───────── Sidebar (desktop) ───────── */}
       <aside className="sticky top-0 hidden h-screen w-[18rem] shrink-0 flex-col border-r border-[var(--border)] bg-[var(--surface)] px-4 py-6 lg:flex">
-        <div className="flex items-start justify-between gap-2 px-2">
+        <div className="flex items-start justify-between gap-2 border-b border-[var(--border)] px-2 pb-5">
           <Link href="/" className="flex flex-col items-start gap-1" aria-label="Orbit home">
             <OrbitLogo className="h-7" />
             <div className="text-[12px] leading-none text-[var(--muted)]">self-driving savings</div>
