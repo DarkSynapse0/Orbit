@@ -28,7 +28,7 @@ export function InfoDot({ label, className = "" }: { label: string; className?: 
         <span
           role="tooltip"
           id={id}
-          className="absolute bottom-full left-1/2 z-40 mb-1.5 w-max max-w-[15rem] -translate-x-1/2 rounded-lg bg-[var(--foreground)] px-2.5 py-1.5 text-[12px] leading-snug font-normal text-[var(--background)] shadow-[0_6px_20px_-6px_rgba(0,0,0,0.35)]"
+          className="absolute top-full left-0 z-40 mt-1.5 ml-1 w-max max-w-[15rem] rounded-lg bg-[var(--foreground)] px-2.5 py-1.5 text-[12px] leading-snug font-normal text-[var(--background)] shadow-[0_6px_20px_-6px_rgba(0,0,0,0.35)]"
         >
           {label}
         </span>

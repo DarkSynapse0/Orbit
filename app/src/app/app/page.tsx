@@ -49,7 +49,7 @@ import { OrbitLogo } from "@/components/OrbitLogo";
 import { AaveMark, KaminoMark, SaveMark, MarginfiMark } from "@/components/landing/BrandMarks";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { InfoDot } from "@/components/ui/InfoDot";
-import { txnIcon, TONE_ICON } from "@/lib/visuals";
+import { txnIcon } from "@/lib/visuals";
 
 const THRESHOLD = 10;
 const APY = 0.06;
@@ -730,7 +730,7 @@ export default function Home() {
                 {/* Balance — the one moment of emphasis */}
                 <section>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[13px] font-medium text-[var(--muted)]">Total saved</span>
+                    <span className="font-display text-[15px] font-semibold">Total saved</span>
                     <InfoDot label="Everything you've set aside plus the yield it's earning on-chain." />
                   </div>
                   <div
@@ -756,16 +756,16 @@ export default function Home() {
                 </section>
 
                 {/* In vault | Set aside */}
-                <div className="mt-6 grid grid-cols-2 gap-6 border-t border-[var(--border)] pt-6">
+                <div className="mt-6 grid grid-cols-2 gap-6 border-t border-[var(--line)] pt-6">
                   <div>
-                    <div className="flex items-center gap-1.5 text-[13px] text-[var(--muted)]">
+                    <div className="flex items-center gap-1.5 font-display text-[15px] font-semibold">
                       <Coins className="h-4 w-4" aria-hidden /> In vault
                       <InfoDot label="Invested on-chain and earning yield. Only you can withdraw it." />
                     </div>
                     <div className="mt-1.5 font-mono text-2xl font-semibold tabular-nums text-[var(--primary-strong)]">{usd(principalUsd)}</div>
                   </div>
-                  <div className="border-l border-[var(--border)] pl-6">
-                    <div className="flex items-center gap-1.5 text-[13px] text-[var(--muted)]">
+                  <div className="border-l border-[var(--line)] pl-6">
+                    <div className="flex items-center gap-1.5 font-display text-[15px] font-semibold">
                       <Landmark className="h-4 w-4" aria-hidden /> Set aside
                       <InfoDot label={`Waiting in your bank. It moves to your vault once it reaches ${usd(THRESHOLD)}.`} />
                     </div>
@@ -779,9 +779,9 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div className="mt-6 flex min-h-0 flex-1 flex-col border-t border-[var(--border)] pt-6">
+                <div className="mt-6 flex min-h-0 flex-1 flex-col border-t border-[var(--line)] pt-6">
                   <div className="flex items-center justify-between">
-                    <h2 className="text-[12px] font-medium uppercase tracking-[0.14em] text-[var(--faint)]">Recent activity</h2>
+                    <h2 className="font-display text-[15px] font-semibold">Recent activity</h2>
                     {txns.length > 0 && (
                       <button type="button" onClick={() => setTab("activity")} className="inline-flex items-center gap-1 text-[13px] text-[var(--muted)] transition-colors hover:text-[var(--foreground)]">
                         See all <ChevronRight className="h-3.5 w-3.5" aria-hidden />
@@ -800,7 +800,7 @@ export default function Home() {
                         const Icon = txnIcon(t);
                         return (
                           <li key={t.id} className="flex items-center gap-3 py-3">
-                            <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${t.deposited ? TONE_ICON.primary : TONE_ICON.neutral}`}>
+                            <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[var(--surface)] ${t.deposited ? "text-[var(--primary-strong)]" : "text-[var(--muted)]"}`}>
                               <Icon className="h-4 w-4" aria-hidden />
                             </span>
                             <div className="min-w-0 flex-1">
@@ -820,13 +820,13 @@ export default function Home() {
               </div>
 
               {/* RIGHT — growth chart + savings health */}
-              <div className="mt-6 flex min-h-0 flex-col border-t border-[var(--border)] pt-6 lg:mt-0 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
+              <div className="mt-6 flex min-h-0 flex-col border-t border-[var(--line)] pt-6 lg:mt-0 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
                 <div className="shrink-0">
                   <div className="flex items-center gap-1.5">
                     <h2 className="font-display text-[15px] font-semibold">Savings over time</h2>
                     <InfoDot label={analytics.hasData ? "Your set-aside balance building up over time." : "Sample data. Your real curve appears once you start saving."} />
                   </div>
-                  <div className="mt-3 h-[168px]">
+                  <div className="mt-3 h-[240px] lg:h-[300px]">
                     <LineArea
                       fill
                       series={[{ label: "Saved", points: analytics.hasData ? analytics.savingsLine : SAMPLE_LINE }]}
@@ -837,9 +837,9 @@ export default function Home() {
                 </div>
 
                 {/* Savings health */}
-                <div className="mt-6 border-t border-[var(--border)] pt-6">
+                <div className="mt-6 border-t border-[var(--line)] pt-6">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-[12px] font-medium uppercase tracking-[0.14em] text-[var(--faint)]">
+                    <div className="flex items-center gap-1.5 font-display text-[15px] font-semibold">
                       Savings health
                       <InfoDot label="A quick read on how set up you are: open a vault, connect a bank, start saving." />
                     </div>
@@ -1129,7 +1129,7 @@ export default function Home() {
                           <tr key={t.id} className="transition-colors hover:bg-[var(--background)]">
                             <td className="px-5 py-3">
                               <div className="flex items-center gap-3">
-                                <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full ${t.deposited ? TONE_ICON.primary : TONE_ICON.neutral}`}>
+                                <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[var(--surface)] ${t.deposited ? "text-[var(--primary-strong)]" : "text-[var(--muted)]"}`}>
                                   <Icon className="h-4 w-4" aria-hidden />
                                 </span>
                                 <span className="truncate font-medium">{t.name}</span>
