@@ -28,6 +28,10 @@ import {
   LogIn,
   LogOut,
   Plus,
+  Search,
+  Gift,
+  Settings,
+  HelpCircle,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { apiFetch } from "@/lib/api";
@@ -183,7 +187,17 @@ function Toggle({ on, onClick, label }: { on: boolean; onClick: () => void; labe
 export default function Home() {
   const { user, ready: authReady, signInWithGoogle, signOut } = useAuth();
   const [tab, setTab] = useState<TabId>("home");
+  const [invited, setInvited] = useState(false);
   const firstTabPersist = useRef(true);
+
+  // "Invite & Earn" (Finora parity): copy an invite link to the clipboard for now.
+  const invite = () => {
+    try {
+      navigator.clipboard?.writeText(typeof window !== "undefined" ? window.location.origin : "https://orbit.app");
+      setInvited(true);
+      setTimeout(() => setInvited(false), 1800);
+    } catch {}
+  };
 
   // Restore the last-viewed tab after a refresh (client-only, avoids SSR mismatch).
   useEffect(() => {
@@ -524,28 +538,49 @@ export default function Home() {
   return (
     <div className="flex min-h-full flex-1">
       {/* ───────── Sidebar (desktop) ───────── */}
-      <aside className="sticky top-0 hidden h-screen w-[15rem] shrink-0 flex-col border-r border-[var(--border)] px-4 py-6 lg:flex">
-        <Link href="/" className="flex flex-col items-start gap-1 px-1" aria-label="Orbit home">
+      <aside className="sticky top-0 hidden h-screen w-[15.5rem] shrink-0 flex-col border-r border-[var(--border)] bg-[var(--surface)] px-4 py-6 lg:flex">
+        <Link href="/" className="flex flex-col items-start gap-1 px-2" aria-label="Orbit home">
           <OrbitLogo className="h-7" />
           <div className="text-[12px] leading-none text-[var(--muted)]">self-driving savings</div>
         </Link>
 
-        <nav className="mt-9 flex-1 space-y-1">
-          {NAV.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              onClick={() => setTab(t.id)}
-              className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40 ${
-                tab === t.id
-                  ? "bg-[var(--surface)] font-medium text-[var(--foreground)]"
-                  : "text-[var(--muted)] hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
-              }`}
-            >
-              <t.icon className="h-[18px] w-[18px]" aria-hidden />
-              {t.label}
-            </button>
-          ))}
+        <nav className="mt-8 flex-1 space-y-1">
+          <div className="px-3 pb-1.5 text-[11px] font-medium uppercase tracking-wider text-[var(--faint)]">Menu</div>
+          {NAV.map((t) => {
+            const on = tab === t.id;
+            return (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setTab(t.id)}
+                className={`relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40 ${
+                  on
+                    ? "bg-[var(--background)] font-medium text-[var(--foreground)] shadow-[0_1px_2px_rgba(2,6,23,0.06)]"
+                    : "text-[var(--muted)] hover:bg-[var(--background)]/60 hover:text-[var(--foreground)]"
+                }`}
+              >
+                {on && <span className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-[var(--accent)]" aria-hidden />}
+                <t.icon className={`h-[18px] w-[18px] ${on ? "text-[var(--accent-strong)]" : ""}`} aria-hidden />
+                {t.label}
+              </button>
+            );
+          })}
+
+          <div className="my-3 h-px bg-[var(--border)]" />
+
+          <button
+            type="button"
+            onClick={() => setTab("account")}
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[var(--muted)] transition-colors hover:bg-[var(--background)]/60 hover:text-[var(--foreground)]"
+          >
+            <Settings className="h-[18px] w-[18px]" aria-hidden /> Settings
+          </button>
+          <a
+            href="/"
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[var(--muted)] transition-colors hover:bg-[var(--background)]/60 hover:text-[var(--foreground)]"
+          >
+            <HelpCircle className="h-[18px] w-[18px]" aria-hidden /> Help Center
+          </a>
         </nav>
 
         <div className="space-y-3 border-t border-[var(--border)] px-1 pt-4">
@@ -582,8 +617,8 @@ export default function Home() {
 
       {/* ───────── Main ───────── */}
       <div className="flex min-w-0 flex-1 flex-col pb-20 lg:pb-0">
-        <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-4 border-b border-[var(--border)] bg-[var(--background)]/80 px-5 backdrop-blur-md lg:px-8">
-          <div className="flex items-center gap-2.5">
+        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-[var(--border)] bg-[var(--background)]/80 px-5 backdrop-blur-md lg:px-8">
+          <div className="flex shrink-0 items-center gap-2.5">
             <Link href="/" className="flex items-center lg:hidden" aria-label="Orbit home">
               <OrbitLogo mark className="h-7" />
             </Link>
@@ -592,7 +627,27 @@ export default function Home() {
               <p className="mt-1 hidden text-[14px] leading-none text-[var(--muted)] sm:block">{activeNav.hint}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+
+          {/* Center search (Finora parity) */}
+          <div className="mx-auto hidden w-full max-w-md items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-[var(--muted)] transition-colors focus-within:border-[var(--border-strong)] md:flex">
+            <Search className="h-4 w-4 shrink-0 text-[var(--faint)]" aria-hidden />
+            <input
+              type="text"
+              placeholder="Search here…"
+              aria-label="Search"
+              className="w-full min-w-0 bg-transparent text-[14px] text-[var(--foreground)] placeholder:text-[var(--faint)] focus:outline-none"
+            />
+          </div>
+
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              onClick={invite}
+              className="hidden items-center gap-1.5 rounded-full border border-[var(--border-strong)] px-3.5 py-2 text-[13px] font-medium transition-colors hover:bg-[var(--surface)] sm:inline-flex"
+            >
+              {invited ? <Check className="h-4 w-4 text-[var(--accent-strong)]" aria-hidden /> : <Gift className="h-4 w-4" aria-hidden />}
+              {invited ? "Link copied" : "Invite & Earn"}
+            </button>
             <span className="lg:hidden">
               <ThemeToggle />
             </span>
