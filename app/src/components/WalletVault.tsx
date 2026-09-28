@@ -281,6 +281,26 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
         ) : (
           /* ───────── Connected ───────── */
           <div className="space-y-5">
+            {/* Account */}
+            <div className="flex items-center justify-between gap-3 border-b border-[var(--border)] pb-4 text-[12px] text-[var(--muted)]">
+              <button
+                type="button"
+                onClick={() => { navigator.clipboard?.writeText(publicKey.toBase58()); setCopied(true); setTimeout(() => setCopied(false), 1500); }}
+                className="flex min-w-0 items-center gap-1.5 rounded transition-colors hover:text-[var(--foreground)]"
+                aria-label="Copy account address"
+              >
+                <Wallet className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                <span className="truncate">{isEmbedded ? "Orbit account" : "Wallet"} · <span className="font-mono">{truncate(publicKey.toBase58())}</span></span>
+                {copied ? <Check className="h-3.5 w-3.5 shrink-0 text-[var(--primary-strong)]" aria-hidden /> : <Copy className="h-3.5 w-3.5 shrink-0" aria-hidden />}
+              </button>
+              <button
+                type="button"
+                onClick={() => disconnect().catch(() => {})}
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[var(--destructive)]/40 px-2.5 py-1 font-medium text-[var(--destructive)] transition-colors hover:bg-[var(--destructive-soft)]"
+              >
+                <Power className="h-3.5 w-3.5" aria-hidden /> <span className="hidden sm:inline">Disconnect</span>
+              </button>
+            </div>
             {/* Your savings — the headline (the one card we allow) */}
             <div className="rounded-2xl bg-[var(--surface)] p-4">
               <div className="flex items-center gap-1.5 text-[13px] font-medium text-[var(--muted)]">
@@ -383,26 +403,6 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
               </div>
             )}
 
-            {/* Account details, de-emphasized */}
-            <div className="flex items-center justify-between gap-3 border-t border-[var(--border)] pt-3.5 text-[12px] text-[var(--muted)]">
-              <button
-                type="button"
-                onClick={() => { navigator.clipboard?.writeText(publicKey.toBase58()); setCopied(true); setTimeout(() => setCopied(false), 1500); }}
-                className="flex min-w-0 items-center gap-1.5 rounded transition-colors hover:text-[var(--foreground)]"
-                aria-label="Copy account address"
-              >
-                <Wallet className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                <span className="truncate">{isEmbedded ? "Orbit account" : "Wallet"} · <span className="font-mono">{truncate(publicKey.toBase58())}</span></span>
-                {copied ? <Check className="h-3.5 w-3.5 shrink-0 text-[var(--primary-strong)]" aria-hidden /> : <Copy className="h-3.5 w-3.5 shrink-0" aria-hidden />}
-              </button>
-              <button
-                type="button"
-                onClick={() => disconnect().catch(() => {})}
-                className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[var(--destructive)]/40 px-2.5 py-1 font-medium text-[var(--destructive)] transition-colors hover:bg-[var(--destructive-soft)]"
-              >
-                <Power className="h-3.5 w-3.5" aria-hidden /> <span className="hidden sm:inline">Disconnect</span>
-              </button>
-            </div>
           </div>
         )}
       </div>
