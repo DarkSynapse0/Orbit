@@ -578,7 +578,7 @@ export default function Home() {
   if (!user) return <AuthScreen />;
 
   return (
-    <div className="flex min-h-full flex-1">
+    <div className="flex min-h-full flex-1 lg:h-dvh lg:min-h-0 lg:flex-none lg:overflow-hidden">
       {/* ───────── Sidebar (desktop) ───────── */}
       <aside className="sticky top-0 hidden h-screen w-[18rem] shrink-0 flex-col border-r border-[var(--border)] bg-[var(--surface)] px-4 py-6 lg:flex">
         <div className="flex items-start justify-between gap-2 border-b border-[var(--border)] px-2 pb-5">
@@ -640,8 +640,8 @@ export default function Home() {
       </aside>
 
       {/* ───────── Main ───────── */}
-      <div className="flex min-w-0 flex-1 flex-col pb-20 lg:pb-0">
-        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-[var(--border)] bg-[var(--background)]/80 px-5 backdrop-blur-md lg:px-8">
+      <div className="flex min-w-0 flex-1 flex-col pb-20 lg:min-h-0 lg:overflow-hidden lg:pb-0">
+        <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-3 border-b border-[var(--border)] bg-[var(--background)]/80 px-5 backdrop-blur-md lg:px-8">
           <div className="flex shrink-0 items-center gap-2.5">
             <Link href="/" className="flex items-center lg:hidden" aria-label="Orbit home">
               <OrbitLogo mark className="h-7" />
@@ -676,15 +676,15 @@ export default function Home() {
           </div>
         </header>
 
-        <main className="w-full flex-1 px-5 py-6 lg:px-8 lg:py-8">
+        <main className="w-full flex-1 px-5 py-6 lg:min-h-0 lg:overflow-y-auto lg:px-8 lg:py-6">
           {/* ═══════════ HOME ═══════════ */}
           {tab === "home" && (
-            <div className="space-y-4 lg:space-y-5">
+            <div className="space-y-4 lg:flex lg:h-full lg:flex-col lg:gap-4 lg:space-y-0">
               {/* Top row — balance + vault (narrow) beside the savings chart (wide) */}
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-[0.92fr_1.7fr] lg:gap-5">
-                <div className="space-y-4 lg:space-y-5">
+              <div className="grid grid-cols-1 gap-4 lg:min-h-0 lg:flex-[1.15] lg:grid-cols-[0.8fr_2fr] lg:gap-4">
+                <div className="flex flex-col gap-4 lg:min-h-0">
                   {/* Total saved (Finora: Total Balance) */}
-                  <div className={`${CARD} p-6`}>
+                  <div className={`${CARD} shrink-0 p-5`}>
                     <div className="flex items-center justify-between">
                       <span className="text-[13px] font-medium text-[var(--muted)]">Total saved</span>
                       <span className="inline-flex items-center gap-1 rounded-full border border-[var(--border)] px-2.5 py-1 text-[11px] font-medium text-[var(--muted)]">USD <ChevronDown className="h-3 w-3" aria-hidden /></span>
@@ -696,29 +696,29 @@ export default function Home() {
                     >
                       {usd(total)}
                     </div>
-                    <div className="mt-2.5 flex flex-wrap items-center gap-1.5 text-[13px]">
+                    <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[13px]">
                       <TrendingUp className="h-4 w-4 text-[var(--accent-strong)]" aria-hidden />
                       <span className="font-mono font-medium text-[var(--accent-strong)]">{liveYield > 0 ? "+" : ""}{fmtYield(liveYield)}</span>
                       <span className="text-[var(--muted)]">earned · 6% a year</span>
                     </div>
-                    <div className="mt-5 grid grid-cols-2 gap-2.5">
-                      <button type="button" onClick={() => setTab("grow")} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--accent)] px-4 py-2.5 text-[14px] font-semibold text-[var(--on-accent)] transition-opacity hover:opacity-90">
+                    <div className="mt-4 grid grid-cols-2 gap-2.5">
+                      <button type="button" onClick={() => setTab("grow")} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--accent)] px-4 py-2 text-[14px] font-semibold text-[var(--on-accent)] transition-opacity hover:opacity-90">
                         <ArrowDownToLine className="h-4 w-4" aria-hidden /> Add money
                       </button>
-                      <button type="button" onClick={() => setTab("grow")} className="inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--border-strong)] px-4 py-2.5 text-[14px] font-medium transition-colors hover:bg-[var(--background)]">
+                      <button type="button" onClick={() => setTab("grow")} className="inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--border-strong)] px-4 py-2 text-[14px] font-medium transition-colors hover:bg-[var(--background)]">
                         <ArrowUpFromLine className="h-4 w-4" aria-hidden /> Take out
                       </button>
                     </div>
                   </div>
 
                   {/* Your vault (Finora: Your Cards) */}
-                  <div className={`${CARD} p-6`}>
+                  <div className={`${CARD} flex flex-col p-5 lg:min-h-0 lg:flex-1 lg:overflow-hidden`}>
                     <div className="flex items-center justify-between">
                       <h3 className="font-display text-[16px] font-semibold">Your vault</h3>
                       <button type="button" onClick={() => setTab("grow")} className="text-[13px] text-[var(--muted)] transition-colors hover:text-[var(--foreground)]">Manage</button>
                     </div>
-                    <div className="mt-4 space-y-1">
-                      <div className="flex items-center gap-3 py-1.5">
+                    <div className="mt-3 space-y-1">
+                      <div className="flex items-center gap-3 py-1">
                         <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[var(--accent-soft)] text-[var(--accent-strong)]"><Coins className="h-4 w-4" aria-hidden /></span>
                         <div className="min-w-0 flex-1">
                           <div className="text-[14px] font-medium">In vault</div>
@@ -726,7 +726,7 @@ export default function Home() {
                         </div>
                         <div className="shrink-0 font-mono text-[15px] font-semibold tabular-nums text-[var(--accent-strong)]">{usd(principalUsd)}</div>
                       </div>
-                      <div className="flex items-center gap-3 py-1.5">
+                      <div className="flex items-center gap-3 py-1">
                         <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[var(--background)] text-[var(--muted)] ring-1 ring-inset ring-[var(--border)]"><Landmark className="h-4 w-4" aria-hidden /></span>
                         <div className="min-w-0 flex-1">
                           <div className="text-[14px] font-medium">Set aside</div>
@@ -741,7 +741,7 @@ export default function Home() {
                     <button
                       type="button"
                       onClick={() => setTab("grow")}
-                      className="mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-[var(--border-strong)] px-3 py-2.5 text-[13px] font-medium text-[var(--muted)] transition-colors hover:bg-[var(--background)] hover:text-[var(--foreground)]"
+                      className="mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-[var(--border-strong)] px-3 py-2.5 text-[13px] font-medium text-[var(--muted)] transition-colors hover:bg-[var(--background)] hover:text-[var(--foreground)] lg:hidden"
                     >
                       <Plus className="h-4 w-4" aria-hidden /> Manage vault &amp; goals
                     </button>
@@ -749,23 +749,24 @@ export default function Home() {
                 </div>
 
                 {/* Savings chart (Finora: Money Management Overview) */}
-                <div className={`${CARD} flex flex-col p-6`}>
+                <div className={`${CARD} flex flex-col p-5 lg:min-h-0 lg:overflow-hidden`}>
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <div className="flex items-center gap-1.5">
                         <h3 className="font-display text-[16px] font-semibold">Savings over time</h3>
                         <Info className="h-3.5 w-3.5 text-[var(--faint)]" aria-hidden />
                       </div>
-                      <div className="mt-3 text-[13px] text-[var(--muted)]">Total saved so far</div>
-                      <div className="mt-1 font-mono text-[clamp(1.6rem,4vw,2.25rem)] font-semibold leading-none tabular-nums">{usd(total)}</div>
+                      <div className="mt-2 text-[13px] text-[var(--muted)]">Total saved so far</div>
+                      <div className="mt-1 font-mono text-[clamp(1.5rem,3.5vw,2rem)] font-semibold leading-none tabular-nums">{usd(total)}</div>
                       <div className="mt-1.5 text-[13px]">
                         <span className="font-mono text-[var(--accent-strong)]">{liveYield > 0 ? "+" : ""}{fmtYield(liveYield)}</span> <span className="text-[var(--muted)]">earned, live{analytics.hasData ? "" : " · sample"}</span>
                       </div>
                     </div>
                     <span className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-2.5 py-1.5 text-[12px] font-medium text-[var(--muted)]">Yearly <ChevronDown className="h-3.5 w-3.5" aria-hidden /></span>
                   </div>
-                  <div className="mt-5 flex-1">
+                  <div className="mt-4 min-h-0 flex-1">
                     <LineArea
+                      fill
                       series={[{ label: "Saved", points: analytics.hasData ? analytics.savingsLine : SAMPLE_LINE }]}
                       xLabels={analytics.hasData ? analytics.savingsLabels : SAMPLE_LINE_LABELS}
                       fmtY={(v) => `$${v >= 1000 ? `${Math.round(v / 1000)}k` : Math.round(v)}`}
@@ -775,9 +776,9 @@ export default function Home() {
               </div>
 
               {/* Bottom row — activity table (wide) beside a side panel (narrow) */}
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.7fr_0.92fr] lg:gap-5">
+              <div className="grid grid-cols-1 gap-4 lg:min-h-0 lg:flex-1 lg:grid-cols-[2fr_1fr] lg:gap-4">
                 {/* Recent activity (Finora: Recent Transactions) */}
-                <div className={`${CARD} p-6`}>
+                <div className={`${CARD} flex flex-col p-5 lg:min-h-0 lg:overflow-hidden`}>
                   <div className="flex items-center justify-between">
                     <h3 className="font-display text-[16px] font-semibold">Recent activity</h3>
                     <button type="button" onClick={() => setTab("activity")} className="inline-flex items-center gap-1 text-[13px] text-[var(--muted)] transition-colors hover:text-[var(--foreground)]">
@@ -791,7 +792,7 @@ export default function Home() {
                       <p className="mt-0.5 text-[14px] text-[var(--faint)]">Spend or sync a bank to start saving.</p>
                     </div>
                   ) : (
-                    <div className="mt-4 overflow-x-auto">
+                    <div className="mt-4 min-h-0 flex-1 overflow-auto">
                       <table className="w-full text-left">
                         <thead>
                           <tr className="text-[11px] uppercase tracking-wide text-[var(--faint)]">
@@ -834,7 +835,7 @@ export default function Home() {
                 </div>
 
                 {/* Side panel (Finora: Invoice) — a savings score + a list */}
-                <div className={`${CARD} p-6`}>
+                <div className={`${CARD} p-5 lg:min-h-0 lg:overflow-auto`}>
                   <div className="flex items-center justify-between">
                     <h3 className="font-display text-[16px] font-semibold">Savings health</h3>
                     <MoreHorizontal className="h-4 w-4 text-[var(--faint)]" aria-hidden />

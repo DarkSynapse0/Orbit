@@ -114,10 +114,13 @@ export function LineArea({
   series,
   xLabels,
   fmtY = (v) => (v >= 1000 ? `${Math.round(v / 1000)}k` : `${Math.round(v)}`),
+  fill = false,
 }: {
   series: { label: string; points: number[]; dashed?: boolean }[];
   xLabels: string[];
   fmtY?: (v: number) => string;
+  // When true, the chart stretches to fill its container height (for fixed-height layouts).
+  fill?: boolean;
 }) {
   const W = 580, H = 240, L = 26, R = 12, T = 16, B = 26;
   const max = Math.max(1, ...series.flatMap((s) => s.points));
@@ -133,8 +136,14 @@ export function LineArea({
   // show a subset of x labels to avoid crowding
   const labelStep = Math.ceil(n / 7);
   return (
-    <div>
-      <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img" aria-label="Savings over time">
+    <div className={fill ? "flex h-full flex-col" : undefined}>
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        preserveAspectRatio={fill ? "none" : undefined}
+        className={fill ? "min-h-0 w-full flex-1" : "h-auto w-full"}
+        role="img"
+        aria-label="Savings over time"
+      >
         <defs>
           <linearGradient id="laArea" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.22" />
