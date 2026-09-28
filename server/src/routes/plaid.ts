@@ -100,6 +100,12 @@ plaidRouter.post('/connect', requireAuth, async (_req, res) => {
   }
 });
 
+/** Disconnect the linked bank (clears the Plaid item). Keeps savings + history. */
+plaidRouter.post('/disconnect', requireAuth, (_req, res) => {
+  clearItem();
+  res.json({ connected: false });
+});
+
 /** Pull real transactions from Plaid sandbox and run each purchase through the pipeline. */
 plaidRouter.post('/sync', requireAuth, async (req, res) => {
   const userId = req.userId!;

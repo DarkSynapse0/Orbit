@@ -79,11 +79,10 @@ export async function syncTransactions(): Promise<DetectedPurchase[]> {
   }
   save({ ...st, cursor });
 
-  // Curate for the demo: a couple below-tier purchases (to show the tier logic) plus a few
-  // that qualify. Each qualifying one fires a real devnet deposit and the public RPC
-  // rate-limits, so keep the qualifying count small.
-  const LOW_TIER = 100;
-  const below = all.filter((p) => p.amountUsd < LOW_TIER).slice(0, 2);
-  const qualifying = all.filter((p) => p.amountUsd >= LOW_TIER).slice(0, 3);
-  return [...below, ...qualifying];
+  // Only sync recent spending: transactions from the last day, not older history.
+  const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+  const recent = all.filter((p) => !p.date || new Date(p.date).getTime() >= cutoff);
+  // Cap how many run through the pipeline in one sync — each one that crosses the
+  // threshold fires a real devnet deposit and the RPC rate-limits.
+  return recent.slice(0, 8);
 }

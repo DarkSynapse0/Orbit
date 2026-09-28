@@ -31,6 +31,7 @@ import {
   HelpCircle,
   Info,
   X,
+  Power,
   MoreHorizontal,
   LayoutDashboard,
   ArrowLeftRight,
@@ -475,21 +476,6 @@ export default function Home() {
     }
   }, [connected, owner, state.pendingUsd, investing, investNow]);
 
-  const connectBank = useCallback(async () => {
-    setBusy(true);
-    try {
-      const d = await (await apiFetch(`/plaid/connect`, { method: "POST" })).json();
-      if (d.connected) {
-        setPlaid({ configured: true, connected: true });
-        log("info", "Connected First Platypus Bank via Plaid sandbox");
-      } else log("none", `Plaid: ${d.error ?? "connect failed"}`);
-    } catch {
-      log("none", "Plaid connect failed");
-    } finally {
-      setBusy(false);
-    }
-  }, []);
-
   const syncSpending = useCallback(async () => {
     setSyncing(true);
     try {
@@ -523,6 +509,28 @@ export default function Home() {
       setSyncing(false);
     }
   }, [owner, refreshVault, refreshTxns]);
+
+  const connectBank = useCallback(async () => {
+    setBusy(true);
+    try {
+      const d = await (await apiFetch(`/plaid/connect`, { method: "POST" })).json();
+      if (d.connected) {
+        setPlaid({ configured: true, connected: true });
+        log("info", "Connected First Platypus Bank via Plaid sandbox");
+        syncSpending(); // auto-pull spending right after connecting
+      } else log("none", `Plaid: ${d.error ?? "connect failed"}`);
+    } catch {
+      log("none", "Plaid connect failed");
+    } finally {
+      setBusy(false);
+    }
+  }, [syncSpending]);
+
+  const disconnectBank = useCallback(async () => {
+    await apiFetch(`/plaid/disconnect`, { method: "POST" }).catch(() => {});
+    setPlaid((p) => ({ configured: p?.configured ?? true, connected: false }));
+    log("info", "Disconnected your bank");
+  }, []);
 
   const reset = useCallback(async () => {
     await apiFetch(`/plaid/reset`, {
@@ -977,9 +985,14 @@ export default function Home() {
                     </button>
                   )}
                   {plaid?.connected && (
-                    <button type="button" onClick={syncSpending} disabled={syncing} className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--primary)] text-[14px] font-semibold text-[var(--primary-fg)] transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-60">
-                      <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} aria-hidden /> {syncing ? "Pulling transactions…" : "Sync spending"}
-                    </button>
+                    <div className="mt-4 flex gap-2">
+                      <button type="button" onClick={syncSpending} disabled={syncing} className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--primary)] text-[14px] font-semibold text-[var(--primary-fg)] transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-60">
+                        <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} aria-hidden /> {syncing ? "Pulling transactions…" : "Sync spending"}
+                      </button>
+                      <button type="button" onClick={disconnectBank} disabled={syncing} className="inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-xl border border-[var(--destructive)]/40 px-3.5 text-[14px] font-medium text-[var(--destructive)] transition-colors hover:bg-[var(--destructive-soft)] disabled:pointer-events-none disabled:opacity-50">
+                        <Power className="h-4 w-4" aria-hidden /> Disconnect
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>
