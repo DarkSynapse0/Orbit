@@ -77,9 +77,10 @@ const truncate = (a: string, n = 4) => (a.length <= n * 2 + 1 ? a : `${a.slice(0
 const solTx = (s: string) => `https://solscan.io/tx/${s}?cluster=devnet`;
 const solAcct = (a: string) => `https://solscan.io/account/${a}?cluster=devnet`;
 
-const PANEL = "rounded-2xl border border-[var(--border)] bg-[var(--surface)]";
 // Soft, elevated card (Finora-style): hairline border for dark mode + gentle shadow, no hard box lines.
 const CARD = "rounded-3xl border border-[var(--border)] bg-[var(--surface)] shadow-[0_1px_2px_rgba(2,6,23,0.03),0_18px_40px_-24px_rgba(2,6,23,0.22)]";
+// Every dashboard section uses the same soft card so the whole app reads as one system.
+const PANEL = CARD;
 
 // Placeholder shown only until there are real transactions (fresh account).
 const SAMPLE_LINE = [15, 25, 30, 45, 55, 75, 90, 110, 130, 160];
