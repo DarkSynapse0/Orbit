@@ -83,7 +83,7 @@ export function UserMenu() {
                 signOut();
                 setOpen(false);
               }}
-              className="mt-1 flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-[13px] text-[var(--muted)] transition-colors hover:bg-[var(--background)] hover:text-[var(--foreground)]"
+              className="mt-1 flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-[13px] text-[var(--destructive)] transition-colors hover:bg-[var(--destructive-soft)]"
             >
               <LogOut className="h-4 w-4" aria-hidden /> Sign out
             </button>

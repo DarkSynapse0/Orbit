@@ -157,7 +157,7 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
                       <button key={d} type="button" onClick={() => allocate(g.id, d)} disabled={unallocated <= 0} className="rounded-md border border-[var(--border-strong)] px-2 py-0.5 text-[12px] font-medium transition-colors hover:bg-[var(--surface)] disabled:pointer-events-none disabled:opacity-40">+${d}</button>
                     ))}
                     <button type="button" onClick={() => allocate(g.id, -g.allocated)} disabled={g.allocated <= 0} className="rounded-md border border-[var(--border-strong)] px-2 py-0.5 text-[12px] font-medium transition-colors hover:bg-[var(--surface)] disabled:pointer-events-none disabled:opacity-40">Empty</button>
-                    <button type="button" onClick={() => remove(g.id)} aria-label={`Delete ${g.name}`} className="ml-auto grid h-6 w-6 place-items-center rounded-md text-[var(--faint)] transition-colors hover:text-[var(--destructive)]"><Trash2 className="h-3.5 w-3.5" aria-hidden /></button>
+                    <button type="button" onClick={() => remove(g.id)} aria-label={`Delete ${g.name}`} className="ml-auto grid h-6 w-6 place-items-center rounded-md text-[var(--faint)] transition-colors hover:bg-[var(--destructive-soft)] hover:text-[var(--destructive)]"><Trash2 className="h-3.5 w-3.5" aria-hidden /></button>
                   </div>
                 </div>
               </li>

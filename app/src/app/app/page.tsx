@@ -1201,7 +1201,7 @@ export default function Home() {
                     </button>
                   );
                 })}
-                <button type="button" onClick={() => { reset(); clearActivity(); }} className="mb-1.5 ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[var(--border-strong)] bg-transparent px-3 py-1.5 text-[13px] text-[var(--muted)] transition-colors hover:bg-[var(--surface)] hover:text-[var(--foreground)]"><RotateCcw className="h-3.5 w-3.5" aria-hidden /> reset</button>
+                <button type="button" onClick={() => { reset(); clearActivity(); }} className="mb-1.5 ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[var(--destructive)]/40 bg-transparent px-3 py-1.5 text-[13px] font-medium text-[var(--destructive)] transition-colors hover:bg-[var(--destructive-soft)]"><RotateCcw className="h-3.5 w-3.5" aria-hidden /> reset</button>
               </div>
 
               {q && <p className="mt-4 text-[13px] text-[var(--muted)]">Results for “{query}” · {filteredHistory.length} {filteredHistory.length === 1 ? "match" : "matches"}</p>}
@@ -1312,7 +1312,7 @@ export default function Home() {
                 </section>
                 <section className={`${PANEL} flex items-center justify-between gap-4 p-5`}>
                   <div><div className="text-sm font-medium">Reset demo data</div><div className="mt-0.5 text-[14px] text-[var(--muted)]">Clears set-asides and activity. Your on-chain vault is untouched.</div></div>
-                  <button type="button" onClick={reset} className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--border-strong)] px-3.5 py-2 text-[14px] font-medium transition-colors hover:bg-[var(--background)]"><RotateCcw className="h-3.5 w-3.5" aria-hidden /> Reset</button>
+                  <button type="button" onClick={reset} className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--destructive)]/40 px-3.5 py-2 text-[14px] font-medium text-[var(--destructive)] transition-colors hover:bg-[var(--destructive-soft)]"><RotateCcw className="h-3.5 w-3.5" aria-hidden /> Reset</button>
                 </section>
                 </div>
 
