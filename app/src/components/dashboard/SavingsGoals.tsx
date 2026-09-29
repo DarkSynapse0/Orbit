@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Plus, Trash2, TrendingUp, Check } from "lucide-react";
+import { Plus, Trash2, TrendingUp, Check, Info } from "lucide-react";
 import { logActivity } from "@/lib/activity";
 import { Sheet } from "@/components/ui/Sheet";
 
@@ -199,6 +199,13 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
           </table>
           </div>
         </>
+      )}
+
+      {withYield.length > 0 && saved <= 0.005 && (
+        <div className="mt-3 flex items-start gap-2 rounded-xl bg-[var(--surface)] px-4 py-3 text-[13px] text-[var(--muted)]">
+          <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--faint)]" aria-hidden />
+          <span>Your vault is empty, so these goals are unfunded. Add money to your vault to fund them, or delete any you don&apos;t need.</span>
+        </div>
       )}
 
       <Sheet open={adding} onClose={() => setAdding(false)} side="right" title="New goal">
