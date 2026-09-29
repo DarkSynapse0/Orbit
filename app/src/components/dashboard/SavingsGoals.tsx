@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Plus, Trash2, TrendingUp } from "lucide-react";
+import { Plus, Trash2, TrendingUp, Check } from "lucide-react";
 import { logActivity } from "@/lib/activity";
 
 // Named savings goals ("pots") layered over the single on-chain vault. Each goal has
@@ -156,12 +156,20 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
             <tbody className="divide-y divide-[var(--border)]">
               {withYield.map((g) => {
                 const pct = Math.min(100, (g.balance / g.target) * 100);
+                const reached = g.target > 0 && g.balance >= g.target;
                 return (
                   <tr key={g.id}>
                     <td className="py-3 pr-3">
                       <div className="flex items-center gap-2.5">
                         <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[var(--background)] text-[18px]">{g.emoji}</span>
-                        <span className="truncate text-[15px] font-medium">{g.name}</span>
+                        <div className="flex min-w-0 items-center gap-2">
+                          <span className="truncate text-[15px] font-medium">{g.name}</span>
+                          {reached && (
+                            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[var(--primary-soft)] px-2 py-0.5 text-[11px] font-medium text-[var(--primary-strong)]">
+                              <Check className="h-3 w-3" aria-hidden /> Reached
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </td>
                     <td className="py-3 pr-4">
