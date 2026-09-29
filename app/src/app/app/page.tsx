@@ -43,6 +43,8 @@ import { AuthScreen } from "@/components/AuthScreen";
 import { UserMenu, Avatar } from "@/components/UserMenu";
 import { LineArea } from "@/components/dashboard/Charts";
 import { SavingsGoals } from "@/components/dashboard/SavingsGoals";
+import { SecurityCenter } from "@/components/dashboard/SecurityCenter";
+import { HelpCenter } from "@/components/dashboard/HelpCenter";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletVault } from "@/components/WalletVault";
 import { OrbitLogo } from "@/components/OrbitLogo";
@@ -82,7 +84,7 @@ type OnChain = {
 };
 type Entry = { id: number; kind: "spend" | "deposit" | "none" | "info"; text: string };
 type Txn = { id: number; name: string; category: string; amountUsd: number; setAside: number; deposited: boolean; ts: number };
-type TabId = "home" | "save" | "grow" | "goals" | "activity" | "account";
+type TabId = "home" | "save" | "grow" | "goals" | "activity" | "account" | "security" | "help";
 
 const usd = (n: number) => `$${n.toFixed(2)}`;
 // Live yield reads as money: clean $0.00 when there's nothing, otherwise enough
@@ -154,9 +156,9 @@ const NAV: NavItem[] = [
   { id: "goals", label: "Savings Goals", icon: Target, hint: "Your savings pots", tab: "goals" },
 ];
 const NAV_SECONDARY: NavItem[] = [
-  { id: "settings", label: "Settings", icon: Settings, hint: "Wallet & settings", tab: "account" },
-  { id: "security", label: "Security", icon: ShieldCheck, hint: "Wallet & settings", tab: "account" },
-  { id: "help", label: "Help Center", icon: HelpCircle, hint: "Wallet & settings", href: "/" },
+  { id: "settings", label: "Settings", icon: Settings, hint: "Profile & preferences", tab: "account" },
+  { id: "security", label: "Security", icon: ShieldCheck, hint: "What protects your money", tab: "security" },
+  { id: "help", label: "Help Center", icon: HelpCircle, hint: "Guides for using Orbit", tab: "help" },
 ];
 // Mobile bottom bar: one entry per real view.
 const MOBILE_NAV: NavItem[] = [
@@ -1352,9 +1354,40 @@ export default function Home() {
                 </section>
               </div>
 
+              {/* Mobile-only: the sidebar links live on desktop; surface them here on phones. */}
+              <section className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] divide-y divide-[var(--border)] lg:hidden">
+                <button type="button" onClick={() => setTab("security")} className="flex w-full items-center gap-3 p-5 text-left transition-colors hover:bg-[var(--background)]">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--background)] ring-1 ring-inset ring-[var(--border)]"><ShieldCheck className="h-5 w-5 text-[var(--foreground)]" aria-hidden /></span>
+                  <div className="min-w-0 flex-1"><div className="text-sm font-medium">Security</div><div className="mt-0.5 text-[14px] text-[var(--muted)]">What protects your money</div></div>
+                  <ChevronRight className="h-4 w-4 shrink-0 text-[var(--faint)]" aria-hidden />
+                </button>
+                <button type="button" onClick={() => setTab("help")} className="flex w-full items-center gap-3 p-5 text-left transition-colors hover:bg-[var(--background)]">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--background)] ring-1 ring-inset ring-[var(--border)]"><HelpCircle className="h-5 w-5 text-[var(--foreground)]" aria-hidden /></span>
+                  <div className="min-w-0 flex-1"><div className="text-sm font-medium">Help Center</div><div className="mt-0.5 text-[14px] text-[var(--muted)]">Guides for using Orbit</div></div>
+                  <ChevronRight className="h-4 w-4 shrink-0 text-[var(--faint)]" aria-hidden />
+                </button>
+              </section>
+
               <p className="text-[12px] leading-5 text-[var(--faint)]">Live on Solana devnet. Detection, threshold, and the vault deposit are real; the fiat→USDC step (Stripe) is mocked. Not a bank. Not FDIC-insured — principal is not guaranteed.</p>
             </div>
           )}
+
+          {tab === "security" && (
+            <SecurityCenter
+              owner={owner}
+              connected={connected}
+              plaidConnected={!!plaid?.connected}
+              programId={onchain?.programId ?? "8LEjyrMCKukhxA4q3DRaYGfkappxRayiTPM7saZG2Kgi"}
+              vaultAccount={onchain?.vaultAccount ?? null}
+              onManageWallet={() => setTab("grow")}
+              onDisconnectBank={disconnectBank}
+              onReset={reset}
+              onSignOut={signOut}
+              signedIn={!!user}
+            />
+          )}
+
+          {tab === "help" && <HelpCenter />}
         </main>
       </div>
 
