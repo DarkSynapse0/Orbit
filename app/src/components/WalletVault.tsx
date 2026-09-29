@@ -274,12 +274,12 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
             <div className="flex w-full items-center gap-3 text-[10px] uppercase tracking-wide text-[var(--faint)]">
               <span className="h-px flex-1 bg-[var(--border)]" /> or <span className="h-px flex-1 bg-[var(--border)]" />
             </div>
-            <div className="wallet-adapter-fullwidth flex w-full items-center gap-2.5">
+            <div className="flex w-full items-center justify-center gap-2.5">
               <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-[var(--border-strong)] bg-[var(--background)]">
                 <PhantomMark className="h-5 w-5 text-[#ab9ff2]" />
               </span>
               <WalletMultiButton
-                style={{ height: 44, flex: 1, borderRadius: 12, background: "var(--background)", color: "var(--foreground)", border: "1px solid var(--border-strong)", fontSize: 13, fontWeight: 500, justifyContent: "center" }}
+                style={{ height: 44, borderRadius: 12, background: "var(--background)", color: "var(--foreground)", border: "1px solid var(--border-strong)", fontSize: 13, fontWeight: 500, justifyContent: "center" }}
               />
             </div>
             <div className="text-[12px] text-[var(--muted)]">Already have Phantom or Solflare? Connect it (Devnet).</div>
