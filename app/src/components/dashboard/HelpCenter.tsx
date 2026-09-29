@@ -9,9 +9,11 @@ import {
   Target,
   TrendingUp,
   Compass,
+  LayoutDashboard,
+  KeyRound,
   ArrowLeft,
   Clock,
-  ChevronRight,
+  ArrowUpRight,
   type LucideIcon,
 } from "lucide-react";
 
@@ -22,14 +24,27 @@ type Block =
   | { t: "steps"; items: string[] }
   | { t: "note"; text: string };
 
+type Category = "Basics" | "Saving" | "Vault" | "Goals" | "Growing" | "Security";
+
 type Article = {
   id: string;
-  category: string;
+  category: Category;
   icon: LucideIcon;
   title: string;
   excerpt: string;
   read: string;
   body: Block[];
+};
+
+// Editorial cover palette — one gradient per category. White iconography overlays
+// read as cover art in both themes without needing image assets.
+const COVER: Record<Category, [string, string]> = {
+  Basics: ["#15803d", "#0e7490"],
+  Saving: ["#0d9488", "#0369a1"],
+  Vault: ["#4f46e5", "#0891b2"],
+  Goals: ["#b45309", "#be123c"],
+  Growing: ["#7c3aed", "#2563eb"],
+  Security: ["#0f766e", "#1e3a8a"],
 };
 
 const ARTICLES: Article[] = [
@@ -143,6 +158,21 @@ const ARTICLES: Article[] = [
     ],
   },
   {
+    id: "dashboard",
+    category: "Basics",
+    icon: LayoutDashboard,
+    title: "Reading your dashboard",
+    excerpt: "Make sense of your balance, savings health, and recent activity.",
+    read: "2 min",
+    body: [
+      { t: "p", text: "The Dashboard is your money at a glance. The top shows your total saved and how it's growing; below sit your savings health and recent transactions." },
+      { t: "h", text: "Savings health" },
+      { t: "p", text: "This is a quick read on how well your setup is working: whether a bank is connected, whether a rate is set, and whether money is reaching your vault. A full bar means Orbit is running smoothly." },
+      { t: "h", text: "Recent transactions" },
+      { t: "p", text: "Every purchase Orbit sees, with the slice it set aside. Tap through to Activity for the full, filterable history." },
+    ],
+  },
+  {
     id: "navigation",
     category: "Basics",
     icon: Compass,
@@ -163,18 +193,70 @@ const ARTICLES: Article[] = [
       { t: "note", text: "Your last tab is remembered, so a refresh drops you right back where you were." },
     ],
   },
+  {
+    id: "self-custody",
+    category: "Security",
+    icon: KeyRound,
+    title: "Staying safe and self-custody basics",
+    excerpt: "Recovery phrases, verifying on-chain, and keeping control of your money.",
+    read: "3 min",
+    body: [
+      { t: "p", text: "Self-custody means you, and only you, control your money. It's powerful, and it comes with a few habits worth building." },
+      { t: "h", text: "Protect your recovery phrase" },
+      { t: "ul", items: [
+        "Write it down offline and store it somewhere safe. Never type it into a website or share it.",
+        "No one from Orbit will ever ask for it. Anyone who does is trying to steal from you.",
+        "If you lose it, no one can recover your wallet for you.",
+      ] },
+      { t: "h", text: "Don't trust, verify" },
+      { t: "p", text: "Your vault balance is public on Solana. From the Security page you can open the vault program and your vault account on the explorer to confirm everything yourself." },
+      { t: "note", text: "Orbit is non-custodial. Even if the app disappeared, your funds stay in your on-chain vault." },
+    ],
+  },
 ];
 
-function Pill({ children }: { children: React.ReactNode }) {
+function Pill({ children, dark = false }: { children: React.ReactNode; dark?: boolean }) {
   return (
-    <span className="rounded-full bg-[var(--background)] px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-[0.12em] text-[var(--muted)] ring-1 ring-inset ring-[var(--border)]">
+    <span
+      className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-[0.12em] ${
+        dark
+          ? "bg-white/15 text-white ring-1 ring-inset ring-white/20"
+          : "bg-[var(--background)] text-[var(--muted)] ring-1 ring-inset ring-[var(--border)]"
+      }`}
+    >
       {children}
     </span>
   );
 }
 
-function ArticleView({ article, onBack }: { article: Article; onBack: () => void }) {
+// Gradient cover art with a large translucent icon watermark.
+function Cover({ article, className = "", big = false }: { article: Article; className?: string; big?: boolean }) {
+  const [from, to] = COVER[article.category];
   const Icon = article.icon;
+  return (
+    <div
+      className={`relative overflow-hidden ${className}`}
+      style={{ backgroundImage: `linear-gradient(135deg, ${from}, ${to})` }}
+    >
+      <Icon
+        className={`absolute -bottom-4 -right-3 text-white/15 ${big ? "h-44 w-44" : "h-28 w-28"}`}
+        aria-hidden
+      />
+      <div className={`relative flex h-full flex-col justify-between ${big ? "p-6" : "p-4"}`}>
+        <span
+          className={`grid place-items-center rounded-xl bg-white/15 ring-1 ring-inset ring-white/25 ${
+            big ? "h-12 w-12" : "h-10 w-10"
+          }`}
+        >
+          <Icon className={big ? "h-6 w-6 text-white" : "h-5 w-5 text-white"} aria-hidden />
+        </span>
+        <Pill dark>{article.category}</Pill>
+      </div>
+    </div>
+  );
+}
+
+function ArticleView({ article, onBack }: { article: Article; onBack: () => void }) {
   return (
     <div className="space-y-5">
       <button
@@ -185,52 +267,50 @@ function ArticleView({ article, onBack }: { article: Article; onBack: () => void
         <ArrowLeft className="h-4 w-4" aria-hidden /> All guides
       </button>
 
-      <article className="rounded-2xl bg-[var(--surface)] p-6 sm:p-8">
-        <div className="flex items-center gap-2">
-          <Pill>{article.category}</Pill>
-          <span className="inline-flex items-center gap-1 text-[12px] text-[var(--faint)]">
-            <Clock className="h-3 w-3" aria-hidden /> {article.read} read
-          </span>
-        </div>
-        <div className="mt-4 flex items-start gap-3">
-          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[var(--primary-soft)] text-[var(--primary-strong)]">
-            <Icon className="h-6 w-6" aria-hidden />
-          </span>
-          <h1 className="font-display text-[22px] font-bold leading-tight sm:text-[26px]">{article.title}</h1>
-        </div>
+      <article className="overflow-hidden rounded-2xl bg-[var(--surface)]">
+        <Cover article={article} className="h-48 sm:h-56" big />
+        <div className="p-6 sm:p-8">
+          <div className="flex items-center gap-2">
+            <Pill>{article.category}</Pill>
+            <span className="inline-flex items-center gap-1 text-[12px] text-[var(--faint)]">
+              <Clock className="h-3 w-3" aria-hidden /> {article.read} read
+            </span>
+          </div>
+          <h1 className="mt-4 font-display text-[22px] font-bold leading-tight sm:text-[26px]">{article.title}</h1>
 
-        <div className="mt-6 max-w-2xl space-y-4">
-          {article.body.map((b, i) => {
-            if (b.t === "h") return <h2 key={i} className="pt-2 font-display text-[16px] font-bold">{b.text}</h2>;
-            if (b.t === "p") return <p key={i} className="text-[14px] leading-7 text-[var(--secondary-fg)]">{b.text}</p>;
-            if (b.t === "ul")
+          <div className="mt-6 max-w-2xl space-y-4">
+            {article.body.map((b, i) => {
+              if (b.t === "h") return <h2 key={i} className="pt-2 font-display text-[16px] font-bold">{b.text}</h2>;
+              if (b.t === "p") return <p key={i} className="text-[14px] leading-7 text-[var(--secondary-fg)]">{b.text}</p>;
+              if (b.t === "ul")
+                return (
+                  <ul key={i} className="space-y-2">
+                    {b.items.map((it, j) => (
+                      <li key={j} className="flex gap-2.5 text-[14px] leading-6 text-[var(--secondary-fg)]">
+                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--primary)]" aria-hidden />
+                        {it}
+                      </li>
+                    ))}
+                  </ul>
+                );
+              if (b.t === "steps")
+                return (
+                  <ol key={i} className="space-y-2.5">
+                    {b.items.map((it, j) => (
+                      <li key={j} className="flex gap-3 text-[14px] leading-6 text-[var(--secondary-fg)]">
+                        <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[var(--primary-soft)] text-[12px] font-bold text-[var(--primary-strong)]">{j + 1}</span>
+                        <span className="pt-0.5">{it}</span>
+                      </li>
+                    ))}
+                  </ol>
+                );
               return (
-                <ul key={i} className="space-y-2">
-                  {b.items.map((it, j) => (
-                    <li key={j} className="flex gap-2.5 text-[14px] leading-6 text-[var(--secondary-fg)]">
-                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--primary)]" aria-hidden />
-                      {it}
-                    </li>
-                  ))}
-                </ul>
+                <p key={i} className="rounded-xl bg-[var(--info-soft)] px-4 py-3 text-[13px] leading-6 text-[var(--foreground)]">
+                  {b.text}
+                </p>
               );
-            if (b.t === "steps")
-              return (
-                <ol key={i} className="space-y-2.5">
-                  {b.items.map((it, j) => (
-                    <li key={j} className="flex gap-3 text-[14px] leading-6 text-[var(--secondary-fg)]">
-                      <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[var(--primary-soft)] text-[12px] font-bold text-[var(--primary-strong)]">{j + 1}</span>
-                      <span className="pt-0.5">{it}</span>
-                    </li>
-                  ))}
-                </ol>
-              );
-            return (
-              <p key={i} className="rounded-xl bg-[var(--info-soft)] px-4 py-3 text-[13px] leading-6 text-[var(--foreground)]">
-                {b.text}
-              </p>
-            );
-          })}
+            })}
+          </div>
         </div>
       </article>
     </div>
@@ -243,43 +323,69 @@ export function HelpCenter() {
 
   if (open) return <ArticleView article={open} onBack={() => setOpenId(null)} />;
 
+  const featured = ARTICLES[0];
+
   return (
-    <div className="space-y-4">
-      <section className="rounded-2xl bg-[var(--surface)] p-6">
-        <h2 className="font-display text-[17px] font-bold">Help Center</h2>
-        <p className="mt-1 max-w-xl text-[13px] leading-6 text-[var(--muted)]">
-          Short guides for getting set up, finding your way around, and using Orbit well. Pick a
-          topic to read.
-        </p>
+    <div className="space-y-6">
+      {/* Hero */}
+      <section className="overflow-hidden rounded-3xl bg-[var(--surface)]">
+        <div className="grid items-stretch gap-0 md:grid-cols-2">
+          <div className="flex flex-col justify-center p-7 sm:p-9">
+            <span className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--primary-strong)]">Orbit Guides</span>
+            <h1 className="mt-3 font-display text-[26px] font-extrabold leading-[1.15] sm:text-[32px]">
+              Everything you need to make your money self-driving
+            </h1>
+            <p className="mt-3 max-w-md text-[14px] leading-6 text-[var(--muted)]">
+              Short, plain-language reads on setting up Orbit, saving automatically, and keeping full
+              control of your on-chain savings.
+            </p>
+            <button
+              type="button"
+              onClick={() => setOpenId(featured.id)}
+              className="mt-6 inline-flex w-fit items-center gap-2 rounded-xl bg-[var(--primary)] px-4 py-2.5 text-[14px] font-semibold text-[var(--primary-fg)] transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/40"
+            >
+              Start with the basics <ArrowUpRight className="h-4 w-4" aria-hidden />
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={() => setOpenId(featured.id)}
+            className="group relative min-h-[220px] text-left focus-visible:outline-none"
+            aria-label={`Read: ${featured.title}`}
+          >
+            <Cover article={featured} className="absolute inset-0 h-full w-full" big />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/55 to-transparent p-6">
+              <div className="text-[11px] font-medium uppercase tracking-[0.14em] text-white/80">Featured</div>
+              <div className="mt-1 font-display text-[18px] font-bold text-white">{featured.title}</div>
+            </div>
+          </button>
+        </div>
       </section>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {ARTICLES.map((a) => {
-          const Icon = a.icon;
-          return (
-            <button
-              key={a.id}
-              type="button"
-              onClick={() => setOpenId(a.id)}
-              className="group flex items-start gap-3.5 rounded-2xl bg-[var(--surface)] p-5 text-left transition-colors hover:bg-[var(--background)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/30"
-            >
-              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--primary-soft)] text-[var(--primary-strong)]">
-                <Icon className="h-5 w-5" aria-hidden />
-              </span>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <Pill>{a.category}</Pill>
-                  <span className="inline-flex items-center gap-1 text-[11px] text-[var(--faint)]">
-                    <Clock className="h-3 w-3" aria-hidden /> {a.read}
-                  </span>
-                </div>
-                <div className="mt-2 text-[15px] font-semibold text-[var(--foreground)]">{a.title}</div>
-                <div className="mt-1 text-[13px] leading-5 text-[var(--muted)]">{a.excerpt}</div>
+      {/* Post grid (3 across) */}
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {ARTICLES.map((a) => (
+          <button
+            key={a.id}
+            type="button"
+            onClick={() => setOpenId(a.id)}
+            className="group flex flex-col overflow-hidden rounded-2xl bg-[var(--surface)] text-left transition-all hover:-translate-y-0.5 hover:shadow-[0_12px_32px_-16px_rgba(2,6,23,0.28)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/30"
+          >
+            <Cover article={a} className="h-36" />
+            <div className="flex flex-1 flex-col p-5">
+              <div className="text-[15px] font-semibold leading-snug text-[var(--foreground)]">{a.title}</div>
+              <div className="mt-1.5 flex-1 text-[13px] leading-5 text-[var(--muted)]">{a.excerpt}</div>
+              <div className="mt-4 flex items-center justify-between border-t border-[var(--border)] pt-3">
+                <span className="inline-flex items-center gap-1 text-[12px] text-[var(--faint)]">
+                  <Clock className="h-3 w-3" aria-hidden /> {a.read} read
+                </span>
+                <span className="inline-flex items-center gap-1 text-[12px] font-medium text-[var(--primary-strong)]">
+                  Read <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden />
+                </span>
               </div>
-              <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-[var(--faint)] transition-transform group-hover:translate-x-0.5" aria-hidden />
-            </button>
-          );
-        })}
+            </div>
+          </button>
+        ))}
       </div>
     </div>
   );
