@@ -384,8 +384,10 @@ export function HelpCenter() {
 
   return (
     <div className="space-y-6">
-      {/* Hero — learning path progress */}
-      <section className="overflow-hidden rounded-3xl bg-[var(--surface)] p-7 sm:p-9">
+      {/* Hero — learning path progress (stays pinned while the guides scroll under it).
+         The sticky wrapper bleeds into the main scroll padding so content slides cleanly under it. */}
+      <div className="relative sticky top-0 z-20 -mx-5 bg-[var(--background)] px-5 pb-4 pt-2 before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-16 before:bg-[var(--background)] lg:-mx-8 lg:px-8">
+      <section className="overflow-hidden rounded-3xl bg-[var(--surface)] p-7 shadow-[0_10px_24px_-20px_rgba(2,6,23,0.35)] sm:p-9">
         <span className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--primary-strong)]">Orbit learning path</span>
         <div className="mt-3 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div className="max-w-lg">
@@ -417,6 +419,7 @@ export function HelpCenter() {
           </div>
         </div>
       </section>
+      </div>
 
       {/* Stepped path */}
       <ol className="space-y-3">
