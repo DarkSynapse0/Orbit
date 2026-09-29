@@ -63,6 +63,10 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
 
   const allocatedTotal = goals.reduce((s, g) => s + g.allocated, 0);
   const unallocated = Math.max(0, saved - allocatedTotal);
+  // Goals are pots inside the one vault, so they can never hold more than the vault
+  // actually has. If the vault shrinks (e.g. you withdraw everything), shrink each
+  // pot to its share of what's left — so empty vault means empty goals.
+  const coverage = allocatedTotal > 0 ? Math.min(1, saved / allocatedTotal) : 1;
 
   // Yield accrued on the current balance since the last change (not yet banked).
   const accruedSince = (g: Goal) => {
@@ -70,14 +74,16 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
     return (g.allocated * apy * elapsed) / SECONDS_PER_YEAR;
   };
 
-  // Live yield = yield banked at the last change + yield accruing on the current balance.
+  // Live yield = yield banked at the last change + yield accruing on the current balance,
+  // both scaled to how much of the pot the vault can actually back right now.
   const withYield = useMemo(
     () =>
       goals.map((g) => {
-        const yieldUsd = (g.earned ?? 0) + accruedSince(g);
-        return { ...g, balance: g.allocated + yieldUsd, yieldUsd };
+        const allocated = g.allocated * coverage;
+        const yieldUsd = ((g.earned ?? 0) + accruedSince(g)) * coverage;
+        return { ...g, allocated, balance: allocated + yieldUsd, yieldUsd };
       }),
-    [goals, now, apy],
+    [goals, now, apy, coverage],
   );
 
   const addGoal = () => {
@@ -173,7 +179,7 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
                         {[10, 50].map((d) => (
                           <button key={d} type="button" onClick={() => allocate(g.id, d)} disabled={unallocated <= 0} className="rounded-md border border-[var(--border-strong)] px-2 py-0.5 text-[12px] font-medium transition-colors hover:bg-[var(--surface)] disabled:pointer-events-none disabled:opacity-40">+${d}</button>
                         ))}
-                        <button type="button" onClick={() => allocate(g.id, -g.allocated)} disabled={g.allocated <= 0} className="rounded-md border border-[var(--border-strong)] px-2 py-0.5 text-[12px] font-medium transition-colors hover:bg-[var(--surface)] disabled:pointer-events-none disabled:opacity-40">Empty</button>
+                        <button type="button" onClick={() => allocate(g.id, -1e12)} disabled={g.allocated <= 0} className="rounded-md border border-[var(--border-strong)] px-2 py-0.5 text-[12px] font-medium transition-colors hover:bg-[var(--surface)] disabled:pointer-events-none disabled:opacity-40">Empty</button>
                         <button type="button" onClick={() => remove(g.id)} aria-label={`Delete ${g.name}`} className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[var(--faint)] transition-colors hover:bg-[var(--destructive-soft)] hover:text-[var(--destructive)]"><Trash2 className="h-3.5 w-3.5" aria-hidden /></button>
                       </div>
                     </td>
