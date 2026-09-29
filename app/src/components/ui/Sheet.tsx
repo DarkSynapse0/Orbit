@@ -35,7 +35,7 @@ export function Sheet({
 
   return (
     <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label={title}>
-      <button type="button" aria-label="Close" onClick={onClose} className="animate-overlay absolute inset-0 cursor-default bg-black/40 backdrop-blur-[1px]" />
+      <button type="button" aria-label="Close" onClick={onClose} className="animate-overlay absolute inset-0 cursor-default bg-black/40" />
       <div
         className={`absolute inset-y-0 flex w-full max-w-[420px] flex-col bg-[var(--background)] shadow-[0_0_60px_-12px_rgba(2,6,23,0.5)] ${
           side === "right" ? "right-0 animate-sheet-right" : "left-0 animate-sheet-left"

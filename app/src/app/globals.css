@@ -252,9 +252,9 @@ body {
 @keyframes sheet-in-right { from { transform: translateX(100%); } to { transform: translateX(0); } }
 @keyframes sheet-in-left { from { transform: translateX(-100%); } to { transform: translateX(0); } }
 @keyframes overlay-fade { from { opacity: 0; } to { opacity: 1; } }
-.animate-sheet-right { animation: sheet-in-right 0.28s cubic-bezier(0.16, 1, 0.3, 1); }
-.animate-sheet-left { animation: sheet-in-left 0.28s cubic-bezier(0.16, 1, 0.3, 1); }
-.animate-overlay { animation: overlay-fade 0.2s ease-out; }
+.animate-sheet-right { animation: sheet-in-right 0.3s cubic-bezier(0.32, 0.72, 0, 1) both; will-change: transform; transform: translateZ(0); }
+.animate-sheet-left { animation: sheet-in-left 0.3s cubic-bezier(0.32, 0.72, 0, 1) both; will-change: transform; transform: translateZ(0); }
+.animate-overlay { animation: overlay-fade 0.25s ease-out both; }
 
 /* Honor reduced-motion globally. */
 @media (prefers-reduced-motion: reduce) {
