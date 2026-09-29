@@ -6,7 +6,7 @@ import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { AnchorProvider, Program, BN, type Idl } from "@coral-xyz/anchor";
 import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { Wallet, Coins, ArrowDownToLine, ArrowUpFromLine, Copy, Check, ExternalLink, Loader2, ShieldCheck, Sparkles, Power } from "lucide-react";
+import { Wallet, Coins, ArrowDownToLine, ArrowUpFromLine, Copy, Check, ExternalLink, Loader2, ShieldCheck, UserPlus, Power } from "lucide-react";
 import { PhantomMark } from "@/components/landing/BrandMarks";
 import { InfoDot } from "@/components/ui/InfoDot";
 import idl from "@/idl/orbit_vault.json";
@@ -267,7 +267,7 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
               disabled={creating || connecting}
               className="mt-1 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--accent)] text-sm font-semibold text-[var(--on-accent)] transition-opacity hover:opacity-90 active:scale-[0.99] disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/50"
             >
-              {creating || connecting ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Sparkles className="h-4 w-4" aria-hidden />}
+              {creating || connecting ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <UserPlus className="h-4 w-4" aria-hidden />}
               Create an account
             </button>
             <div className="text-[12px] text-[var(--muted)]">No wallet, no seed phrase — Orbit makes one for you.</div>

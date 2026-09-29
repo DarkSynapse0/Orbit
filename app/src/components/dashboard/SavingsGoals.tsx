@@ -123,7 +123,7 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
 
   return (
     <section>
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-[var(--surface)] px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-[var(--surface)] px-5 py-3.5">
         <div className="inline-flex items-baseline gap-2">
           <span className="text-[13px] text-[var(--muted)]">Unallocated</span>
           <span className="font-mono text-[15px] font-semibold tabular-nums text-[var(--foreground)]">{usd(unallocated)}</span>
@@ -134,8 +134,10 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
       </div>
 
       {withYield.length > 0 && (
-        <div className="mt-4 overflow-x-auto rounded-2xl bg-[var(--surface)] px-5 py-2">
-          <table className="w-full min-w-[560px] text-left">
+        <>
+          <div className="my-4 border-t border-[var(--line)]" />
+          <div className="overflow-x-auto rounded-2xl bg-[var(--surface)] px-5 py-2">
+            <table className="w-full min-w-[560px] text-left">
             <thead>
               <tr className="border-b border-[var(--border)] text-[14px] font-bold text-[var(--foreground)]">
                 <th className="pb-3">Goal</th>
@@ -180,7 +182,8 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
               })}
             </tbody>
           </table>
-        </div>
+          </div>
+        </>
       )}
 
       {adding && (
