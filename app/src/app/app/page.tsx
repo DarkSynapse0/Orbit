@@ -96,11 +96,6 @@ const truncate = (a: string, n = 4) => (a.length <= n * 2 + 1 ? a : `${a.slice(0
 const solTx = (s: string) => `https://solscan.io/tx/${s}?cluster=devnet`;
 const solAcct = (a: string) => `https://solscan.io/account/${a}?cluster=devnet`;
 
-// Soft, elevated card (Finora-style): hairline border for dark mode + gentle shadow, no hard box lines.
-const CARD = "rounded-3xl border border-[var(--border)] bg-[var(--surface)] shadow-[0_1px_2px_rgba(2,6,23,0.03),0_18px_40px_-24px_rgba(2,6,23,0.22)]";
-// Every dashboard section uses the same soft card so the whole app reads as one system.
-const PANEL = CARD;
-
 // Placeholder shown only until there are real transactions (fresh account).
 const SAMPLE_LINE = [15, 25, 30, 45, 55, 75, 90, 110, 130, 160];
 const SAMPLE_LINE_LABELS = ["", "", "", "", "", "", "", "", "", "now"];
@@ -181,10 +176,6 @@ function ExplorerLink({ href, children }: { href: string; children: React.ReactN
       <ExternalLink className="h-3 w-3" aria-hidden />
     </a>
   );
-}
-
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return <div className="text-[12px] font-medium uppercase tracking-[0.16em] text-[var(--faint)]">{children}</div>;
 }
 
 function Toggle({ on, onClick, label }: { on: boolean; onClick: () => void; label: string }) {
@@ -1286,31 +1277,31 @@ export default function Home() {
           {/* ═══════════ ACCOUNT ═══════════ */}
           {tab === "account" && (
             <div className="space-y-4">
-              {/* Profile (Google account) */}
-              <section className={`${PANEL} p-6`}>
-                <SectionLabel>Profile</SectionLabel>
+              {/* Profile */}
+              <section className="rounded-2xl bg-[var(--surface)] px-5 pb-5 pt-5">
+                <div className="flex items-center gap-2 text-[12px] font-medium uppercase tracking-[0.16em] text-[var(--faint)]"><UserIcon className="h-3.5 w-3.5" aria-hidden /> Profile</div>
                 {user ? (
                   <div className="mt-4 flex flex-wrap items-center gap-4">
-                    <Avatar user={user} size="h-14 w-14" />
+                    <Avatar user={user} size="h-12 w-12" />
                     <div className="min-w-0 flex-1">
-                      <div className="truncate text-base font-medium">{user.name}</div>
-                      <div className="truncate text-[14px] text-[var(--muted)]">{user.email}</div>
+                      <div className="truncate text-[15px] font-semibold">{user.name}</div>
+                      <div className="truncate text-[13px] text-[var(--muted)]">{user.email}</div>
                     </div>
                     <button
                       type="button"
                       onClick={signOut}
-                      className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--border-strong)] px-3.5 py-2 text-[14px] font-medium transition-colors hover:bg-[var(--background)]"
+                      className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[var(--destructive)]/40 px-2.5 py-1.5 text-[13px] font-medium text-[var(--destructive)] transition-colors hover:bg-[var(--destructive-soft)]"
                     >
                       <LogOut className="h-3.5 w-3.5" aria-hidden /> Sign out
                     </button>
                   </div>
                 ) : (
                   <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
-                    <p className="text-[14px] text-[var(--muted)]">Sign in to sync your savings across devices.</p>
+                    <p className="text-[13px] text-[var(--muted)]">Sign in to sync your savings across devices.</p>
                     <button
                       type="button"
                       onClick={signInWithGoogle}
-                      className="inline-flex items-center gap-2 rounded-full bg-[var(--contrast)] px-4 py-2.5 text-[14px] font-semibold text-[var(--contrast-fg)] transition-opacity hover:opacity-90"
+                      className="inline-flex items-center gap-2 rounded-xl bg-[var(--primary)] px-4 py-2.5 text-[14px] font-semibold text-[var(--primary-fg)] transition-opacity hover:opacity-90"
                     >
                       <LogIn className="h-4 w-4" aria-hidden /> Sign in with Google
                     </button>
@@ -1320,50 +1311,61 @@ export default function Home() {
 
               <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
                 <div className="space-y-4">
-                <section className={`${PANEL} p-6`}>
-                  <SectionLabel>Wallet</SectionLabel>
-                  <div className="mt-4 flex items-center gap-3">
-                    <span className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--background)] ring-1 ring-inset ring-[var(--border)]"><Wallet className="h-5 w-5 text-[var(--foreground)]" aria-hidden /></span>
-                    <div className="min-w-0 flex-1">
-                      <div className="text-sm font-medium">{connected ? "Orbit account" : "No wallet connected"}</div>
-                      <div className="mt-0.5 truncate font-mono text-[14px] text-[var(--muted)]">{owner ?? "Open one in Grow"}</div>
+                  <section className="rounded-2xl bg-[var(--surface)] px-5 pb-5 pt-5">
+                    <div className="flex items-center gap-2 text-[12px] font-medium uppercase tracking-[0.16em] text-[var(--faint)]"><Wallet className="h-3.5 w-3.5" aria-hidden /> Wallet</div>
+                    <div className="mt-4 flex items-center gap-3">
+                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--background)] ring-1 ring-inset ring-[var(--border)]"><Wallet className="h-5 w-5 text-[var(--foreground)]" aria-hidden /></span>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-[14px] font-semibold">{connected ? "Orbit account" : "No wallet connected"}</div>
+                        <div className="mt-0.5 truncate font-mono text-[13px] text-[var(--muted)]">{owner ?? "Open one in Wallet"}</div>
+                      </div>
+                      {connected && <span className="h-2 w-2 shrink-0 rounded-full bg-[var(--success)]" aria-hidden />}
                     </div>
-                    {connected && <span className="h-2 w-2 rounded-full bg-[var(--accent)]" aria-hidden />}
-                  </div>
-                  <button type="button" onClick={() => setTab("grow")} className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-[var(--border-strong)] text-sm font-medium transition-colors hover:bg-[var(--background)]">{connected ? "Manage in Grow" : "Open or connect a wallet"}</button>
-                </section>
-                <section className={`${PANEL} flex items-center justify-between gap-4 p-5`}>
-                  <div><div className="text-sm font-medium">Reset demo data</div><div className="mt-0.5 text-[14px] text-[var(--muted)]">Clears set-asides and activity. Your on-chain vault is untouched.</div></div>
-                  <button type="button" onClick={reset} className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--destructive)]/40 px-3.5 py-2 text-[14px] font-medium text-[var(--destructive)] transition-colors hover:bg-[var(--destructive-soft)]"><RotateCcw className="h-3.5 w-3.5" aria-hidden /> Reset</button>
-                </section>
+                    <button type="button" onClick={() => setTab("grow")} className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-[var(--border-strong)] text-[14px] font-medium text-[var(--secondary-fg)] transition-colors hover:bg-[var(--background)]">{connected ? "Manage in Wallet" : "Open or connect a wallet"}</button>
+                  </section>
+
+                  {/* Danger zone */}
+                  <section className="rounded-2xl bg-[var(--surface)] px-5 pb-5 pt-5">
+                    <div className="flex items-center gap-2 text-[12px] font-medium uppercase tracking-[0.16em] text-[var(--faint)]"><RotateCcw className="h-3.5 w-3.5" aria-hidden /> Data</div>
+                    <div className="mt-3 flex items-start justify-between gap-4">
+                      <div>
+                        <div className="text-[14px] font-semibold">Reset app data</div>
+                        <div className="mt-0.5 text-[13px] leading-5 text-[var(--muted)]">Clears set-asides and activity and disconnects your bank. Your on-chain vault is never touched.</div>
+                      </div>
+                      <button type="button" onClick={reset} className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[var(--destructive)]/40 px-2.5 py-1.5 text-[13px] font-medium text-[var(--destructive)] transition-colors hover:bg-[var(--destructive-soft)]"><RotateCcw className="h-3.5 w-3.5" aria-hidden /> Reset</button>
+                    </div>
+                  </section>
                 </div>
 
-                <section className={`${PANEL} divide-y divide-[var(--border)]`}>
-                  <div className="flex items-center justify-between gap-4 p-5">
-                    <div><div className="text-sm font-medium">Appearance</div><div className="mt-0.5 text-[14px] text-[var(--muted)]">Light or dark theme</div></div>
-                    <ThemeToggle />
-                  </div>
-                  <div className="flex items-center justify-between gap-4 p-5">
-                    <div><div className="text-sm font-medium">Network</div><div className="mt-0.5 text-[14px] text-[var(--muted)]">Solana devnet</div></div>
-                    <ExplorerLink href={solAcct(onchain?.programId ?? "8LEjyrMCKukhxA4q3DRaYGfkappxRayiTPM7saZG2Kgi")}>Program</ExplorerLink>
-                  </div>
-                  <div className="flex items-center justify-between gap-4 p-5">
-                    <div><div className="text-sm font-medium">Backend</div><div className="mt-0.5 text-[14px] text-[var(--muted)]">Detection &amp; deposit service</div></div>
-                    <span className="inline-flex items-center gap-1.5 text-[14px] text-[var(--muted)]"><span className={`h-1.5 w-1.5 rounded-full ${online ? "bg-[var(--accent)]" : online === false ? "bg-red-500" : "bg-[var(--faint)]"}`} aria-hidden />{online === null ? "…" : online ? "Connected" : "Offline"}</span>
+                <section className="rounded-2xl bg-[var(--surface)] px-5 pb-4 pt-5">
+                  <div className="flex items-center gap-2 text-[12px] font-medium uppercase tracking-[0.16em] text-[var(--faint)]"><Settings className="h-3.5 w-3.5" aria-hidden /> Preferences</div>
+                  <div className="mt-1 divide-y divide-[var(--border)]">
+                    <div className="flex items-center justify-between gap-4 py-3.5">
+                      <div><div className="text-[14px] font-semibold">Appearance</div><div className="mt-0.5 text-[13px] text-[var(--muted)]">Light or dark theme</div></div>
+                      <ThemeToggle />
+                    </div>
+                    <div className="flex items-center justify-between gap-4 py-3.5">
+                      <div><div className="text-[14px] font-semibold">Network</div><div className="mt-0.5 text-[13px] text-[var(--muted)]">Solana devnet</div></div>
+                      <ExplorerLink href={solAcct(onchain?.programId ?? "8LEjyrMCKukhxA4q3DRaYGfkappxRayiTPM7saZG2Kgi")}>Program</ExplorerLink>
+                    </div>
+                    <div className="flex items-center justify-between gap-4 py-3.5">
+                      <div><div className="text-[14px] font-semibold">Backend</div><div className="mt-0.5 text-[13px] text-[var(--muted)]">Detection &amp; deposit service</div></div>
+                      <span className="inline-flex items-center gap-1.5 text-[13px] text-[var(--muted)]"><span className={`h-1.5 w-1.5 rounded-full ${online ? "bg-[var(--success)]" : online === false ? "bg-[var(--destructive)]" : "bg-[var(--faint)]"}`} aria-hidden />{online === null ? "…" : online ? "Connected" : "Offline"}</span>
+                    </div>
                   </div>
                 </section>
               </div>
 
               {/* Mobile-only: the sidebar links live on desktop; surface them here on phones. */}
-              <section className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] divide-y divide-[var(--border)] lg:hidden">
-                <button type="button" onClick={() => setTab("security")} className="flex w-full items-center gap-3 p-5 text-left transition-colors hover:bg-[var(--background)]">
+              <section className="divide-y divide-[var(--border)] overflow-hidden rounded-2xl bg-[var(--surface)] lg:hidden">
+                <button type="button" onClick={() => setTab("security")} className="flex w-full items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-[var(--background)]">
                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--background)] ring-1 ring-inset ring-[var(--border)]"><ShieldCheck className="h-5 w-5 text-[var(--foreground)]" aria-hidden /></span>
-                  <div className="min-w-0 flex-1"><div className="text-sm font-medium">Security</div><div className="mt-0.5 text-[14px] text-[var(--muted)]">What protects your money</div></div>
+                  <div className="min-w-0 flex-1"><div className="text-[14px] font-semibold">Security</div><div className="mt-0.5 text-[13px] text-[var(--muted)]">What protects your money</div></div>
                   <ChevronRight className="h-4 w-4 shrink-0 text-[var(--faint)]" aria-hidden />
                 </button>
-                <button type="button" onClick={() => setTab("help")} className="flex w-full items-center gap-3 p-5 text-left transition-colors hover:bg-[var(--background)]">
+                <button type="button" onClick={() => setTab("help")} className="flex w-full items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-[var(--background)]">
                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--background)] ring-1 ring-inset ring-[var(--border)]"><HelpCircle className="h-5 w-5 text-[var(--foreground)]" aria-hidden /></span>
-                  <div className="min-w-0 flex-1"><div className="text-sm font-medium">Help Center</div><div className="mt-0.5 text-[14px] text-[var(--muted)]">Guides for using Orbit</div></div>
+                  <div className="min-w-0 flex-1"><div className="text-[14px] font-semibold">Help Center</div><div className="mt-0.5 text-[13px] text-[var(--muted)]">Guides for using Orbit</div></div>
                   <ChevronRight className="h-4 w-4 shrink-0 text-[var(--faint)]" aria-hidden />
                 </button>
               </section>
