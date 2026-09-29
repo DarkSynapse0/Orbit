@@ -1,19 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Rocket,
+  Compass,
+  LayoutDashboard,
   Percent,
   Landmark,
   ShieldCheck,
   Target,
   TrendingUp,
-  Compass,
-  LayoutDashboard,
   KeyRound,
   ArrowLeft,
+  ArrowRight,
   Clock,
-  ArrowUpRight,
+  Check,
+  Lock,
   type LucideIcon,
 } from "lucide-react";
 
@@ -36,8 +38,7 @@ type Article = {
   body: Block[];
 };
 
-// Editorial cover palette — one gradient per category. White iconography overlays
-// read as cover art in both themes without needing image assets.
+// Editorial cover palette — one gradient per category.
 const COVER: Record<Category, [string, string]> = {
   Basics: ["#15803d", "#0e7490"],
   Saving: ["#0d9488", "#0369a1"],
@@ -47,6 +48,7 @@ const COVER: Record<Category, [string, string]> = {
   Security: ["#0f766e", "#1e3a8a"],
 };
 
+// Ordered as a learning path: each guide builds on the one before it.
 const ARTICLES: Article[] = [
   {
     id: "getting-started",
@@ -65,6 +67,42 @@ const ARTICLES: Article[] = [
       ] },
       { t: "p", text: "That's it. From here Orbit runs on its own, earmarking a little from each purchase and moving it to your vault when you cross your threshold." },
       { t: "note", text: "Nothing leaves your bank until you cross your threshold. Before that, a set-aside is just a number." },
+    ],
+  },
+  {
+    id: "navigation",
+    category: "Basics",
+    icon: Compass,
+    title: "Finding your way around",
+    excerpt: "A quick tour of every tab and what it's for.",
+    read: "2 min",
+    body: [
+      { t: "h", text: "The main tabs" },
+      { t: "ul", items: [
+        "Dashboard: your money at a glance, recent transactions, and savings health.",
+        "Activity: every transaction and event, filterable by type, with search.",
+        "Wallet: your vault balance, withdraw and invest controls, and yield venues.",
+        "Budget: connect your bank and set your set-aside rate.",
+        "Savings Goals: split your vault into named pots.",
+      ] },
+      { t: "h", text: "Settings, Security, and Help" },
+      { t: "p", text: "Down in the sidebar, Settings holds your profile and app preferences, Security explains what protects your money and gives you the controls, and Help is where you are now." },
+      { t: "note", text: "Your last tab is remembered, so a refresh drops you right back where you were." },
+    ],
+  },
+  {
+    id: "dashboard",
+    category: "Basics",
+    icon: LayoutDashboard,
+    title: "Reading your dashboard",
+    excerpt: "Make sense of your balance, savings health, and recent activity.",
+    read: "2 min",
+    body: [
+      { t: "p", text: "The Dashboard is your money at a glance. The top shows your total saved and how it's growing; below sit your savings health and recent transactions." },
+      { t: "h", text: "Savings health" },
+      { t: "p", text: "This is a quick read on how well your setup is working: whether a bank is connected, whether a rate is set, and whether money is reaching your vault. A full bar means Orbit is running smoothly." },
+      { t: "h", text: "Recent transactions" },
+      { t: "p", text: "Every purchase Orbit sees, with the slice it set aside. Tap through to Activity for the full, filterable history." },
     ],
   },
   {
@@ -158,42 +196,6 @@ const ARTICLES: Article[] = [
     ],
   },
   {
-    id: "dashboard",
-    category: "Basics",
-    icon: LayoutDashboard,
-    title: "Reading your dashboard",
-    excerpt: "Make sense of your balance, savings health, and recent activity.",
-    read: "2 min",
-    body: [
-      { t: "p", text: "The Dashboard is your money at a glance. The top shows your total saved and how it's growing; below sit your savings health and recent transactions." },
-      { t: "h", text: "Savings health" },
-      { t: "p", text: "This is a quick read on how well your setup is working: whether a bank is connected, whether a rate is set, and whether money is reaching your vault. A full bar means Orbit is running smoothly." },
-      { t: "h", text: "Recent transactions" },
-      { t: "p", text: "Every purchase Orbit sees, with the slice it set aside. Tap through to Activity for the full, filterable history." },
-    ],
-  },
-  {
-    id: "navigation",
-    category: "Basics",
-    icon: Compass,
-    title: "Finding your way around",
-    excerpt: "A quick tour of every tab and what it's for.",
-    read: "2 min",
-    body: [
-      { t: "h", text: "The main tabs" },
-      { t: "ul", items: [
-        "Dashboard: your money at a glance, recent transactions, and savings health.",
-        "Activity: every transaction and event, filterable by type, with search.",
-        "Wallet: your vault balance, withdraw and invest controls, and yield venues.",
-        "Budget: connect your bank and set your set-aside rate.",
-        "Savings Goals: split your vault into named pots.",
-      ] },
-      { t: "h", text: "Settings, Security, and Help" },
-      { t: "p", text: "Down in the sidebar, Settings holds your profile and app preferences, Security explains what protects your money and gives you the controls, and Help is where you are now." },
-      { t: "note", text: "Your last tab is remembered, so a refresh drops you right back where you were." },
-    ],
-  },
-  {
     id: "self-custody",
     category: "Security",
     icon: KeyRound,
@@ -215,13 +217,13 @@ const ARTICLES: Article[] = [
   },
 ];
 
+const PROGRESS_KEY = "orbit.help.progress.v1";
+
 function Pill({ children, dark = false }: { children: React.ReactNode; dark?: boolean }) {
   return (
     <span
       className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-[0.12em] ${
-        dark
-          ? "bg-white/15 text-white ring-1 ring-inset ring-white/20"
-          : "bg-[var(--background)] text-[var(--muted)] ring-1 ring-inset ring-[var(--border)]"
+        dark ? "bg-white/15 text-white ring-1 ring-inset ring-white/20" : "bg-[var(--background)] text-[var(--muted)] ring-1 ring-inset ring-[var(--border)]"
       }`}
     >
       {children}
@@ -234,47 +236,48 @@ function Cover({ article, className = "", big = false }: { article: Article; cla
   const [from, to] = COVER[article.category];
   const Icon = article.icon;
   return (
-    <div
-      className={`relative overflow-hidden ${className}`}
-      style={{ backgroundImage: `linear-gradient(135deg, ${from}, ${to})` }}
-    >
-      <Icon
-        className={`absolute -bottom-4 -right-3 text-white/15 ${big ? "h-44 w-44" : "h-28 w-28"}`}
-        aria-hidden
-      />
-      <div className={`relative flex h-full flex-col justify-between ${big ? "p-6" : "p-4"}`}>
-        <span
-          className={`grid place-items-center rounded-xl bg-white/15 ring-1 ring-inset ring-white/25 ${
-            big ? "h-12 w-12" : "h-10 w-10"
-          }`}
-        >
+    <div className={`relative overflow-hidden ${className}`} style={{ backgroundImage: `linear-gradient(135deg, ${from}, ${to})` }}>
+      <Icon className={`absolute -bottom-4 -right-3 text-white/15 ${big ? "h-44 w-44" : "h-24 w-24"}`} aria-hidden />
+      <div className={`relative flex h-full items-center justify-center ${big ? "p-6" : "p-3"}`}>
+        <span className={`grid place-items-center rounded-xl bg-white/15 ring-1 ring-inset ring-white/25 ${big ? "h-12 w-12" : "h-10 w-10"}`}>
           <Icon className={big ? "h-6 w-6 text-white" : "h-5 w-5 text-white"} aria-hidden />
         </span>
-        <Pill dark>{article.category}</Pill>
       </div>
     </div>
   );
 }
 
-function ArticleView({ article, onBack }: { article: Article; onBack: () => void }) {
+function ArticleView({
+  article,
+  index,
+  total,
+  isDone,
+  nextTitle,
+  onBack,
+  onComplete,
+}: {
+  article: Article;
+  index: number;
+  total: number;
+  isDone: boolean;
+  nextTitle: string | null;
+  onBack: () => void;
+  onComplete: () => void;
+}) {
   return (
     <div className="space-y-5">
-      <button
-        type="button"
-        onClick={onBack}
-        className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[var(--muted)] transition-colors hover:text-[var(--foreground)]"
-      >
-        <ArrowLeft className="h-4 w-4" aria-hidden /> All guides
+      <button type="button" onClick={onBack} className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[var(--muted)] transition-colors hover:text-[var(--foreground)]">
+        <ArrowLeft className="h-4 w-4" aria-hidden /> Back to path
       </button>
 
       <article className="overflow-hidden rounded-2xl bg-[var(--surface)]">
-        <Cover article={article} className="h-48 sm:h-56" big />
+        <Cover article={article} className="h-44 sm:h-52" big />
         <div className="p-6 sm:p-8">
           <div className="flex items-center gap-2">
+            <span className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[var(--primary-strong)]">Step {index + 1} of {total}</span>
+            <span className="text-[var(--faint)]">·</span>
             <Pill>{article.category}</Pill>
-            <span className="inline-flex items-center gap-1 text-[12px] text-[var(--faint)]">
-              <Clock className="h-3 w-3" aria-hidden /> {article.read} read
-            </span>
+            <span className="inline-flex items-center gap-1 text-[12px] text-[var(--faint)]"><Clock className="h-3 w-3" aria-hidden /> {article.read} read</span>
           </div>
           <h1 className="mt-4 font-display text-[22px] font-bold leading-tight sm:text-[26px]">{article.title}</h1>
 
@@ -304,12 +307,23 @@ function ArticleView({ article, onBack }: { article: Article; onBack: () => void
                     ))}
                   </ol>
                 );
-              return (
-                <p key={i} className="rounded-xl bg-[var(--info-soft)] px-4 py-3 text-[13px] leading-6 text-[var(--foreground)]">
-                  {b.text}
-                </p>
-              );
+              return <p key={i} className="rounded-xl bg-[var(--info-soft)] px-4 py-3 text-[13px] leading-6 text-[var(--foreground)]">{b.text}</p>;
             })}
+          </div>
+
+          {/* Completion / continue */}
+          <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--border)] pt-5">
+            <span className="inline-flex items-center gap-1.5 text-[13px] text-[var(--muted)]">
+              {isDone ? (<><Check className="h-4 w-4 text-[var(--success)]" aria-hidden /> Completed</>) : nextTitle ? "Finish to unlock the next guide" : "Last guide in the path"}
+            </span>
+            <button
+              type="button"
+              onClick={onComplete}
+              className="inline-flex items-center gap-2 rounded-xl bg-[var(--primary)] px-4 py-2.5 text-[14px] font-semibold text-[var(--primary-fg)] transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/40"
+            >
+              {nextTitle ? (isDone ? "Next guide" : "Mark as read & continue") : isDone ? "Back to path" : "Mark as read & finish"}
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </button>
           </div>
         </div>
       </article>
@@ -319,74 +333,161 @@ function ArticleView({ article, onBack }: { article: Article; onBack: () => void
 
 export function HelpCenter() {
   const [openId, setOpenId] = useState<string | null>(null);
-  const open = ARTICLES.find((a) => a.id === openId) ?? null;
+  const [completed, setCompleted] = useState<string[]>([]);
+  const [loaded, setLoaded] = useState(false);
 
-  if (open) return <ArticleView article={open} onBack={() => setOpenId(null)} />;
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(PROGRESS_KEY);
+      if (raw) setCompleted(JSON.parse(raw));
+    } catch {}
+    setLoaded(true);
+  }, []);
 
-  const featured = ARTICLES[0];
+  const persist = (next: string[]) => {
+    setCompleted(next);
+    try {
+      localStorage.setItem(PROGRESS_KEY, JSON.stringify(next));
+    } catch {}
+  };
+
+  const isDone = (id: string) => completed.includes(id);
+  // A step is unlocked if it's the first, or the previous step is completed.
+  const isUnlocked = (i: number) => i === 0 || isDone(ARTICLES[i - 1].id);
+  const doneCount = ARTICLES.filter((a) => isDone(a.id)).length;
+  const pct = Math.round((doneCount / ARTICLES.length) * 100);
+  // First unlocked, not-yet-completed step = where to continue.
+  const nextIdx = ARTICLES.findIndex((a, i) => isUnlocked(i) && !isDone(a.id));
+  const nextStep = nextIdx >= 0 ? ARTICLES[nextIdx] : null;
+
+  if (openId) {
+    const idx = ARTICLES.findIndex((a) => a.id === openId);
+    if (idx >= 0) {
+      const article = ARTICLES[idx];
+      const next = ARTICLES[idx + 1] ?? null;
+      return (
+        <ArticleView
+          article={article}
+          index={idx}
+          total={ARTICLES.length}
+          isDone={isDone(article.id)}
+          nextTitle={next?.title ?? null}
+          onBack={() => setOpenId(null)}
+          onComplete={() => {
+            if (!isDone(article.id)) persist([...completed, article.id]);
+            setOpenId(next ? next.id : null);
+          }}
+        />
+      );
+    }
+  }
 
   return (
     <div className="space-y-6">
-      {/* Hero */}
-      <section className="overflow-hidden rounded-3xl bg-[var(--surface)]">
-        <div className="grid items-stretch gap-0 md:grid-cols-2">
-          <div className="flex flex-col justify-center p-7 sm:p-9">
-            <span className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--primary-strong)]">Orbit Guides</span>
-            <h1 className="mt-3 font-display text-[26px] font-extrabold leading-[1.15] sm:text-[32px]">
-              Everything you need to make your money self-driving
-            </h1>
-            <p className="mt-3 max-w-md text-[14px] leading-6 text-[var(--muted)]">
-              Short, plain-language reads on setting up Orbit, saving automatically, and keeping full
-              control of your on-chain savings.
-            </p>
+      {/* Hero — learning path progress */}
+      <section className="overflow-hidden rounded-3xl bg-[var(--surface)] p-7 sm:p-9">
+        <span className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--primary-strong)]">Orbit learning path</span>
+        <div className="mt-3 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+          <div className="max-w-lg">
+            <h1 className="font-display text-[26px] font-extrabold leading-[1.15] sm:text-[30px]">Learn Orbit, one step at a time</h1>
+            <p className="mt-2 text-[14px] leading-6 text-[var(--muted)]">Work through the guides in order. Finish each one to unlock the next, from opening your account to keeping full control of your savings.</p>
+          </div>
+          {nextStep && (
             <button
               type="button"
-              onClick={() => setOpenId(featured.id)}
-              className="mt-6 inline-flex w-fit items-center gap-2 rounded-xl bg-[var(--primary)] px-4 py-2.5 text-[14px] font-semibold text-[var(--primary-fg)] transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/40"
+              onClick={() => setOpenId(nextStep.id)}
+              className="inline-flex w-fit shrink-0 items-center gap-2 rounded-xl bg-[var(--primary)] px-4 py-2.5 text-[14px] font-semibold text-[var(--primary-fg)] transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/40"
             >
-              Start with the basics <ArrowUpRight className="h-4 w-4" aria-hidden />
+              {doneCount === 0 ? "Start learning" : "Continue"} <ArrowRight className="h-4 w-4" aria-hidden />
             </button>
-          </div>
-          <button
-            type="button"
-            onClick={() => setOpenId(featured.id)}
-            className="group relative min-h-[220px] text-left focus-visible:outline-none"
-            aria-label={`Read: ${featured.title}`}
-          >
-            <Cover article={featured} className="absolute inset-0 h-full w-full" big />
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/55 to-transparent p-6">
-              <div className="text-[11px] font-medium uppercase tracking-[0.14em] text-white/80">Featured</div>
-              <div className="mt-1 font-display text-[18px] font-bold text-white">{featured.title}</div>
+          )}
+        </div>
+        <div className="mt-6">
+          <div className="flex items-center justify-between text-[12px] font-medium text-[var(--muted)]">
+            <span>{doneCount} of {ARTICLES.length} completed</span>
+            <div className="flex items-center gap-3">
+              <span>{pct}%</span>
+              {doneCount > 0 && (
+                <button type="button" onClick={() => persist([])} className="text-[var(--faint)] underline-offset-2 transition-colors hover:text-[var(--foreground)] hover:underline">Reset</button>
+              )}
             </div>
-          </button>
+          </div>
+          <div className="mt-2 h-2 overflow-hidden rounded-full bg-[var(--background)]">
+            <div className="h-full rounded-full bg-[var(--primary)] transition-[width] duration-500" style={{ width: `${loaded ? pct : 0}%` }} />
+          </div>
         </div>
       </section>
 
-      {/* Post grid (3 across) */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {ARTICLES.map((a) => (
-          <button
-            key={a.id}
-            type="button"
-            onClick={() => setOpenId(a.id)}
-            className="group flex flex-col overflow-hidden rounded-2xl bg-[var(--surface)] text-left transition-all hover:-translate-y-0.5 hover:shadow-[0_12px_32px_-16px_rgba(2,6,23,0.28)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/30"
-          >
-            <Cover article={a} className="h-36" />
-            <div className="flex flex-1 flex-col p-5">
-              <div className="text-[15px] font-semibold leading-snug text-[var(--foreground)]">{a.title}</div>
-              <div className="mt-1.5 flex-1 text-[13px] leading-5 text-[var(--muted)]">{a.excerpt}</div>
-              <div className="mt-4 flex items-center justify-between border-t border-[var(--border)] pt-3">
-                <span className="inline-flex items-center gap-1 text-[12px] text-[var(--faint)]">
-                  <Clock className="h-3 w-3" aria-hidden /> {a.read} read
+      {/* Stepped path */}
+      <ol className="space-y-3">
+        {ARTICLES.map((a, i) => {
+          const done = isDone(a.id);
+          const unlocked = isUnlocked(i);
+          const isNext = nextStep?.id === a.id;
+          const last = i === ARTICLES.length - 1;
+          return (
+            <li key={a.id} className="relative flex gap-4">
+              {/* Rail: node + connector */}
+              <div className="flex flex-col items-center pt-6">
+                <span
+                  className={`z-10 grid h-9 w-9 shrink-0 place-items-center rounded-full text-[13px] font-bold ring-4 ring-[var(--background)] ${
+                    done
+                      ? "bg-[var(--primary)] text-[var(--primary-fg)]"
+                      : unlocked
+                        ? "bg-[var(--primary-soft)] text-[var(--primary-strong)]"
+                        : "bg-[var(--surface)] text-[var(--faint)] ring-1 ring-[var(--border)]"
+                  }`}
+                >
+                  {done ? <Check className="h-4.5 w-4.5" aria-hidden /> : unlocked ? i + 1 : <Lock className="h-4 w-4" aria-hidden />}
                 </span>
-                <span className="inline-flex items-center gap-1 text-[12px] font-medium text-[var(--primary-strong)]">
-                  Read <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden />
-                </span>
+                {!last && <span className={`w-0.5 flex-1 ${done ? "bg-[var(--primary)]/40" : "bg-[var(--border)]"}`} aria-hidden />}
               </div>
-            </div>
-          </button>
-        ))}
-      </div>
+
+              {/* Card */}
+              <div className="flex-1 pb-1">
+                <button
+                  type="button"
+                  disabled={!unlocked}
+                  onClick={() => unlocked && setOpenId(a.id)}
+                  className={`flex w-full items-stretch gap-4 overflow-hidden rounded-2xl bg-[var(--surface)] text-left transition-all ${
+                    unlocked
+                      ? "hover:-translate-y-0.5 hover:shadow-[0_12px_32px_-16px_rgba(2,6,23,0.28)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/30"
+                      : "cursor-not-allowed opacity-70"
+                  } ${isNext ? "ring-2 ring-[var(--primary)]/40" : ""}`}
+                >
+                  <div className="relative w-24 shrink-0 sm:w-32">
+                    <Cover article={a} className="h-full w-full" />
+                    {!unlocked && (
+                      <div className="absolute inset-0 grid place-items-center bg-[var(--surface)]/70 backdrop-grayscale">
+                        <Lock className="h-5 w-5 text-[var(--muted)]" aria-hidden />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex min-w-0 flex-1 flex-col justify-center py-4 pr-4">
+                    <div className="flex items-center gap-2">
+                      <Pill>{a.category}</Pill>
+                      {done && <span className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--success)]"><Check className="h-3 w-3" aria-hidden /> Done</span>}
+                      {isNext && !done && <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--primary-strong)]">Up next</span>}
+                      {!unlocked && <span className="inline-flex items-center gap-1 text-[11px] font-medium uppercase tracking-[0.1em] text-[var(--faint)]"><Lock className="h-3 w-3" aria-hidden /> Locked</span>}
+                    </div>
+                    <div className="mt-1.5 text-[15px] font-semibold leading-snug text-[var(--foreground)]">{a.title}</div>
+                    <div className="mt-1 line-clamp-2 text-[13px] leading-5 text-[var(--muted)]">
+                      {unlocked ? a.excerpt : `Finish "${ARTICLES[i - 1].title}" to unlock this guide.`}
+                    </div>
+                    <div className="mt-2 inline-flex items-center gap-1 text-[12px] text-[var(--faint)]"><Clock className="h-3 w-3" aria-hidden /> {a.read} read</div>
+                  </div>
+                </button>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+
+      {doneCount === ARTICLES.length && (
+        <div className="flex items-center gap-2.5 rounded-2xl bg-[var(--success-soft)] px-5 py-4 text-[14px] font-medium text-[var(--success)]">
+          <Check className="h-5 w-5" aria-hidden /> You've completed the Orbit learning path. Nicely done.
+        </div>
+      )}
     </div>
   );
 }
