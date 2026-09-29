@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Plus, Trash2, TrendingUp, Check } from "lucide-react";
 import { logActivity } from "@/lib/activity";
+import { Sheet } from "@/components/ui/Sheet";
 
 // Named savings goals ("pots") layered over the single on-chain vault. Each goal has
 // its own allocated balance and earns the same 6% APY on that balance — mathematically
@@ -200,8 +201,8 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
         </>
       )}
 
-      {adding && (
-        <div className="mt-4 space-y-4 rounded-xl border border-[var(--border)] bg-[var(--background)] p-4">
+      <Sheet open={adding} onClose={() => setAdding(false)} side="right" title="New goal">
+        <div className="space-y-5">
           <div>
             <span className="mb-1.5 block text-[12px] font-medium text-[var(--muted)]">Icon</span>
             <div className="flex flex-wrap gap-1.5">
@@ -211,38 +212,36 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
                   type="button"
                   aria-label={`Icon ${e}`}
                   onClick={() => setEmoji(e)}
-                  className={`grid h-9 w-9 place-items-center rounded-lg text-[18px] transition-colors ${emoji === e ? "bg-[var(--accent-soft)] ring-1 ring-inset ring-[var(--accent)]/40" : "hover:bg-[var(--surface)]"}`}
+                  className={`grid h-9 w-9 place-items-center rounded-lg text-[18px] transition-colors ${emoji === e ? "bg-[var(--primary-soft)] ring-1 ring-inset ring-[var(--primary)]/40" : "hover:bg-[var(--surface)]"}`}
                 >
                   {e}
                 </button>
               ))}
             </div>
           </div>
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <div className="min-w-0 flex-1">
-              <label htmlFor="goal-name" className="mb-1.5 block text-[12px] font-medium text-[var(--muted)]">Goal name</label>
+          <div>
+            <label htmlFor="goal-name" className="mb-1.5 block text-[12px] font-medium text-[var(--muted)]">Goal name</label>
+            <input
+              id="goal-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Vacation"
+              maxLength={24}
+              className="h-11 w-full min-w-0 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3.5 text-[15px] text-[var(--foreground)] placeholder:text-[var(--faint)] focus:border-[var(--border-strong)] focus:outline-none"
+            />
+          </div>
+          <div>
+            <label htmlFor="goal-target" className="mb-1.5 block text-[12px] font-medium text-[var(--muted)]">Target amount</label>
+            <div className="flex h-11 items-center rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3">
+              <span className="text-[var(--muted)]">$</span>
               <input
-                id="goal-name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Vacation"
-                maxLength={24}
-                className="h-11 w-full min-w-0 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3.5 text-[15px] text-[var(--foreground)] placeholder:text-[var(--faint)] focus:border-[var(--accent)]/50 focus:outline-none"
+                id="goal-target"
+                value={target}
+                onChange={(e) => setTarget(e.target.value.replace(/[^0-9.]/g, ""))}
+                inputMode="decimal"
+                placeholder="500"
+                className="h-full w-full min-w-0 bg-transparent px-1.5 font-mono text-[15px] tabular-nums focus:outline-none"
               />
-            </div>
-            <div className="sm:w-40">
-              <label htmlFor="goal-target" className="mb-1.5 block text-[12px] font-medium text-[var(--muted)]">Target amount</label>
-              <div className="flex h-11 items-center rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3">
-                <span className="text-[var(--muted)]">$</span>
-                <input
-                  id="goal-target"
-                  value={target}
-                  onChange={(e) => setTarget(e.target.value.replace(/[^0-9.]/g, ""))}
-                  inputMode="decimal"
-                  placeholder="500"
-                  className="h-full w-full min-w-0 bg-transparent px-1.5 font-mono text-[15px] tabular-nums focus:outline-none"
-                />
-              </div>
             </div>
           </div>
           <div>
@@ -260,25 +259,16 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
               <span className="shrink-0 text-[12px] text-[var(--faint)]">of {usd(unallocated)} free</span>
             </div>
           </div>
-          <div className="mt-3 flex gap-2">
-            <button
-              type="button"
-              onClick={addGoal}
-              disabled={!name.trim()}
-              className="inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-xl bg-[var(--accent)] text-[14px] font-semibold text-[var(--on-accent)] transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-40"
-            >
-              Add goal
-            </button>
-            <button
-              type="button"
-              onClick={() => setAdding(false)}
-              className="inline-flex h-10 items-center justify-center rounded-xl border border-[var(--border-strong)] px-4 text-[14px] font-medium transition-colors hover:bg-[var(--background)]"
-            >
-              Cancel
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={addGoal}
+            disabled={!name.trim()}
+            className="inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-[var(--primary)] text-[14px] font-semibold text-[var(--primary-fg)] transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-40"
+          >
+            <Plus className="h-4 w-4" aria-hidden /> Add goal
+          </button>
         </div>
-      )}
+      </Sheet>
 
       {withYield.length === 0 && !adding && (
         <div className="mt-5 flex items-center gap-2 border-t border-[var(--line)] pt-5 text-[13px] text-[var(--faint)]">
