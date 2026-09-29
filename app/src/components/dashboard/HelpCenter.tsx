@@ -449,9 +449,9 @@ export function HelpCenter() {
                   type="button"
                   disabled={!unlocked}
                   onClick={() => unlocked && setOpenId(a.id)}
-                  className={`flex w-full items-stretch gap-4 overflow-hidden rounded-2xl bg-[var(--surface)] text-left transition-all ${
+                  className={`flex w-full items-stretch gap-4 overflow-hidden rounded-2xl bg-[var(--surface)] text-left transition-colors ${
                     unlocked
-                      ? "hover:-translate-y-0.5 hover:shadow-[0_12px_32px_-16px_rgba(2,6,23,0.28)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/30"
+                      ? "hover:bg-[var(--background)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/30"
                       : "cursor-not-allowed opacity-70"
                   } ${isNext ? "ring-2 ring-[var(--primary)]/40" : ""}`}
                 >
