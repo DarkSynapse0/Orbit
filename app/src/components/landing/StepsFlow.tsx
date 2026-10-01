@@ -54,13 +54,13 @@ const STEPS: Step[] = [
   },
 ];
 
-// A landing-friendly take on the GreenSock full-screen slide slider. Rather than
-// permanently hijacking the wheel (or pinning, which misbehaves inside the page's
-// flex column), a tall section holds a `sticky` viewport; a scrubbed, snapped
-// ScrollTrigger timeline plays the slide-in / heading-morph / image-scale
-// transitions as you scroll through it, then the page continues normally.
+// Skiper "StickyCard_002" stacking mechanic, rebuilt on the gsap/ScrollTrigger we
+// already ship: each card starts below the viewport and rises to cover the stack
+// while the card beneath it scales to 0.7 and tilts 5°. Driven by a scrubbed
+// timeline over a sticky track (robust inside the page's flex column — no pin).
 export function StepsFlow() {
   const root = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const countRef = useRef<HTMLSpanElement>(null);
   const [reduced, setReduced] = useState(false);
 
@@ -75,57 +75,39 @@ export function StepsFlow() {
     if (!el || reduced) return;
 
     gsap.registerPlugin(ScrollTrigger);
-    const n = STEPS.length;
+    const cards = cardRefs.current.filter(Boolean) as HTMLDivElement[];
+    const total = cards.length;
+    if (total === 0) return;
 
     const ctx = gsap.context(() => {
-      const sections = gsap.utils.toArray<HTMLElement>(".sf-slide");
-      const outers = gsap.utils.toArray<HTMLElement>(".sf-outer");
-      const inners = gsap.utils.toArray<HTMLElement>(".sf-inner");
-      const imgs = gsap.utils.toArray<HTMLElement>(".sf-img");
-      const headings = gsap.utils.toArray<HTMLElement>(".sf-heading");
-
-      // Stack order: later slides sit above and slide over the earlier ones.
-      sections.forEach((s, i) => gsap.set(s, { zIndex: i, autoAlpha: 1 }));
-
-      // Everything but the first slide starts masked off to the right.
-      gsap.set(outers, { xPercent: 100 });
-      gsap.set(inners, { xPercent: -100 });
-      gsap.set(outers[0], { xPercent: 0 });
-      gsap.set(inners[0], { xPercent: 0 });
+      gsap.set(cards[0], { yPercent: 0, scale: 1, rotation: 0 });
+      for (let i = 1; i < total; i++) {
+        gsap.set(cards[i], { yPercent: 100, scale: 1, rotation: 0 });
+      }
 
       const tl = gsap.timeline({
-        defaults: { ease: "power2.inOut" },
+        defaults: { ease: "none" },
         scrollTrigger: {
           trigger: el,
           start: "top top",
           end: "bottom bottom",
-          scrub: 1,
+          scrub: 0.5,
           snap: {
-            snapTo: 1 / (n - 1),
+            snapTo: 1 / (total - 1),
             duration: { min: 0.2, max: 0.5 },
             ease: "power1.inOut",
           },
           invalidateOnRefresh: true,
           onUpdate: (self) => {
-            const idx = Math.round(self.progress * (n - 1));
+            const idx = Math.round(self.progress * (total - 1));
             if (countRef.current) countRef.current.textContent = String(idx + 1);
           },
         },
       });
 
-      for (let i = 1; i < n; i++) {
-        const at = i - 1;
-        tl.fromTo(outers[i], { xPercent: 100 }, { xPercent: 0 }, at)
-          .fromTo(inners[i], { xPercent: -100 }, { xPercent: 0 }, at)
-          .fromTo(imgs[i], { scale: 1.6 }, { scale: 1 }, at)
-          .fromTo(
-            headings[i],
-            { xPercent: -16, autoAlpha: 0.2 },
-            { xPercent: 0, autoAlpha: 1 },
-            at,
-          )
-          // nudge the outgoing heading for a touch of parallax depth
-          .to(headings[i - 1], { xPercent: 16 }, at);
+      for (let i = 0; i < total - 1; i++) {
+        tl.to(cards[i], { scale: 0.7, rotation: 5, duration: 1 }, i);
+        tl.to(cards[i + 1], { yPercent: 0, duration: 1 }, i);
       }
     }, el);
 
@@ -158,11 +140,11 @@ export function StepsFlow() {
   }
 
   return (
-    // Tall track: gives the sticky viewport room to scrub through all steps.
+    // Tall track gives the sticky viewport room to scrub through every card.
     <section
       ref={root}
       id="how"
-      className="dark relative w-full"
+      className="dark relative w-full bg-[#06120d]"
       style={
         {
           height: `${STEPS.length * 100}vh`,
@@ -173,57 +155,63 @@ export function StepsFlow() {
       }
       aria-label="How Orbit works"
     >
-      <div className="sticky top-0 h-screen w-full overflow-hidden bg-[#06120d] text-white">
+      <div className="sticky top-0 flex h-screen w-full items-center justify-center overflow-hidden p-4 text-white sm:p-8">
         {/* persistent overlay: section label + step counter */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-40 flex items-center justify-between px-6 pt-8 sm:px-10">
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-50 flex items-center justify-between px-6 pt-8 sm:px-10">
           <p className="font-mono text-[12px] uppercase tracking-[0.24em] text-white/50">How it works</p>
           <p className="font-mono text-[13px] tracking-[0.2em] text-white/70">
             0<span ref={countRef}>1</span> <span className="text-white/30">/ 0{STEPS.length}</span>
           </p>
         </div>
 
-        {STEPS.map((s) => (
-          <div key={s.n} className="sf-slide absolute inset-0">
-            <div className="sf-outer h-full w-full overflow-hidden">
-              <div className="sf-inner h-full w-full overflow-hidden">
-                <div
-                  className="flex h-full w-full items-center"
-                  style={{ background: `radial-gradient(120% 120% at 15% 10%, ${s.from} 0%, ${s.to} 60%)` }}
-                >
-                  <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-6 sm:px-10 lg:grid-cols-2 lg:gap-16">
-                    {/* copy */}
-                    <div className="order-2 lg:order-1">
-                      <div className="font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--accent-strong)]">
-                        Step {s.n}
-                      </div>
-                      <h2 className="sf-heading mt-3 font-display text-[clamp(3rem,9vw,7rem)] font-semibold leading-[0.95] tracking-[-0.03em]">
-                        {s.word}
-                      </h2>
-                      <h3 className="mt-4 font-display text-[clamp(1.25rem,2.4vw,1.9rem)] font-medium">
-                        {s.title}
-                      </h3>
-                      <p className="mt-4 max-w-md text-[17px] leading-relaxed text-white/75">
-                        {s.desc}
-                      </p>
-                    </div>
+        {/* card stack */}
+        <div className="relative h-[82vh] w-full max-w-5xl">
+          {STEPS.map((s, i) => (
+            <div
+              key={s.n}
+              ref={(node) => {
+                cardRefs.current[i] = node;
+              }}
+              className="absolute inset-0 overflow-hidden rounded-[2rem] border border-white/10 shadow-2xl"
+              style={{
+                zIndex: i,
+                background: `radial-gradient(120% 120% at 20% 0%, ${s.from} 0%, ${s.to} 62%)`,
+              }}
+            >
+              {/* oversized ghost numeral */}
+              <span
+                aria-hidden
+                className="pointer-events-none absolute -right-4 -top-16 select-none font-display text-[14rem] font-bold leading-none tracking-tighter text-white opacity-[0.05] sm:text-[20rem]"
+              >
+                {s.n}
+              </span>
 
-                    {/* visual panel */}
-                    <figure className="order-1 m-0 overflow-hidden rounded-[2rem] border border-white/10 lg:order-2">
-                      <div
-                        className="sf-img grid aspect-[4/3] w-full place-items-center"
-                        style={{ background: `linear-gradient(135deg, ${s.from} 0%, ${s.to} 100%)` }}
-                      >
-                        <div className="grid h-24 w-24 place-items-center rounded-3xl bg-[var(--accent)] text-[var(--on-accent)] shadow-2xl">
-                          <s.icon className="h-11 w-11" aria-hidden />
-                        </div>
-                      </div>
-                    </figure>
+              <div className="relative grid h-full w-full items-center gap-10 p-8 sm:p-14 lg:grid-cols-2 lg:gap-16">
+                <div>
+                  <div className="font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--accent-strong)]">
+                    Step {s.n}
+                  </div>
+                  <h2 className="mt-3 font-display text-[clamp(2.6rem,7vw,5.5rem)] font-semibold leading-[0.95] tracking-[-0.03em]">
+                    {s.word}
+                  </h2>
+                  <h3 className="mt-4 font-display text-[clamp(1.2rem,2.2vw,1.8rem)] font-medium">
+                    {s.title}
+                  </h3>
+                  <p className="mt-4 max-w-md text-[16px] leading-relaxed text-white/75 sm:text-[17px]">
+                    {s.desc}
+                  </p>
+                </div>
+
+                {/* icon tile */}
+                <div className="hidden place-items-center lg:grid">
+                  <div className="grid h-28 w-28 place-items-center rounded-[1.75rem] bg-[var(--accent)] text-[var(--on-accent)] shadow-2xl">
+                    <s.icon className="h-12 w-12" aria-hidden />
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </section>
   );
