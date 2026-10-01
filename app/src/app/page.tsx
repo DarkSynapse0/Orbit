@@ -121,7 +121,7 @@ export default function Landing() {
       <section className="border-b border-[var(--border)]">
         <div className="mx-auto max-w-5xl px-6 py-8 text-center">
           <p className="font-mono text-[12px] uppercase tracking-[0.24em] text-[var(--faint)]">Built on</p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-12 gap-y-8">
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-20 gap-y-8">
             {LOGOS.map((t) => (
               <span key={t.name} className="inline-flex items-center opacity-80">
                 <img src={t.src} alt={t.name} className={`${t.className} block dark:hidden`} />
