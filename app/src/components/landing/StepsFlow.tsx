@@ -11,8 +11,6 @@ type Step = {
   title: string;
   desc: string;
   icon: LucideIcon;
-  from: string;
-  to: string;
 };
 
 const STEPS: Step[] = [
@@ -22,8 +20,6 @@ const STEPS: Step[] = [
     title: "You spend as usual",
     desc: "Connect your bank and go about your day. Orbit watches purchases through Plaid — it can see, but never touch your money.",
     icon: CreditCard,
-    from: "#0b3b2e",
-    to: "#06120d",
   },
   {
     n: "02",
@@ -31,8 +27,6 @@ const STEPS: Step[] = [
     title: "Orbit sets aside",
     desc: "A small slice of each purchase gets earmarked. The dollars stay in your bank until they add up to a batch.",
     icon: Coins,
-    from: "#123149",
-    to: "#081521",
   },
   {
     n: "03",
@@ -40,8 +34,6 @@ const STEPS: Step[] = [
     title: "On-chain at the threshold",
     desc: "At the batch point, funds convert to USDC and land in a vault that's yours alone — self-custodial, verifiable.",
     icon: Lock,
-    from: "#39234a",
-    to: "#170e1f",
   },
   {
     n: "04",
@@ -49,15 +41,12 @@ const STEPS: Step[] = [
     title: "It earns yield",
     desc: "Your USDC earns real on-chain yield around the clock. Withdraw everything you saved, plus what it earned — anytime.",
     icon: TrendingUp,
-    from: "#0b3b2e",
-    to: "#06120d",
   },
 ];
 
-// Skiper "StickyCard_002" stacking mechanic, rebuilt on the gsap/ScrollTrigger we
-// already ship: each card starts below the viewport and rises to cover the stack
-// while the card beneath it scales to 0.7 and tilts 5°. Driven by a scrubbed
-// timeline over a sticky track (robust inside the page's flex column — no pin).
+// Stacking cards (Skiper StickyCard_002 mechanic) on our gsap/ScrollTrigger:
+// each card rises from the bottom while the one beneath scales to 0.7 and tilts
+// 5°. Two-column: a sticky label on the left, the card stack on the right.
 export function StepsFlow() {
   const root = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -117,19 +106,19 @@ export function StepsFlow() {
   // Reduced-motion / no-JS friendly: a simple vertical list, no scroll effect.
   if (reduced) {
     return (
-      <section className="dark border-y border-white/10 bg-[#06120d] text-white">
+      <section className="border-y border-[var(--border)] bg-[var(--background)]">
         <div className="mx-auto max-w-5xl px-6 py-20">
-          <p className="font-mono text-[12px] uppercase tracking-[0.24em] text-white/45">How it works</p>
+          <p className="font-mono text-[12px] uppercase tracking-[0.24em] text-[var(--faint)]">How it works</p>
           <div className="mt-10 grid gap-6">
             {STEPS.map((s) => (
-              <div key={s.n} className="flex items-start gap-5 rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+              <div key={s.n} className="flex items-start gap-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
                 <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-[var(--accent)] text-[var(--on-accent)]">
                   <s.icon className="h-5 w-5" aria-hidden />
                 </div>
                 <div>
                   <div className="font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--accent-strong)]">Step {s.n} · {s.word}</div>
                   <h3 className="mt-2 font-display text-2xl font-semibold">{s.title}</h3>
-                  <p className="mt-2 max-w-xl text-white/70">{s.desc}</p>
+                  <p className="mt-2 max-w-xl text-[var(--muted)]">{s.desc}</p>
                 </div>
               </div>
             ))}
@@ -144,73 +133,66 @@ export function StepsFlow() {
     <section
       ref={root}
       id="how"
-      className="dark relative w-full bg-[#06120d]"
-      style={
-        {
-          height: `${STEPS.length * 100}vh`,
-          "--accent": "#35f0c6",
-          "--accent-strong": "#5cf5d2",
-          "--on-accent": "#06251c",
-        } as React.CSSProperties
-      }
+      className="relative w-full bg-[var(--background)] text-[var(--foreground)]"
+      style={{ height: `${STEPS.length * 100}vh` }}
       aria-label="How Orbit works"
     >
-      <div className="sticky top-0 flex h-screen w-full items-center justify-center overflow-hidden p-4 text-white sm:p-8">
-        {/* persistent overlay: section label + step counter */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-50 flex items-center justify-between px-6 pt-8 sm:px-10">
-          <p className="font-mono text-[12px] uppercase tracking-[0.24em] text-white/50">How it works</p>
-          <p className="font-mono text-[13px] tracking-[0.2em] text-white/70">
-            0<span ref={countRef}>1</span> <span className="text-white/30">/ 0{STEPS.length}</span>
-          </p>
-        </div>
+      <div className="sticky top-0 flex h-screen w-full items-center overflow-hidden">
+        <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-6 lg:grid-cols-[0.8fr_1fr] lg:gap-16">
+          {/* left: sticky label */}
+          <div>
+            <p className="font-mono text-[12px] uppercase tracking-[0.24em] text-[var(--faint)]">How it works</p>
+            <h2 className="mt-4 font-display text-[clamp(2rem,4vw,3.25rem)] font-semibold leading-[1.02] tracking-[-0.02em]">
+              From a swipe to on-chain yield.
+            </h2>
+            <p className="mt-4 max-w-sm text-[var(--muted)]">
+              Four quiet steps run every time you spend — you never lift a finger.
+            </p>
+            <p className="mt-8 font-mono text-[13px] tracking-[0.2em] text-[var(--muted)]">
+              0<span ref={countRef}>1</span> <span className="text-[var(--faint)]">/ 0{STEPS.length}</span>
+            </p>
+          </div>
 
-        {/* card stack */}
-        <div className="relative h-[82vh] w-full max-w-5xl">
-          {STEPS.map((s, i) => (
-            <div
-              key={s.n}
-              ref={(node) => {
-                cardRefs.current[i] = node;
-              }}
-              className="absolute inset-0 overflow-hidden rounded-[2rem] border border-white/10 shadow-2xl"
-              style={{
-                zIndex: i,
-                background: `radial-gradient(120% 120% at 20% 0%, ${s.from} 0%, ${s.to} 62%)`,
-              }}
-            >
-              {/* oversized ghost numeral */}
-              <span
-                aria-hidden
-                className="pointer-events-none absolute -right-4 -top-16 select-none font-display text-[14rem] font-bold leading-none tracking-tighter text-white opacity-[0.05] sm:text-[20rem]"
+          {/* right: card stack */}
+          <div className="relative mx-auto h-[52vh] w-full max-w-md">
+            {STEPS.map((s, i) => (
+              <div
+                key={s.n}
+                ref={(node) => {
+                  cardRefs.current[i] = node;
+                }}
+                className="absolute inset-0 overflow-hidden rounded-[1.75rem] border border-[var(--border)] bg-[var(--surface)] shadow-float"
+                style={{ zIndex: i }}
               >
-                {s.n}
-              </span>
+                {/* accent top bar */}
+                <div aria-hidden className="absolute inset-x-0 top-0 h-1.5" style={{ background: "var(--gradient-accent)" }} />
+                {/* oversized ghost numeral */}
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute -right-3 -top-10 select-none font-display text-[9rem] font-bold leading-none tracking-tighter text-[var(--foreground)] opacity-[0.04] sm:text-[11rem]"
+                >
+                  {s.n}
+                </span>
 
-              <div className="relative grid h-full w-full items-center gap-10 p-8 sm:p-14 lg:grid-cols-2 lg:gap-16">
-                <div>
-                  <div className="font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--accent-strong)]">
-                    Step {s.n}
+                <div className="relative flex h-full flex-col justify-between p-7 sm:p-9">
+                  <div className="grid h-14 w-14 place-items-center rounded-2xl bg-[var(--accent)] text-[var(--on-accent)] shadow-soft">
+                    <s.icon className="h-6 w-6" aria-hidden />
                   </div>
-                  <h2 className="mt-3 font-display text-[clamp(2.6rem,7vw,5.5rem)] font-semibold leading-[0.95] tracking-[-0.03em]">
-                    {s.word}
-                  </h2>
-                  <h3 className="mt-4 font-display text-[clamp(1.2rem,2.2vw,1.8rem)] font-medium">
-                    {s.title}
-                  </h3>
-                  <p className="mt-4 max-w-md text-[16px] leading-relaxed text-white/75 sm:text-[17px]">
-                    {s.desc}
-                  </p>
-                </div>
-
-                {/* icon tile */}
-                <div className="hidden place-items-center lg:grid">
-                  <div className="grid h-28 w-28 place-items-center rounded-[1.75rem] bg-[var(--accent)] text-[var(--on-accent)] shadow-2xl">
-                    <s.icon className="h-12 w-12" aria-hidden />
+                  <div>
+                    <div className="font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--accent-strong)]">
+                      Step {s.n} · {s.word}
+                    </div>
+                    <h3 className="mt-3 font-display text-[clamp(1.5rem,3vw,2.1rem)] font-semibold leading-[1.05] tracking-[-0.02em]">
+                      {s.title}
+                    </h3>
+                    <p className="mt-3 text-[15px] leading-relaxed text-[var(--muted)]">
+                      {s.desc}
+                    </p>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </section>
