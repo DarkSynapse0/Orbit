@@ -47,3 +47,7 @@ npm-debug.log*
 
 # Generated /brag launch-video output (large binaries)
 brag-output/
+
+# local design previews (not for the repo)
+.brand-preview/
+*.css.bak

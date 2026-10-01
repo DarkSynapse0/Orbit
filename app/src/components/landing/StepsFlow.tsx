@@ -1,4 +1,5 @@
 import { CreditCard, Coins, Lock, TrendingUp, type LucideIcon } from "lucide-react";
+import { LottieBox } from "@/components/landing/LottieBox";
 
 type Step = {
   n: string;
@@ -6,6 +7,7 @@ type Step = {
   title: string;
   desc: string;
   icon: LucideIcon;
+  lottie?: string;
 };
 
 const STEPS: Step[] = [
@@ -15,6 +17,7 @@ const STEPS: Step[] = [
     title: "You spend as usual",
     desc: "Orbit watches purchases through Plaid — it can see, but never touch your money.",
     icon: CreditCard,
+    lottie: "/lottie/step-1.lottie",
   },
   {
     n: "02",
@@ -59,10 +62,14 @@ export function StepsFlow() {
               key={s.n}
               className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]"
             >
-              {/* Lottie slot — drop the animation here (placeholder: step icon) */}
+              {/* Lottie slot — animation if provided, else step icon */}
               <div className="relative grid aspect-[4/3] place-items-center border-b border-[var(--border)] bg-[var(--background)]">
-                <span className="absolute left-4 top-4 font-mono text-[13px] tracking-[0.2em] text-[var(--faint)]">{s.n}</span>
-                <s.icon className="h-10 w-10 text-[var(--muted)]" aria-hidden />
+                <span className="absolute left-4 top-4 z-10 font-mono text-[13px] tracking-[0.2em] text-[var(--faint)]">{s.n}</span>
+                {s.lottie ? (
+                  <LottieBox src={s.lottie} className="h-full w-full" />
+                ) : (
+                  <s.icon className="h-10 w-10 text-[var(--muted)]" aria-hidden />
+                )}
               </div>
 
               <div className="p-6">
