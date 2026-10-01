@@ -9,6 +9,8 @@ import {
   Zap,
   Check,
   ExternalLink,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Reveal } from "@/components/landing/Reveal";
 import { LiveYield } from "@/components/landing/LiveYield";
@@ -130,39 +132,84 @@ export default function Landing() {
       {/* ───────── Command deck: one dashboard-style bento ───────── */}
       <section id="deck" className="mx-auto w-full max-w-7xl scroll-mt-20 px-6 py-20 lg:py-24">
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
-          {/* growth chart */}
+          {/* growth chart — heading + corner badge over an inner panel */}
           <Reveal className="lg:col-span-8">
             <div className={`${tile} h-full`}>
-              <div className="flex items-end justify-between">
+              <div className="flex items-start justify-between gap-4">
                 <div>
-                  <div className={`${eyebrow} text-[var(--faint)]`}>Idle cash vs Orbit</div>
-                  <div className="mt-2 font-mono text-[clamp(1.5rem,4vw,2.2rem)] font-semibold leading-none">
-                    <LiveYield principal={5980} apy={0.06} />
-                  </div>
+                  <div className={`${eyebrow} text-[var(--faint)]`}>Your money, working</div>
+                  <h3 className="mt-2 max-w-sm font-display text-[clamp(1.3rem,2.4vw,1.8rem)] font-semibold leading-tight tracking-[-0.02em]">
+                    Watch idle cash fall behind your vault.
+                  </h3>
                 </div>
-                <span className="inline-flex items-center gap-1 rounded-full bg-[var(--accent-soft)] px-2 py-1 text-[14px] font-medium text-[var(--accent)]">
-                  <TrendingUp className="h-3.5 w-3.5" aria-hidden /> 6.0%
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[var(--accent-soft)] text-[var(--accent)]">
+                  <TrendingUp className="h-5 w-5" aria-hidden />
                 </span>
               </div>
-              <div className="mt-6">
-                <GrowthChart />
-              </div>
-              <div className="mt-4 flex items-center gap-5 text-[13px] text-[var(--muted)]">
-                <span className="flex items-center gap-2"><span className="h-[3px] w-4 rounded-full bg-[var(--accent)]" /> Your vault</span>
-                <span className="flex items-center gap-2"><span className="h-0 w-4 border-t-2 border-dashed border-[var(--border-strong)]" /> Cash left idle</span>
+
+              <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <div className="text-[14px] font-semibold">Projected balance</div>
+                    <div className="mt-1 font-mono text-[clamp(1.3rem,3vw,1.9rem)] font-semibold leading-none">
+                      <LiveYield principal={5980} apy={0.06} />
+                    </div>
+                  </div>
+                  <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] px-2.5 py-1 text-[13px] text-[var(--muted)]">
+                    <ChevronLeft className="h-3.5 w-3.5" aria-hidden /> 5 years <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+                  </div>
+                </div>
+                <div className="mt-5">
+                  <GrowthChart />
+                </div>
+                <div className="mt-4 flex items-center gap-5 text-[13px] text-[var(--muted)]">
+                  <span className="flex items-center gap-2"><span className="h-[3px] w-4 rounded-full bg-[var(--accent)]" /> Your vault</span>
+                  <span className="flex items-center gap-2"><span className="h-0 w-4 border-t-2 border-dashed border-[var(--border-strong)]" /> Cash left idle</span>
+                </div>
               </div>
             </div>
           </Reveal>
 
-          {/* APY */}
+          {/* APY — progress ring + comparison list */}
           <Reveal className="lg:col-span-4">
-            <div className={`${tile} flex h-full flex-col justify-between`}>
-              <TrendingUp className="h-6 w-6 text-[var(--accent)]" aria-hidden />
-              <div className="mt-8">
-                <div className="text-[clamp(2.4rem,7vw,3.4rem)] font-semibold leading-none text-[var(--accent)]">
-                  <CountUp value={6} decimals={1} suffix="%" />
+            <div className={`${tile} flex h-full flex-col`}>
+              <div className={`${eyebrow} text-[var(--faint)]`}>Real yield, on-chain</div>
+
+              <div className="relative mx-auto mt-6 grid h-40 w-40 place-items-center">
+                <svg viewBox="0 0 120 120" className="h-40 w-40 -rotate-90">
+                  <circle cx="60" cy="60" r="52" fill="none" stroke="var(--border)" strokeWidth="11" />
+                  <circle
+                    cx="60" cy="60" r="52" fill="none" stroke="var(--accent)" strokeWidth="11" strokeLinecap="round"
+                    strokeDasharray="326.726" strokeDashoffset="130.69"
+                  />
+                </svg>
+                <div className="absolute inset-0 grid place-items-center text-center">
+                  <div>
+                    <div className="text-[clamp(1.8rem,5vw,2.4rem)] font-semibold leading-none text-[var(--accent)]">
+                      <CountUp value={6} decimals={1} suffix="%" />
+                    </div>
+                    <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--muted)]">APY</div>
+                  </div>
                 </div>
-                <div className="mt-2 text-[14px] text-[var(--muted)]">APY on-chain — real yield, streamed to your vault every second.</div>
+              </div>
+
+              <div className="mt-6 space-y-2">
+                {[
+                  { k: "Orbit vault", v: "6.0%", on: true },
+                  { k: "High-yield bank", v: "0.5%", on: false },
+                  { k: "Checking", v: "0.01%", on: false },
+                ].map((r) => (
+                  <div
+                    key={r.k}
+                    className={`flex items-center justify-between rounded-lg px-3 py-2 text-[13px] ${r.on ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "border border-[var(--border)] text-[var(--muted)]"}`}
+                  >
+                    <span className="flex items-center gap-2">
+                      <span className={`h-2 w-2 rounded-full ${r.on ? "bg-[var(--accent)]" : "bg-[var(--border-strong)]"}`} />
+                      {r.k}
+                    </span>
+                    <span className="font-mono tabular-nums">{r.v}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </Reveal>
