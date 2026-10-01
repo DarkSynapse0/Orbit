@@ -19,6 +19,7 @@ import { GrowthChart } from "@/components/landing/GrowthChart";
 import { OrbitRings } from "@/components/landing/OrbitRings";
 import { CountUp } from "@/components/landing/CountUp";
 import { LiveChain } from "@/components/landing/LiveChain";
+import { StepsFlow } from "@/components/landing/StepsFlow";
 import { OrbitLogo } from "@/components/OrbitLogo";
 
 const PROGRAM = "8LEjyrMCKukhxA4q3DRaYGfkappxRayiTPM7saZG2Kgi";
@@ -132,6 +133,9 @@ export default function Landing() {
         </div>
       </section>
       </div>
+
+      {/* ───────── How it works: pinned slide flow ───────── */}
+      <StepsFlow />
 
       {/* ───────── Command deck: one dashboard-style bento ───────── */}
       <section id="deck" className="mx-auto w-full max-w-7xl scroll-mt-20 px-6 py-20 lg:py-24">
