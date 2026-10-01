@@ -67,14 +67,14 @@ export default function Landing() {
         />
 
         {/* floating pill nav */}
-        <header className="relative z-40 px-6 pt-6">
-          <div className="mx-auto grid max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-4">
-            <div className="flex items-center gap-3 justify-self-start">
+        <header className="relative z-40 px-4 pt-5 sm:px-6 sm:pt-6">
+          <div className="mx-auto grid max-w-7xl grid-cols-[1fr_auto] items-center gap-3 md:grid-cols-[1fr_auto_1fr] md:gap-4">
+            <div className="flex items-center gap-2 justify-self-start sm:gap-3">
               <Link href="/" aria-label="Orbit home">
-                <OrbitLogo className="h-7" />
+                <OrbitLogo className="h-6 sm:h-7" />
               </Link>
               <span className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-2.5 py-1 backdrop-blur">
-                <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-white/90">devnet</span>
+                <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/90 sm:text-[11px]">devnet</span>
               </span>
             </div>
             <nav className="hidden items-center gap-8 md:flex md:justify-self-center">
@@ -82,31 +82,31 @@ export default function Landing() {
               <a href="#proof" className="text-[14px] text-white/80 transition-colors hover:text-white">On-chain</a>
               <a href="#faq" className="text-[14px] text-white/80 transition-colors hover:text-white">FAQ</a>
             </nav>
-            <Link href="/app" className="inline-flex items-center gap-1.5 justify-self-end rounded-full bg-white px-5 py-2 text-[14px] font-semibold text-[#0a0a0a] transition-opacity hover:opacity-90">
+            <Link href="/app" className="inline-flex items-center gap-1.5 justify-self-end rounded-full bg-white px-4 py-2 text-[13px] font-semibold text-[#0a0a0a] transition-opacity hover:opacity-90 sm:px-5 sm:text-[14px]">
               Get started <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>
           </div>
         </header>
 
-        <div className="relative z-10 flex flex-1 flex-col items-center justify-center py-6">
+        <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-5 py-10 sm:px-6 sm:py-6">
         {/* centered copy */}
-        <div className="mx-auto max-w-5xl px-8 text-center">
+        <div className="mx-auto max-w-5xl text-center">
           <Reveal delay={80}>
-            <h1 className="mx-auto mt-5 max-w-5xl font-display text-[clamp(3.25rem,9vw,7rem)] font-semibold leading-[1.08] tracking-[-0.04em]">
+            <h1 className="mx-auto mt-5 max-w-5xl font-display text-[clamp(2.4rem,9vw,7rem)] font-semibold leading-[1.08] tracking-[-0.03em] sm:tracking-[-0.04em]">
               Money that grows itself.
             </h1>
           </Reveal>
           <Reveal delay={160}>
-            <p className="mx-auto mt-5 max-w-lg text-[clamp(1.05rem,2vw,1.2rem)] leading-relaxed text-white/80">
+            <p className="mx-auto mt-5 max-w-lg text-[clamp(1rem,2.4vw,1.2rem)] leading-relaxed text-white/80">
               Orbit saves a slice of everyday spending and grows it with on-chain USDC yield — self-custodial, withdraw anytime.
             </p>
           </Reveal>
           <Reveal delay={240}>
-            <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
-              <Link href="/app" className="inline-flex h-12 items-center gap-2 rounded-full bg-white px-7 text-[16px] font-semibold text-[#0a0a0a] transition-opacity hover:opacity-90">
+            <div className="mt-7 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+              <Link href="/app" className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-white px-7 text-[16px] font-semibold text-[#0a0a0a] transition-opacity hover:opacity-90 sm:w-auto">
                 Open your vault <ArrowRight className="h-4 w-4" aria-hidden />
               </Link>
-              <a href="#proof" className="inline-flex h-12 items-center gap-2 rounded-full border border-white/30 px-6 text-[16px] font-semibold text-white transition-colors hover:bg-white/10">
+              <a href="#proof" className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full border border-white/30 px-6 text-[16px] font-semibold text-white transition-colors hover:bg-white/10 sm:w-auto">
                 See it on-chain
                 <span className="rounded-full bg-white/15 px-2 py-0.5 text-[11px] font-mono uppercase">live</span>
               </a>
@@ -119,9 +119,9 @@ export default function Landing() {
 
       {/* ───────── Partner logos — centered, static ───────── */}
       <section className="border-b border-[var(--border)]">
-        <div className="mx-auto max-w-5xl px-6 py-8 text-center">
+        <div className="mx-auto max-w-5xl px-5 py-8 text-center sm:px-6">
           <p className="font-mono text-[12px] uppercase tracking-[0.24em] text-[var(--faint)]">Built on</p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-12 gap-y-8 sm:flex-nowrap sm:justify-between sm:gap-x-6">
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-8 gap-y-6 sm:mt-8 sm:gap-x-12 md:flex-nowrap md:justify-between md:gap-x-6">
             {LOGOS.map((t) => (
               <span key={t.name} className="inline-flex items-center opacity-80">
                 <img src={t.src} alt={t.name} className={`${t.className} block dark:hidden`} />
