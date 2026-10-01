@@ -142,12 +142,15 @@ export default function Landing() {
                     Watch idle cash fall behind your vault.
                   </h3>
                 </div>
-                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[var(--accent-soft)] text-[var(--accent)]">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[var(--foreground)] text-[var(--background)]">
                   <TrendingUp className="h-5 w-5" aria-hidden />
                 </span>
               </div>
 
-              <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5">
+              <div
+                className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5"
+                style={{ "--chart-line": "var(--foreground)", "--chart-ring": "var(--surface)" } as React.CSSProperties}
+              >
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <div className="text-[14px] font-semibold">Projected balance</div>
@@ -163,7 +166,7 @@ export default function Landing() {
                   <GrowthChart />
                 </div>
                 <div className="mt-4 flex items-center gap-5 text-[13px] text-[var(--muted)]">
-                  <span className="flex items-center gap-2"><span className="h-[3px] w-4 rounded-full bg-[var(--accent)]" /> Your vault</span>
+                  <span className="flex items-center gap-2"><span className="h-[3px] w-4 rounded-full bg-[var(--foreground)]" /> Your vault</span>
                   <span className="flex items-center gap-2"><span className="h-0 w-4 border-t-2 border-dashed border-[var(--border-strong)]" /> Cash left idle</span>
                 </div>
               </div>
@@ -179,13 +182,13 @@ export default function Landing() {
                 <svg viewBox="0 0 120 120" className="h-40 w-40 -rotate-90">
                   <circle cx="60" cy="60" r="52" fill="none" stroke="var(--border)" strokeWidth="11" />
                   <circle
-                    cx="60" cy="60" r="52" fill="none" stroke="var(--accent)" strokeWidth="11" strokeLinecap="round"
+                    cx="60" cy="60" r="52" fill="none" stroke="var(--foreground)" strokeWidth="11" strokeLinecap="round"
                     strokeDasharray="326.726" strokeDashoffset="130.69"
                   />
                 </svg>
                 <div className="absolute inset-0 grid place-items-center text-center">
                   <div>
-                    <div className="text-[clamp(1.8rem,5vw,2.4rem)] font-semibold leading-none text-[var(--accent)]">
+                    <div className="text-[clamp(1.8rem,5vw,2.4rem)] font-semibold leading-none text-[var(--foreground)]">
                       <CountUp value={6} decimals={1} suffix="%" />
                     </div>
                     <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--muted)]">APY</div>
@@ -201,10 +204,10 @@ export default function Landing() {
                 ].map((r) => (
                   <div
                     key={r.k}
-                    className={`flex items-center justify-between rounded-lg px-3 py-2 text-[13px] ${r.on ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "border border-[var(--border)] text-[var(--muted)]"}`}
+                    className={`flex items-center justify-between rounded-lg px-3 py-2 text-[13px] ${r.on ? "bg-[var(--foreground)] text-[var(--background)]" : "border border-[var(--border)] text-[var(--muted)]"}`}
                   >
                     <span className="flex items-center gap-2">
-                      <span className={`h-2 w-2 rounded-full ${r.on ? "bg-[var(--accent)]" : "bg-[var(--border-strong)]"}`} />
+                      <span className={`h-2 w-2 rounded-full ${r.on ? "bg-[var(--background)]" : "bg-[var(--border-strong)]"}`} />
                       {r.k}
                     </span>
                     <span className="font-mono tabular-nums">{r.v}</span>
