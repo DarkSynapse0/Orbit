@@ -1,325 +1,284 @@
+/* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import {
   ArrowRight,
   ArrowUpRight,
-  Landmark,
-  Coins,
-  TrendingUp,
   ShieldCheck,
-  Eye,
   RefreshCw,
+  TrendingUp,
+  Zap,
+  Check,
   ExternalLink,
+  CreditCard,
+  Coins,
+  Lock,
 } from "lucide-react";
 import { Reveal } from "@/components/landing/Reveal";
 import { LiveYield } from "@/components/landing/LiveYield";
-import { Underline } from "@/components/landing/Underline";
 import { GrowthChart } from "@/components/landing/GrowthChart";
 import { OrbitRings } from "@/components/landing/OrbitRings";
-import { SolanaMark, UsdcMark, AaveMark, StripeMark, PlaidMark, PhantomMark } from "@/components/landing/BrandMarks";
-import { SiteHeader } from "@/components/landing/SiteHeader";
+import { CountUp } from "@/components/landing/CountUp";
+import { LiveChain } from "@/components/landing/LiveChain";
 import { OrbitLogo } from "@/components/OrbitLogo";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
 const PROGRAM = "8LEjyrMCKukhxA4q3DRaYGfkappxRayiTPM7saZG2Kgi";
 const solAcct = (a: string) => `https://solscan.io/account/${a}?cluster=devnet`;
+const eyebrow = "font-mono text-[12px] font-medium uppercase tracking-[0.24em]";
 
-const eyebrow = "text-[12px] font-medium uppercase tracking-[0.22em]";
+const FLOW = [
+  { icon: CreditCard, t: "You spend", d: "Plaid watches" },
+  { icon: Coins, t: "Orbit sets aside", d: "a slice, your rate" },
+  { icon: Lock, t: "Moves on-chain", d: "USDC vault" },
+  { icon: TrendingUp, t: "It grows", d: "~6% APY" },
+];
+
+const tile = "rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-7 transition-colors duration-300 hover:border-[var(--border-strong)]";
+
+// Each logo ships a light-strip (dark ink) and a dark-strip (white) variant;
+// the render swaps on the `dark` theme class.
+const LOGOS = [
+  { name: "Solana", src: "/solana.svg", srcDark: "/solana-white.svg", className: "h-5 w-auto" },
+  { name: "USDC", src: "/usdc.svg", srcDark: "/usdc-white.svg", className: "h-6 w-auto" },
+  { name: "Aave", src: "/aave.svg", srcDark: "/aave-white.svg", className: "h-5 w-auto" },
+  { name: "Plaid", src: "/plaid.svg", srcDark: "/plaid-white.svg", className: "h-7 w-auto" },
+  { name: "Stripe", src: "/stripe.svg", srcDark: "/stripe-white.svg", className: "h-6 w-auto" },
+  { name: "Phantom", src: "/phantom.svg", srcDark: "/phantom-white.svg", className: "h-6 w-auto" },
+];
 
 export default function Landing() {
+  // `dark` forces the dark token set on the landing (black canvas, lime accent).
   return (
-    <div className="relative flex min-h-full flex-col">
-      <SiteHeader />
+    <div className="relative flex min-h-full flex-col bg-[var(--background)] text-[var(--foreground)]">
+      {/* ───────── First screen: hero + logos fill one viewport ───────── */}
+      <div className="flex min-h-[100svh] flex-col">
+      {/* ───────── Hero (Helium-style sky gradient) — dark-scoped for light text ───────── */}
+      <section
+        className="dark relative isolate mx-2 mt-3 flex flex-1 flex-col overflow-hidden rounded-[2rem] text-white sm:mx-3"
+        style={{ "--accent": "#35f0c6", "--accent-strong": "#5cf5d2", "--on-accent": "#06251c" } as React.CSSProperties}
+      >
+        {/* background image, fading into the page background at the bottom */}
+        {/* full-area background image, scaled to cover the whole hero */}
+        <div className="absolute inset-0 z-0 bg-cover bg-center" style={{ backgroundImage: "url('/hero.png')" }} aria-hidden />
+        {/* even darken for centered-content legibility + fade the bottom into the page bg */}
+        <div
+          className="absolute inset-0 z-0"
+          style={{ background: "radial-gradient(120% 90% at 50% 45%, rgba(6,9,14,0.35) 0%, rgba(6,9,14,0.62) 55%, rgba(6,9,14,0.82) 100%), linear-gradient(180deg, rgba(6,9,14,0) 72%, var(--background) 100%)" }}
+          aria-hidden
+        />
 
-      {/* ───────── Hero ───────── */}
-      <section className="relative -mt-20 flex min-h-[94vh] flex-col items-center justify-center overflow-hidden px-6 pb-16 pt-32 text-center">
-        <div className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-center">
-          <OrbitRings className="h-[135vh] w-[135vh] max-w-none text-[var(--foreground)] opacity-[0.05]" />
-          <div
-            className="absolute inset-x-0 bottom-0 h-40"
-            style={{ background: "linear-gradient(180deg, transparent, var(--background))" }}
-          />
-        </div>
-
-        <Reveal>
-          <Badge variant="accent">
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" aria-hidden /> Live on Solana devnet
-          </Badge>
-        </Reveal>
-
-        <Reveal delay={80}>
-          <h1 className="mt-7 max-w-4xl font-display text-[clamp(2.6rem,7vw,5.5rem)] font-semibold leading-[0.96] tracking-[-0.04em]">
-            Money that saves,
-            <br />
-            invests, and <Underline>grows</Underline> itself.
-          </h1>
-        </Reveal>
-
-        <Reveal delay={160}>
-          <p className="mt-6 max-w-md text-[17px] leading-relaxed text-[var(--muted)]">
-            Orbit sets aside a little from everyday spending, invests it on-chain, and grows it. Hands-free.
-          </p>
-        </Reveal>
-
-        <Reveal delay={240}>
-          <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-            <Button asChild size="lg">
-              <Link href="/app">
-                Open your vault <ArrowRight aria-hidden />
+        {/* floating pill nav */}
+        <header className="relative z-40 px-6 pt-6">
+          <div className="mx-auto grid max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-4">
+            <div className="flex items-center gap-3 justify-self-start">
+              <Link href="/" aria-label="Orbit home">
+                <OrbitLogo className="h-7" />
               </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <a href="#how">See how it works</a>
-            </Button>
-          </div>
-        </Reveal>
-      </section>
-
-      {/* ───────── Live vault number ───────── */}
-      <section className="mx-auto w-full max-w-5xl overflow-hidden px-6 pb-24 text-center">
-        <Reveal>
-          <div className={`${eyebrow} text-[var(--faint)]`}>Vault · Devnet · live</div>
-          <div className="mt-5 font-mono text-[clamp(2rem,7vw,4.5rem)] font-semibold tracking-[-0.02em]">
-            <LiveYield principal={5980} apy={0.06} />
-          </div>
-          <div className="mt-4 text-[15px] text-[var(--muted)]">
-            A real balance on Solana, growing every second — 6% a year.
-          </div>
-        </Reveal>
-      </section>
-
-      {/* ───────── Trust band (hairline, seamless) ───────── */}
-      <section className="border-y border-[var(--border)]">
-        <div className="mx-auto grid max-w-6xl grid-cols-2 divide-x divide-y divide-[var(--border)] sm:grid-cols-4 sm:divide-y-0">
-          {[
-            { icon: ShieldCheck, k: "Yours, always", v: "Only you can withdraw" },
-            { icon: Eye, k: "Nothing hidden", v: "Every dollar on-chain" },
-            { icon: RefreshCw, k: "Cash out anytime", v: "No lock-ups or fees" },
-            { icon: TrendingUp, k: "It actually earns", v: "Real yield, paid to you" },
-          ].map((p) => (
-            <div key={p.k} className="flex items-center gap-3 px-6 py-6">
-              <p.icon className="h-5 w-5 shrink-0 text-[var(--foreground)]" aria-hidden />
-              <div>
-                <div className="text-[15px] font-medium">{p.k}</div>
-                <div className="text-[14px] text-[var(--muted)]">{p.v}</div>
-              </div>
+              <span className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-2.5 py-1 backdrop-blur">
+                <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-white/90">devnet</span>
+              </span>
             </div>
-          ))}
-        </div>
-      </section>
+            <nav className="hidden items-center gap-8 md:flex md:justify-self-center">
+              <a href="#deck" className="text-[14px] text-white/80 transition-colors hover:text-white">Product</a>
+              <a href="#proof" className="text-[14px] text-white/80 transition-colors hover:text-white">On-chain</a>
+              <a href="#faq" className="text-[14px] text-white/80 transition-colors hover:text-white">FAQ</a>
+            </nav>
+            <Link href="/app" className="inline-flex items-center gap-1.5 justify-self-end rounded-full bg-white px-5 py-2 text-[14px] font-semibold text-[#0a0a0a] transition-opacity hover:opacity-90">
+              Get started <ArrowRight className="h-4 w-4" aria-hidden />
+            </Link>
+          </div>
+        </header>
 
-      {/* ───────── How it works ───────── */}
-      <section id="how" className="mx-auto w-full max-w-6xl scroll-mt-20 px-6 py-24 lg:py-32">
-        <Reveal>
-          <div className={`${eyebrow} text-[var(--faint)]`}>How it works</div>
-          <h2 className="mt-4 max-w-2xl font-display text-[clamp(1.9rem,4vw,3.25rem)] font-semibold leading-[1.02] tracking-[-0.03em]">
-            Three steps. Then <Underline>nothing</Underline>.
-          </h2>
-        </Reveal>
-        <div className="mt-16 grid grid-cols-1 gap-x-10 gap-y-12 sm:grid-cols-3">
-          {[
-            { n: "01", icon: Landmark, t: "You spend", d: "Connect your bank and go about your day. Orbit notices your spending through Plaid — it can look, but never touch your money." },
-            { n: "02", icon: Coins, t: "Orbit saves", d: "It quietly tucks away a little from each purchase and moves it into a savings vault that’s yours alone." },
-            { n: "03", icon: TrendingUp, t: "It grows", d: "Your savings earn interest around the clock. Take out everything you saved, plus what it earned, in one tap — anytime." },
-          ].map((s, i) => (
-            <Reveal key={s.n} delay={i * 90}>
-              <div className="border-t border-[var(--border-strong)] pt-6">
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-[15px] text-[var(--muted)]">{s.n}</span>
-                  <s.icon className="h-5 w-5 text-[var(--accent)]" aria-hidden />
-                </div>
-                <h3 className="mt-8 font-display text-xl font-semibold tracking-tight">{s.t}</h3>
-                <p className="mt-2 text-[16px] leading-relaxed text-[var(--muted)]">{s.d}</p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </section>
-
-      {/* ───────── The output: growth chart ───────── */}
-      <section className="mx-auto w-full max-w-6xl px-6 pb-24 lg:pb-32">
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
-          <Reveal className="min-w-0">
-            <div className={`${eyebrow} text-[var(--accent-strong)]`}>The payoff</div>
-            <h2 className="mt-4 font-display text-[clamp(1.9rem,4vw,3.25rem)] font-semibold leading-[1.02] tracking-[-0.03em]">
-              Money sitting still loses.
-              <br />
-              Yours <Underline>grows</Underline> instead.
-            </h2>
-            <p className="mt-5 max-w-sm text-[17px] leading-relaxed text-[var(--muted)]">
-              The same money, sitting in a bank versus growing in Orbit — earning real interest, every second.
+        <div className="relative z-10 flex flex-1 flex-col items-center justify-center py-6">
+        {/* centered copy */}
+        <div className="mx-auto max-w-5xl px-8 text-center">
+          <Reveal delay={80}>
+            <h1 className="mx-auto mt-5 max-w-5xl font-display text-[clamp(3.25rem,9vw,7rem)] font-semibold leading-[1.08] tracking-[-0.04em]">
+              Money that grows itself.
+            </h1>
+          </Reveal>
+          <Reveal delay={160}>
+            <p className="mx-auto mt-5 max-w-lg text-[clamp(1.05rem,2vw,1.2rem)] leading-relaxed text-white/80">
+              Orbit saves a slice of everyday spending and grows it with on-chain USDC yield — self-custodial, withdraw anytime.
             </p>
-            <div className="mt-8 grid grid-cols-3 gap-6">
-              {[
-                { v: "6%", l: "APY" },
-                { v: "$0", l: "lock-ups" },
-                { v: "1-tap", l: "exit" },
-              ].map((s) => (
-                <div key={s.l}>
-                  <div className="font-mono text-[clamp(1.4rem,3vw,2rem)] font-semibold">{s.v}</div>
-                  <div className={`mt-1 ${eyebrow} text-[var(--faint)]`}>{s.l}</div>
-                </div>
-              ))}
+          </Reveal>
+          <Reveal delay={240}>
+            <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+              <Link href="/app" className="inline-flex h-12 items-center gap-2 rounded-full bg-white px-7 text-[16px] font-semibold text-[#0a0a0a] transition-opacity hover:opacity-90">
+                Open your vault <ArrowRight className="h-4 w-4" aria-hidden />
+              </Link>
+              <a href="#proof" className="inline-flex h-12 items-center gap-2 rounded-full border border-white/30 px-6 text-[16px] font-semibold text-white transition-colors hover:bg-white/10">
+                See it on-chain
+                <span className="rounded-full bg-white/15 px-2 py-0.5 text-[11px] font-mono uppercase">live</span>
+              </a>
+            </div>
+          </Reveal>
+        </div>
+
+        </div>
+      </section>
+
+      {/* ───────── Partner logos — centered, static ───────── */}
+      <section className="border-b border-[var(--border)]">
+        <div className="mx-auto max-w-5xl px-6 py-8 text-center">
+          <p className="font-mono text-[12px] uppercase tracking-[0.24em] text-[var(--faint)]">Built on</p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-12 gap-y-8">
+            {LOGOS.map((t) => (
+              <span key={t.name} className="inline-flex items-center opacity-80">
+                <img src={t.src} alt={t.name} className={`${t.className} block dark:hidden`} />
+                <img src={t.srcDark} alt="" aria-hidden className={`${t.className} hidden dark:block`} />
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+      </div>
+
+      {/* ───────── Command deck: one dashboard-style bento ───────── */}
+      <section id="deck" className="mx-auto w-full max-w-7xl scroll-mt-20 px-6 py-20 lg:py-24">
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+          {/* money flow — full width */}
+          <Reveal className="lg:col-span-12">
+            <div className={tile}>
+              <div className={`${eyebrow} text-[var(--faint)]`}>The loop</div>
+              <div className="mt-5 grid grid-cols-2 gap-5 sm:grid-cols-4">
+                {FLOW.map((f, i) => (
+                  <div key={f.t} className="relative flex items-start gap-3">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-[var(--border-strong)] text-[var(--accent)]">
+                      <f.icon className="h-5 w-5" aria-hidden />
+                    </span>
+                    <div className="min-w-0">
+                      <div className="text-[15px] font-semibold leading-tight">{f.t}</div>
+                      <div className="text-[13px] text-[var(--muted)]">{f.d}</div>
+                    </div>
+                    {i < FLOW.length - 1 && (
+                      <ArrowRight className="absolute -right-3.5 top-2.5 hidden h-4 w-4 text-[var(--faint)] sm:block" aria-hidden />
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </Reveal>
 
-          <Reveal delay={100}>
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-7">
+          {/* growth chart */}
+          <Reveal className="lg:col-span-8">
+            <div className={`${tile} h-full`}>
               <div className="flex items-end justify-between">
                 <div>
-                  <div className={`${eyebrow} text-[var(--faint)]`}>Vault balance</div>
-                  <div className="mt-2 font-mono text-[clamp(1.6rem,4vw,2.4rem)] font-semibold leading-none">
+                  <div className={`${eyebrow} text-[var(--faint)]`}>Idle cash vs Orbit</div>
+                  <div className="mt-2 font-mono text-[clamp(1.5rem,4vw,2.2rem)] font-semibold leading-none">
                     <LiveYield principal={5980} apy={0.06} />
                   </div>
                 </div>
-                <span className="inline-flex items-center gap-1 rounded-full bg-[var(--accent-soft)] px-2 py-1 text-[14px] font-medium text-[var(--accent-strong)]">
+                <span className="inline-flex items-center gap-1 rounded-full bg-[var(--accent-soft)] px-2 py-1 text-[14px] font-medium text-[var(--accent)]">
                   <TrendingUp className="h-3.5 w-3.5" aria-hidden /> 6.0%
                 </span>
               </div>
               <div className="mt-6">
                 <GrowthChart />
               </div>
-              <div className="mt-4 flex items-center gap-5 text-[14px] text-[var(--muted)]">
-                <span className="flex items-center gap-2">
-                  <span className="h-[3px] w-4 rounded-full bg-[var(--accent)]" /> Your vault
-                </span>
-                <span className="flex items-center gap-2">
-                  <span className="h-0 w-4 border-t-2 border-dashed border-[var(--border-strong)]" /> Cash left idle
-                </span>
+              <div className="mt-4 flex items-center gap-5 text-[13px] text-[var(--muted)]">
+                <span className="flex items-center gap-2"><span className="h-[3px] w-4 rounded-full bg-[var(--accent)]" /> Your vault</span>
+                <span className="flex items-center gap-2"><span className="h-0 w-4 border-t-2 border-dashed border-[var(--border-strong)]" /> Cash left idle</span>
               </div>
             </div>
           </Reveal>
-        </div>
-      </section>
 
-      {/* ───────── The set-aside rule ───────── */}
-      <section className="border-y border-[var(--border)] bg-[var(--surface)]">
-        <div className="mx-auto grid max-w-6xl grid-cols-1 gap-12 px-6 py-24 lg:grid-cols-2 lg:items-center lg:py-28">
-          <Reveal>
-            <div className={`${eyebrow} text-[var(--accent-strong)]`}>Automatic</div>
-            <h2 className="mt-4 font-display text-[clamp(1.9rem,4vw,3.25rem)] font-semibold leading-[1.02] tracking-[-0.03em]">
-              It saves on every purchase.
-            </h2>
-            <p className="mt-5 max-w-sm text-[17px] leading-relaxed text-[var(--muted)]">
-              Orbit sets aside a small percentage of everything you spend. Pick your rate, anywhere from 0.5% to 5%. You never decide to save; it just happens.
-            </p>
-          </Reveal>
-          <Reveal delay={100}>
-            <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--border)]">
-              {[
-                { spend: "You spend $50", set: "$0.50" },
-                { spend: "You spend $500", set: "$5.00" },
-              ].map((t) => (
-                <div key={t.spend} className="bg-[var(--background)] p-8">
-                  <div className={`${eyebrow} text-[var(--faint)]`}>{t.spend}</div>
-                  <div className="mt-3 font-mono text-[clamp(2.4rem,6vw,4rem)] font-semibold leading-none text-[var(--accent-strong)]">
-                    {t.set}
-                  </div>
-                  <div className="mt-2 text-[14px] text-[var(--muted)]">set aside at 1%</div>
+          {/* APY */}
+          <Reveal className="lg:col-span-4">
+            <div className={`${tile} flex h-full flex-col justify-between`}>
+              <TrendingUp className="h-6 w-6 text-[var(--accent)]" aria-hidden />
+              <div className="mt-8">
+                <div className="text-[clamp(2.4rem,7vw,3.4rem)] font-semibold leading-none text-[var(--accent)]">
+                  <CountUp value={6} decimals={1} suffix="%" />
                 </div>
-              ))}
+                <div className="mt-2 text-[14px] text-[var(--muted)]">APY on-chain — real yield, streamed to your vault every second.</div>
+              </div>
             </div>
           </Reveal>
-        </div>
-      </section>
 
-      {/* ───────── Built on ───────── */}
-      <section className="mx-auto w-full max-w-6xl px-6 py-24 lg:py-28">
-        <Reveal>
-          <div className={`${eyebrow} text-[var(--faint)]`}>Built on</div>
-          <h2 className="mt-4 max-w-2xl font-display text-[clamp(1.7rem,3.5vw,2.75rem)] font-semibold leading-[1.05] tracking-[-0.03em]">
-            The same tools banks and big apps rely on.
-          </h2>
-        </Reveal>
-        <Reveal delay={80}>
-          <div className="mt-12 grid grid-cols-3 gap-px overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--border)] md:grid-cols-6">
-            {[
-              { mark: <SolanaMark className="h-11 w-11" />, name: "Solana" },
-              { mark: <UsdcMark className="h-11 w-11" />, name: "USDC" },
-              { mark: <AaveMark className="h-11 w-11" />, name: "Aave" },
-              { mark: <PlaidMark className="h-10 w-10 text-[var(--foreground)]" />, name: "Plaid" },
-              { mark: <StripeMark className="h-11 w-11" />, name: "Stripe" },
-              { mark: <PhantomMark className="h-10 w-10 text-[#ab9ff2]" />, name: "Phantom" },
-            ].map((t) => (
-              <div key={t.name} className="flex flex-col items-center gap-3 bg-[var(--background)] py-8">
-                <span className="grid h-12 w-12 place-items-center">{t.mark}</span>
-                <span className="text-[15px] text-[var(--muted)]">{t.name}</span>
+          {/* three feature tiles */}
+          {[
+            { icon: Zap, t: "Automatic", d: "Set a rate once; Orbit saves from every purchase and moves it on-chain at your threshold." },
+            { icon: ShieldCheck, t: "Self-custody", d: "Orbit can add to your vault but never move or freeze it. Only your wallet signs." },
+            { icon: RefreshCw, t: "Withdraw anytime", d: "No lock-ups, no fees, no minimums. One tap returns your balance plus earnings." },
+          ].map((f) => (
+            <Reveal key={f.t} className="lg:col-span-4">
+              <div className={`${tile} flex h-full flex-col gap-5`}>
+                <span className="grid h-12 w-12 place-items-center rounded-2xl border border-[var(--border-strong)] text-[var(--accent)]">
+                  <f.icon className="h-5 w-5" aria-hidden />
+                </span>
+                <div>
+                  <div className="text-[18px] font-semibold">{f.t}</div>
+                  <p className="mt-2 text-[14px] leading-relaxed text-[var(--muted)]">{f.d}</p>
+                </div>
               </div>
-            ))}
-          </div>
-        </Reveal>
-      </section>
+            </Reveal>
+          ))}
 
-      {/* ───────── On-chain proof ───────── */}
-      <section id="proof" className="border-t border-[var(--border)]">
-        <div className="mx-auto grid w-full max-w-6xl grid-cols-1 scroll-mt-20 gap-12 px-6 py-24 lg:grid-cols-2 lg:items-center lg:py-32">
-          <Reveal className="min-w-0">
-            <div className={`${eyebrow} text-[var(--accent-strong)]`}>Verifiable</div>
-            <h2 className="mt-4 font-display text-[clamp(1.9rem,4vw,3.25rem)] font-semibold leading-[1.02] tracking-[-0.03em]">
-              See it for <Underline>yourself</Underline>.
-            </h2>
-            <p className="mt-5 max-w-sm text-[17px] leading-relaxed text-[var(--muted)]">
-              Your vault, your deposits, the interest you earn — it all lives on Solana, out in the open. Anyone can check it, including you.
-            </p>
-            <a
-              href={solAcct(PROGRAM)}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-7 inline-flex max-w-full items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 transition-colors hover:border-[var(--border-strong)]"
-            >
-              <span className="min-w-0">
-                <span className={`block ${eyebrow} text-[var(--faint)]`}>Vault program</span>
-                <code className="mt-1 block truncate font-mono text-[15px]">{PROGRAM}</code>
-              </span>
-              <ExternalLink className="h-4 w-4 shrink-0 text-[var(--accent)]" aria-hidden />
-            </a>
-          </Reveal>
-
-          <Reveal delay={100}>
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-7">
-              <div className={`${eyebrow} text-[var(--faint)]`}>Proven on-chain</div>
-              <div className="mt-5 space-y-3 font-mono text-[16px] tabular-nums">
+          {/* on-chain proof */}
+          <Reveal className="lg:col-span-8">
+            <div id="proof" className={`${tile} h-full scroll-mt-20`}>
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 text-[14px] font-medium text-[var(--accent)]">
+                  <span className="grid h-5 w-5 place-items-center rounded-full bg-[var(--accent)] text-[var(--on-accent)]"><Check className="h-3 w-3" aria-hidden /></span>
+                  Verified on-chain
+                </div>
+                <a href={solAcct(PROGRAM)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[var(--accent)] hover:underline">
+                  Solscan <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+                </a>
+              </div>
+              <div className="mt-4 rounded-lg bg-[var(--background)] px-4 py-3">
+                <LiveChain />
+              </div>
+              <div className="mt-4 grid gap-3 font-mono text-[15px] tabular-nums sm:grid-cols-2">
                 <div className="flex items-center justify-between rounded-lg border border-[var(--border)] px-4 py-3">
-                  <span className="text-[var(--muted)]">deposited</span>
-                  <span>1,000,000.00</span>
+                  <span className="text-[var(--muted)]">deposited</span><span>1,000,000.00</span>
                 </div>
                 <div className="flex items-center justify-between rounded-lg border border-[var(--accent-soft)] bg-[var(--accent-soft)] px-4 py-3">
-                  <span className="text-[var(--accent-strong)]">withdrew</span>
-                  <span className="text-[var(--accent-strong)]">1,000,000.03</span>
+                  <span className="text-[var(--accent)]">withdrew</span><span className="text-[var(--accent)]">1,000,000.03</span>
                 </div>
               </div>
-              <p className="mt-4 text-[14px] text-[var(--muted)]">
-                Real interest, paid in tokens. Withdrew more than deposited.
-              </p>
+              <div className="mt-4 truncate rounded-lg bg-[var(--background)] px-4 py-3 font-mono text-[13px] text-[var(--muted)]">
+                program <span className="text-[var(--foreground)]">{PROGRAM}</span>
+              </div>
             </div>
           </Reveal>
+
+          {/* set-aside rule */}
+          <Reveal className="lg:col-span-4">
+            <div className={`${tile} flex h-full flex-col justify-between`}>
+              <div className={`${eyebrow} text-[var(--faint)]`}>The rule</div>
+              <div className="mt-6">
+                <div className="font-mono text-[clamp(2rem,6vw,3rem)] font-semibold leading-none text-[var(--accent)]">0.5–5%</div>
+                <p className="mt-3 text-[14px] leading-relaxed text-[var(--muted)]">of every purchase, your pick. Spend $50 at 1% → <span className="font-mono text-[var(--foreground)]">$0.50</span> set aside.</p>
+              </div>
+            </div>
+          </Reveal>
+
         </div>
       </section>
 
-      {/* ───────── FAQ ───────── */}
-      <section id="faq" className="mx-auto w-full max-w-3xl scroll-mt-20 px-6 py-24 lg:py-32">
+      {/* ───────── FAQ (two-column) ───────── */}
+      <section id="faq" className="mx-auto w-full max-w-6xl scroll-mt-20 px-6 py-24 lg:py-28">
         <Reveal>
-          <h2 className="font-display text-[clamp(1.9rem,4vw,3rem)] font-semibold tracking-[-0.03em]">Good questions</h2>
-          <p className="mt-3 text-[17px] text-[var(--muted)]">Everything you&rsquo;re probably wondering, in plain English.</p>
+          <div className={`${eyebrow} text-[var(--accent)]`}>FAQ</div>
+          <h2 className="mt-4 font-display text-[clamp(1.9rem,4vw,3rem)] font-medium tracking-[-0.03em]">Good questions</h2>
         </Reveal>
-        <Reveal delay={80} className="mt-10 divide-y divide-[var(--border)] border-y border-[var(--border)]">
+        <Reveal delay={80} className="mt-10 grid grid-cols-1 gap-x-10 md:grid-cols-2">
           {[
-            { q: "Is my money safe?", a: "Yes. Your savings live in a vault only you can open — Orbit can add to it, but can never take anything out. It all sits on Solana, so you can check your balance yourself anytime." },
-            { q: "How much does Orbit set aside?", a: "A small percentage of each purchase, and you pick the rate — anywhere from 0.5% to 5%. Spend $50 at 1% and 50 cents gets set aside. It scales with your spending, so you save a little more in busy months and less in quiet ones. Nothing leaves your bank until it adds up to a small batch." },
-            { q: "Can I take my money out whenever I want?", a: "Anytime, instantly. No lock-ups, no penalties, no waiting period. One tap sends your full balance back to you, plus whatever it has earned." },
-            { q: "Do I need to know anything about crypto?", a: "Not a thing. Sign in and Orbit sets up your account for you — no wallet to install, no seed phrase to write down. Already use Phantom or Solflare? You can connect those instead." },
-            { q: "How does my money actually grow?", a: "Your savings earn interest on-chain, paid in real tokens. On mainnet that runs through Aave, one of the most-used and most-audited lending markets in crypto. Rates move with the market, so earnings can go up or down." },
-            { q: "What does it cost to use?", a: "Nothing to get started. You're trying Orbit on Solana's free test network right now, so there's no cost to open a vault and watch it work." },
-            { q: "Is Orbit a bank?", a: "No — Orbit isn't a bank and isn't FDIC-insured. Your money is held as USDC (a dollar-pegged stablecoin) in your own on-chain vault. Because it's a real investment, your balance can move and returns aren't guaranteed." },
+            { q: "Is my money safe?", a: "Your savings live in a vault only you can open — Orbit can add to it, but can never take anything out. It all sits on Solana, so you can check your balance yourself anytime." },
+            { q: "How much does Orbit set aside?", a: "A small percentage of each purchase — you pick the rate, 0.5% to 5%. Spend $50 at 1% and 50 cents gets set aside. Nothing leaves your bank until it adds up to a small batch." },
+            { q: "Can I take my money out anytime?", a: "Anytime, instantly. No lock-ups, no penalties. One tap sends your full balance back, plus whatever it has earned." },
+            { q: "Do I need to know crypto?", a: "Not a thing. Sign in and Orbit sets up your account — no wallet to install, no seed phrase. Prefer Phantom or Solflare? Connect those instead." },
+            { q: "How does my money grow?", a: "It earns interest on-chain, paid in real tokens. On mainnet that runs through Aave, one of the most-audited lending markets in crypto. Rates move with the market." },
+            { q: "Is Orbit a bank?", a: "No — not a bank, not FDIC-insured. Your money is USDC in your own on-chain vault. Because it's a real investment, your balance can move and returns aren't guaranteed." },
           ].map((f) => (
-            <details key={f.q} className="group py-1">
-              <summary className="flex cursor-pointer list-none items-center justify-between py-5 text-[17px] font-medium transition-colors hover:text-[var(--accent-strong)] focus-visible:outline-none">
+            <details key={f.q} className="group border-b border-[var(--border)] py-1">
+              <summary className="flex cursor-pointer list-none items-center justify-between py-5 text-[16px] font-medium transition-colors hover:text-[var(--accent)] focus-visible:outline-none">
                 {f.q}
-                <span className="ml-4 grid h-6 w-6 shrink-0 place-items-center rounded-full border border-[var(--border-strong)] text-[var(--muted)] transition-transform duration-200 group-open:rotate-45" aria-hidden>
-                  +
-                </span>
+                <span className="ml-4 grid h-6 w-6 shrink-0 place-items-center rounded-full border border-[var(--border-strong)] text-[var(--muted)] transition-transform duration-200 group-open:rotate-45" aria-hidden>+</span>
               </summary>
-              <p className="pb-6 pr-10 text-[16px] leading-relaxed text-[var(--muted)]">{f.a}</p>
+              <p className="pb-6 pr-6 text-[15px] leading-relaxed text-[var(--muted)]">{f.a}</p>
             </details>
           ))}
         </Reveal>
@@ -327,21 +286,21 @@ export default function Landing() {
 
       {/* ───────── CTA ───────── */}
       <section className="relative overflow-hidden border-t border-[var(--border)] bg-[var(--surface)]">
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <OrbitRings className="h-[120vh] w-[120vh] max-w-none text-[var(--foreground)] opacity-[0.05]" />
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center" aria-hidden>
+          <div className="animate-[orbit-spin_160s_linear_infinite]">
+            <OrbitRings className="h-[120vh] w-[120vh] max-w-none text-[var(--foreground)] opacity-[0.07]" />
+          </div>
+          <div className="absolute left-1/2 top-1/2 h-[42vh] w-[42vh] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-[0.08] blur-[130px]" style={{ background: "var(--gradient-accent)" }} />
         </div>
         <div className="relative mx-auto max-w-3xl px-6 py-28 text-center lg:py-36">
           <Reveal>
-            <h2 className="mx-auto max-w-xl font-display text-[clamp(2.2rem,5vw,4rem)] font-semibold leading-[1.0] tracking-[-0.03em]">
-              Put your money in <Underline>orbit</Underline>.
+            <h2 className="mx-auto max-w-xl font-display text-[clamp(2.2rem,5vw,4rem)] font-medium leading-[1.0] tracking-[-0.03em]">
+              Put your money in orbit.
             </h2>
             <p className="mx-auto mt-5 max-w-md text-[17px] text-[var(--muted)]">
               Under a minute to start. No wallet needed, nothing locked, everything verifiable.
             </p>
-            <Link
-              href="/app"
-              className="mt-9 inline-flex h-12 items-center gap-2 rounded-full bg-[var(--accent)] px-7 text-[17px] font-semibold text-[var(--on-accent)] transition-opacity duration-150 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface)]"
-            >
+            <Link href="/app" className="mt-9 inline-flex h-12 items-center gap-2 rounded-full bg-[var(--accent)] px-7 text-[17px] font-semibold text-[var(--on-accent)] transition-opacity hover:opacity-90">
               Open your vault <ArrowUpRight className="h-4 w-4" aria-hidden />
             </Link>
           </Reveal>
@@ -350,18 +309,18 @@ export default function Landing() {
 
       {/* ───────── Footer ───────── */}
       <footer className="mt-auto border-t border-[var(--border)]">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-10 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-6 py-10 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <OrbitLogo className="h-7" />
             <div className="text-[14px] text-[var(--muted)]">Self-driving savings on Solana</div>
           </div>
           <div className="flex items-center gap-6 text-[15px] text-[var(--muted)]">
-            <a href="#how" className="transition-colors hover:text-[var(--foreground)]">How it works</a>
+            <a href="#deck" className="transition-colors hover:text-[var(--foreground)]">Product</a>
             <a href="#proof" className="transition-colors hover:text-[var(--foreground)]">On-chain</a>
             <Link href="/app" className="transition-colors hover:text-[var(--foreground)]">Launch app</Link>
           </div>
         </div>
-        <div className="mx-auto w-full max-w-6xl px-6 pb-10">
+        <div className="mx-auto w-full max-w-7xl px-6 pb-10">
           <p className="text-[12px] leading-5 text-[var(--faint)]">
             Live on Solana devnet for demonstration. Detection, the on-chain vault, and yield are real; the
             fiat-to-USDC step is simulated. Not a bank. Not FDIC-insured. Principal is not guaranteed. Built for

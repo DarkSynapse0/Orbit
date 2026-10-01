@@ -3,96 +3,112 @@
 /* Class-based dark mode: `.dark` on <html> flips the theme. */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Light theme: paper white, near-black ink, growth green. */
+/* Light theme (brand: "Black · White · Green"): white canvas, black ink, and
+   lime green (#d4f34d) as the vibrant accent (black text on fills). A dark
+   green (#3f6212 / #15803d) carries emphasis text and chart lines. Status
+   colors (red / amber / blue) stay functional. */
 :root {
   --background: #ffffff;
   --foreground: #0a0a0a;
-  --muted: #71717a;
-  --faint: #a1a1aa;
-  --surface: #f5f5f5;
+  --muted: #595959;
+  --faint: #a3a3a3;
+  --surface: #f4f4f5;
   --border: rgba(10, 10, 10, 0.1);
-  --border-strong: rgba(10, 10, 10, 0.16);
-  --line: rgba(10, 10, 10, 0.24); /* clearly-visible section separators */
+  --border-strong: rgba(10, 10, 10, 0.18);
+  --line: rgba(10, 10, 10, 0.22); /* clearly-visible section separators */
   --contrast: #0a0a0a; /* inverted band background */
   --contrast-fg: #fafafa;
-  --contrast-muted: rgba(250, 250, 250, 0.6);
+  --contrast-muted: rgba(250, 250, 250, 0.62);
   --contrast-border: rgba(250, 250, 250, 0.14);
-  --accent: #16a34a; /* growth green — primary action color */
-  --accent-strong: #15803d;
-  --on-accent: #ffffff; /* text/icon on a filled accent button */
-  --accent-soft: rgba(22, 163, 74, 0.1);
+  --accent: #2f6e4a; /* mild muted green — accent (white text ~6:1) */
+  --accent-strong: #244f36;
+  --on-accent: #ffffff;
+  --accent-soft: rgba(47, 110, 74, 0.08);
 
-  /* Semantic roles (product palette). Primary = brand green; the rest are status-only. */
-  --primary: #16a34a;
-  --primary-strong: #15803d;
+  /* Subtle green accent gradient. */
+  --gradient-accent: linear-gradient(120deg, #2f6e4a 0%, #5f8f6a 100%);
+
+  /* Soft, neutral elevation. */
+  --elev-soft: 0 1px 2px rgba(10, 10, 10, 0.05), 0 4px 14px rgba(10, 10, 10, 0.07);
+  --elev-float: 0 6px 16px rgba(10, 10, 10, 0.1), 0 16px 48px rgba(10, 10, 10, 0.08);
+
+  /* Semantic roles. Primary = lime green; status colors stay functional. */
+  --primary: #2f6e4a;
+  --primary-strong: #244f36;
   --primary-fg: #ffffff;
-  --primary-soft: rgba(22, 163, 74, 0.1);
+  --primary-soft: rgba(47, 110, 74, 0.08);
   --secondary-fg: #0a0a0a; /* neutral/outline action text */
-  --disabled: #c4c4cc; /* inactive text/controls */
-  --destructive: #dc2626; /* withdraw-out, reset, delete only */
+  --disabled: #c8c8cc; /* inactive text/controls */
+  --destructive: #dc2626; /* withdraw-out, reset, delete only — kept distinctly red */
   --destructive-fg: #ffffff;
   --destructive-soft: rgba(220, 38, 38, 0.1);
-  --success: #16a34a;
-  --success-soft: rgba(22, 163, 74, 0.1);
-  --warning: #b45309;
-  --warning-soft: rgba(180, 83, 9, 0.1);
-  --info: #2563eb;
-  --info-soft: rgba(37, 99, 235, 0.1);
+  --success: #15803d; /* green — gains/positive status */
+  --success-soft: rgba(21, 128, 61, 0.1);
+  --warning: #d97706; /* amber — caution status */
+  --warning-soft: rgba(217, 119, 6, 0.1);
+  --info: #007aff; /* Cosmos royal blue — informational status */
+  --info-soft: rgba(0, 122, 255, 0.1);
 
   --chart-grid: rgba(10, 10, 10, 0.07);
   --chart-axis: rgba(10, 10, 10, 0.38);
   --chart-dash: rgba(10, 10, 10, 0.22);
-  --chart-line: #16a34a;
+  --chart-line: #2f6e4a;
   --chart-ring: #ffffff;
   --chart-label-bg: #0a0a0a;
   --chart-label-border: rgba(10, 10, 10, 0.12);
   --chart-label-text: #fafafa;
 }
 
-/* Dark theme. */
+/* Dark theme (brand: "Cosmos") — true-black canvas, spring-green + blue accents. */
 .dark {
-  --background: #0a0a0b;
-  --foreground: #fafafa;
-  --muted: #a1a1aa;
-  --faint: #71717a;
-  --surface: #141416;
+  --background: #000000;
+  --foreground: #ffffff;
+  --muted: #a8a8a8;
+  --faint: #808080;
+  --surface: #18191b;
   --border: rgba(255, 255, 255, 0.1);
   --border-strong: rgba(255, 255, 255, 0.18);
   --line: rgba(255, 255, 255, 0.2);
-  --contrast: #fafafa;
-  --contrast-fg: #0a0a0a;
-  --contrast-muted: rgba(10, 10, 10, 0.6);
-  --contrast-border: rgba(10, 10, 10, 0.12);
-  --accent: #34d399;
-  --accent-strong: #4ade80;
-  --on-accent: #052e16;
-  --accent-soft: rgba(52, 211, 153, 0.12);
+  --contrast: #ffffff;
+  --contrast-fg: #000000;
+  --contrast-muted: rgba(0, 0, 0, 0.62);
+  --contrast-border: rgba(0, 0, 0, 0.14);
+  --accent: #7fb891; /* mild soft green — accent on dark (dark text on fills) */
+  --accent-strong: #9ccfab;
+  --on-accent: #06130c;
+  --accent-soft: rgba(127, 184, 145, 0.14);
+
+  --gradient-accent: linear-gradient(120deg, #3f6b50 0%, #7fb891 100%);
+
+  /* Elevation — deeper on the dark canvas. */
+  --elev-soft: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 14px rgba(0, 0, 0, 0.35);
+  --elev-float: 0 6px 16px rgba(0, 0, 0, 0.5), 0 16px 48px rgba(0, 0, 0, 0.45);
 
   /* Semantic roles — dark. */
-  --primary: #34d399;
-  --primary-strong: #4ade80;
-  --primary-fg: #052e16;
-  --primary-soft: rgba(52, 211, 153, 0.12);
-  --secondary-fg: #fafafa;
-  --disabled: #52525b;
+  --primary: #7fb891;
+  --primary-strong: #9ccfab;
+  --primary-fg: #06130c;
+  --primary-soft: rgba(127, 184, 145, 0.14);
+  --secondary-fg: #ffffff;
+  --disabled: #4a4a4a;
   --destructive: #f87171;
   --destructive-fg: #1a0505;
   --destructive-soft: rgba(248, 113, 113, 0.14);
-  --success: #34d399;
-  --success-soft: rgba(52, 211, 153, 0.12);
+  --success: #22e2a8; /* spring-green — gains/positive on dark */
+  --success-soft: rgba(34, 226, 168, 0.14);
   --warning: #fbbf24;
   --warning-soft: rgba(251, 191, 36, 0.14);
-  --info: #60a5fa;
-  --info-soft: rgba(96, 165, 250, 0.14);
+  --info: #40b3ff; /* Cosmos cornflower blue */
+  --info-soft: rgba(64, 179, 255, 0.14);
 
   --chart-grid: rgba(255, 255, 255, 0.07);
   --chart-axis: rgba(255, 255, 255, 0.34);
   --chart-dash: rgba(255, 255, 255, 0.24);
-  --chart-line: #34d399;
-  --chart-ring: #0a0a0b;
-  --chart-label-bg: #fafafa;
+  --chart-line: #7fb891;
+  --chart-ring: #000000;
+  --chart-label-bg: #ffffff;
   --chart-label-border: rgba(255, 255, 255, 0.16);
-  --chart-label-text: #0a0a0a;
+  --chart-label-text: #000000;
 }
 
 @theme inline {
@@ -101,6 +117,8 @@
   --font-display: var(--ff-display);
   --font-sans: var(--ff-sans);
   --font-mono: var(--ff-mono);
+  --shadow-soft: var(--elev-soft);
+  --shadow-float: var(--elev-float);
 }
 
 /* Mobile-first safety net: clip any stray horizontal overflow so phones never
@@ -119,7 +137,20 @@ body {
 
 ::selection {
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
+}
+
+/* Logo marquee — seamless right-to-left scroll (duplicated track). */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.animate-marquee {
+  animation: marquee 32s linear infinite;
 }
 
 /* Tailwind v4 no longer sets cursor:pointer on buttons — restore it for all

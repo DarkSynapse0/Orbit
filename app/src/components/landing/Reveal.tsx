@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ElementType, type ReactNode } from "react";
+import { createElement, useEffect, useRef, useState, type ElementType, type ReactNode } from "react";
 
 // Reveals children when they scroll into view. CSS in globals.css does the actual motion;
 // this just toggles .is-visible. Reduced-motion users get content immediately (CSS handles it).
@@ -34,13 +34,15 @@ export function Reveal({
     return () => io.disconnect();
   }, []);
 
-  return (
-    <Tag
-      ref={ref}
-      className={`reveal ${visible ? "is-visible" : ""} ${className}`}
-      style={{ transitionDelay: `${delay}ms` }}
-    >
-      {children}
-    </Tag>
+  // Rendered via createElement (not <Tag/>) so the dynamic ElementType doesn't
+  // trip TS's "children: never" inference once @react-three/fiber augments JSX.
+  return createElement(
+    Tag,
+    {
+      ref,
+      className: `reveal ${visible ? "is-visible" : ""} ${className}`,
+      style: { transitionDelay: `${delay}ms` },
+    },
+    children,
   );
 }

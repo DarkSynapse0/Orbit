@@ -635,6 +635,60 @@ export default function Home() {
     return true;
   });
 
+  // Activity tab — PathPro-style summaries. Three 4-week rollups (spend / set
+  // aside / invested), each with weekly buckets for a mini bar chart.
+  const activityStats = useMemo(() => {
+    const WEEK_MS = 6.048e8; // 7 days
+    const now = Date.now();
+    const wk = (ts: number) => { const d = Math.floor((now - ts) / WEEK_MS); return d < 0 ? 3 : d > 3 ? -1 : 3 - d; };
+    const spendW = [0, 0, 0, 0], savedW = [0, 0, 0, 0], investW = [0, 0, 0, 0];
+    let spendTotal = 0, savedTotal = 0, investTotal = 0, spendCount = 0, savedCount = 0, investCount = 0;
+    for (const t of txns) {
+      const b = wk(t.ts);
+      spendTotal += t.amountUsd; spendCount++;
+      if (b >= 0) spendW[b] += t.amountUsd;
+      if (t.setAside > 0) { savedTotal += t.setAside; savedCount++; if (b >= 0) savedW[b] += t.setAside; }
+      if (t.deposited) { investTotal += t.setAside; investCount++; if (b >= 0) investW[b] += t.setAside; }
+    }
+    const cards = [
+      { key: "spend", label: "Spending", icon: ShoppingBag, total: spendTotal, count: spendCount, weeks: spendW, bar: "var(--muted)", soft: "var(--surface)" },
+      { key: "saved", label: "Set aside", icon: PiggyBank, total: savedTotal, count: savedCount, weeks: savedW, bar: "var(--primary)", soft: "var(--primary-soft)" },
+      { key: "invest", label: "Invested", icon: TrendingUp, total: investTotal, count: investCount, weeks: investW, bar: "var(--success)", soft: "var(--success-soft)" },
+    ];
+    return { cards };
+  }, [txns]);
+
+  // Current-month calendar with a colored dot per day that had activity.
+  const monthCal = useMemo(() => {
+    const now = new Date();
+    const year = now.getFullYear(), month = now.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const startDow = (new Date(year, month, 1).getDay() + 6) % 7; // Monday-first
+    const dayHas: Record<number, { saved: boolean; invest: boolean; spend: boolean }> = {};
+    let countThisMonth = 0;
+    for (const it of historyItems) {
+      const d = new Date(it.ts);
+      if (d.getFullYear() !== year || d.getMonth() !== month) continue;
+      countThisMonth++;
+      const e = (dayHas[d.getDate()] ||= { saved: false, invest: false, spend: false });
+      if (it.type === "txn") { e.spend = true; if (it.t.setAside > 0) e.saved = true; if (it.t.deposited) e.invest = true; }
+      else if (it.cat === "deposits") e.invest = true;
+      else e.saved = true;
+    }
+    return { daysInMonth, startDow, dayHas, countThisMonth, monthName: now.toLocaleString("en-US", { month: "long" }), today: now.getDate() };
+  }, [historyItems]);
+
+  // Milestones, unlocked from real data.
+  const achievements = useMemo(() => {
+    const saved = analytics.totalSaved;
+    return [
+      { id: "first-save", label: "First set-aside", desc: "Rounded up a purchase", done: txns.some((t) => t.setAside > 0), icon: PiggyBank, tone: "primary" as const },
+      { id: "save-100", label: "$100 set aside", desc: "Crossed $100 saved", done: saved >= 100, icon: TrendingUp, tone: "success" as const },
+      { id: "first-vault", label: "First vault deposit", desc: "Moved savings on-chain", done: acts.some((a) => a.kind === "deposit"), icon: Zap, tone: "primary" as const },
+      { id: "first-goal", label: "Goal set", desc: "Created a savings goal", done: acts.some((a) => a.kind.startsWith("goal")), icon: Target, tone: "success" as const },
+    ];
+  }, [analytics.totalSaved, txns, acts]);
+
   // Gate the dashboard behind sign-in. Wait for the stored session to load to
   // avoid flashing the login screen for an already-signed-in user.
   if (!authReady) return <div className="min-h-dvh bg-[var(--background)]" />;
@@ -958,36 +1012,15 @@ export default function Home() {
                   </div>
                 </section>
 
-                {/* Your bank */}
-                <div className="mt-6 rounded-2xl bg-[var(--surface)] p-5">
-                  <div className="font-display text-[16px] font-bold">Your bank</div>
-                  <div className="mt-3 flex items-center gap-3">
-                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[var(--surface)] text-[var(--muted)]"><Landmark className="h-5 w-5" aria-hidden /></span>
-                    <div className="min-w-0 flex-1">
-                      <div className="text-[15px] font-medium">{plaid?.connected ? "First Platypus Bank" : "No bank connected"}</div>
-                      <div className="text-[13px] text-[var(--muted)]">{plaid?.connected ? "Plaid sandbox · detection only" : "Connect to detect spending"}</div>
-                    </div>
-                    {plaid?.connected && <span className="flex items-center gap-1.5 text-[12px] font-medium text-[var(--primary-strong)]"><span className="h-1.5 w-1.5 rounded-full bg-[var(--primary)]" aria-hidden /> Connected</span>}
+                {/* Your bank — now managed in the Wallet tab */}
+                <button type="button" onClick={() => setTab("grow")} className="mt-6 flex w-full items-center gap-3 rounded-2xl bg-[var(--surface)] p-5 text-left transition-colors hover:bg-[var(--primary-soft)]">
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[var(--background)] text-[var(--muted)]"><Landmark className="h-5 w-5" aria-hidden /></span>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[15px] font-medium">{plaid?.connected ? "First Platypus Bank" : "No bank connected"}</div>
+                    <div className="text-[13px] text-[var(--muted)]">{plaid?.connected ? "Connected · manage in Wallet" : "Connect your bank in Wallet"}</div>
                   </div>
-                  {plaid && !plaid.configured && (
-                    <p className="mt-3 text-[13px] text-[var(--muted)]">Set <code className="font-mono text-[12px]">PLAID_CLIENT_ID</code> and <code className="font-mono text-[12px]">PLAID_SECRET</code> in the server to detect real spending.</p>
-                  )}
-                  {plaid?.configured && !plaid.connected && (
-                    <button type="button" onClick={connectBank} disabled={busy} className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-[var(--border-strong)] text-[14px] font-medium transition-colors hover:bg-[var(--surface)] disabled:pointer-events-none disabled:opacity-50">
-                      {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Landmark className="h-4 w-4" aria-hidden />} Connect a test bank
-                    </button>
-                  )}
-                  {plaid?.connected && (
-                    <div className="mt-4 flex gap-2">
-                      <button type="button" onClick={syncSpending} disabled={syncing} className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--primary)] text-[14px] font-semibold text-[var(--primary-fg)] transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-60">
-                        <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} aria-hidden /> {syncing ? "Pulling transactions…" : "Sync spending"}
-                      </button>
-                      <button type="button" onClick={disconnectBank} disabled={syncing} className="inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-xl border border-[var(--destructive)]/40 px-3.5 text-[14px] font-medium text-[var(--destructive)] transition-colors hover:bg-[var(--destructive-soft)] disabled:pointer-events-none disabled:opacity-50">
-                        <Power className="h-4 w-4" aria-hidden /> Disconnect
-                      </button>
-                    </div>
-                  )}
-                </div>
+                  <ChevronRight className="h-4 w-4 shrink-0 text-[var(--muted)]" aria-hidden />
+                </button>
               </div>
 
               {/* RIGHT — try it + automation */}
@@ -1036,17 +1069,76 @@ export default function Home() {
 
           {/* ═══════════ GROW ═══════════ */}
           {tab === "grow" && (
-            <div className="lg:grid lg:grid-cols-2 lg:gap-10">
-              {/* LEFT — the vault + goals */}
-              <div className="flex flex-col">
-                {/* The vault */}
-                <div className="[&>section]:mt-0">
-                  <WalletVault onChanged={refreshVault} />
+            <div className="space-y-8">
+              {/* ── Overview stats ── */}
+              <section>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-soft p-5">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="text-[13px] text-[var(--muted)]">Total value</div>
+                      {liveYield > 0 && <span className="inline-flex items-center gap-1 rounded-full bg-[var(--success-soft)] px-2 py-0.5 text-[12px] font-semibold text-[var(--success)]">+{usd(liveYield)}</span>}
+                    </div>
+                    <div className="mt-1 font-mono text-[24px] font-bold leading-none tabular-nums">{usd(total)}</div>
+                  </div>
+                  <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-soft p-5">
+                    <div className="text-[13px] text-[var(--muted)]">Yield earned</div>
+                    <div className="mt-1 font-mono text-[24px] font-bold leading-none tabular-nums text-[var(--success)]">{usd(liveYield)}</div>
+                  </div>
+                  <div className="flex items-center justify-between rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-soft p-5">
+                    <div>
+                      <div className="text-[13px] text-[var(--muted)]">Earning at</div>
+                      <div className="mt-1 font-mono text-[24px] font-bold leading-none tabular-nums text-[var(--primary-strong)]">{selectedVenue.apy.toFixed(1)}% APY</div>
+                    </div>
+                    <VenueMark venue={selectedVenue} className="h-9 w-9" />
+                  </div>
                 </div>
-              </div>
+              </section>
 
-              {/* RIGHT — how it earns + projection */}
-              <div className="mt-6 border-t border-[var(--line)] pt-6 lg:mt-0 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
+              {/* ── Your Wallet (vault + bank side by side) ── */}
+              <section>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <h2 className="font-display text-[20px] font-bold">Your wallet</h2>
+                  {plaid?.configured && plaid.connected && (
+                    <button type="button" onClick={connectBank} disabled={busy} className="inline-flex items-center gap-1.5 rounded-full bg-[var(--contrast)] px-4 py-2 text-[13px] font-semibold text-[var(--contrast-fg)] transition-opacity hover:opacity-90 disabled:opacity-50"><Plus className="h-4 w-4" aria-hidden /> Add bank account</button>
+                  )}
+                </div>
+                <div className="mt-4 grid grid-cols-1 gap-5 lg:grid-cols-[1.1fr_0.9fr]">
+                  <div className="[&>section]:mt-0"><WalletVault onChanged={refreshVault} /></div>
+                  {/* Your bank account */}
+                  {plaid?.connected ? (
+                    <div className="flex flex-col rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-soft p-5">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2.5">
+                          <span className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--background)] text-[var(--muted)]"><Landmark className="h-5 w-5" aria-hidden /></span>
+                          <span className="text-[15px] font-semibold">Your bank</span>
+                        </div>
+                        <span className="rounded-full bg-[var(--success-soft)] px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-[var(--success)]">Default</span>
+                      </div>
+                      <div className="mt-4 space-y-2.5">
+                        <div><div className="text-[11px] uppercase tracking-wide text-[var(--faint)]">Name</div><div className="text-[14px] font-medium">First Platypus Bank</div></div>
+                        <div><div className="text-[11px] uppercase tracking-wide text-[var(--faint)]">Connection</div><div className="text-[14px] font-medium">Plaid sandbox · detection only</div></div>
+                        <div className="flex items-center gap-1.5 text-[12px] font-medium text-[var(--primary-strong)]"><span className="h-1.5 w-1.5 rounded-full bg-[var(--primary)]" aria-hidden /> Connected</div>
+                      </div>
+                      <div className="mt-auto flex gap-2 pt-4">
+                        <button type="button" onClick={syncSpending} disabled={syncing} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-[var(--border-strong)] px-3 py-2 text-[13px] font-medium transition-colors hover:bg-[var(--background)] disabled:opacity-50"><RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} aria-hidden /> {syncing ? "Syncing…" : "Sync"}</button>
+                        <button type="button" onClick={disconnectBank} disabled={syncing} className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[var(--destructive)]/40 px-3 py-2 text-[13px] font-medium text-[var(--destructive)] transition-colors hover:bg-[var(--destructive-soft)] disabled:opacity-50"><Power className="h-3.5 w-3.5" aria-hidden /> Disconnect</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button type="button" onClick={connectBank} disabled={busy || !plaid?.configured} className="flex min-h-[190px] flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-[var(--border-strong)] p-5 text-center transition-colors hover:bg-[var(--surface)] disabled:opacity-50">
+                      {busy ? <Loader2 className="h-5 w-5 animate-spin" aria-hidden /> : <Plus className="h-5 w-5 text-[var(--muted)]" aria-hidden />}
+                      <span className="text-[14px] font-semibold">Connect a test bank</span>
+                      <span className="text-[12px] text-[var(--muted)]">Plaid sandbox — detection only</span>
+                    </button>
+                  )}
+                </div>
+                {plaid && !plaid.configured && (
+                  <p className="mt-3 text-[13px] text-[var(--muted)]">Set <code className="font-mono text-[12px]">PLAID_CLIENT_ID</code> and <code className="font-mono text-[12px]">PLAID_SECRET</code> in the server to detect real spending.</p>
+                )}
+              </section>
+
+              {/* ── How your USDC earns + projection ── */}
+              <div className="border-t border-[var(--line)] pt-8">
                 {/* Earning + where it's invested */}
                 <div>
                   <div className="flex items-start justify-between gap-3">
@@ -1190,87 +1282,227 @@ export default function Home() {
 
           {/* ═══════════ ACTIVITY ═══════════ */}
           {tab === "activity" && (
-            <div>
-              {/* Category underline tabs */}
-              <div className="flex items-center overflow-x-auto border-b border-[var(--border)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                {[
-                  { id: "all", label: "All" },
-                  { id: "spending", label: "Spending" },
-                  { id: "deposits", label: "Deposits" },
-                  { id: "withdrawals", label: "Withdrawals" },
-                  { id: "goals", label: "Goals" },
-                  { id: "wallet", label: "Wallet" },
-                ].map((t) => {
-                  const on = historyTab === t.id;
-                  return (
-                    <button
-                      key={t.id}
-                      type="button"
-                      onClick={() => setHistoryTab(t.id)}
-                      className={`relative -mb-px flex shrink-0 items-center gap-1.5 border-b-2 px-5 pb-3 pt-2.5 text-[15px] font-semibold transition-colors ${on ? "border-[var(--primary)] bg-[var(--primary-soft)] text-[var(--primary-strong)]" : "border-transparent text-[var(--muted)] hover:bg-[var(--surface)] hover:text-[var(--foreground)]"}`}
-                    >
-                      {t.label}
-                      <span className={`grid min-w-[1.3rem] place-items-center rounded-full px-1.5 py-0.5 font-mono text-[11px] ${on ? "bg-[var(--primary)] text-[var(--primary-fg)]" : "bg-[var(--surface)] text-[var(--muted)]"}`}>{historyCounts[t.id] ?? 0}</span>
-                    </button>
-                  );
-                })}
-                <button type="button" onClick={() => { reset(); clearActivity(); }} className="mb-1.5 ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[var(--destructive)]/40 bg-transparent px-3 pb-1.5 pt-1 text-[13px] font-medium text-[var(--destructive)] transition-colors hover:bg-[var(--destructive-soft)]"><RotateCcw className="h-3.5 w-3.5" aria-hidden /> reset</button>
-              </div>
-
-              {q && <p className="mt-4 text-[13px] text-[var(--muted)]">Results for “{query}” · {filteredHistory.length} {filteredHistory.length === 1 ? "match" : "matches"}</p>}
-
-              {filteredHistory.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-center">
-                  <ShoppingBag className="h-6 w-6 text-[var(--muted)]" aria-hidden />
-                  <p className="mt-2 text-[15px] text-[var(--muted)]">{q ? `Nothing matches “${query}”` : "Nothing here yet"}</p>
-                  <p className="mt-0.5 text-[13px] text-[var(--faint)]">Simulate a purchase or use your vault to see activity.</p>
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_320px]">
+              {/* ── MAIN: summaries + list ── */}
+              <div className="min-w-0 space-y-5">
+                <div className="flex items-center justify-between gap-3">
+                  <h2 className="font-display text-[20px] font-bold">My activity</h2>
+                  <button type="button" onClick={() => { reset(); clearActivity(); }} className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[var(--destructive)]/40 bg-transparent px-3 py-1.5 text-[13px] font-medium text-[var(--destructive)] transition-colors hover:bg-[var(--destructive-soft)]"><RotateCcw className="h-3.5 w-3.5" aria-hidden /> reset</button>
                 </div>
-              ) : (
-                <ul className="mt-2 divide-y divide-[var(--border)]">
-                  {filteredHistory.map((it) => {
-                    if (it.type === "txn") {
-                      const t = it.t;
-                      const Icon = txnIcon(t);
-                      return (
-                        <li key={it.id} className="flex items-center gap-3.5 py-3.5">
-                          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--surface)] text-[var(--muted)]">
-                            <Icon className="h-[18px] w-[18px]" aria-hidden />
-                          </span>
-                          <div className="min-w-0 flex-1">
-                            <div className="truncate text-[15px] font-medium">{t.name}</div>
-                            <div className="text-[12px] text-[var(--muted)]">{t.category} · {txnDate(t.ts)}</div>
-                          </div>
-                          <div className="shrink-0 text-right">
-                            <div className="font-mono text-[15px] tabular-nums text-[var(--foreground)]">{usd(t.amountUsd)}</div>
-                            {t.setAside > 0 ? (
-                              <div className="mt-1 inline-flex items-center gap-1 rounded-full bg-[var(--primary-soft)] px-2 py-0.5 text-[11px] font-medium text-[var(--primary-strong)]">
-                                {t.deposited ? <Zap className="h-3 w-3" aria-hidden /> : <Coins className="h-3 w-3" aria-hidden />}
-                                +{usd(t.setAside)} {t.deposited ? "invested" : "saved"}
-                              </div>
-                            ) : (
-                              <div className="mt-1 text-[11px] text-[var(--faint)]">not saved</div>
-                            )}
-                          </div>
-                        </li>
-                      );
-                    }
-                    const a = it.a;
-                    const AIcon = ACTIVITY_ICON[a.kind];
-                    const money = a.kind === "deposit" || a.kind === "withdraw" || a.kind === "faucet";
+
+                {/* Summary cards — last 4 weeks */}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  {activityStats.cards.map((c) => {
+                    const Icon = c.icon;
+                    const max = Math.max(1, ...c.weeks);
                     return (
-                      <li key={it.id} className="flex items-center gap-3.5 py-3.5">
-                        <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${money ? "bg-[var(--primary-soft)] text-[var(--primary-strong)]" : "bg-[var(--surface)] text-[var(--muted)]"}`}>
-                          <AIcon className="h-[18px] w-[18px]" aria-hidden />
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <div className="truncate text-[15px] font-medium">{a.text}</div>
+                      <div key={c.key} className="rounded-2xl bg-[var(--surface)] p-4">
+                        <div className="flex items-center gap-2">
+                          <span className="grid h-8 w-8 place-items-center rounded-lg" style={{ background: c.soft, color: c.bar }}><Icon className="h-4 w-4" aria-hidden /></span>
+                          <span className="text-[13px] font-semibold text-[var(--muted)]">{c.label}</span>
                         </div>
-                        <div className="shrink-0 font-mono text-[12px] text-[var(--faint)]">{actWhen(a.ts)}</div>
-                      </li>
+                        <div className="mt-3 font-mono text-[22px] font-bold leading-none tabular-nums">{usd(c.total)}</div>
+                        <div className="mt-1 text-[12px] text-[var(--faint)]">{c.count} {c.count === 1 ? "item" : "items"} · last 4 weeks</div>
+                        <div className="mt-3 flex h-9 items-end gap-1.5" aria-hidden>
+                          {c.weeks.map((v, i) => (
+                            <div key={i} className="flex-1 rounded-sm transition-all" style={{ height: `${Math.max(8, (v / max) * 100)}%`, background: c.bar, opacity: i === 3 ? 1 : 0.4 }} />
+                          ))}
+                        </div>
+                      </div>
                     );
                   })}
-                </ul>
-              )}
+                </div>
+
+                {/* List activity */}
+                <div className="rounded-2xl bg-[var(--surface)] p-4 sm:p-5">
+                  <div className="flex items-center justify-between gap-3">
+                    <h3 className="font-display text-[16px] font-bold">List activity</h3>
+                    <div className="relative">
+                      <select
+                        value={historyTab}
+                        onChange={(e) => setHistoryTab(e.target.value)}
+                        aria-label="Filter activity by type"
+                        className="appearance-none rounded-lg border border-[var(--border-strong)] bg-[var(--background)] py-1.5 pl-3 pr-8 text-[13px] font-medium text-[var(--foreground)] transition-colors hover:bg-[var(--surface)]"
+                      >
+                        <option value="all">All types ({historyCounts.all ?? 0})</option>
+                        <option value="spending">Spending ({historyCounts.spending ?? 0})</option>
+                        <option value="deposits">Deposits ({historyCounts.deposits ?? 0})</option>
+                        <option value="withdrawals">Withdrawals ({historyCounts.withdrawals ?? 0})</option>
+                        <option value="goals">Goals ({historyCounts.goals ?? 0})</option>
+                        <option value="wallet">Wallet ({historyCounts.wallet ?? 0})</option>
+                      </select>
+                      <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted)]" aria-hidden />
+                    </div>
+                  </div>
+
+                  {q && <p className="mt-3 text-[13px] text-[var(--muted)]">Results for “{query}” · {filteredHistory.length} {filteredHistory.length === 1 ? "match" : "matches"}</p>}
+
+                  {filteredHistory.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-16 text-center">
+                      <ShoppingBag className="h-6 w-6 text-[var(--muted)]" aria-hidden />
+                      <p className="mt-2 text-[15px] text-[var(--muted)]">{q ? `Nothing matches “${query}”` : "Nothing here yet"}</p>
+                      <p className="mt-0.5 text-[13px] text-[var(--faint)]">Simulate a purchase or use your vault to see activity.</p>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Desktop: table */}
+                      <div className="mt-3 hidden lg:block">
+                        <table className="w-full border-separate border-spacing-y-1 text-left">
+                          <thead>
+                            <tr className="text-[11px] uppercase tracking-wide text-[var(--faint)]">
+                              <th className="pb-1 pl-3 font-semibold">Type</th>
+                              <th className="pb-1 font-semibold">Date</th>
+                              <th className="pb-1 font-semibold">Details</th>
+                              <th className="pb-1 pr-3 text-right font-semibold">Amount</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {filteredHistory.map((it, i) => {
+                              const zebra = i % 2 === 1 ? "bg-[var(--background)]" : "";
+                              if (it.type === "txn") {
+                                const t = it.t;
+                                const Icon = txnIcon(t);
+                                return (
+                                  <tr key={it.id} className={zebra}>
+                                    <td className="rounded-l-lg py-2.5 pl-3">
+                                      <div className="flex items-center gap-2.5">
+                                        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[var(--surface)] text-[var(--muted)]"><Icon className="h-4 w-4" aria-hidden /></span>
+                                        <span className="text-[13px] font-medium">Spending</span>
+                                      </div>
+                                    </td>
+                                    <td className="py-2.5 text-[13px] text-[var(--muted)]">{txnDate(t.ts)}</td>
+                                    <td className="py-2.5">
+                                      <div className="max-w-[180px] truncate text-[13px] font-medium">{t.name}</div>
+                                      <div className="text-[11px] text-[var(--muted)]">{t.category}</div>
+                                    </td>
+                                    <td className="rounded-r-lg py-2.5 pr-3 text-right">
+                                      <div className="font-mono text-[13px] tabular-nums">{usd(t.amountUsd)}</div>
+                                      {t.setAside > 0 && <div className="font-mono text-[11px] text-[var(--primary-strong)]">+{usd(t.setAside)} {t.deposited ? "invested" : "saved"}</div>}
+                                    </td>
+                                  </tr>
+                                );
+                              }
+                              const a = it.a;
+                              const AIcon = ACTIVITY_ICON[a.kind];
+                              const money = a.kind === "deposit" || a.kind === "withdraw" || a.kind === "faucet";
+                              return (
+                                <tr key={it.id} className={zebra}>
+                                  <td className="rounded-l-lg py-2.5 pl-3">
+                                    <div className="flex items-center gap-2.5">
+                                      <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg ${money ? "bg-[var(--primary-soft)] text-[var(--primary-strong)]" : "bg-[var(--surface)] text-[var(--muted)]"}`}><AIcon className="h-4 w-4" aria-hidden /></span>
+                                      <span className="text-[13px] font-medium capitalize">{it.cat}</span>
+                                    </div>
+                                  </td>
+                                  <td className="py-2.5 text-[13px] text-[var(--muted)]">{txnDate(a.ts)}</td>
+                                  <td className="py-2.5"><div className="max-w-[240px] truncate text-[13px] font-medium">{a.text}</div></td>
+                                  <td className="rounded-r-lg py-2.5 pr-3 text-right font-mono text-[12px] text-[var(--faint)]">{actWhen(a.ts).split(", ").pop()}</td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      {/* Mobile: stacked list */}
+                      <ul className="mt-2 divide-y divide-[var(--border)] lg:hidden">
+                        {filteredHistory.map((it) => {
+                          if (it.type === "txn") {
+                            const t = it.t;
+                            const Icon = txnIcon(t);
+                            return (
+                              <li key={it.id} className="flex items-center gap-3.5 py-3.5">
+                                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--surface)] text-[var(--muted)]"><Icon className="h-[18px] w-[18px]" aria-hidden /></span>
+                                <div className="min-w-0 flex-1">
+                                  <div className="truncate text-[15px] font-medium">{t.name}</div>
+                                  <div className="text-[12px] text-[var(--muted)]">{t.category} · {txnDate(t.ts)}</div>
+                                </div>
+                                <div className="shrink-0 text-right">
+                                  <div className="font-mono text-[15px] tabular-nums text-[var(--foreground)]">{usd(t.amountUsd)}</div>
+                                  {t.setAside > 0 ? (
+                                    <div className="mt-1 inline-flex items-center gap-1 rounded-full bg-[var(--primary-soft)] px-2 py-0.5 text-[11px] font-medium text-[var(--primary-strong)]">
+                                      {t.deposited ? <Zap className="h-3 w-3" aria-hidden /> : <Coins className="h-3 w-3" aria-hidden />}
+                                      +{usd(t.setAside)} {t.deposited ? "invested" : "saved"}
+                                    </div>
+                                  ) : (
+                                    <div className="mt-1 text-[11px] text-[var(--faint)]">not saved</div>
+                                  )}
+                                </div>
+                              </li>
+                            );
+                          }
+                          const a = it.a;
+                          const AIcon = ACTIVITY_ICON[a.kind];
+                          const money = a.kind === "deposit" || a.kind === "withdraw" || a.kind === "faucet";
+                          return (
+                            <li key={it.id} className="flex items-center gap-3.5 py-3.5">
+                              <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${money ? "bg-[var(--primary-soft)] text-[var(--primary-strong)]" : "bg-[var(--surface)] text-[var(--muted)]"}`}><AIcon className="h-[18px] w-[18px]" aria-hidden /></span>
+                              <div className="min-w-0 flex-1"><div className="truncate text-[15px] font-medium">{a.text}</div></div>
+                              <div className="shrink-0 font-mono text-[12px] text-[var(--faint)]">{actWhen(a.ts)}</div>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* ── SIDEBAR: monthly summary + achievements ── */}
+              <div className="space-y-5">
+                {/* Monthly summary + calendar */}
+                <div className="rounded-2xl bg-[var(--surface)] p-5">
+                  <div className="text-[12px] font-medium uppercase tracking-[0.16em] text-[var(--faint)]">Monthly summary</div>
+                  <div className="mt-3 flex items-end gap-2.5">
+                    <span className="font-mono text-[40px] font-bold leading-none tabular-nums text-[var(--primary-strong)]">{monthCal.countThisMonth}</span>
+                    <span className="pb-1 text-[13px] leading-tight text-[var(--muted)]">activities in<br />{monthCal.monthName}</span>
+                  </div>
+                  <div className="mt-4 grid grid-cols-7 gap-1 text-center">
+                    {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
+                      <div key={i} className="pb-1 text-[11px] font-semibold text-[var(--faint)]">{d}</div>
+                    ))}
+                    {Array.from({ length: monthCal.startDow }).map((_, i) => <div key={`b${i}`} />)}
+                    {Array.from({ length: monthCal.daysInMonth }).map((_, i) => {
+                      const day = i + 1;
+                      const e = monthCal.dayHas[day];
+                      const isToday = day === monthCal.today;
+                      const dot = e ? (e.invest ? "var(--success)" : e.saved ? "var(--primary)" : "var(--muted)") : null;
+                      return (
+                        <div key={day} className={`relative grid aspect-square place-items-center rounded-md text-[12px] tabular-nums ${isToday ? "bg-[var(--primary-soft)] font-bold text-[var(--primary-strong)]" : "text-[var(--foreground)]"}`}>
+                          {day}
+                          {dot && <span className="absolute bottom-1 h-1 w-1 rounded-full" style={{ background: dot }} aria-hidden />}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-[var(--muted)]">
+                    <span className="inline-flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--primary)" }} /> Saved</span>
+                    <span className="inline-flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--success)" }} /> Invested</span>
+                    <span className="inline-flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--muted)" }} /> Spend</span>
+                  </div>
+                </div>
+
+                {/* Achievements */}
+                <div className="rounded-2xl bg-[var(--surface)] p-5">
+                  <div className="text-[12px] font-medium uppercase tracking-[0.16em] text-[var(--faint)]">Achievements</div>
+                  <ul className="mt-3 space-y-3">
+                    {achievements.map((a) => {
+                      const Icon = a.icon;
+                      const soft = a.tone === "primary" ? "var(--primary-soft)" : "var(--success-soft)";
+                      const fg = a.tone === "primary" ? "var(--primary-strong)" : "var(--success)";
+                      return (
+                        <li key={a.id} className={`flex items-center gap-3 ${a.done ? "" : "opacity-45"}`}>
+                          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full" style={{ background: a.done ? soft : "var(--background)", color: a.done ? fg : "var(--faint)" }}><Icon className="h-4 w-4" aria-hidden /></span>
+                          <div className="min-w-0 flex-1">
+                            <div className="text-[13px] font-semibold">{a.label}</div>
+                            <div className="truncate text-[12px] text-[var(--muted)]">{a.desc}</div>
+                          </div>
+                          {a.done && <Check className="h-4 w-4 shrink-0" style={{ color: fg }} aria-hidden />}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              </div>
             </div>
           )}
 

@@ -1,17 +1,17 @@
 import type { Metadata } from "next";
-import { Bricolage_Grotesque, Inter, JetBrains_Mono } from "next/font/google";
+import { Figtree, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
-// Display: Bricolage Grotesque — friendly, characterful grotesque for headlines.
-// Body: Inter (best-in-class UI legibility). Numbers/addresses: JetBrains Mono.
-const fontDisplay = Bricolage_Grotesque({
+// Figtree — the project-wide sans (matches helium.com). Variable font, so the full
+// weight range loads; used for both headlines (--ff-display) and body (--ff-sans).
+// Numbers stay on JetBrains Mono.
+const fontFigtree = Figtree({
   variable: "--ff-display",
   subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
   display: "swap",
 });
-const fontSans = Inter({ variable: "--ff-sans", subsets: ["latin"], display: "swap" });
+const fontSans = Figtree({ variable: "--ff-sans", subsets: ["latin"], display: "swap" });
 const fontMono = JetBrains_Mono({ variable: "--ff-mono", subsets: ["latin"], display: "swap" });
 
 // Set NEXT_PUBLIC_SITE_URL to your production origin for correct canonical + OG URLs.
@@ -94,7 +94,7 @@ export const metadata: Metadata = {
 export const viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#0b0d10" },
+    { media: "(prefers-color-scheme: dark)", color: "#000000" },
   ],
   colorScheme: "light dark" as const,
 };
@@ -135,7 +135,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${fontDisplay.variable} ${fontSans.variable} ${fontMono.variable} h-full antialiased`}
+      className={`${fontFigtree.variable} ${fontSans.variable} ${fontMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>

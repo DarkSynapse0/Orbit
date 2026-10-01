@@ -143,7 +143,8 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
       {withYield.length > 0 && (
         <>
           <div className="my-4 border-t border-[var(--line)]" />
-          <div className="overflow-x-auto rounded-2xl bg-[var(--surface)] px-5 py-2">
+          {/* Desktop: table */}
+          <div className="hidden overflow-x-auto rounded-2xl bg-[var(--surface)] px-5 py-2 lg:block">
             <table className="w-full min-w-[560px] text-left">
             <thead>
               <tr className="border-b border-[var(--border)] text-[14px] font-bold text-[var(--foreground)]">
@@ -197,6 +198,45 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
               })}
             </tbody>
           </table>
+          </div>
+
+          {/* Mobile: stacked cards */}
+          <div className="space-y-3 lg:hidden">
+            {withYield.map((g) => {
+              const pct = Math.min(100, (g.balance / g.target) * 100);
+              const reached = g.target > 0 && g.balance >= g.target;
+              return (
+                <div key={g.id} className="rounded-2xl bg-[var(--surface)] p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex min-w-0 items-center gap-2.5">
+                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[var(--background)] text-[18px]">{g.emoji}</span>
+                      <div className="flex min-w-0 items-center gap-2">
+                        <span className="truncate text-[15px] font-medium">{g.name}</span>
+                        {reached && (
+                          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[var(--primary-soft)] px-2 py-0.5 text-[11px] font-medium text-[var(--primary-strong)]">
+                            <Check className="h-3 w-3" aria-hidden /> Reached
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <button type="button" onClick={() => remove(g.id)} aria-label={`Delete ${g.name}`} className="grid h-7 w-7 shrink-0 place-items-center rounded-md text-[var(--faint)] transition-colors hover:bg-[var(--destructive-soft)] hover:text-[var(--destructive)]"><Trash2 className="h-4 w-4" aria-hidden /></button>
+                  </div>
+                  <div className="mt-3 flex items-baseline justify-between gap-2">
+                    <span className="font-mono text-lg font-semibold tabular-nums text-[var(--primary-strong)]">{usd(g.balance)}</span>
+                    <span className="font-mono text-[13px] tabular-nums text-[var(--muted)]">of {usd(g.target)} · {Math.round(pct)}%</span>
+                  </div>
+                  <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[var(--border)]">
+                    <div className="h-full rounded-full bg-[var(--primary)] transition-[width] duration-300" style={{ width: `${pct}%` }} />
+                  </div>
+                  <div className="mt-3 flex items-center gap-1.5">
+                    {[10, 50].map((d) => (
+                      <button key={d} type="button" onClick={() => allocate(g.id, d)} disabled={unallocated <= 0} className="rounded-md border border-[var(--border-strong)] px-2.5 py-1 text-[12px] font-medium transition-colors hover:bg-[var(--background)] disabled:pointer-events-none disabled:opacity-40">+${d}</button>
+                    ))}
+                    <button type="button" onClick={() => allocate(g.id, -1e12)} disabled={g.allocated <= 0} className="rounded-md border border-[var(--border-strong)] px-2.5 py-1 text-[12px] font-medium transition-colors hover:bg-[var(--background)] disabled:pointer-events-none disabled:opacity-40">Empty</button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </>
       )}

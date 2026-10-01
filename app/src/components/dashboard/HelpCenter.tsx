@@ -40,7 +40,7 @@ type Article = {
 
 // Editorial cover palette — one gradient per category.
 const COVER: Record<Category, [string, string]> = {
-  Basics: ["#15803d", "#0e7490"],
+  Basics: ["#0f766e", "#40b3ff"],
   Saving: ["#0d9488", "#0369a1"],
   Vault: ["#4f46e5", "#0891b2"],
   Goals: ["#b45309", "#be123c"],

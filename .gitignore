@@ -44,3 +44,6 @@ npm-debug.log*
 .directory
 .idea/
 .vscode/
+
+# Generated /brag launch-video output (large binaries)
+brag-output/
