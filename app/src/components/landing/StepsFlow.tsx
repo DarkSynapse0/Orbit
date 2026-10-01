@@ -57,16 +57,18 @@ export function StepsFlow() {
           {STEPS.map((s) => (
             <div
               key={s.n}
-              className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6"
+              className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]"
             >
-              <div className="flex items-center justify-between">
-                <div className="grid h-11 w-11 place-items-center rounded-xl bg-[var(--foreground)] text-[var(--background)]">
-                  <s.icon className="h-5 w-5" aria-hidden />
-                </div>
-                <span className="font-mono text-[13px] tracking-[0.2em] text-[var(--faint)]">{s.n}</span>
+              {/* Lottie slot — drop the animation here (placeholder: step icon) */}
+              <div className="relative grid aspect-[4/3] place-items-center border-b border-[var(--border)] bg-[var(--background)]">
+                <span className="absolute left-4 top-4 font-mono text-[13px] tracking-[0.2em] text-[var(--faint)]">{s.n}</span>
+                <s.icon className="h-10 w-10 text-[var(--muted)]" aria-hidden />
               </div>
-              <h3 className="mt-5 font-display text-lg font-semibold">{s.title}</h3>
-              <p className="mt-2 text-[14px] leading-relaxed text-[var(--muted)]">{s.desc}</p>
+
+              <div className="p-6">
+                <h3 className="font-display text-lg font-semibold">{s.title}</h3>
+                <p className="mt-2 text-[14px] leading-relaxed text-[var(--muted)]">{s.desc}</p>
+              </div>
             </div>
           ))}
         </div>
