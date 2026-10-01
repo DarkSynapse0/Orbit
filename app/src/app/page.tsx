@@ -9,9 +9,6 @@ import {
   Zap,
   Check,
   ExternalLink,
-  CreditCard,
-  Coins,
-  Lock,
 } from "lucide-react";
 import { Reveal } from "@/components/landing/Reveal";
 import { LiveYield } from "@/components/landing/LiveYield";
@@ -26,14 +23,7 @@ const PROGRAM = "8LEjyrMCKukhxA4q3DRaYGfkappxRayiTPM7saZG2Kgi";
 const solAcct = (a: string) => `https://solscan.io/account/${a}?cluster=devnet`;
 const eyebrow = "font-mono text-[12px] font-medium uppercase tracking-[0.24em]";
 
-const FLOW = [
-  { icon: CreditCard, t: "You spend", d: "Plaid watches" },
-  { icon: Coins, t: "Orbit sets aside", d: "a slice, your rate" },
-  { icon: Lock, t: "Moves on-chain", d: "USDC vault" },
-  { icon: TrendingUp, t: "It grows", d: "~6% APY" },
-];
-
-const tile = "rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-7 transition-colors duration-300 hover:border-[var(--border-strong)]";
+const tile ="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-7 transition-colors duration-300 hover:border-[var(--border-strong)]";
 
 // Each logo ships a light-strip (dark ink) and a dark-strip (white) variant;
 // the render swaps on the `dark` theme class.
@@ -140,29 +130,6 @@ export default function Landing() {
       {/* ───────── Command deck: one dashboard-style bento ───────── */}
       <section id="deck" className="mx-auto w-full max-w-7xl scroll-mt-20 px-6 py-20 lg:py-24">
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
-          {/* money flow — full width */}
-          <Reveal className="lg:col-span-12">
-            <div className={tile}>
-              <div className={`${eyebrow} text-[var(--faint)]`}>The loop</div>
-              <div className="mt-5 grid grid-cols-2 gap-5 sm:grid-cols-4">
-                {FLOW.map((f, i) => (
-                  <div key={f.t} className="relative flex items-start gap-3">
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-[var(--border-strong)] text-[var(--accent)]">
-                      <f.icon className="h-5 w-5" aria-hidden />
-                    </span>
-                    <div className="min-w-0">
-                      <div className="text-[15px] font-semibold leading-tight">{f.t}</div>
-                      <div className="text-[13px] text-[var(--muted)]">{f.d}</div>
-                    </div>
-                    {i < FLOW.length - 1 && (
-                      <ArrowRight className="absolute -right-3.5 top-2.5 hidden h-4 w-4 text-[var(--faint)] sm:block" aria-hidden />
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </Reveal>
-
           {/* growth chart */}
           <Reveal className="lg:col-span-8">
             <div className={`${tile} h-full`}>
