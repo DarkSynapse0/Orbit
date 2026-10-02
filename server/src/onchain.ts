@@ -116,7 +116,8 @@ async function build(): Promise<Ctx> {
 /** Ensure the shared yield reserve exists and is funded with an interest buffer. */
 async function ensureReserve(c: Ctx) {
   try {
-    await c.program.account.reserve.fetch(c.reserve);
+    // Generic Idl Program doesn't type the account namespace — access it loosely.
+    await (c.program.account as any).reserve.fetch(c.reserve);
     return;
   } catch {
     /* not created yet */
@@ -141,7 +142,7 @@ async function ensureReserve(c: Ctx) {
 async function ensureVault(c: Ctx, owner: PublicKey) {
   const vault = vaultPda(c.program, owner, c.mint);
   try {
-    await c.program.account.vault.fetch(vault);
+    await (c.program.account as any).vault.fetch(vault);
   } catch {
     await c.program.methods
       .initializeVault()
@@ -199,7 +200,7 @@ export async function getVaultOnChain(ownerAddress: string) {
   let lastUpdateTs = 0;
   let exists = false;
   try {
-    const v = (await c.program.account.vault.fetch(vault)) as any;
+    const v = (await (c.program.account as any).vault.fetch(vault)) as any;
     principalUsd = fromBase(Number(v.principal));
     accruedYieldUsd = fromBase(Number(v.accruedYield));
     lastUpdateTs = Number(v.lastUpdateTs);
