@@ -15,7 +15,6 @@ import {
 import { Reveal } from "@/components/landing/Reveal";
 import { LiveYield } from "@/components/landing/LiveYield";
 import { GrowthChart } from "@/components/landing/GrowthChart";
-import { OrbitRings } from "@/components/landing/OrbitRings";
 import { CountUp } from "@/components/landing/CountUp";
 import { LiveChain } from "@/components/landing/LiveChain";
 import { StepsFlow } from "@/components/landing/StepsFlow";
@@ -129,9 +128,15 @@ export default function Landing() {
       {/* ───────── How it works: pinned slide flow ───────── */}
       <StepsFlow />
 
-      {/* ───────── Command deck: one dashboard-style bento ───────── */}
-      <section id="deck" className="mx-auto w-full max-w-7xl scroll-mt-20 px-6 py-20 lg:py-24">
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+      {/* ───────── Charts & APY ───────── */}
+      <section id="deck" className="mx-auto w-full max-w-7xl scroll-mt-20 px-6 py-14 lg:py-16">
+        <Reveal>
+          <div className={`${eyebrow} text-[var(--faint)]`}>Your money at work</div>
+          <h2 className="mt-4 max-w-2xl font-display text-[clamp(1.8rem,3.5vw,2.75rem)] font-semibold leading-[1.05] tracking-[-0.02em]">
+            Idle cash falls behind.
+          </h2>
+        </Reveal>
+        <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-12">
           {/* growth chart — heading + corner badge over an inner panel */}
           <Reveal className="lg:col-span-8">
             <div className={`${tile} h-full`}>
@@ -216,26 +221,53 @@ export default function Landing() {
               </div>
             </div>
           </Reveal>
+        </div>
+      </section>
 
+      {/* ───────── Features ───────── */}
+      <section id="features" className="mx-auto w-full max-w-7xl scroll-mt-20 border-t border-[var(--border)] px-6 py-20 lg:py-24">
+        <Reveal>
+          <div className={`${eyebrow} text-[var(--faint)]`}>Why Orbit</div>
+          <h2 className="mt-4 max-w-2xl font-display text-[clamp(1.8rem,3.5vw,2.75rem)] font-semibold leading-[1.05] tracking-[-0.02em]">
+            Saving that runs itself.
+          </h2>
+        </Reveal>
+        <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {/* three feature tiles */}
           {[
-            { icon: Zap, t: "Automatic", d: "Set a rate once; Orbit saves from every purchase and moves it on-chain at your threshold." },
-            { icon: ShieldCheck, t: "Self-custody", d: "Orbit can add to your vault but never move or freeze it. Only your wallet signs." },
-            { icon: RefreshCw, t: "Withdraw anytime", d: "No lock-ups, no fees, no minimums. One tap returns your balance plus earnings." },
+            { icon: Zap, t: "Automatic", d: "Set a rate once; Orbit saves from every purchase and moves it on-chain at your threshold.", img: "/illustrations/automatic.svg" },
+            { icon: ShieldCheck, t: "Self-custody", d: "Orbit can add to your vault but never move or freeze it. Only your wallet signs.", img: "/illustrations/self-custody.svg" },
+            { icon: RefreshCw, t: "Withdraw anytime", d: "No lock-ups, no fees, no minimums. One tap returns your balance plus earnings.", img: "/illustrations/withdraw.svg" },
           ].map((f) => (
-            <Reveal key={f.t} className="lg:col-span-4">
-              <div className={`${tile} flex h-full flex-col gap-5`}>
-                <span className="grid h-12 w-12 place-items-center rounded-2xl border border-[var(--border-strong)] text-[var(--accent)]">
-                  <f.icon className="h-5 w-5" aria-hidden />
-                </span>
-                <div>
-                  <div className="text-[18px] font-semibold">{f.t}</div>
+            <Reveal key={f.t}>
+              <div className="h-full overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
+                {/* media panel — illustration, or icon fallback */}
+                <div className="grid aspect-[4/3] place-items-center border-b border-[var(--border)] bg-[var(--background)]">
+                  {f.img ? (
+                    <img src={f.img} alt="" aria-hidden className="h-full w-full object-contain p-3" />
+                  ) : (
+                    <f.icon className="h-12 w-12 text-[var(--muted)]" aria-hidden />
+                  )}
+                </div>
+                <div className="p-6">
+                  <h3 className="font-display text-lg font-semibold">{f.t}</h3>
                   <p className="mt-2 text-[14px] leading-relaxed text-[var(--muted)]">{f.d}</p>
                 </div>
               </div>
             </Reveal>
           ))}
+        </div>
+      </section>
 
+      {/* ───────── On-chain vault ───────── */}
+      <section className="mx-auto w-full max-w-7xl scroll-mt-20 border-t border-[var(--border)] px-6 py-20 lg:py-24">
+        <Reveal>
+          <div className={`${eyebrow} text-[var(--faint)]`}>On-chain</div>
+          <h2 className="mt-4 max-w-2xl font-display text-[clamp(1.8rem,3.5vw,2.75rem)] font-semibold leading-[1.05] tracking-[-0.02em]">
+            Every move is verifiable.
+          </h2>
+        </Reveal>
+        <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-12">
           {/* on-chain proof */}
           <Reveal className="lg:col-span-8">
             <div id="proof" className={`${tile} h-full scroll-mt-20`}>
@@ -305,50 +337,56 @@ export default function Landing() {
         </Reveal>
       </section>
 
-      {/* ───────── CTA ───────── */}
-      <section className="relative overflow-hidden border-t border-[var(--border)] bg-[var(--surface)]">
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center" aria-hidden>
-          <div className="animate-[orbit-spin_160s_linear_infinite]">
-            <OrbitRings className="h-[120vh] w-[120vh] max-w-none text-[var(--foreground)] opacity-[0.07]" />
-          </div>
-          <div className="absolute left-1/2 top-1/2 h-[42vh] w-[42vh] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-[0.08] blur-[130px]" style={{ background: "var(--gradient-accent)" }} />
-        </div>
-        <div className="relative mx-auto max-w-3xl px-6 py-28 text-center lg:py-36">
+      {/* ───────── CTA + Footer: one floating panel over the hero bg ───────── */}
+      <section
+        className="dark relative isolate mx-2 mb-3 mt-6 flex flex-col overflow-hidden rounded-[2rem] text-white sm:mx-3"
+        style={{ "--accent": "#35f0c6", "--on-accent": "#06251c" } as React.CSSProperties}
+      >
+        {/* cosmic background (same as the hero) + legibility scrim */}
+        <div className="absolute inset-0 z-0 bg-cover bg-center" style={{ backgroundImage: "url('/hero.png')" }} aria-hidden />
+        <div
+          className="absolute inset-0 z-0"
+          style={{ background: "radial-gradient(120% 90% at 50% 25%, rgba(6,9,14,0.55) 0%, rgba(6,9,14,0.8) 62%, rgba(6,9,14,0.92) 100%)" }}
+          aria-hidden
+        />
+
+        {/* CTA */}
+        <div className="relative z-10 mx-auto max-w-3xl px-6 py-14 text-center lg:py-16">
           <Reveal>
-            <h2 className="mx-auto max-w-xl font-display text-[clamp(2.2rem,5vw,4rem)] font-medium leading-[1.0] tracking-[-0.03em]">
+            <h2 className="mx-auto max-w-xl font-display text-[clamp(2rem,4.2vw,3.25rem)] font-medium leading-[1.0] tracking-[-0.03em]">
               Put your money in orbit.
             </h2>
-            <p className="mx-auto mt-5 max-w-md text-[17px] text-[var(--muted)]">
+            <p className="mx-auto mt-4 max-w-md text-[16px] text-white/75">
               Under a minute to start. No wallet needed, nothing locked, everything verifiable.
             </p>
-            <Link href="/app" className="mt-9 inline-flex h-12 items-center gap-2 rounded-full bg-[var(--accent)] px-7 text-[17px] font-semibold text-[var(--on-accent)] transition-opacity hover:opacity-90">
+            <Link href="/app" className="mt-7 inline-flex h-12 items-center gap-2 rounded-full bg-[var(--accent)] px-7 text-[16px] font-semibold text-[var(--on-accent)] transition-opacity hover:opacity-90">
               Open your vault <ArrowUpRight className="h-4 w-4" aria-hidden />
             </Link>
           </Reveal>
         </div>
-      </section>
 
-      {/* ───────── Footer ───────── */}
-      <footer className="mt-auto border-t border-[var(--border)]">
-        <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-6 py-10 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
-            <OrbitLogo className="h-7" />
-            <div className="text-[14px] text-[var(--muted)]">Self-driving savings on Solana</div>
+        {/* footer */}
+        <div className="relative z-10 border-t border-white/10">
+          <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-6 py-7 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <OrbitLogo className="h-7" />
+              <div className="text-[14px] text-white/70">Self-driving savings on Solana</div>
+            </div>
+            <div className="flex items-center gap-6 text-[15px] text-white/70">
+              <a href="#deck" className="transition-colors hover:text-white">Product</a>
+              <a href="#proof" className="transition-colors hover:text-white">On-chain</a>
+              <Link href="/app" className="transition-colors hover:text-white">Launch app</Link>
+            </div>
           </div>
-          <div className="flex items-center gap-6 text-[15px] text-[var(--muted)]">
-            <a href="#deck" className="transition-colors hover:text-[var(--foreground)]">Product</a>
-            <a href="#proof" className="transition-colors hover:text-[var(--foreground)]">On-chain</a>
-            <Link href="/app" className="transition-colors hover:text-[var(--foreground)]">Launch app</Link>
+          <div className="mx-auto w-full max-w-7xl px-6 pb-7">
+            <p className="text-[12px] leading-5 text-white/45">
+              Live on Solana devnet for demonstration. Detection, the on-chain vault, and yield are real; the
+              fiat-to-USDC step is simulated. Not a bank. Not FDIC-insured. Principal is not guaranteed. Built for
+              the Colosseum Crypto World&rsquo;s Fair.
+            </p>
           </div>
         </div>
-        <div className="mx-auto w-full max-w-7xl px-6 pb-10">
-          <p className="text-[12px] leading-5 text-[var(--faint)]">
-            Live on Solana devnet for demonstration. Detection, the on-chain vault, and yield are real; the
-            fiat-to-USDC step is simulated. Not a bank. Not FDIC-insured. Principal is not guaranteed. Built for
-            the Colosseum Crypto World&rsquo;s Fair.
-          </p>
-        </div>
-      </footer>
+      </section>
     </div>
   );
 }
