@@ -16,6 +16,7 @@ import {
   Loader2,
   User as UserIcon,
   ArrowDownToLine,
+  ArrowUp,
   ArrowUpFromLine,
   ChevronRight,
   ChevronDown,
@@ -99,6 +100,9 @@ const solAcct = (a: string) => `https://solscan.io/account/${a}?cluster=devnet`;
 // Placeholder shown only until there are real transactions (fresh account).
 const SAMPLE_LINE = [15, 25, 30, 45, 55, 75, 90, 110, 130, 160];
 const SAMPLE_LINE_LABELS = ["", "", "", "", "", "", "", "", "", "now"];
+// Landing-matched building blocks: a mono uppercase eyebrow + a soft surface card.
+const eyebrow = "font-mono text-[12px] font-medium uppercase tracking-[0.24em] text-[var(--faint)]";
+const CARD = "rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-7";
 // Yield venues the vault's USDC can be routed to. The Orbit reserve is live on devnet now;
 // the mainnet lenders are where deposits route in production. APY/TVL are indicative.
 type Venue = {
@@ -807,64 +811,105 @@ export default function Home() {
         <main className="w-full flex-1 px-5 py-6 lg:min-h-0 lg:overflow-y-auto lg:px-8 lg:py-6">
           {/* ═══════════ HOME ═══════════ */}
           {tab === "home" && (
-            <div className="lg:grid lg:h-full lg:grid-cols-[0.85fr_1.15fr] lg:gap-10">
-              {/* LEFT — balance, stats, recent activity */}
-              <div className="flex flex-col">
-                {/* Balance — the one moment of emphasis */}
-                <section>
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-display text-[16px] font-bold">Total saved</span>
-                    <InfoDot label="Everything you've set aside plus the yield it's earning on-chain." />
+            <div className="mx-auto w-full max-w-6xl space-y-5">
+              {/* Balance — a dark cosmic hero panel, mirroring the landing hero */}
+              <section
+                className="dark relative isolate overflow-hidden rounded-[2rem] text-white"
+                style={{ "--accent": "#35f0c6", "--accent-strong": "#5cf5d2", "--on-accent": "#06251c" } as React.CSSProperties}
+              >
+                <div className="absolute inset-0 z-0 animate-slow-zoom bg-cover bg-center" style={{ backgroundImage: "url('/hero.png')" }} aria-hidden />
+                <div
+                  className="absolute inset-0 z-0"
+                  style={{ background: "radial-gradient(120% 120% at 25% 15%, rgba(6,9,14,0.45) 0%, rgba(6,9,14,0.72) 58%, rgba(6,9,14,0.9) 100%)" }}
+                  aria-hidden
+                />
+                <div className="animate-aurora-a pointer-events-none absolute -left-16 -top-10 z-0 h-56 w-56 rounded-full bg-[var(--accent)] opacity-40 blur-[90px]" aria-hidden />
+                <div className="animate-aurora-b pointer-events-none absolute -bottom-16 -right-12 z-0 h-64 w-64 rounded-full bg-[#5b93ef] opacity-30 blur-[100px]" aria-hidden />
+                <div className="relative z-10 p-7 sm:p-9">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="font-mono text-[12px] font-medium uppercase tracking-[0.24em] text-white/60">Total saved</span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-[12px] font-medium text-white/80 backdrop-blur">
+                      <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" aria-hidden /> Devnet · live
+                    </span>
                   </div>
                   <div
-                    className={`mt-2 font-mono text-[clamp(2.25rem,5vw,3.25rem)] font-semibold leading-none tabular-nums transition-colors duration-700 ${
-                      flash ? "text-[var(--primary)]" : "text-[var(--foreground)]"
+                    className={`mt-3 font-display text-[clamp(2.5rem,7vw,4.5rem)] font-semibold leading-none tabular-nums transition-colors duration-700 ${
+                      flash ? "text-[var(--accent-strong)]" : "text-white"
                     }`}
                   >
                     {usd(total)}
                   </div>
-                  <div className="mt-3 flex items-center gap-1.5 text-[14px]">
-                    <TrendingUp className="h-4 w-4 text-[var(--primary-strong)]" aria-hidden />
-                    <span className="font-mono font-medium text-[var(--primary-strong)]">{liveYield > 0 ? "+" : ""}{fmtYield(liveYield)}</span>
-                    <span className="text-[var(--muted)]">earned · 6% a year</span>
+                  <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-[15px]">
+                    <span className="inline-flex items-center gap-1.5 font-medium text-[var(--accent-strong)]">
+                      <ArrowUp className="h-4 w-4" aria-hidden /> {liveYield > 0 ? "+" : ""}{fmtYield(liveYield)}
+                    </span>
+                    <span className="text-white/60">earned · 6% a year</span>
                   </div>
-                  <div className="mt-5 flex flex-wrap gap-2.5">
-                    <button type="button" onClick={() => setTab("grow")} className="inline-flex items-center gap-2 rounded-xl bg-[var(--primary)] px-4 py-2.5 text-[14px] font-semibold text-[var(--primary-fg)] transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/40">
+                  <div className="mt-7 flex flex-wrap gap-3">
+                    <button type="button" onClick={() => setTab("grow")} className="group inline-flex h-11 items-center gap-2 rounded-full bg-white px-6 text-[15px] font-semibold text-[#0a0a0a] transition-opacity hover:opacity-90">
                       <ArrowDownToLine className="h-4 w-4" aria-hidden /> Add money
                     </button>
-                    <button type="button" onClick={() => setTab("grow")} className="inline-flex items-center gap-2 rounded-xl border border-[var(--border-strong)] px-4 py-2.5 text-[14px] font-medium text-[var(--secondary-fg)] transition-colors hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/30">
+                    <button type="button" onClick={() => setTab("grow")} className="inline-flex h-11 items-center gap-2 rounded-full border border-white/30 px-6 text-[15px] font-semibold text-white transition-colors hover:bg-white/10">
                       <ArrowUpFromLine className="h-4 w-4" aria-hidden /> Withdraw to bank
                     </button>
                   </div>
-                </section>
-
-                {/* In vault | Set aside */}
-                <div className="mt-6 grid grid-cols-2 gap-6 border-t border-[var(--line)] pt-6">
-                  <div>
-                    <div className="flex items-center gap-1.5 font-display text-[16px] font-bold">
-                      <Coins className="h-4 w-4" aria-hidden /> In vault
-                      <InfoDot label="Invested on-chain and earning yield. Only you can withdraw it." />
-                    </div>
-                    <div className="mt-1.5 font-mono text-2xl font-semibold tabular-nums text-[var(--primary-strong)]">{usd(principalUsd)}</div>
-                  </div>
-                  <div className="border-l border-[var(--line)] pl-6">
-                    <div className="flex items-center gap-1.5 font-display text-[16px] font-bold">
-                      <Landmark className="h-4 w-4" aria-hidden /> Set aside
-                      <InfoDot label={`Waiting in your bank. It moves to your vault once it reaches ${usd(THRESHOLD)}.`} />
-                    </div>
-                    <div className="mt-1.5 font-mono text-2xl font-semibold tabular-nums">{usd(state.pendingUsd)}</div>
-                    <div className="mt-2 h-1.5 w-full max-w-[10rem] overflow-hidden rounded-full bg-[var(--border)]">
-                      <div className={`h-full rounded-full transition-[width] duration-300 ${state.pendingUsd >= THRESHOLD ? "bg-[var(--primary)]" : "bg-[var(--disabled)]"}`} style={{ width: `${pct}%` }} />
-                    </div>
-                    {state.pendingUsd >= THRESHOLD && connected && investing && (
-                      <div className="mt-1.5 flex items-center gap-1.5 text-[12px] text-[var(--primary-strong)]"><Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden /> Investing…</div>
-                    )}
-                  </div>
                 </div>
+              </section>
 
-                <div className="mt-6 hidden min-h-0 flex-1 flex-col border-t border-[var(--line)] pt-6 lg:flex">
+              {/* In vault + Set aside */}
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                <div className={CARD}>
                   <div className="flex items-center justify-between">
-                    <h2 className="font-display text-[16px] font-bold">Recent transactions</h2>
+                    <span className={eyebrow}>In vault</span>
+                    <span className="grid h-9 w-9 place-items-center rounded-full bg-[var(--foreground)] text-[var(--background)]"><Coins className="h-4 w-4" aria-hidden /></span>
+                  </div>
+                  <div className="mt-4 font-display text-[clamp(1.75rem,4vw,2.5rem)] font-semibold leading-none tabular-nums text-[var(--accent-strong)]">{usd(principalUsd)}</div>
+                  <p className="mt-2 text-[13px] leading-relaxed text-[var(--muted)]">Invested on-chain and earning yield. Only you can withdraw it.</p>
+                </div>
+                <div className={CARD}>
+                  <div className="flex items-center justify-between">
+                    <span className={eyebrow}>Set aside</span>
+                    <span className="grid h-9 w-9 place-items-center rounded-full bg-[var(--foreground)] text-[var(--background)]"><Landmark className="h-4 w-4" aria-hidden /></span>
+                  </div>
+                  <div className="mt-4 font-display text-[clamp(1.75rem,4vw,2.5rem)] font-semibold leading-none tabular-nums">{usd(state.pendingUsd)}</div>
+                  <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-[var(--border)]">
+                    <div className={`h-full rounded-full transition-[width] duration-300 ${state.pendingUsd >= THRESHOLD ? "bg-[var(--accent)]" : "bg-[var(--disabled)]"}`} style={{ width: `${pct}%` }} />
+                  </div>
+                  {state.pendingUsd >= THRESHOLD && connected && investing ? (
+                    <div className="mt-2 flex items-center gap-1.5 text-[12px] font-medium text-[var(--accent-strong)]"><Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden /> Investing…</div>
+                  ) : (
+                    <p className="mt-2 text-[13px] leading-relaxed text-[var(--muted)]">Waiting in your bank. Moves to your vault at {usd(THRESHOLD)}.</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Savings over time — statistics card */}
+              <div className={CARD}>
+                <div className="flex flex-wrap items-end justify-between gap-4">
+                  <div>
+                    <span className={eyebrow}>Your money over time</span>
+                    <div className="mt-3 font-display text-[clamp(1.75rem,4vw,2.5rem)] font-semibold leading-none tabular-nums">{usd(total)}</div>
+                  </div>
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[var(--foreground)] text-[var(--background)]"><TrendingUp className="h-4 w-4" aria-hidden /></span>
+                </div>
+                <div className="mt-5 h-[260px] lg:h-[300px]">
+                  <LineArea
+                    fill
+                    series={[{ label: "Saved", points: analytics.hasData ? analytics.savingsLine : SAMPLE_LINE }]}
+                    xLabels={analytics.hasData ? analytics.savingsLabels : SAMPLE_LINE_LABELS}
+                    fmtY={(v) => `$${v >= 1000 ? `${Math.round(v / 1000)}k` : Math.round(v)}`}
+                  />
+                </div>
+                <div className="mt-2 flex items-center gap-2 text-[13px] text-[var(--muted)]">
+                  <span className="h-3 w-3 rounded-[3px] bg-[var(--accent)]" aria-hidden /> {analytics.hasData ? "Your savings, building up over time" : "Sample — your real curve appears once you start saving"}
+                </div>
+              </div>
+
+              {/* Recent transactions + Savings health */}
+              <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+                <div className={`${CARD} lg:col-span-7`}>
+                  <div className="flex items-center justify-between">
+                    <span className={eyebrow}>Recent transactions</span>
                     {txns.length > 0 && (
                       <button type="button" onClick={() => setTab("activity")} className="inline-flex items-center gap-1 text-[13px] text-[var(--muted)] transition-colors hover:text-[var(--foreground)]">
                         See all <ChevronRight className="h-3.5 w-3.5" aria-hidden />
@@ -872,18 +917,18 @@ export default function Home() {
                     )}
                   </div>
                   {txns.length === 0 ? (
-                    <div className="flex flex-1 flex-col items-center justify-center py-10 text-center">
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
                       <ShoppingBag className="h-6 w-6 text-[var(--muted)]" aria-hidden />
                       <p className="mt-2 text-[15px] text-[var(--muted)]">No transactions yet</p>
                       <p className="mt-0.5 text-[13px] text-[var(--faint)]">Simulate a purchase in Budget to see it here.</p>
                     </div>
                   ) : (
-                    <ul className="mt-1 min-h-0 flex-1 divide-y divide-[var(--border)] overflow-y-auto">
-                      {txns.slice(0, 10).map((t) => {
+                    <ul className="mt-4 divide-y divide-[var(--border)]">
+                      {txns.slice(0, 7).map((t) => {
                         const Icon = txnIcon(t);
                         return (
                           <li key={t.id} className="flex items-center gap-3.5 py-3">
-                            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--surface)] text-[var(--muted)]">
+                            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--background)] text-[var(--muted)]">
                               <Icon className="h-[18px] w-[18px]" aria-hidden />
                             </span>
                             <div className="min-w-0 flex-1">
@@ -893,7 +938,7 @@ export default function Home() {
                             <div className="shrink-0 text-right">
                               <div className="font-mono text-[15px] tabular-nums text-[var(--foreground)]">{usd(t.amountUsd)}</div>
                               {t.setAside > 0 ? (
-                                <div className="mt-1 inline-flex items-center gap-1 rounded-full bg-[var(--primary-soft)] px-2 py-0.5 text-[11px] font-medium text-[var(--primary-strong)]">
+                                <div className="mt-1 inline-flex items-center gap-1 rounded-full bg-[var(--accent-soft)] px-2 py-0.5 text-[11px] font-medium text-[var(--accent-strong)]">
                                   {t.deposited ? <Zap className="h-3 w-3" aria-hidden /> : <Coins className="h-3 w-3" aria-hidden />}
                                   +{usd(t.setAside)} {t.deposited ? "invested" : "saved"}
                                 </div>
@@ -907,52 +952,28 @@ export default function Home() {
                     </ul>
                   )}
                 </div>
-              </div>
 
-              {/* RIGHT — growth chart + savings health */}
-              <div className="mt-6 flex min-h-0 flex-col border-t border-[var(--line)] pt-6 lg:mt-0 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
-                <div className="shrink-0">
-                  <div className="flex items-center gap-1.5">
-                    <h2 className="font-display text-[16px] font-bold">Savings over time</h2>
-                    <InfoDot label={analytics.hasData ? "Your set-aside balance building up over time." : "Sample data. Your real curve appears once you start saving."} />
-                  </div>
-                  <div className="mt-3 h-[280px] lg:h-[360px]">
-                    <LineArea
-                      fill
-                      series={[{ label: "Saved", points: analytics.hasData ? analytics.savingsLine : SAMPLE_LINE }]}
-                      xLabels={analytics.hasData ? analytics.savingsLabels : SAMPLE_LINE_LABELS}
-                      fmtY={(v) => `$${v >= 1000 ? `${Math.round(v / 1000)}k` : Math.round(v)}`}
-                    />
-                  </div>
-                </div>
-
-                {/* Savings health */}
-                <div className="mt-6 border-t border-[var(--line)] pt-6">
+                <div className={`${CARD} lg:col-span-5`}>
                   <div className="flex items-baseline justify-between">
-                    <div className="flex items-center gap-1.5 font-display text-[16px] font-bold">
-                      Savings health
-                      <InfoDot label="Three steps to fully automatic saving: open a vault, connect a bank, start saving." />
-                    </div>
+                    <span className={eyebrow}>Savings health</span>
                     <span className="text-[13px] font-medium text-[var(--muted)]">
                       {healthSteps.filter((s) => s.done).length === 3 ? "All set" : `${healthSteps.filter((s) => s.done).length} of 3`}
                     </span>
                   </div>
-                  {/* progress: fill one segment per completed step, left to right */}
-                  <div className="mt-3 flex gap-1.5" aria-hidden>
+                  <div className="mt-4 flex gap-1.5" aria-hidden>
                     {healthSteps.map((_, i) => (
-                      <span key={i} className={`h-1.5 flex-1 rounded-full transition-colors duration-500 ${i < healthSteps.filter((s) => s.done).length ? "bg-[var(--primary)]" : "bg-[var(--border)]"}`} />
+                      <span key={i} className={`h-1.5 flex-1 rounded-full transition-colors duration-500 ${i < healthSteps.filter((s) => s.done).length ? "bg-[var(--accent)]" : "bg-[var(--border)]"}`} />
                     ))}
                   </div>
-                  {/* the three steps as a clean checklist */}
                   <div className="mt-4 space-y-0.5">
                     {healthSteps.map((s) => (
                       <button
                         key={s.label}
                         type="button"
                         onClick={() => setTab(s.go)}
-                        className="-mx-2 flex w-[calc(100%+1rem)] items-center gap-3 rounded-lg px-2 py-2.5 text-left transition-colors hover:bg-[var(--surface)]"
+                        className="-mx-2 flex w-[calc(100%+1rem)] items-center gap-3 rounded-lg px-2 py-2.5 text-left transition-colors hover:bg-[var(--background)]"
                       >
-                        <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full transition-colors ${s.done ? "bg-[var(--primary)] text-[var(--primary-fg)]" : "border-2 border-[var(--border-strong)]"}`}>
+                        <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full transition-colors ${s.done ? "bg-[var(--accent)] text-[var(--on-accent)]" : "border-2 border-[var(--border-strong)]"}`}>
                           {s.done && <Check className="h-3.5 w-3.5" aria-hidden />}
                         </span>
                         <span className="min-w-0 flex-1">
