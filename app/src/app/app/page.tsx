@@ -31,6 +31,7 @@ import {
   Settings,
   HelpCircle,
   Info,
+  Sparkles,
   X,
   Power,
   MoreHorizontal,
@@ -271,6 +272,7 @@ export default function Home() {
   const [plaid, setPlaid] = useState<{ configured: boolean; connected: boolean } | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [investing, setInvesting] = useState(false);
+  const [healthOpen, setHealthOpen] = useState(false);
 
   // Automation (demo-local controls)
   const [autoInvest, setAutoInvest] = useState(true);
@@ -902,88 +904,6 @@ export default function Home() {
                 </div>
                 <div className="mt-2 flex items-center gap-2 text-[13px] text-[var(--muted)]">
                   <span className="h-3 w-3 rounded-[3px] bg-[var(--accent)]" aria-hidden /> {analytics.hasData ? "Your savings, building up over time" : "Sample — your real curve appears once you start saving"}
-                </div>
-              </div>
-
-              {/* Recent transactions + Savings health */}
-              <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
-                <div className={`${CARD} lg:col-span-7`}>
-                  <div className="flex items-center justify-between">
-                    <span className={eyebrow}>Recent transactions</span>
-                    {txns.length > 0 && (
-                      <button type="button" onClick={() => setTab("activity")} className="inline-flex items-center gap-1 text-[13px] text-[var(--muted)] transition-colors hover:text-[var(--foreground)]">
-                        See all <ChevronRight className="h-3.5 w-3.5" aria-hidden />
-                      </button>
-                    )}
-                  </div>
-                  {txns.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-12 text-center">
-                      <ShoppingBag className="h-6 w-6 text-[var(--muted)]" aria-hidden />
-                      <p className="mt-2 text-[15px] text-[var(--muted)]">No transactions yet</p>
-                      <p className="mt-0.5 text-[13px] text-[var(--faint)]">Simulate a purchase in Budget to see it here.</p>
-                    </div>
-                  ) : (
-                    <ul className="mt-4 divide-y divide-[var(--border)]">
-                      {txns.slice(0, 7).map((t) => {
-                        const Icon = txnIcon(t);
-                        return (
-                          <li key={t.id} className="flex items-center gap-3.5 py-3">
-                            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--background)] text-[var(--muted)]">
-                              <Icon className="h-[18px] w-[18px]" aria-hidden />
-                            </span>
-                            <div className="min-w-0 flex-1">
-                              <div className="truncate text-[15px] font-medium">{t.name}</div>
-                              <div className="text-[12px] text-[var(--muted)]">{t.category} · {txnDate(t.ts)}</div>
-                            </div>
-                            <div className="shrink-0 text-right">
-                              <div className="font-mono text-[15px] tabular-nums text-[var(--foreground)]">{usd(t.amountUsd)}</div>
-                              {t.setAside > 0 ? (
-                                <div className="mt-1 inline-flex items-center gap-1 rounded-full bg-[var(--accent-soft)] px-2 py-0.5 text-[11px] font-medium text-[var(--accent-strong)]">
-                                  {t.deposited ? <Zap className="h-3 w-3" aria-hidden /> : <Coins className="h-3 w-3" aria-hidden />}
-                                  +{usd(t.setAside)} {t.deposited ? "invested" : "saved"}
-                                </div>
-                              ) : (
-                                <div className="mt-1 text-[11px] text-[var(--faint)]">not saved</div>
-                              )}
-                            </div>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  )}
-                </div>
-
-                <div className={`${CARD} lg:col-span-5`}>
-                  <div className="flex items-baseline justify-between">
-                    <span className={eyebrow}>Savings health</span>
-                    <span className="text-[13px] font-medium text-[var(--muted)]">
-                      {healthSteps.filter((s) => s.done).length === 3 ? "All set" : `${healthSteps.filter((s) => s.done).length} of 3`}
-                    </span>
-                  </div>
-                  <div className="mt-4 flex gap-1.5" aria-hidden>
-                    {healthSteps.map((_, i) => (
-                      <span key={i} className={`h-1.5 flex-1 rounded-full transition-colors duration-500 ${i < healthSteps.filter((s) => s.done).length ? "bg-[var(--accent)]" : "bg-[var(--border)]"}`} />
-                    ))}
-                  </div>
-                  <div className="mt-4 space-y-0.5">
-                    {healthSteps.map((s) => (
-                      <button
-                        key={s.label}
-                        type="button"
-                        onClick={() => setTab(s.go)}
-                        className="-mx-2 flex w-[calc(100%+1rem)] items-center gap-3 rounded-lg px-2 py-2.5 text-left transition-colors hover:bg-[var(--background)]"
-                      >
-                        <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full transition-colors ${s.done ? "bg-[var(--accent)] text-[var(--on-accent)]" : "border-2 border-[var(--border-strong)]"}`}>
-                          {s.done && <Check className="h-3.5 w-3.5" aria-hidden />}
-                        </span>
-                        <span className="min-w-0 flex-1">
-                          <span className={`block text-[14px] font-medium ${s.done ? "text-[var(--muted)] line-through" : ""}`}>{s.label}</span>
-                          <span className="block text-[12px] text-[var(--muted)]">{s.desc}</span>
-                        </span>
-                        {!s.done && <ChevronRight className="h-4 w-4 shrink-0 text-[var(--faint)]" aria-hidden />}
-                      </button>
-                    ))}
-                  </div>
                 </div>
               </div>
             </div>
@@ -1660,6 +1580,65 @@ export default function Home() {
           </button>
         ))}
       </nav>
+
+      {/* Floating recommendation — a bottom-right nudge of what to do next.
+          Disappears once setup is complete (nothing left to recommend). */}
+      {(() => {
+        const done = healthSteps.filter((s) => s.done).length;
+        if (done === 3) return null;
+        const next = healthSteps.find((s) => !s.done);
+        return (
+          <div className="fixed bottom-20 right-4 z-40 flex flex-col items-end gap-3 lg:bottom-5 lg:right-5">
+            {healthOpen && (
+              <div className="w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-[0_24px_60px_-20px_rgba(10,10,10,0.35)]">
+                <div className="flex items-start justify-between gap-2 border-b border-[var(--border)] px-5 py-4">
+                  <div>
+                    <div className={eyebrow}>What to do next</div>
+                    <div className="mt-1 text-[15px] font-semibold">Finish setup · {done} of 3</div>
+                  </div>
+                  <button type="button" onClick={() => setHealthOpen(false)} aria-label="Close" className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-[var(--muted)] transition-colors hover:bg-[var(--background)]">
+                    <X className="h-4 w-4" aria-hidden />
+                  </button>
+                </div>
+                <div className="p-3">
+                  <div className="mx-1 mb-2 flex gap-1.5" aria-hidden>
+                    {healthSteps.map((_, i) => (
+                      <span key={i} className={`h-1.5 flex-1 rounded-full ${i < done ? "bg-[var(--accent)]" : "bg-[var(--border)]"}`} />
+                    ))}
+                  </div>
+                  {healthSteps.map((s) => (
+                    <button
+                      key={s.label}
+                      type="button"
+                      onClick={() => { setTab(s.go); setHealthOpen(false); }}
+                      className="flex w-full items-center gap-3 rounded-xl px-2 py-2.5 text-left transition-colors hover:bg-[var(--background)]"
+                    >
+                      <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full transition-colors ${s.done ? "bg-[var(--accent)] text-[var(--on-accent)]" : "border-2 border-[var(--border-strong)]"}`}>
+                        {s.done && <Check className="h-3.5 w-3.5" aria-hidden />}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className={`block text-[14px] font-medium ${s.done ? "text-[var(--muted)] line-through" : ""}`}>{s.label}</span>
+                        <span className="block text-[12px] text-[var(--muted)]">{s.desc}</span>
+                      </span>
+                      {!s.done && <ChevronRight className="h-4 w-4 shrink-0 text-[var(--faint)]" aria-hidden />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={() => setHealthOpen((v) => !v)}
+              aria-expanded={healthOpen}
+              className="group inline-flex items-center gap-2 rounded-full bg-[var(--foreground)] py-3 pl-4 pr-3 text-[14px] font-semibold text-[var(--background)] shadow-[0_16px_40px_-12px_rgba(10,10,10,0.5)] transition-transform hover:-translate-y-0.5"
+            >
+              <Sparkles className="h-4 w-4" aria-hidden />
+              <span className="hidden max-w-[10rem] truncate sm:inline">{healthOpen ? "Finish setup" : next?.label ?? "What to do"}</span>
+              <span className="grid h-5 min-w-[1.25rem] place-items-center rounded-full bg-[var(--accent)] px-1 text-[11px] font-bold text-[var(--on-accent)]">{3 - done}</span>
+            </button>
+          </div>
+        );
+      })()}
     </div>
   );
 }
