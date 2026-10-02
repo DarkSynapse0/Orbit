@@ -52,6 +52,5 @@ brag-output/
 .brand-preview/
 *.css.bak
 
-# scratch / exported HTML (the pitch deck stays tracked)
+# scratch / exported HTML
 *.html
-!pitch-deck-orbit.html
