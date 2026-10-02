@@ -22,7 +22,7 @@ import { LiveChain } from "@/components/landing/LiveChain";
 import { StepsFlow } from "@/components/landing/StepsFlow";
 import { FaqAccordion } from "@/components/landing/FaqAccordion";
 import { DemoBanner } from "@/components/landing/DemoBanner";
-import { OrbitLogo } from "@/components/OrbitLogo";
+import { OrbitLogo } from "@/components/common/OrbitLogo";
 
 const PROGRAM = "8LEjyrMCKukhxA4q3DRaYGfkappxRayiTPM7saZG2Kgi";
 const solAcct = (a: string) => `https://solscan.io/account/${a}?cluster=devnet`;

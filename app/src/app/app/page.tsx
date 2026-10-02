@@ -47,10 +47,10 @@ import { SecurityCenter } from "@/components/dashboard/SecurityCenter";
 import { HelpCenter } from "@/components/dashboard/HelpCenter";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletVault } from "@/components/WalletVault";
-import { OrbitLogo } from "@/components/OrbitLogo";
+import { OrbitLogo } from "@/components/common/OrbitLogo";
 import { AaveMark, KaminoMark, SaveMark, MarginfiMark } from "@/components/landing/BrandMarks";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { InfoDot } from "@/components/ui/InfoDot";
+import { ThemeToggle } from "@/components/common/ThemeToggle";
+import { InfoDot } from "@/components/ui/info-dot";
 import { txnIcon, ACTIVITY_ICON, activityCategory } from "@/lib/visuals";
 import { getActivity, onActivity, clearActivity, type ActivityEvent } from "@/lib/activity";
 

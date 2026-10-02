@@ -1,13 +1,13 @@
 import express from 'express';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
-import { config } from './config.js';
+import { config } from './lib/config.js';
 import { plaidRouter } from './routes/plaid.js';
-import { getState } from './ledger.js';
-import { getVaultOnChain, getConfig, mintToAddress, fundSol } from './onchain.js';
+import { getState } from './services/ledger.js';
+import { getVaultOnChain, getConfig, mintToAddress, fundSol } from './services/onchain.js';
 import { authRouter } from './routes/auth.js';
-import { requireAuth } from './auth.js';
-import { parseAmount, parseAddress, BadRequest } from './validate.js';
+import { requireAuth } from './lib/auth.js';
+import { parseAmount, parseAddress, BadRequest } from './lib/validate.js';
 
 // Never let a transient RPC error (e.g. a devnet 429) take the whole server down.
 process.on('unhandledRejection', (e) => console.error('[unhandledRejection]', (e as Error)?.message ?? e));
@@ -111,7 +111,7 @@ app.post('/fund-sol', faucetLimiter, requireAuth, async (req, res) => {
 
 app.get('/venues', async (_req, res) => {
   try {
-    const { getVenueStats } = await import('./defillama.js');
+    const { getVenueStats } = await import('./services/defillama.js');
     res.json({ venues: await getVenueStats() });
   } catch (e) {
     fail(res, e, 502);

@@ -4,7 +4,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import type { SavingsState } from '@orbit/shared';
 import { DEFAULT_SET_ASIDE_PCT, clampSetAsidePct } from '@orbit/shared';
-import { config } from './config.js';
+import { config } from '../lib/config.js';
 
 // Durable earmark ledger backed by SQLite (Node's built-in node:sqlite — zero deps).
 // "pending" = earmarked, dollars still in the user's bank; "invested" = USDC in the vault.
@@ -12,7 +12,7 @@ import { config } from './config.js';
 // volume, DATA_DIR points the db at that volume so it persists across redeploys.
 const dbPath = config.dataDir
   ? path.join(config.dataDir, 'orbit.db')
-  : fileURLToPath(new URL('../.orbit.db', import.meta.url));
+  : fileURLToPath(new URL('../../.orbit.db', import.meta.url));
 // Make sure the directory exists (e.g. a mounted volume path) so SQLite can open the file
 // instead of crash-looping with "unable to open database file".
 try {

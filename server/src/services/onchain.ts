@@ -11,7 +11,7 @@ import * as anchor from '@coral-xyz/anchor';
 const BN: any = (anchor as any).BN ?? (anchor as any).default?.BN;
 import { Connection, Keypair, PublicKey, SystemProgram, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
 import { createMint, getOrCreateAssociatedTokenAccount, mintTo, TOKEN_PROGRAM_ID } from '@solana/spl-token';
-import { config } from './config.js';
+import { config } from '../lib/config.js';
 
 // Real on-chain client for the orbit-vault program on devnet.
 // - The server is the *funder* (mock Stripe): it mints test USDC and deposits into each
@@ -41,7 +41,7 @@ let ctxPromise: Promise<Ctx> | null = null;
 // otherwise alongside the source for local dev.
 const mintFile: string | URL = config.dataDir
   ? path.join(config.dataDir, 'devnet.json')
-  : new URL('../.devnet.json', import.meta.url);
+  : new URL('../../.devnet.json', import.meta.url);
 
 function loadKeypair(): Keypair {
   // Prefer an env secret (for hosted deploys); fall back to the local CLI wallet (dev).
@@ -89,11 +89,11 @@ function reservePdas(program: anchor.Program, mint: PublicKey) {
 }
 
 function readIdl(): string {
-  const bundled = new URL('./idl/orbit_vault.json', import.meta.url);
+  const bundled = new URL('../idl/orbit_vault.json', import.meta.url);
   try {
     return fs.readFileSync(bundled, 'utf8');
   } catch {
-    return fs.readFileSync(new URL('../../orbit-vault/target/idl/orbit_vault.json', import.meta.url), 'utf8');
+    return fs.readFileSync(new URL('../../../orbit-vault/target/idl/orbit_vault.json', import.meta.url), 'utf8');
   }
 }
 

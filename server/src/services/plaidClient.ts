@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import { Configuration, PlaidApi, PlaidEnvironments, Products } from 'plaid';
-import { config } from './config.js';
+import { config } from '../lib/config.js';
 
 // Plaid sandbox client. We use Plaid's real API (detection only — Plaid never moves money)
 // against the sandbox environment: connect a test bank, then sync its transactions and run
@@ -19,7 +19,7 @@ const configuration = new Configuration({
 export const plaid = new PlaidApi(configuration);
 
 type PlaidState = { accessToken?: string; cursor?: string };
-const stateFile = new URL('../.plaid.json', import.meta.url);
+const stateFile = new URL('../../.plaid.json', import.meta.url);
 const load = (): PlaidState => {
   try {
     return JSON.parse(fs.readFileSync(stateFile, 'utf8'));

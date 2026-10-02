@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Plus, Trash2, TrendingUp, Check, Info } from "lucide-react";
 import { logActivity } from "@/lib/activity";
-import { Sheet } from "@/components/ui/Sheet";
+import { Sheet } from "@/components/ui/sheet";
 
 // Named savings goals ("pots") layered over the single on-chain vault. Each goal has
 // its own allocated balance and earns the same 6% APY on that balance — mathematically

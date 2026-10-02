@@ -1,12 +1,12 @@
 import { Router } from 'express';
 import type { Response } from 'express';
 import { computeSetAside } from '@orbit/shared';
-import { addPending, moveToInvested, getState, resetState, recordTxn, getTransactions, setSetAsidePct } from '../ledger.js';
-import { simulateStripeDeposit, depositToVault } from '../solana.js';
-import { isConfigured, hasItem, connectSandbox, syncTransactions, clearItem } from '../plaidClient.js';
-import { config } from '../config.js';
-import { requireAuth } from '../auth.js';
-import { parseAmount, parseAddress, BadRequest } from '../validate.js';
+import { addPending, moveToInvested, getState, resetState, recordTxn, getTransactions, setSetAsidePct } from '../services/ledger.js';
+import { simulateStripeDeposit, depositToVault } from '../services/solana.js';
+import { isConfigured, hasItem, connectSandbox, syncTransactions, clearItem } from '../services/plaidClient.js';
+import { config } from '../lib/config.js';
+import { requireAuth } from '../lib/auth.js';
+import { parseAmount, parseAddress, BadRequest } from '../lib/validate.js';
 
 export const plaidRouter = Router();
 

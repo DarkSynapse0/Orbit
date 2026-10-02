@@ -1,4 +1,4 @@
-import { config } from './config.js';
+import { config } from '../lib/config.js';
 import { deliverUsdc, depositOnChain } from './onchain.js';
 
 /**

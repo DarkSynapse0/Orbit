@@ -5,8 +5,8 @@ import Link from "next/link";
 import { ArrowLeft, ShieldCheck, TrendingUp, Landmark } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { OrbitRings } from "@/components/landing/OrbitRings";
-import { OrbitLogo } from "@/components/OrbitLogo";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { OrbitLogo } from "@/components/common/OrbitLogo";
+import { ThemeToggle } from "@/components/common/ThemeToggle";
 
 // Full-screen sign-in / sign-up gate for the dashboard. Google OAuth covers both
 // (Google creates the account on first continue), so there is one flow, not two

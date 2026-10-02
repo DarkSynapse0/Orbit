@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { OAuth2Client } from 'google-auth-library';
-import { config } from '../config.js';
-import { signSession } from '../auth.js';
+import { config } from '../lib/config.js';
+import { signSession } from '../lib/auth.js';
 
 export const authRouter = Router();
 

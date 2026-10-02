@@ -8,7 +8,7 @@ import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { Wallet, Coins, ArrowDownToLine, ArrowUpFromLine, Copy, Check, ExternalLink, Loader2, ShieldCheck, UserPlus, Power } from "lucide-react";
 import { PhantomMark } from "@/components/landing/BrandMarks";
-import { InfoDot } from "@/components/ui/InfoDot";
+import { InfoDot } from "@/components/ui/info-dot";
 import idl from "@/idl/orbit_vault.json";
 import { OrbitWalletName } from "@/lib/orbitWallet";
 import { apiFetch } from "@/lib/api";
