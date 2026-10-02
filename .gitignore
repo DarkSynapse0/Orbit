@@ -51,3 +51,7 @@ brag-output/
 # local design previews (not for the repo)
 .brand-preview/
 *.css.bak
+
+# scratch / exported HTML (the pitch deck stays tracked)
+*.html
+!pitch-deck-orbit.html

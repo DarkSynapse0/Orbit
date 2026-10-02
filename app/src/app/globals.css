@@ -287,6 +287,20 @@ body {
 .animate-sheet-left { animation: sheet-in-left 0.3s cubic-bezier(0.32, 0.72, 0, 1) both; will-change: transform; transform: translateZ(0); }
 .animate-overlay { animation: overlay-fade 0.25s ease-out both; }
 
+/* Slow Ken Burns zoom for hero / CTA backgrounds. */
+@keyframes slow-zoom {
+  from { transform: scale(1); }
+  to { transform: scale(1.1); }
+}
+.animate-slow-zoom { animation: slow-zoom 26s ease-in-out infinite alternate; }
+
+/* Gentle vertical float for decorative elements. */
+@keyframes float-soft {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -14px, 0); }
+}
+.animate-float-soft { animation: float-soft 7s ease-in-out infinite; }
+
 /* Honor reduced-motion globally. */
 @media (prefers-reduced-motion: reduce) {
   *,

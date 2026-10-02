@@ -15,7 +15,7 @@ const STEPS: Step[] = [
     n: "01",
     word: "Spend",
     title: "You spend as usual",
-    desc: "Orbit watches purchases through Plaid — it can see, but never touch your money.",
+    desc: "Orbit keeps an eye on what you buy. It can see your spending, but it can't touch your money.",
     icon: CreditCard,
     lottie: "/lottie/step-1.json",
   },
@@ -23,23 +23,23 @@ const STEPS: Step[] = [
     n: "02",
     word: "Save",
     title: "Orbit sets aside",
-    desc: "A small slice of each purchase is earmarked. The dollars stay in your bank until they batch.",
+    desc: "It puts a little aside from each purchase. That money stays in your bank until there's enough to invest.",
     icon: Coins,
     lottie: "/lottie/step-2.json",
   },
   {
     n: "03",
     word: "Move",
-    title: "On-chain at the threshold",
-    desc: "Funds convert to USDC and land in a vault that's yours alone — self-custodial, verifiable.",
+    title: "It moves to your account",
+    desc: "When it adds up, your savings move into an account that only you can open.",
     icon: Lock,
     lottie: "/lottie/step-3.lottie",
   },
   {
     n: "04",
     word: "Grow",
-    title: "It earns yield",
-    desc: "Your USDC earns real on-chain yield around the clock. Withdraw anytime.",
+    title: "It earns interest",
+    desc: "From there it earns interest, day and night. Pull it all out whenever you want.",
     icon: TrendingUp,
     lottie: "/lottie/step-4.json",
   },
@@ -56,7 +56,7 @@ export function StepsFlow() {
       <div className="mx-auto max-w-7xl px-6 py-20 lg:py-28">
         <p className="font-mono text-[12px] uppercase tracking-[0.24em] text-[var(--faint)]">How it works</p>
         <h2 className="mt-4 max-w-2xl font-display text-[clamp(2rem,4vw,3.25rem)] font-semibold leading-[1.05] tracking-[-0.02em]">
-          From a swipe to on-chain yield.
+          It works in four simple steps.
         </h2>
 
         <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
