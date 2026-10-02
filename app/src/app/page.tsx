@@ -11,6 +11,8 @@ import {
   ExternalLink,
   ChevronLeft,
   ChevronRight,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 import { Reveal } from "@/components/landing/Reveal";
 import { LiveYield } from "@/components/landing/LiveYield";
@@ -144,92 +146,60 @@ export default function Landing() {
             Idle cash falls behind.
           </h2>
         </Reveal>
-        <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-12">
-          {/* growth chart — heading + corner badge over an inner panel */}
-          <Reveal className="lg:col-span-8">
-            <div className={`${tile} h-full`}>
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <div className={`${eyebrow} text-[var(--faint)]`}>Your money, working</div>
-                  <h3 className="mt-2 max-w-sm font-display text-[clamp(1.3rem,2.4vw,1.8rem)] font-semibold leading-tight tracking-[-0.02em]">
-                    Watch idle cash fall behind your vault.
-                  </h3>
-                </div>
-                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[var(--foreground)] text-[var(--background)]">
-                  <TrendingUp className="h-5 w-5" aria-hidden />
+        {/* Chart + APY combined into one Statistics-style card */}
+        <Reveal className="mt-10 block">
+          <div className={tile}>
+            {/* top bar: title + period selector */}
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <h3 className="font-display text-[clamp(1.4rem,2.6vw,2rem)] font-semibold tracking-[-0.02em]">Your money, working</h3>
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] px-3.5 py-1.5 text-[13px] text-[var(--muted)]">
+                  <ChevronLeft className="h-3.5 w-3.5" aria-hidden /> 5 years <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+                </span>
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[var(--foreground)] text-[var(--background)]">
+                  <TrendingUp className="h-4 w-4" aria-hidden />
                 </span>
               </div>
+            </div>
 
-              <div
-                className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5"
-                style={{ "--chart-line": "var(--foreground)", "--chart-ring": "var(--surface)" } as React.CSSProperties}
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <div className="text-[14px] font-semibold">Projected balance</div>
-                    <div className="mt-1 font-mono text-[clamp(1.3rem,3vw,1.9rem)] font-semibold leading-none">
-                      <LiveYield principal={5980} apy={0.06} />
-                    </div>
-                  </div>
-                  <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] px-2.5 py-1 text-[13px] text-[var(--muted)]">
-                    <ChevronLeft className="h-3.5 w-3.5" aria-hidden /> 5 years <ChevronRight className="h-3.5 w-3.5" aria-hidden />
-                  </div>
+            {/* projected-balance callout (the reference's value tooltip) */}
+            <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-[var(--foreground)] px-3.5 py-1.5 text-[13px] font-medium text-[var(--background)]">
+              <span className="h-2 w-2 rounded-full bg-[var(--accent)]" aria-hidden />
+              Projected <span className="font-mono tabular-nums"><LiveYield principal={5980} apy={0.06} /></span>
+            </div>
+
+            {/* chart */}
+            <div className="mt-5" style={{ "--chart-line": "var(--foreground)", "--chart-ring": "var(--surface)" } as React.CSSProperties}>
+              <GrowthChart />
+            </div>
+
+            {/* legend */}
+            <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-[13px] text-[var(--muted)]">
+              <span className="flex items-center gap-2"><span className="h-[3px] w-4 rounded-full bg-[var(--foreground)]" /> Your vault</span>
+              <span className="flex items-center gap-2"><span className="h-0 w-4 border-t-2 border-dashed border-[var(--border-strong)]" /> Cash left idle</span>
+            </div>
+
+            {/* divider + bottom stats (the APY, income/expenses style) */}
+            <div className="mt-7 grid grid-cols-1 gap-6 border-t border-[var(--border)] pt-6 sm:grid-cols-2">
+              <div>
+                <div className="text-[14px] text-[var(--muted)]">Orbit vault · APY</div>
+                <div className="mt-2 flex items-baseline gap-3">
+                  <span className="font-display text-[clamp(1.9rem,4.5vw,2.75rem)] font-semibold leading-none">
+                    <CountUp value={6} decimals={1} suffix="%" />
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-[14px] font-medium text-[var(--success)]"><ArrowUp className="h-4 w-4" aria-hidden /> grows</span>
                 </div>
-                <div className="mt-5">
-                  <GrowthChart />
-                </div>
-                <div className="mt-4 flex items-center gap-5 text-[13px] text-[var(--muted)]">
-                  <span className="flex items-center gap-2"><span className="h-[3px] w-4 rounded-full bg-[var(--foreground)]" /> Your vault</span>
-                  <span className="flex items-center gap-2"><span className="h-0 w-4 border-t-2 border-dashed border-[var(--border-strong)]" /> Cash left idle</span>
+              </div>
+              <div>
+                <div className="text-[14px] text-[var(--muted)]">Cash left idle</div>
+                <div className="mt-2 flex items-baseline gap-3">
+                  <span className="font-display text-[clamp(1.9rem,4.5vw,2.75rem)] font-semibold leading-none tabular-nums">0.01%</span>
+                  <span className="inline-flex items-center gap-1 text-[14px] font-medium text-[var(--destructive)]"><ArrowDown className="h-4 w-4" aria-hidden /> falls behind</span>
                 </div>
               </div>
             </div>
-          </Reveal>
-
-          {/* APY — progress ring + comparison list */}
-          <Reveal className="lg:col-span-4">
-            <div className={`${tile} flex h-full flex-col`}>
-              <div className={`${eyebrow} text-[var(--faint)]`}>Real yield, on-chain</div>
-
-              <div className="relative mx-auto mt-6 grid h-40 w-40 place-items-center">
-                <svg viewBox="0 0 120 120" className="h-40 w-40 -rotate-90">
-                  <circle cx="60" cy="60" r="52" fill="none" stroke="var(--border)" strokeWidth="11" />
-                  <circle
-                    cx="60" cy="60" r="52" fill="none" stroke="var(--foreground)" strokeWidth="11" strokeLinecap="round"
-                    strokeDasharray="326.726" strokeDashoffset="130.69"
-                  />
-                </svg>
-                <div className="absolute inset-0 grid place-items-center text-center">
-                  <div>
-                    <div className="text-[clamp(1.8rem,5vw,2.4rem)] font-semibold leading-none text-[var(--foreground)]">
-                      <CountUp value={6} decimals={1} suffix="%" />
-                    </div>
-                    <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--muted)]">APY</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-6 space-y-2">
-                {[
-                  { k: "Orbit vault", v: "6.0%", on: true },
-                  { k: "High-yield bank", v: "0.5%", on: false },
-                  { k: "Checking", v: "0.01%", on: false },
-                ].map((r) => (
-                  <div
-                    key={r.k}
-                    className={`flex items-center justify-between rounded-lg px-3 py-2 text-[13px] ${r.on ? "bg-[var(--foreground)] text-[var(--background)]" : "border border-[var(--border)] text-[var(--muted)]"}`}
-                  >
-                    <span className="flex items-center gap-2">
-                      <span className={`h-2 w-2 rounded-full ${r.on ? "bg-[var(--background)]" : "bg-[var(--border-strong)]"}`} />
-                      {r.k}
-                    </span>
-                    <span className="font-mono tabular-nums">{r.v}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </Reveal>
-        </div>
+          </div>
+        </Reveal>
       </section>
 
       {/* ───────── Features ───────── */}
