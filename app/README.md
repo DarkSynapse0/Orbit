@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Orbit — web app
 
-## Getting Started
+The frontend for Orbit: the public landing page at `/` and the signed-in dashboard at `/app`. Built with Next.js 16 (App Router) and Tailwind 4, with Solana wallet support and an in-app embedded wallet so people without a crypto wallet can still use it.
 
-First, run the development server:
+> This is part of the Orbit monorepo. For the big picture — how money actually moves from a card swipe into an on-chain vault — see the [root README](../README.md).
+
+## Run it
+
+From the repo root (so the app and backend start together):
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm dev          # app on http://localhost:3000, server on :4000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Or just the app on its own:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm dev:app
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The dashboard talks to the backend on `:4000`, so for the full experience run both.
 
-## Learn More
+## Where things live
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+  app/                 routes (App Router)
+    page.tsx           the landing page
+    app/page.tsx       the signed-in dashboard (/app)
+    layout.tsx         root layout, fonts, metadata
+    globals.css        design tokens + the black/white/green theme + motion
+  components/
+    common/            shared chrome (logo, theme toggle)
+    landing/           pieces of the landing page (hero bits, FAQ, charts…)
+    dashboard/         the dashboard panels (activity, goals, security…)
+    ui/                small reusable primitives (button, chart, sheet…)
+  lib/                 client helpers (API client, auth, embedded wallet, utils)
+  idl/                 the vault program's interface, for talking to Solana
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Good to know
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Theme:** colors are CSS variables in `globals.css` (a light `:root` set and a `.dark` set). The landing forces the dark set for its black canvas; the dashboard follows the user's theme.
+- **Next.js 16 is not the version you remember** — it ships breaking changes. See [`AGENTS.md`](./AGENTS.md) before writing code against Next internals.
+- **Build:** `pnpm build` runs a production build and type-checks everything.

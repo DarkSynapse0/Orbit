@@ -15,14 +15,14 @@ bank/card spend → Plaid detects → Orbit earmarks (money stays in bank)
 - **Kamino = yield venue** (most-audited on Solana). Fallback: a mock yield vault on devnet if Kamino has no devnet.
 - **Threshold pull, not per-purchase**: before the threshold a set-aside is just a number; the dollars stay in the user's bank.
 
-**Hackathon seam:** the ONLY mocked hop is Stripe (`simulateStripeDeposit` in `server/src/solana.ts`). Everything else is real. Production = delete the mock, plug in Stripe; nothing else changes.
+**Hackathon seam:** the ONLY mocked hop is Stripe (`simulateStripeDeposit` in `server/src/services/solana.ts`). Everything else is real. Production = delete the mock, plug in Stripe; nothing else changes.
 
 ## Monorepo layout (pnpm workspace)
 
-- `app/` — Next.js 16 + Tailwind 4 + Solana wallet adapter (frontend)
-- `server/` — Express + TypeScript (Plaid detection, earmark ledger, threshold, mock Stripe, vault deposit)
-- `shared/` — `@orbit/shared`: domain types + `computeSetAside()` tier logic, imported by both app and server
-- `orbit-vault/` — Anchor program: the on-chain vault/chamber (added once the toolchain is ready)
+- `app/` — Next.js 16 + Tailwind 4 + Solana wallet adapter (frontend). Components live under `src/components/{common,landing,dashboard,ui}`.
+- `server/` — Express + TypeScript (Plaid detection, earmark ledger, threshold, mock Stripe, vault deposit). `src/` is grouped into `routes/` (HTTP), `services/` (onchain, solana, plaid, ledger, defillama) and `lib/` (config, auth, validate).
+- `shared/` — `@orbit/shared`: domain types + the `computeSetAside()` set-aside rule, imported by both app and server
+- `orbit-vault/` — Anchor program: the on-chain vault/chamber (deployed to devnet)
 
 ## Commands
 
@@ -36,10 +36,10 @@ Backend config: copy `server/.env.example` → `server/.env` (Plaid sandbox keys
 
 ## Key files
 
-- `shared/src/index.ts` — the set-aside rule (`DEFAULT_TIERS`, `computeSetAside`) and `SavingsState`. Change the rule here only.
+- `shared/src/index.ts` — the set-aside rule (`DEFAULT_SET_ASIDE_PCT`, `computeSetAside`) and `SavingsState`. Change the rule here only.
 - `server/src/routes/plaid.ts` — the pipeline: earmark → threshold → mock Stripe → deposit. `/plaid/simulate-purchase` demos the whole loop.
-- `server/src/solana.ts` — `simulateStripeDeposit` (the mocked hop) + `depositToVault` (real deposit TODO).
-- `server/src/ledger.ts` — in-memory earmark ledger (swap for a DB later).
+- `server/src/services/solana.ts` — `simulateStripeDeposit` (the mocked hop) + `depositToVault` (the real on-chain deposit).
+- `server/src/services/ledger.ts` — the earmark ledger, persisted to SQLite.
 
 ## Toolchain
 
