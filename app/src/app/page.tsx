@@ -29,12 +29,12 @@ const tile ="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-7 t
 // Each logo ships a light-strip (dark ink) and a dark-strip (white) variant;
 // the render swaps on the `dark` theme class.
 const LOGOS = [
-  { name: "Solana", src: "/solana.svg", srcDark: "/solana-white.svg", className: "h-5 w-auto" },
-  { name: "USDC", src: "/usdc.svg", srcDark: "/usdc-white.svg", className: "h-6 w-auto" },
-  { name: "Aave", src: "/aave.svg", srcDark: "/aave-white.svg", className: "h-5 w-auto" },
-  { name: "Plaid", src: "/plaid.svg", srcDark: "/plaid-white.svg", className: "h-7 w-auto" },
-  { name: "Stripe", src: "/stripe.svg", srcDark: "/stripe-white.svg", className: "h-6 w-auto" },
-  { name: "Phantom", src: "/phantom.svg", srcDark: "/phantom-white.svg", className: "h-6 w-auto" },
+  { name: "Solana", src: "/solana.svg", srcDark: "/solana-white.svg", className: "h-5 w-auto", href: "https://solana.com" },
+  { name: "USDC", src: "/usdc.svg", srcDark: "/usdc-white.svg", className: "h-6 w-auto", href: "https://www.circle.com/usdc" },
+  { name: "Aave", src: "/aave.svg", srcDark: "/aave-white.svg", className: "h-5 w-auto", href: "https://aave.com" },
+  { name: "Plaid", src: "/plaid.svg", srcDark: "/plaid-white.svg", className: "h-7 w-auto", href: "https://plaid.com" },
+  { name: "Stripe", src: "/stripe.svg", srcDark: "/stripe-white.svg", className: "h-6 w-auto", href: "https://stripe.com" },
+  { name: "Phantom", src: "/phantom.svg", srcDark: "/phantom-white.svg", className: "h-6 w-auto", href: "https://phantom.app" },
 ];
 
 export default function Landing() {
@@ -115,10 +115,18 @@ export default function Landing() {
           <p className="font-mono text-[12px] uppercase tracking-[0.24em] text-[var(--faint)]">Built on</p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-x-8 gap-y-6 sm:mt-8 sm:gap-x-12 md:flex-nowrap md:justify-between md:gap-x-6">
             {LOGOS.map((t) => (
-              <span key={t.name} className="inline-flex items-center opacity-80">
+              <a
+                key={t.name}
+                href={t.href}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={t.name}
+                title={t.name}
+                className="inline-flex items-center opacity-80 transition-opacity hover:opacity-100"
+              >
                 <img src={t.src} alt={t.name} className={`${t.className} block dark:hidden`} />
                 <img src={t.srcDark} alt="" aria-hidden className={`${t.className} hidden dark:block`} />
-              </span>
+              </a>
             ))}
           </div>
         </div>
