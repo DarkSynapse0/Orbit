@@ -269,12 +269,25 @@ export default function Landing() {
 
       {/* ───────── On-chain vault ───────── */}
       <section className="mx-auto w-full max-w-7xl scroll-mt-20 border-t border-[var(--border)] px-6 py-20 lg:py-24">
-        <Reveal>
-          <div className={`${eyebrow} text-[var(--faint)]`}>On-chain</div>
-          <h2 className="mt-4 max-w-2xl font-display text-[clamp(1.8rem,3.5vw,2.75rem)] font-semibold leading-[1.05] tracking-[-0.02em]">
-            Every move is verifiable.
-          </h2>
-        </Reveal>
+        <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-2">
+          <Reveal>
+            <div className={`${eyebrow} text-[var(--faint)]`}>On-chain</div>
+            <h2 className="mt-4 max-w-md font-display text-[clamp(1.8rem,3.5vw,2.75rem)] font-semibold leading-[1.05] tracking-[-0.02em]">
+              Every move is verifiable.
+            </h2>
+            <p className="mt-4 max-w-md text-[16px] leading-relaxed text-[var(--muted)]">
+              Your savings live in a USDC vault on Solana that only you can open. Every deposit, yield payment, and withdrawal is public and provable.
+            </p>
+          </Reveal>
+          <Reveal delay={80}>
+            <img
+              src="/illustrations/secure-payment.jpg"
+              alt="Isometric illustration of a secure on-chain vault — servers, locks, and keys protecting payments"
+              className="mx-auto w-full max-w-lg"
+              loading="lazy"
+            />
+          </Reveal>
+        </div>
         <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-12">
           {/* on-chain proof */}
           <Reveal className="lg:col-span-8">
