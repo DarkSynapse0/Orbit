@@ -7,7 +7,7 @@
 
 ## Why this palette
 
-A stripped-back monochrome system — **white canvas, black ink** — with **green** as the one accent. The system accent is a readable green (`#4d7c0f` light / `#a3e635` dark) for buttons, icons, links, and chart lines; a **brighter lime (`#d4f34d`)** is reserved as a hero highlight (e.g. the landing feature card), always with black text. Status colors (red / amber / blue) stay functional and sparse.
+A stripped-back monochrome system — **white canvas, black ink** — with **green** as the one accent. Black and white are the **primary/dominant** roles (primary actions, emphasis, most text); green (`#2f6e4a` light / `#7fb891` dark) is the **accent** (`--accent`), used sparingly for highlights, icons, links, chart lines, and small status. Green is *not* the primary color. Status colors (red / amber / blue) stay functional and sparse.
 
 ## Token system
 
@@ -20,13 +20,16 @@ Custom CSS-variable token set in `app/src/app/globals.css` (not stock shadcn). L
 | `--background` | `#ffffff` | `#0a0a0a` |
 | `--foreground` | `#0a0a0a` | `#fafafa` |
 | `--surface` | `#f4f4f5` | `#161616` |
-| `--accent` / `--primary` | `#4d7c0f` | `#a3e635` |
-| `--accent-strong` / `--primary-strong` | `#3f6212` | `#bef264` |
-| `--on-accent` / `--primary-fg` | `#ffffff` | `#0a0a0a` |
-| `--accent-soft` / `--primary-soft` | `rgba(77,124,15,.12)` | `rgba(163,230,53,.16)` |
-| `--gradient-accent` | `linear-gradient(120deg,#d4f34d,#a3e635)` | same |
+| `--accent` (green) | `#2f6e4a` | `#7fb891` |
+| `--accent-strong` | `#244f36` | `#9ccfab` |
+| `--accent-soft` | `rgba(47,110,74,.08)` | `rgba(127,184,145,.14)` |
+| `--on-accent` | `#ffffff` | `#06130c` |
+| `--primary` (neutral) | `#0a0a0a` | `#fafafa` |
+| `--primary-strong` | `#000000` | `#ffffff` |
+| `--primary-fg` | `#ffffff` | `#0a0a0a` |
+| `--gradient-accent` | `linear-gradient(120deg,#2f6e4a,#5f8f6a)` | `…#3f6b50,#7fb891` |
 
-**Key rule:** always use `--on-accent` for text on accent fills — white on light, black on dark. The reserved hero lime (`#d4f34d`) always takes black text. Use `--accent-strong` for green text/links.
+**Key rule:** green and black/white are distinct roles. Use `--accent-strong` for green text/links and `--accent` for green fills, always pairing green fills with `--on-accent` (white on light, dark on dark). Primary actions/emphasis use `--primary` (black/white) with `--primary-fg`.
 
 ### Status roles
 
@@ -45,8 +48,8 @@ Neutrals: `--muted` `#595959` / `#a1a1a1`, `--faint` `#a3a3a3` / `#6b6b6b`, `--b
 
 ## Dos & don'ts
 
-- **Do** use `--accent` for primary fills, icons, and links; pair fills with `--on-accent`.
-- **Do** reserve the bright lime (`#d4f34d`) for occasional hero highlights, with black text.
+- **Do** use `--accent` (green) sparingly — highlights, icons, links, chart lines; pair green fills with `--on-accent`.
+- **Do** use `--primary` (black/white) for primary actions and emphasis; green is the accent, not the dominant fill.
 - **Do** keep the palette to black, white, and green; status colors are the only exceptions and stay sparse.
 - **Don't** hardcode hexes in components — consume the tokens so light/dark stays consistent.
 

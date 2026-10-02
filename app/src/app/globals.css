@@ -32,11 +32,12 @@
   --elev-soft: 0 1px 2px rgba(10, 10, 10, 0.05), 0 4px 14px rgba(10, 10, 10, 0.07);
   --elev-float: 0 6px 16px rgba(10, 10, 10, 0.1), 0 16px 48px rgba(10, 10, 10, 0.08);
 
-  /* Semantic roles. Primary = lime green; status colors stay functional. */
-  --primary: #2f6e4a;
-  --primary-strong: #244f36;
+  /* Semantic roles. Primary = black/white (the dominant brand neutral); green
+     is reserved for --accent and used sparingly. Status colors stay functional. */
+  --primary: #0a0a0a;
+  --primary-strong: #000000;
   --primary-fg: #ffffff;
-  --primary-soft: rgba(47, 110, 74, 0.08);
+  --primary-soft: rgba(10, 10, 10, 0.06);
   --secondary-fg: #0a0a0a; /* neutral/outline action text */
   --disabled: #c8c8cc; /* inactive text/controls */
   --destructive: #dc2626; /* withdraw-out, reset, delete only — kept distinctly red */
@@ -84,11 +85,11 @@
   --elev-soft: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 14px rgba(0, 0, 0, 0.35);
   --elev-float: 0 6px 16px rgba(0, 0, 0, 0.5), 0 16px 48px rgba(0, 0, 0, 0.45);
 
-  /* Semantic roles — dark. */
-  --primary: #7fb891;
-  --primary-strong: #9ccfab;
-  --primary-fg: #06130c;
-  --primary-soft: rgba(127, 184, 145, 0.14);
+  /* Semantic roles — dark. Primary = white/near-white; green stays in --accent. */
+  --primary: #fafafa;
+  --primary-strong: #ffffff;
+  --primary-fg: #0a0a0a;
+  --primary-soft: rgba(250, 250, 250, 0.1);
   --secondary-fg: #ffffff;
   --disabled: #4a4a4a;
   --destructive: #f87171;
