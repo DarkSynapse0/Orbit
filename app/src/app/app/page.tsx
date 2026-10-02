@@ -704,7 +704,7 @@ export default function Home() {
             <div className="text-[12px] leading-none text-[var(--muted)]">self-driving savings</div>
           </Link>
           <span className="mt-0.5 inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[var(--background)] px-2 py-1 text-[11px] font-medium text-[var(--muted)]">
-            <span className={`h-1.5 w-1.5 rounded-full ${online ? "bg-[var(--accent)]" : online === false ? "bg-red-500" : "bg-[var(--faint)]"}`} aria-hidden />
+            <span className={`h-1.5 w-1.5 rounded-full ${online ? "bg-[var(--accent)]" : online === false ? "bg-[var(--destructive)]" : "bg-[var(--faint)]"}`} aria-hidden />
             {online === null ? "…" : online ? "Devnet · live" : "offline"}
           </span>
         </div>
@@ -720,7 +720,7 @@ export default function Home() {
                 onClick={() => selectNav(t)}
                 className={`relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40 ${
                   on
-                    ? "bg-[var(--background)] font-medium text-[var(--foreground)] shadow-[0_1px_2px_rgba(2,6,23,0.06)]"
+                    ? "bg-[var(--background)] font-medium text-[var(--foreground)] shadow-[0_1px_2px_rgba(10,10,10,0.06)]"
                     : "text-[var(--muted)] hover:bg-[var(--background)]/60 hover:text-[var(--foreground)]"
                 }`}
               >
@@ -739,7 +739,7 @@ export default function Home() {
             const on = navId === t.id;
             const cls = `relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40 ${
               on
-                ? "bg-[var(--background)] font-medium text-[var(--foreground)] shadow-[0_1px_2px_rgba(2,6,23,0.06)]"
+                ? "bg-[var(--background)] font-medium text-[var(--foreground)] shadow-[0_1px_2px_rgba(10,10,10,0.06)]"
                 : "text-[var(--muted)] hover:bg-[var(--background)]/60 hover:text-[var(--foreground)]"
             }`;
             return t.href ? (
@@ -1167,7 +1167,7 @@ export default function Home() {
                       {venueOpen && (
                         <>
                           <button type="button" aria-hidden tabIndex={-1} className="fixed inset-0 z-10 cursor-default" onClick={() => setVenueOpen(false)} />
-                          <div className="absolute right-0 z-20 mt-2 w-[min(20rem,calc(100vw-3rem))] overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)] p-1 shadow-[0_16px_44px_-14px_rgba(2,6,23,0.4)]">
+                          <div className="absolute right-0 z-20 mt-2 w-[min(20rem,calc(100vw-3rem))] overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)] p-1 shadow-[0_16px_44px_-14px_rgba(10,10,10,0.4)]">
                             {venues.map((v) => {
                               const on = v.id === venueId;
                               return (

@@ -7,7 +7,7 @@ export function DeltaBadge({ up, value }: { up: boolean; value: string }) {
   return (
     <span
       className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[12px] font-medium ${
-        up ? "bg-[var(--accent-soft)] text-[var(--accent-strong)]" : "bg-red-500/10 text-red-500"
+        up ? "bg-[var(--accent-soft)] text-[var(--accent-strong)]" : "bg-[var(--destructive-soft)] text-[var(--destructive)]"
       }`}
     >
       {up ? <ArrowUpRight className="h-3 w-3" aria-hidden /> : <ArrowDownRight className="h-3 w-3" aria-hidden />}

@@ -105,7 +105,7 @@ export function AuthScreen() {
               </div>
 
               {error && (
-                <p className="mt-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-[12px] leading-relaxed text-red-600 dark:text-red-400">
+                <p className="mt-3 rounded-lg border border-[var(--destructive)]/30 bg-[var(--destructive-soft)] px-3 py-2 text-[12px] leading-relaxed text-[var(--destructive)]">
                   {error}
                 </p>
               )}

@@ -38,14 +38,15 @@ type Article = {
   body: Block[];
 };
 
-// Editorial cover palette — one gradient per category.
+// Editorial cover palette — one gradient per category, all in the brand's
+// black → green family so the covers stay cohesive with the rest of the app.
 const COVER: Record<Category, [string, string]> = {
-  Basics: ["#0f766e", "#40b3ff"],
-  Saving: ["#0d9488", "#0369a1"],
-  Vault: ["#4f46e5", "#0891b2"],
-  Goals: ["#b45309", "#be123c"],
-  Growing: ["#7c3aed", "#2563eb"],
-  Security: ["#0f766e", "#1e3a8a"],
+  Basics: ["#0a0a0a", "#2f6e4a"], // black → brand green
+  Saving: ["#244f36", "#3f6b50"], // deep green → sage
+  Vault: ["#15803d", "#2f6e4a"], // success green → brand green
+  Goals: ["#3f6212", "#2f6e4a"], // olive green → brand green
+  Growing: ["#2f6e4a", "#15803d"], // brand green → success green
+  Security: ["#171717", "#244f36"], // charcoal → deep green
 };
 
 // Ordered as a learning path: each guide builds on the one before it.
@@ -387,7 +388,7 @@ export function HelpCenter() {
       {/* Hero — learning path progress (stays pinned while the guides scroll under it).
          The sticky wrapper bleeds into the main scroll padding so content slides cleanly under it. */}
       <div className="relative sticky top-0 z-20 -mx-5 bg-[var(--background)] px-5 pb-4 pt-2 before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-16 before:bg-[var(--background)] lg:-mx-8 lg:px-8">
-      <section className="overflow-hidden rounded-3xl bg-[var(--surface)] p-7 shadow-[0_10px_24px_-20px_rgba(2,6,23,0.35)] sm:p-9">
+      <section className="overflow-hidden rounded-3xl bg-[var(--surface)] p-7 shadow-[0_10px_24px_-20px_rgba(10,10,10,0.35)] sm:p-9">
         <span className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--primary-strong)]">Orbit learning path</span>
         <div className="mt-3 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div className="max-w-lg">

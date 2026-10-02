@@ -69,7 +69,7 @@ export function UserMenu() {
       </button>
       {open && (
         <>
-          <div className="absolute right-0 z-20 mt-2 w-64 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-2 shadow-[0_16px_44px_-14px_rgba(2,6,23,0.4)]">
+          <div className="absolute right-0 z-20 mt-2 w-64 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-2 shadow-[0_16px_44px_-14px_rgba(10,10,10,0.4)]">
             <div className="flex items-center gap-3 p-2">
               <Avatar user={user} size="h-10 w-10" />
               <div className="min-w-0">
