@@ -982,99 +982,93 @@ export default function Home() {
 
           {/* ═══════════ GROW ═══════════ */}
           {tab === "grow" && (
-            <div className="space-y-8">
-              {/* ── Overview stats ── */}
-              <section>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                  <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-soft p-5">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="text-[13px] text-[var(--muted)]">Total value</div>
-                      {liveYield > 0 && <span className="inline-flex items-center gap-1 rounded-full bg-[var(--success-soft)] px-2 py-0.5 text-[12px] font-semibold text-[var(--success)]">+{usd(liveYield)}</span>}
-                    </div>
-                    <div className="mt-1 font-mono text-[24px] font-bold leading-none tabular-nums">{usd(total)}</div>
+            <div className="w-full space-y-5">
+              {/* Header */}
+              <div className="flex flex-wrap items-end justify-between gap-3">
+                <div>
+                  <div className={eyebrow}>Wallet</div>
+                  <h2 className="mt-1 font-display text-[clamp(1.4rem,3vw,1.9rem)] font-semibold leading-none tracking-[-0.02em]">Your vault &amp; yield</h2>
+                </div>
+                {plaid?.configured && plaid.connected && (
+                  <button type="button" onClick={connectBank} disabled={busy} className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[var(--foreground)] px-4 py-2 text-[13px] font-semibold text-[var(--background)] transition-opacity hover:opacity-90 disabled:opacity-50"><Plus className="h-4 w-4" aria-hidden /> Add bank</button>
+                )}
+              </div>
+
+              {/* Overview tiles */}
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+                <div className={CARD}>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className={eyebrow}>Total value</span>
+                    {liveYield > 0 && <span className="inline-flex items-center gap-1 rounded-full bg-[var(--accent-soft)] px-2 py-0.5 text-[12px] font-semibold text-[var(--accent-strong)]"><ArrowUp className="h-3 w-3" aria-hidden />{usd(liveYield)}</span>}
                   </div>
-                  <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-soft p-5">
-                    <div className="text-[13px] text-[var(--muted)]">Yield earned</div>
-                    <div className="mt-1 font-mono text-[24px] font-bold leading-none tabular-nums text-[var(--success)]">{usd(liveYield)}</div>
-                  </div>
-                  <div className="flex items-center justify-between rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-soft p-5">
+                  <div className="mt-3 font-display text-[clamp(1.5rem,3.5vw,2rem)] font-semibold leading-none tabular-nums">{usd(total)}</div>
+                </div>
+                <div className={CARD}>
+                  <span className={eyebrow}>Yield earned</span>
+                  <div className="mt-3 font-display text-[clamp(1.5rem,3.5vw,2rem)] font-semibold leading-none tabular-nums text-[var(--success)]">{usd(liveYield)}</div>
+                </div>
+                <div className={CARD}>
+                  <div className="flex items-start justify-between gap-3">
                     <div>
-                      <div className="text-[13px] text-[var(--muted)]">Earning at</div>
-                      <div className="mt-1 font-mono text-[24px] font-bold leading-none tabular-nums text-[var(--primary-strong)]">{selectedVenue.apy.toFixed(1)}% APY</div>
+                      <span className={eyebrow}>Earning</span>
+                      <div className="mt-3 font-display text-[clamp(1.5rem,3.5vw,2rem)] font-semibold leading-none tabular-nums text-[var(--accent-strong)]">{selectedVenue.apy.toFixed(1)}%</div>
                     </div>
                     <VenueMark venue={selectedVenue} className="h-9 w-9" />
                   </div>
                 </div>
-              </section>
+              </div>
 
-              {/* ── Your Wallet (vault + bank side by side) ── */}
-              <section>
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <h2 className="font-display text-[20px] font-bold">Your wallet</h2>
-                  {plaid?.configured && plaid.connected && (
-                    <button type="button" onClick={connectBank} disabled={busy} className="inline-flex items-center gap-1.5 rounded-full bg-[var(--contrast)] px-4 py-2 text-[13px] font-semibold text-[var(--contrast-fg)] transition-opacity hover:opacity-90 disabled:opacity-50"><Plus className="h-4 w-4" aria-hidden /> Add bank account</button>
-                  )}
-                </div>
-                <div className="mt-4 grid grid-cols-1 gap-5 lg:grid-cols-[1.1fr_0.9fr]">
-                  <div className="[&>section]:mt-0"><WalletVault onChanged={refreshVault} /></div>
-                  {/* Your bank account */}
-                  {plaid?.connected ? (
-                    <div className="flex flex-col rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-soft p-5">
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2.5">
-                          <span className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--background)] text-[var(--muted)]"><Landmark className="h-5 w-5" aria-hidden /></span>
-                          <span className="text-[15px] font-semibold">Your bank</span>
-                        </div>
-                        <span className="rounded-full bg-[var(--success-soft)] px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-[var(--success)]">Default</span>
+              {/* Vault + bank */}
+              <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.1fr_0.9fr]">
+                <div className={`${CARD} [&>section]:mt-0`}><WalletVault onChanged={refreshVault} /></div>
+                {plaid?.connected ? (
+                  <div className={`${CARD} flex flex-col`}>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2.5">
+                        <span className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--background)] text-[var(--muted)]"><Landmark className="h-5 w-5" aria-hidden /></span>
+                        <span className="text-[15px] font-semibold">Your bank</span>
                       </div>
-                      <div className="mt-4 space-y-2.5">
-                        <div><div className="text-[11px] uppercase tracking-wide text-[var(--faint)]">Name</div><div className="text-[14px] font-medium">First Platypus Bank</div></div>
-                        <div><div className="text-[11px] uppercase tracking-wide text-[var(--faint)]">Connection</div><div className="text-[14px] font-medium">Plaid sandbox · detection only</div></div>
-                        <div className="flex items-center gap-1.5 text-[12px] font-medium text-[var(--primary-strong)]"><span className="h-1.5 w-1.5 rounded-full bg-[var(--primary)]" aria-hidden /> Connected</div>
-                      </div>
-                      <div className="mt-auto flex gap-2 pt-4">
-                        <button type="button" onClick={syncSpending} disabled={syncing} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-[var(--border-strong)] px-3 py-2 text-[13px] font-medium transition-colors hover:bg-[var(--background)] disabled:opacity-50"><RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} aria-hidden /> {syncing ? "Syncing…" : "Sync"}</button>
-                        <button type="button" onClick={disconnectBank} disabled={syncing} className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[var(--destructive)]/40 px-3 py-2 text-[13px] font-medium text-[var(--destructive)] transition-colors hover:bg-[var(--destructive-soft)] disabled:opacity-50"><Power className="h-3.5 w-3.5" aria-hidden /> Disconnect</button>
-                      </div>
+                      <span className="rounded-full bg-[var(--accent-soft)] px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-[var(--accent-strong)]">Default</span>
                     </div>
-                  ) : (
-                    <button type="button" onClick={connectBank} disabled={busy || !plaid?.configured} className="flex min-h-[190px] flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-[var(--border-strong)] p-5 text-center transition-colors hover:bg-[var(--surface)] disabled:opacity-50">
-                      {busy ? <Loader2 className="h-5 w-5 animate-spin" aria-hidden /> : <Plus className="h-5 w-5 text-[var(--muted)]" aria-hidden />}
-                      <span className="text-[14px] font-semibold">Connect a test bank</span>
-                      <span className="text-[12px] text-[var(--muted)]">Plaid sandbox — detection only</span>
-                    </button>
-                  )}
-                </div>
-                {plaid && !plaid.configured && (
-                  <p className="mt-3 text-[13px] text-[var(--muted)]">Set <code className="font-mono text-[12px]">PLAID_CLIENT_ID</code> and <code className="font-mono text-[12px]">PLAID_SECRET</code> in the server to detect real spending.</p>
+                    <div className="mt-4 space-y-2.5">
+                      <div><div className="text-[11px] uppercase tracking-wide text-[var(--faint)]">Name</div><div className="text-[14px] font-medium">First Platypus Bank</div></div>
+                      <div><div className="text-[11px] uppercase tracking-wide text-[var(--faint)]">Connection</div><div className="text-[14px] font-medium">Plaid sandbox · detection only</div></div>
+                      <div className="flex items-center gap-1.5 text-[12px] font-medium text-[var(--accent-strong)]"><span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" aria-hidden /> Connected</div>
+                    </div>
+                    <div className="mt-auto flex gap-2 pt-4">
+                      <button type="button" onClick={syncSpending} disabled={syncing} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-[var(--border-strong)] px-3 py-2 text-[13px] font-medium transition-colors hover:bg-[var(--background)] disabled:opacity-50"><RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} aria-hidden /> {syncing ? "Syncing…" : "Sync"}</button>
+                      <button type="button" onClick={disconnectBank} disabled={syncing} className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[var(--destructive)]/40 px-3 py-2 text-[13px] font-medium text-[var(--destructive)] transition-colors hover:bg-[var(--destructive-soft)] disabled:opacity-50"><Power className="h-3.5 w-3.5" aria-hidden /> Disconnect</button>
+                    </div>
+                  </div>
+                ) : (
+                  <button type="button" onClick={connectBank} disabled={busy || !plaid?.configured} className="flex min-h-[190px] flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-[var(--border-strong)] p-5 text-center transition-colors hover:bg-[var(--surface)] disabled:opacity-50">
+                    {busy ? <Loader2 className="h-5 w-5 animate-spin" aria-hidden /> : <Plus className="h-5 w-5 text-[var(--muted)]" aria-hidden />}
+                    <span className="text-[14px] font-semibold">Connect a test bank</span>
+                    <span className="text-[12px] text-[var(--muted)]">Plaid sandbox — detection only</span>
+                  </button>
                 )}
-              </section>
+              </div>
+              {plaid && !plaid.configured && (
+                <p className="text-[13px] text-[var(--muted)]">Set <code className="font-mono text-[12px]">PLAID_CLIENT_ID</code> and <code className="font-mono text-[12px]">PLAID_SECRET</code> in the server to detect real spending.</p>
+              )}
 
-              {/* ── How your USDC earns + projection ── */}
-              <div className="border-t border-[var(--line)] pt-8">
-                {/* Earning + where it's invested */}
-                <div>
+              {/* Where it earns + projection */}
+              <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+                {/* Where your USDC earns */}
+                <div className={CARD}>
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <div className="flex items-center gap-1.5 font-display text-[16px] font-bold">
-                        Earning
-                        <InfoDot label="The yearly rate your vault earns, paid in real tokens on-chain. Rates move with the market." />
-                      </div>
-                      <div className="mt-2 flex items-baseline gap-1.5">
-                        <span className="font-mono text-4xl font-semibold text-[var(--primary-strong)]">{selectedVenue.apy.toFixed(1)}%</span>
+                      <div className="flex items-center gap-1.5"><span className={eyebrow}>Where your USDC earns</span><InfoDot label="The yearly rate your vault earns, paid in real tokens on-chain. Rates move with the market." /></div>
+                      <div className="mt-3 flex items-baseline gap-1.5">
+                        <span className="font-display text-4xl font-semibold leading-none text-[var(--accent-strong)]">{selectedVenue.apy.toFixed(1)}%</span>
                         <span className="text-[14px] text-[var(--muted)]">APY</span>
                       </div>
                     </div>
-                    {/* Mobile: pick venue from a dropdown */}
+                    {/* Mobile: venue dropdown */}
                     <div className="relative lg:hidden">
-                      <button
-                        type="button"
-                        onClick={() => setVenueOpen((o) => !o)}
-                        aria-expanded={venueOpen}
-                        className="flex items-center gap-2 rounded-xl border border-[var(--border-strong)] px-3 py-2 transition-colors hover:bg-[var(--surface)]"
-                      >
+                      <button type="button" onClick={() => setVenueOpen((o) => !o)} aria-expanded={venueOpen} className="flex items-center gap-2 rounded-xl border border-[var(--border-strong)] px-3 py-2 transition-colors hover:bg-[var(--background)]">
                         <VenueMark venue={selectedVenue} className="h-6 w-6" />
-                        <span className="max-w-[7rem] truncate text-[14px] font-medium">{selectedVenue.name}</span>
+                        <span className="max-w-[6rem] truncate text-[14px] font-medium">{selectedVenue.name}</span>
                         <ChevronDown className={`h-4 w-4 shrink-0 text-[var(--muted)] transition-transform ${venueOpen ? "rotate-180" : ""}`} aria-hidden />
                       </button>
                       {venueOpen && (
@@ -1084,16 +1078,16 @@ export default function Home() {
                             {venues.map((v) => {
                               const on = v.id === venueId;
                               return (
-                                <button key={v.id} type="button" onClick={() => selectVenue(v.id)} className={`flex w-full items-center gap-3 rounded-lg px-2.5 py-2.5 text-left transition-colors ${on ? "bg-[var(--primary-soft)]" : "hover:bg-[var(--background)]"}`}>
+                                <button key={v.id} type="button" onClick={() => selectVenue(v.id)} className={`flex w-full items-center gap-3 rounded-lg px-2.5 py-2.5 text-left transition-colors ${on ? "bg-[var(--accent-soft)]" : "hover:bg-[var(--background)]"}`}>
                                   <VenueMark venue={v} className="h-8 w-8" />
                                   <span className="min-w-0 flex-1">
                                     <span className="flex items-center gap-1.5">
                                       <span className="truncate text-[15px] font-medium">{v.name}</span>
-                                      {v.live ? <span className="rounded-full bg-[var(--primary-soft)] px-1.5 py-0.5 text-[9px] font-medium text-[var(--primary-strong)]">Live</span> : <span className="rounded-full bg-[var(--background)] px-1.5 py-0.5 text-[9px] text-[var(--muted)]">Mainnet</span>}
+                                      {v.live ? <span className="rounded-full bg-[var(--accent-soft)] px-1.5 py-0.5 text-[9px] font-medium text-[var(--accent-strong)]">Live</span> : <span className="rounded-full bg-[var(--background)] px-1.5 py-0.5 text-[9px] text-[var(--muted)]">Mainnet</span>}
                                     </span>
                                     <span className="block truncate text-[12px] text-[var(--muted)]">{v.apy.toFixed(1)}% APY · {v.tvl}</span>
                                   </span>
-                                  {on && <Check className="h-4 w-4 shrink-0 text-[var(--primary-strong)]" aria-hidden />}
+                                  {on && <Check className="h-4 w-4 shrink-0 text-[var(--accent-strong)]" aria-hidden />}
                                 </button>
                               );
                             })}
@@ -1109,42 +1103,37 @@ export default function Home() {
                       { icon: ExternalLink, l: "On-chain" },
                       { icon: RefreshCw, l: "Withdraw anytime" },
                     ].map((c) => (
-                      <span key={c.l} className="inline-flex items-center gap-1.5 rounded-full bg-[var(--primary-soft)] px-3 py-1.5 text-[12px] font-medium text-[var(--primary-strong)]">
+                      <span key={c.l} className="inline-flex items-center gap-1.5 rounded-full bg-[var(--accent-soft)] px-3 py-1.5 text-[12px] font-medium text-[var(--accent-strong)]">
                         <c.icon className="h-3.5 w-3.5" aria-hidden /> {c.l}
                       </span>
                     ))}
                   </div>
 
-                  {/* Desktop: pick venue from a list */}
+                  {/* Desktop: venue list */}
                   <div className="mt-6 hidden lg:block">
-                    <div className="mb-1 text-[13px] font-medium text-[var(--muted)]">Where your USDC earns</div>
+                    <div className="mb-1 text-[13px] font-medium text-[var(--muted)]">Choose a venue</div>
                     <div className="divide-y divide-[var(--border)]">
                       {venues.map((v) => {
                         const on = v.id === venueId;
                         return (
-                          <button
-                            key={v.id}
-                            type="button"
-                            onClick={() => selectVenue(v.id)}
-                            className="-mx-2 flex w-[calc(100%+1rem)] items-center gap-3 rounded-lg px-2 py-3 text-left transition-colors hover:bg-[var(--surface)]"
-                          >
+                          <button key={v.id} type="button" onClick={() => selectVenue(v.id)} className="-mx-2 flex w-[calc(100%+1rem)] items-center gap-3 rounded-lg px-2 py-3 text-left transition-colors hover:bg-[var(--background)]">
                             <VenueMark venue={v} className="h-9 w-9" />
                             <span className="min-w-0 flex-1">
                               <span className="flex items-center gap-1.5">
                                 <span className="truncate text-[15px] font-medium">{v.name}</span>
                                 {v.live ? (
-                                  <span className="rounded-full bg-[var(--primary-soft)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--primary-strong)]">Live</span>
+                                  <span className="rounded-full bg-[var(--accent-soft)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--accent-strong)]">Live</span>
                                 ) : (
-                                  <span className="rounded-full bg-[var(--surface)] px-1.5 py-0.5 text-[10px] text-[var(--muted)]">Mainnet</span>
+                                  <span className="rounded-full bg-[var(--background)] px-1.5 py-0.5 text-[10px] text-[var(--muted)]">Mainnet</span>
                                 )}
                               </span>
                               <span className="block truncate text-[12px] text-[var(--muted)]">{v.tvl} TVL</span>
                             </span>
                             <span className="shrink-0 text-right">
-                              <span className="block font-mono text-[15px] font-semibold tabular-nums text-[var(--primary-strong)]">{v.apy.toFixed(1)}%</span>
+                              <span className="block font-mono text-[15px] font-semibold tabular-nums text-[var(--accent-strong)]">{v.apy.toFixed(1)}%</span>
                               <span className="block text-[11px] text-[var(--faint)]">APY</span>
                             </span>
-                            <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full border-2 ${on ? "border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-fg)]" : "border-[var(--border-strong)]"}`}>
+                            <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full border-2 ${on ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--on-accent)]" : "border-[var(--border-strong)]"}`}>
                               {on && <Check className="h-3 w-3" aria-hidden />}
                             </span>
                           </button>
@@ -1155,7 +1144,7 @@ export default function Home() {
 
                   <div className="mt-5">
                     {connected && onchain ? (
-                      <a href={solAcct(onchain.vaultAccount)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-[14px] font-medium text-[var(--primary-strong)] hover:underline">
+                      <a href={solAcct(onchain.vaultAccount)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-[14px] font-medium text-[var(--accent-strong)] hover:underline">
                         View your vault on Solscan <ExternalLink className="h-3.5 w-3.5" aria-hidden />
                       </a>
                     ) : (
@@ -1164,21 +1153,18 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* If you saved */}
-                <div className="mt-6 border-t border-[var(--line)] pt-6">
-                  <div className="flex items-center gap-1.5 font-display text-[16px] font-bold">
-                    If you saved
-                    <InfoDot label="A rough projection of what a one-time amount could grow to at this rate, compounded yearly. Not a guarantee." />
-                  </div>
-                  <div className="mt-3 flex items-center rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3">
+                {/* Growth projection */}
+                <div className={`${CARD} flex flex-col`}>
+                  <div className="flex items-center gap-1.5"><span className={eyebrow}>Growth projection</span><InfoDot label="A rough projection of what a one-time amount could grow to at this rate, compounded yearly. Not a guarantee." /></div>
+                  <div className="mt-4 flex items-center rounded-xl border border-[var(--border-strong)] bg-[var(--background)] px-3">
                     <span className="text-[var(--muted)]">$</span>
-                    <input id="proj" value={projAmt} onChange={(e) => setProjAmt(e.target.value)} inputMode="decimal" className="h-11 w-full min-w-0 bg-transparent px-1.5 font-mono text-[16px] tabular-nums focus:outline-none" />
+                    <input id="proj" value={projAmt} onChange={(e) => setProjAmt(e.target.value)} inputMode="decimal" aria-label="Amount to project" className="h-11 w-full min-w-0 bg-transparent px-1.5 font-mono text-[16px] tabular-nums focus:outline-none" />
                   </div>
                   <label htmlFor="years" className="mt-4 block text-[15px] text-[var(--muted)]">for <span className="font-mono text-[var(--foreground)]">{projYears} {projYears === 1 ? "year" : "years"}</span></label>
-                  <input id="years" type="range" min={1} max={30} value={projYears} onChange={(e) => setProjYears(Number(e.target.value))} className="mt-3 w-full accent-[var(--primary)]" />
-                  <div className="mt-5">
+                  <input id="years" type="range" min={1} max={30} value={projYears} onChange={(e) => setProjYears(Number(e.target.value))} className="mt-3 w-full accent-[var(--accent)]" />
+                  <div className="mt-auto pt-6">
                     <div className="text-[14px] text-[var(--muted)]">Could become</div>
-                    <div className="mt-1 font-mono text-[clamp(2.25rem,8vw,3rem)] font-semibold leading-none tabular-nums text-[var(--primary-strong)]">${projected.toLocaleString("en-US", { maximumFractionDigits: 0 })}</div>
+                    <div className="mt-1 font-display text-[clamp(2.25rem,8vw,3rem)] font-semibold leading-none tabular-nums text-[var(--accent-strong)]">${projected.toLocaleString("en-US", { maximumFractionDigits: 0 })}</div>
                     <div className="mt-2 text-[15px] text-[var(--muted)]">+${(projected - (Number(projAmt) || 0)).toLocaleString("en-US", { maximumFractionDigits: 0 })} earned at {selectedVenue.apy.toFixed(1)}% APY</div>
                   </div>
                 </div>
