@@ -1195,7 +1195,7 @@ export default function Home() {
 
           {/* ═══════════ ACTIVITY ═══════════ */}
           {tab === "activity" && (
-            <div className="mx-auto w-full max-w-5xl space-y-5">
+            <div className="w-full space-y-5">
               {/* Header */}
               <div className="flex flex-wrap items-end justify-between gap-3">
                 <div>
