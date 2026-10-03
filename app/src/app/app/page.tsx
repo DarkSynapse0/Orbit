@@ -883,81 +883,56 @@ export default function Home() {
 
           {/* ═══════════ SAVE ═══════════ */}
           {tab === "save" && (
-            <div className="lg:grid lg:grid-cols-2 lg:gap-10">
-              {/* LEFT — the rule + your bank */}
-              <div className="flex flex-col">
-                {/* Set-aside rate (the rule) */}
-                <section>
-                  <div className="flex items-center gap-1.5 font-display text-[16px] font-bold">
-                    Set-aside rate
-                    <InfoDot label="Orbit sets aside this share of every purchase. Pick anywhere from 0.5% to 5%." />
-                  </div>
+            <div className="w-full space-y-5">
+              {/* Header */}
+              <div>
+                <div className={eyebrow}>Budget</div>
+                <h2 className="mt-1 font-display text-[clamp(1.4rem,3vw,1.9rem)] font-semibold leading-none tracking-[-0.02em]">How much you set aside</h2>
+              </div>
+
+              <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+                {/* Set-aside rate */}
+                <div className={CARD}>
+                  <div className="flex items-center gap-1.5"><span className={eyebrow}>Set-aside rate</span><InfoDot label="Orbit sets aside this share of every purchase. Pick anywhere from 0.5% to 5%." /></div>
                   <div className="mt-3 flex items-end justify-between gap-4">
-                    <div className="font-mono text-[clamp(2.5rem,6vw,3.5rem)] font-semibold leading-none tabular-nums text-[var(--primary-strong)]">{rate.toFixed(1)}%</div>
-                    <div className="text-right text-[13px] text-[var(--muted)]">
-                      On a <span className="font-mono text-[var(--foreground)]">$50</span> purchase<br />
-                      you&apos;d save <span className="font-mono font-medium text-[var(--primary-strong)]">{usd((50 * rate) / 100)}</span>
-                    </div>
+                    <div className="font-display text-[clamp(2.5rem,6vw,3.5rem)] font-semibold leading-none tabular-nums text-[var(--accent-strong)]">{rate.toFixed(1)}%</div>
+                    <div className="text-right text-[13px] text-[var(--muted)]">On a <span className="font-mono text-[var(--foreground)]">$50</span> purchase<br />you&apos;d save <span className="font-mono font-medium text-[var(--accent-strong)]">{usd((50 * rate) / 100)}</span></div>
                   </div>
                   <div className="mt-5 grid grid-cols-5 gap-2" role="radiogroup" aria-label="Set-aside rate">
                     {RATE_OPTIONS.map((v) => {
                       const on = Math.abs(rate - v) < 0.001;
                       return (
-                        <button
-                          key={v}
-                          type="button"
-                          role="radio"
-                          aria-checked={on}
-                          onClick={() => changeRate(v)}
-                          className={`h-11 rounded-xl border font-mono text-[15px] font-semibold tabular-nums transition-colors ${on ? "border-[var(--primary)] bg-[var(--primary-soft)] text-[var(--primary-strong)]" : "border-[var(--border-strong)] text-[var(--foreground)] hover:bg-[var(--surface)]"}`}
-                        >
-                          {v}%
-                        </button>
+                        <button key={v} type="button" role="radio" aria-checked={on} onClick={() => changeRate(v)} className={`h-11 rounded-xl border font-mono text-[15px] font-semibold tabular-nums transition-colors ${on ? "border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-strong)]" : "border-[var(--border-strong)] text-[var(--foreground)] hover:bg-[var(--background)]"}`}>{v}%</button>
                       );
                     })}
                   </div>
-                  <div className="mt-5 flex items-center justify-between text-[14px]">
-                    <span className="flex items-center gap-1.5 text-[var(--muted)]">
-                      Moves to vault at
-                      <InfoDot label="Set-asides wait in your bank and batch up. Once they reach this amount, they convert to USDC and move into your vault." />
-                    </span>
+                  <div className="mt-5 flex items-center justify-between border-t border-[var(--border)] pt-4 text-[14px]">
+                    <span className="flex items-center gap-1.5 text-[var(--muted)]">Moves to vault at<InfoDot label="Set-asides wait in your bank and batch up. Once they reach this amount, they convert to USDC and move into your vault." /></span>
                     <span className="font-mono font-medium">{usd(THRESHOLD)}</span>
-                  </div>
-                </section>
-
-                {/* Your bank — now managed in the Wallet tab */}
-                <button type="button" onClick={() => setTab("grow")} className="mt-6 flex w-full items-center gap-3 rounded-2xl bg-[var(--surface)] p-5 text-left transition-colors hover:bg-[var(--primary-soft)]">
-                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[var(--background)] text-[var(--muted)]"><Landmark className="h-5 w-5" aria-hidden /></span>
-                  <div className="min-w-0 flex-1">
-                    <div className="text-[15px] font-medium">{plaid?.connected ? "First Platypus Bank" : "No bank connected"}</div>
-                    <div className="text-[13px] text-[var(--muted)]">{plaid?.connected ? "Connected · manage in Wallet" : "Connect your bank in Wallet"}</div>
-                  </div>
-                  <ChevronRight className="h-4 w-4 shrink-0 text-[var(--muted)]" aria-hidden />
-                </button>
-              </div>
-
-              {/* RIGHT — try it + automation */}
-              <div className="mt-6 border-t border-[var(--line)] pt-6 lg:mt-0 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
-                <div className="hidden lg:block">
-                  <div className="font-display text-[16px] font-bold">Try it</div>
-                  <p className="mt-1 text-[14px] text-[var(--muted)]">Simulate a purchase and watch a slice get set aside.</p>
-                  {!connected && (
-                    <p className="mt-3 rounded-lg bg-[var(--primary-soft)] px-3 py-2 text-[13px] text-[var(--primary-strong)]">Open your vault in Wallet first, that&apos;s where set-asides land.</p>
-                  )}
-                  <div className="mt-4 flex gap-2">
-                    {[45, 120, 600].map((v) => (
-                      <button key={v} type="button" onClick={() => spend(v)} disabled={busy || !online || !connected} className="h-11 flex-1 rounded-xl border border-[var(--border-strong)] text-[14px] font-medium tabular-nums transition-colors hover:bg-[var(--surface)] disabled:pointer-events-none disabled:opacity-40">${v}</button>
-                    ))}
-                  </div>
-                  <div className="mt-2 flex gap-2">
-                    <label htmlFor="amount" className="sr-only">Purchase amount</label>
-                    <input id="amount" value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" placeholder="Custom amount" className="h-11 min-w-0 flex-1 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3.5 text-[14px] tabular-nums text-[var(--foreground)] placeholder:text-[var(--faint)] focus:border-[var(--border-strong)] focus:outline-none" />
-                    <button type="button" onClick={() => spend(Number(amount))} disabled={busy || !online || !connected} className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--primary)] px-5 text-[14px] font-semibold text-[var(--primary-fg)] transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-40">{busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null} Spend</button>
                   </div>
                 </div>
 
-                <div className="lg:mt-6 lg:border-t lg:border-[var(--line)] lg:pt-6">
-                  <div className="font-display text-[16px] font-bold">Automation</div>
+                {/* Try it */}
+                <div className={CARD}>
+                  <span className={eyebrow}>Try it</span>
+                  <p className="mt-2 text-[14px] text-[var(--muted)]">Simulate a purchase and watch a slice get set aside.</p>
+                  {!connected && <p className="mt-3 rounded-lg bg-[var(--accent-soft)] px-3 py-2 text-[13px] text-[var(--accent-strong)]">Open your vault in Wallet first, that&apos;s where set-asides land.</p>}
+                  <div className="mt-4 flex gap-2">
+                    {[45, 120, 600].map((v) => (<button key={v} type="button" onClick={() => spend(v)} disabled={busy || !online || !connected} className="h-11 flex-1 rounded-xl border border-[var(--border-strong)] text-[14px] font-medium tabular-nums transition-colors hover:bg-[var(--background)] disabled:pointer-events-none disabled:opacity-40">${v}</button>))}
+                  </div>
+                  <div className="mt-2 flex gap-2">
+                    <label htmlFor="amount" className="sr-only">Purchase amount</label>
+                    <input id="amount" value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" placeholder="Custom amount" className="h-11 min-w-0 flex-1 rounded-xl border border-[var(--border)] bg-[var(--background)] px-3.5 text-[14px] tabular-nums text-[var(--foreground)] placeholder:text-[var(--faint)] focus:border-[var(--border-strong)] focus:outline-none" />
+                    <button type="button" onClick={() => spend(Number(amount))} disabled={busy || !online || !connected} className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--foreground)] px-5 text-[14px] font-semibold text-[var(--background)] transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-40">{busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null} Spend</button>
+                  </div>
+                  <p className="mt-3 text-[12px] text-[var(--faint)]">Purchases run through the live pipeline: detect → set aside → deposit at threshold.</p>
+                </div>
+              </div>
+
+              {/* Automation + bank */}
+              <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.4fr_0.6fr]">
+                <div className={CARD}>
+                  <span className={eyebrow}>Automation</span>
                   <div className="mt-2 divide-y divide-[var(--border)]">
                     <div className="flex items-center justify-between gap-4 py-4">
                       <div className="pr-2">
@@ -976,6 +951,16 @@ export default function Home() {
                   </div>
                   <p className="mt-4 text-[12px] text-[var(--faint)]">Auto-invest and pause are a demo preview; the set-aside rate is live and used for every purchase.</p>
                 </div>
+
+                {/* Bank shortcut */}
+                <button type="button" onClick={() => setTab("grow")} className="flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 text-left transition-colors hover:border-[var(--border-strong)]">
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[var(--background)] text-[var(--muted)]"><Landmark className="h-5 w-5" aria-hidden /></span>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[15px] font-medium">{plaid?.connected ? "First Platypus Bank" : "No bank connected"}</div>
+                    <div className="text-[13px] text-[var(--muted)]">{plaid?.connected ? "Connected · manage in Wallet" : "Connect your bank in Wallet"}</div>
+                  </div>
+                  <ChevronRight className="h-4 w-4 shrink-0 text-[var(--muted)]" aria-hidden />
+                </button>
               </div>
             </div>
           )}
@@ -1389,99 +1374,69 @@ export default function Home() {
 
           {/* ═══════════ ACCOUNT ═══════════ */}
           {tab === "account" && (
-            <div className="space-y-4">
+            <div className="w-full space-y-5">
+              {/* Header */}
+              <div>
+                <div className={eyebrow}>Account</div>
+                <h2 className="mt-1 font-display text-[clamp(1.4rem,3vw,1.9rem)] font-semibold leading-none tracking-[-0.02em]">Your settings</h2>
+              </div>
+
               {/* Profile */}
-              <section className="rounded-2xl bg-[var(--surface)] px-5 pb-5 pt-5">
-                <div className="flex items-center gap-2 text-[12px] font-medium uppercase tracking-[0.16em] text-[var(--faint)]"><UserIcon className="h-3.5 w-3.5" aria-hidden /> Profile</div>
+              <div className={CARD}>
+                <div className="flex items-center gap-2"><UserIcon className="h-3.5 w-3.5 text-[var(--faint)]" aria-hidden /><span className={eyebrow}>Profile</span></div>
                 {user ? (
                   <div className="mt-4 flex flex-wrap items-center gap-4">
                     <Avatar user={user} size="h-12 w-12" />
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate text-[15px] font-semibold">{user.name}</div>
-                      <div className="truncate text-[13px] text-[var(--muted)]">{user.email}</div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={signOut}
-                      className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[var(--destructive)]/40 px-2.5 py-1.5 text-[13px] font-medium text-[var(--destructive)] transition-colors hover:bg-[var(--destructive-soft)]"
-                    >
-                      <LogOut className="h-3.5 w-3.5" aria-hidden /> Sign out
-                    </button>
+                    <div className="min-w-0 flex-1"><div className="truncate text-[15px] font-semibold">{user.name}</div><div className="truncate text-[13px] text-[var(--muted)]">{user.email}</div></div>
+                    <button type="button" onClick={signOut} className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--destructive)]/40 px-3 py-1.5 text-[13px] font-medium text-[var(--destructive)] transition-colors hover:bg-[var(--destructive-soft)]"><LogOut className="h-3.5 w-3.5" aria-hidden /> Sign out</button>
                   </div>
                 ) : (
                   <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
                     <p className="text-[13px] text-[var(--muted)]">Sign in to sync your savings across devices.</p>
-                    <button
-                      type="button"
-                      onClick={signInWithGoogle}
-                      className="inline-flex items-center gap-2 rounded-xl bg-[var(--primary)] px-4 py-2.5 text-[14px] font-semibold text-[var(--primary-fg)] transition-opacity hover:opacity-90"
-                    >
-                      <LogIn className="h-4 w-4" aria-hidden /> Sign in with Google
-                    </button>
+                    <button type="button" onClick={signInWithGoogle} className="inline-flex items-center gap-2 rounded-full bg-[var(--foreground)] px-4 py-2.5 text-[14px] font-semibold text-[var(--background)] transition-opacity hover:opacity-90"><LogIn className="h-4 w-4" aria-hidden /> Sign in with Google</button>
                   </div>
                 )}
-              </section>
-
-              <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
-                <div className="space-y-4">
-                  <section className="rounded-2xl bg-[var(--surface)] px-5 pb-5 pt-5">
-                    <div className="flex items-center gap-2 text-[12px] font-medium uppercase tracking-[0.16em] text-[var(--faint)]"><Wallet className="h-3.5 w-3.5" aria-hidden /> Wallet</div>
-                    <div className="mt-4 flex items-center gap-3">
-                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--background)] ring-1 ring-inset ring-[var(--border)]"><Wallet className="h-5 w-5 text-[var(--foreground)]" aria-hidden /></span>
-                      <div className="min-w-0 flex-1">
-                        <div className="text-[14px] font-semibold">{connected ? "Orbit account" : "No wallet connected"}</div>
-                        <div className="mt-0.5 truncate font-mono text-[13px] text-[var(--muted)]">{owner ?? "Open one in Wallet"}</div>
-                      </div>
-                      {connected && <span className="h-2 w-2 shrink-0 rounded-full bg-[var(--success)]" aria-hidden />}
-                    </div>
-                    <button type="button" onClick={() => setTab("grow")} className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-[var(--border-strong)] text-[14px] font-medium text-[var(--secondary-fg)] transition-colors hover:bg-[var(--background)]">{connected ? "Manage in Wallet" : "Open or connect a wallet"}</button>
-                  </section>
-
-                  {/* Danger zone */}
-                  <section className="rounded-2xl bg-[var(--surface)] px-5 pb-5 pt-5">
-                    <div className="flex items-center gap-2 text-[12px] font-medium uppercase tracking-[0.16em] text-[var(--faint)]"><RotateCcw className="h-3.5 w-3.5" aria-hidden /> Data</div>
-                    <div className="mt-3 flex items-start justify-between gap-4">
-                      <div>
-                        <div className="text-[14px] font-semibold">Reset app data</div>
-                        <div className="mt-0.5 text-[13px] leading-5 text-[var(--muted)]">Clears set-asides and activity and disconnects your bank. Your on-chain vault is never touched.</div>
-                      </div>
-                      <button type="button" onClick={reset} className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[var(--destructive)]/40 px-2.5 py-1.5 text-[13px] font-medium text-[var(--destructive)] transition-colors hover:bg-[var(--destructive-soft)]"><RotateCcw className="h-3.5 w-3.5" aria-hidden /> Reset</button>
-                    </div>
-                  </section>
-                </div>
-
-                <section className="rounded-2xl bg-[var(--surface)] px-5 pb-4 pt-5">
-                  <div className="flex items-center gap-2 text-[12px] font-medium uppercase tracking-[0.16em] text-[var(--faint)]"><Settings className="h-3.5 w-3.5" aria-hidden /> Preferences</div>
-                  <div className="mt-1 divide-y divide-[var(--border)]">
-                    <div className="flex items-center justify-between gap-4 py-3.5">
-                      <div><div className="text-[14px] font-semibold">Appearance</div><div className="mt-0.5 text-[13px] text-[var(--muted)]">Light or dark theme</div></div>
-                      <ThemeToggle />
-                    </div>
-                    <div className="flex items-center justify-between gap-4 py-3.5">
-                      <div><div className="text-[14px] font-semibold">Network</div><div className="mt-0.5 text-[13px] text-[var(--muted)]">Solana devnet</div></div>
-                      <ExplorerLink href={solAcct(onchain?.programId ?? "8LEjyrMCKukhxA4q3DRaYGfkappxRayiTPM7saZG2Kgi")}>Program</ExplorerLink>
-                    </div>
-                    <div className="flex items-center justify-between gap-4 py-3.5">
-                      <div><div className="text-[14px] font-semibold">Backend</div><div className="mt-0.5 text-[13px] text-[var(--muted)]">Detection &amp; deposit service</div></div>
-                      <span className="inline-flex items-center gap-1.5 text-[13px] text-[var(--muted)]"><span className={`h-1.5 w-1.5 rounded-full ${online ? "bg-[var(--success)]" : online === false ? "bg-[var(--destructive)]" : "bg-[var(--faint)]"}`} aria-hidden />{online === null ? "…" : online ? "Connected" : "Offline"}</span>
-                    </div>
-                  </div>
-                </section>
               </div>
 
-              {/* Mobile-only: the sidebar links live on desktop; surface them here on phones. */}
-              <section className="divide-y divide-[var(--border)] overflow-hidden rounded-2xl bg-[var(--surface)] lg:hidden">
-                <button type="button" onClick={() => setTab("security")} className="flex w-full items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-[var(--background)]">
-                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--background)] ring-1 ring-inset ring-[var(--border)]"><ShieldCheck className="h-5 w-5 text-[var(--foreground)]" aria-hidden /></span>
-                  <div className="min-w-0 flex-1"><div className="text-[14px] font-semibold">Security</div><div className="mt-0.5 text-[13px] text-[var(--muted)]">What protects your money</div></div>
-                  <ChevronRight className="h-4 w-4 shrink-0 text-[var(--faint)]" aria-hidden />
-                </button>
-                <button type="button" onClick={() => setTab("help")} className="flex w-full items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-[var(--background)]">
-                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--background)] ring-1 ring-inset ring-[var(--border)]"><HelpCircle className="h-5 w-5 text-[var(--foreground)]" aria-hidden /></span>
-                  <div className="min-w-0 flex-1"><div className="text-[14px] font-semibold">Help Center</div><div className="mt-0.5 text-[13px] text-[var(--muted)]">Guides for using Orbit</div></div>
-                  <ChevronRight className="h-4 w-4 shrink-0 text-[var(--faint)]" aria-hidden />
-                </button>
-              </section>
+              <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-2">
+                <div className="space-y-5">
+                  {/* Wallet */}
+                  <div className={CARD}>
+                    <div className="flex items-center gap-2"><Wallet className="h-3.5 w-3.5 text-[var(--faint)]" aria-hidden /><span className={eyebrow}>Wallet</span></div>
+                    <div className="mt-4 flex items-center gap-3">
+                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--background)] ring-1 ring-inset ring-[var(--border)]"><Wallet className="h-5 w-5 text-[var(--foreground)]" aria-hidden /></span>
+                      <div className="min-w-0 flex-1"><div className="text-[14px] font-semibold">{connected ? "Orbit account" : "No wallet connected"}</div><div className="mt-0.5 truncate font-mono text-[13px] text-[var(--muted)]">{owner ?? "Open one in Wallet"}</div></div>
+                      {connected && <span className="h-2 w-2 shrink-0 rounded-full bg-[var(--success)]" aria-hidden />}
+                    </div>
+                    <button type="button" onClick={() => setTab("grow")} className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-full border border-[var(--border-strong)] text-[14px] font-medium transition-colors hover:bg-[var(--background)]">{connected ? "Manage in Wallet" : "Open or connect a wallet"}</button>
+                  </div>
+
+                  {/* Data */}
+                  <div className={CARD}>
+                    <div className="flex items-center gap-2"><RotateCcw className="h-3.5 w-3.5 text-[var(--faint)]" aria-hidden /><span className={eyebrow}>Data</span></div>
+                    <div className="mt-3 flex items-start justify-between gap-4">
+                      <div><div className="text-[14px] font-semibold">Reset app data</div><div className="mt-0.5 text-[13px] leading-5 text-[var(--muted)]">Clears set-asides and activity and disconnects your bank. Your on-chain vault is never touched.</div></div>
+                      <button type="button" onClick={reset} className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--destructive)]/40 px-3 py-1.5 text-[13px] font-medium text-[var(--destructive)] transition-colors hover:bg-[var(--destructive-soft)]"><RotateCcw className="h-3.5 w-3.5" aria-hidden /> Reset</button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Preferences */}
+                <div className={CARD}>
+                  <div className="flex items-center gap-2"><Settings className="h-3.5 w-3.5 text-[var(--faint)]" aria-hidden /><span className={eyebrow}>Preferences</span></div>
+                  <div className="mt-1 divide-y divide-[var(--border)]">
+                    <div className="flex items-center justify-between gap-4 py-3.5"><div><div className="text-[14px] font-semibold">Appearance</div><div className="mt-0.5 text-[13px] text-[var(--muted)]">Light or dark theme</div></div><ThemeToggle /></div>
+                    <div className="flex items-center justify-between gap-4 py-3.5"><div><div className="text-[14px] font-semibold">Network</div><div className="mt-0.5 text-[13px] text-[var(--muted)]">Solana devnet</div></div><ExplorerLink href={solAcct(onchain?.programId ?? "8LEjyrMCKukhxA4q3DRaYGfkappxRayiTPM7saZG2Kgi")}>Program</ExplorerLink></div>
+                    <div className="flex items-center justify-between gap-4 py-3.5"><div><div className="text-[14px] font-semibold">Backend</div><div className="mt-0.5 text-[13px] text-[var(--muted)]">Detection &amp; deposit service</div></div><span className="inline-flex items-center gap-1.5 text-[13px] text-[var(--muted)]"><span className={`h-1.5 w-1.5 rounded-full ${online ? "bg-[var(--success)]" : online === false ? "bg-[var(--destructive)]" : "bg-[var(--faint)]"}`} aria-hidden />{online === null ? "…" : online ? "Connected" : "Offline"}</span></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Mobile-only: surface the sidebar links on phones. */}
+              <div className="divide-y divide-[var(--border)] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] lg:hidden">
+                <button type="button" onClick={() => setTab("security")} className="flex w-full items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-[var(--background)]"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--background)] ring-1 ring-inset ring-[var(--border)]"><ShieldCheck className="h-5 w-5 text-[var(--foreground)]" aria-hidden /></span><div className="min-w-0 flex-1"><div className="text-[14px] font-semibold">Security</div><div className="mt-0.5 text-[13px] text-[var(--muted)]">What protects your money</div></div><ChevronRight className="h-4 w-4 shrink-0 text-[var(--faint)]" aria-hidden /></button>
+                <button type="button" onClick={() => setTab("help")} className="flex w-full items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-[var(--background)]"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--background)] ring-1 ring-inset ring-[var(--border)]"><HelpCircle className="h-5 w-5 text-[var(--foreground)]" aria-hidden /></span><div className="min-w-0 flex-1"><div className="text-[14px] font-semibold">Help Center</div><div className="mt-0.5 text-[13px] text-[var(--muted)]">Guides for using Orbit</div></div><ChevronRight className="h-4 w-4 shrink-0 text-[var(--faint)]" aria-hidden /></button>
+              </div>
 
               <p className="text-[12px] leading-5 text-[var(--faint)]">Live on Solana devnet. Detection, threshold, and the vault deposit are real; the fiat→USDC step (Stripe) is mocked. Not a bank. Not FDIC-insured — principal is not guaranteed.</p>
             </div>

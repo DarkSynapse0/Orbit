@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Plus, Trash2, TrendingUp, Check, Info } from "lucide-react";
+import { Plus, Trash2, TrendingUp, Check, Info, Target, Wallet } from "lucide-react";
 import { logActivity } from "@/lib/activity";
 import { Sheet } from "@/components/ui/sheet";
 
@@ -19,6 +19,8 @@ const EMOJIS = ["🏖️", "🚨", "🏠", "🚗", "🎁", "✈️", "🎓", "�
 // current balance; live yield = earned + (allocated growing since `since`).
 type Goal = { id: string; emoji: string; name: string; target: number; allocated: number; earned?: number; since: number };
 
+const eyebrow = "font-mono text-[12px] font-medium uppercase tracking-[0.24em] text-[var(--faint)]";
+const CARD = "rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-7";
 
 const usd = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
@@ -87,6 +89,8 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
     [goals, now, apy, coverage],
   );
 
+  const reachedCount = withYield.filter((g) => g.target > 0 && g.balance >= g.target).length;
+
   const addGoal = () => {
     const t = Math.max(1, Number(target) || 0);
     if (!name.trim()) return;
@@ -129,129 +133,146 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
   };
 
   return (
-    <section>
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-[var(--surface)] px-5 py-3.5">
-        <div className="inline-flex items-baseline gap-2">
-          <span className="text-[13px] text-[var(--muted)]">Unallocated</span>
-          <span className="font-mono text-[15px] font-semibold tabular-nums text-[var(--foreground)]">{usd(unallocated)}</span>
+    <section className="w-full space-y-5">
+      {/* Header */}
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <div className={eyebrow}>Goals</div>
+          <h2 className="mt-1 font-display text-[clamp(1.4rem,3vw,1.9rem)] font-semibold leading-none tracking-[-0.02em]">Savings goals</h2>
         </div>
-        <button type="button" onClick={() => setAdding((v) => !v)} className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-[var(--primary)] px-4 text-[14px] font-semibold text-[var(--primary-fg)] transition-opacity hover:opacity-90">
+        <button
+          type="button"
+          onClick={() => setAdding((v) => !v)}
+          className="inline-flex h-11 shrink-0 items-center gap-2 rounded-full bg-[var(--foreground)] px-5 text-[14px] font-semibold text-[var(--background)] transition-opacity hover:opacity-90"
+        >
           <Plus className="h-4 w-4" aria-hidden /> New goal
         </button>
       </div>
 
-      {withYield.length > 0 && (
-        <>
-          <div className="my-4 border-t border-[var(--line)]" />
-          {/* Desktop: table */}
-          <div className="hidden overflow-x-auto rounded-2xl bg-[var(--surface)] px-5 py-2 lg:block">
-            <table className="w-full min-w-[560px] text-left">
-            <thead>
-              <tr className="border-b border-[var(--border)] text-[14px] font-bold text-[var(--foreground)]">
-                <th className="pb-3">Goal</th>
-                <th className="pb-3">Progress</th>
-                <th className="pb-3 text-right">Saved</th>
-                <th className="pb-3 text-right">Target</th>
-                <th className="pb-3 pl-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--border)]">
-              {withYield.map((g) => {
-                const pct = Math.min(100, (g.balance / g.target) * 100);
-                const reached = g.target > 0 && g.balance >= g.target;
-                return (
-                  <tr key={g.id}>
-                    <td className="py-3 pr-3">
-                      <div className="flex items-center gap-2.5">
-                        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[var(--background)] text-[18px]">{g.emoji}</span>
-                        <div className="flex min-w-0 items-center gap-2">
-                          <span className="truncate text-[15px] font-medium">{g.name}</span>
-                          {reached && (
-                            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[var(--primary-soft)] px-2 py-0.5 text-[11px] font-medium text-[var(--primary-strong)]">
-                              <Check className="h-3 w-3" aria-hidden /> Reached
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-3 pr-4">
-                      <div className="flex items-center gap-2">
-                        <div className="h-1.5 w-full min-w-[80px] overflow-hidden rounded-full bg-[var(--border)]">
-                          <div className="h-full rounded-full bg-[var(--primary)] transition-[width] duration-300" style={{ width: `${pct}%` }} />
-                        </div>
-                        <span className="shrink-0 font-mono text-[11px] tabular-nums text-[var(--faint)]">{Math.round(pct)}%</span>
-                      </div>
-                    </td>
-                    <td className="py-3 text-right font-mono text-[14px] font-semibold tabular-nums text-[var(--primary-strong)]">{usd(g.balance)}</td>
-                    <td className="py-3 text-right font-mono text-[14px] tabular-nums text-[var(--muted)]">{usd(g.target)}</td>
-                    <td className="py-3 pl-3">
-                      <div className="flex items-center justify-end gap-1.5">
-                        {[10, 50].map((d) => (
-                          <button key={d} type="button" onClick={() => allocate(g.id, d)} disabled={unallocated <= 0} className="rounded-md border border-[var(--border-strong)] px-2 py-0.5 text-[12px] font-medium transition-colors hover:bg-[var(--surface)] disabled:pointer-events-none disabled:opacity-40">+${d}</button>
-                        ))}
-                        <button type="button" onClick={() => allocate(g.id, -1e12)} disabled={g.allocated <= 0} className="rounded-md border border-[var(--border-strong)] px-2 py-0.5 text-[12px] font-medium transition-colors hover:bg-[var(--surface)] disabled:pointer-events-none disabled:opacity-40">Empty</button>
-                        <button type="button" onClick={() => remove(g.id)} aria-label={`Delete ${g.name}`} className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[var(--faint)] transition-colors hover:bg-[var(--destructive-soft)] hover:text-[var(--destructive)]"><Trash2 className="h-3.5 w-3.5" aria-hidden /></button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+      {/* Overview tiles */}
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+        <div className={CARD}>
+          <div className="flex items-center justify-between">
+            <span className={eyebrow}>Unallocated</span>
+            <span className="grid h-9 w-9 place-items-center rounded-full bg-[var(--foreground)] text-[var(--background)]"><Wallet className="h-4 w-4" aria-hidden /></span>
           </div>
+          <div className="mt-4 font-display text-[clamp(1.5rem,3.5vw,2rem)] font-semibold leading-none tabular-nums">{usd(unallocated)}</div>
+          <p className="mt-2 text-[13px] leading-relaxed text-[var(--muted)]">Free in your vault to assign to a goal.</p>
+        </div>
+        <div className={CARD}>
+          <div className="flex items-center justify-between">
+            <span className={eyebrow}>Active goals</span>
+            <span className="grid h-9 w-9 place-items-center rounded-full bg-[var(--foreground)] text-[var(--background)]"><Target className="h-4 w-4" aria-hidden /></span>
+          </div>
+          <div className="mt-4 font-display text-[clamp(1.5rem,3.5vw,2rem)] font-semibold leading-none tabular-nums">{withYield.length}</div>
+          <p className="mt-2 text-[13px] leading-relaxed text-[var(--muted)]">Pots layered over your one vault.</p>
+        </div>
+        <div className={CARD}>
+          <div className="flex items-center justify-between">
+            <span className={eyebrow}>Reached</span>
+            <span className="grid h-9 w-9 place-items-center rounded-full bg-[var(--foreground)] text-[var(--background)]"><Check className="h-4 w-4" aria-hidden /></span>
+          </div>
+          <div className="mt-4 font-display text-[clamp(1.5rem,3.5vw,2rem)] font-semibold leading-none tabular-nums text-[var(--accent-strong)]">{reachedCount}</div>
+          <p className="mt-2 text-[13px] leading-relaxed text-[var(--muted)]">Goals fully funded and earning.</p>
+        </div>
+      </div>
 
-          {/* Mobile: stacked cards */}
-          <div className="space-y-3 lg:hidden">
-            {withYield.map((g) => {
-              const pct = Math.min(100, (g.balance / g.target) * 100);
-              const reached = g.target > 0 && g.balance >= g.target;
-              return (
-                <div key={g.id} className="rounded-2xl bg-[var(--surface)] p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex min-w-0 items-center gap-2.5">
-                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[var(--background)] text-[18px]">{g.emoji}</span>
-                      <div className="flex min-w-0 items-center gap-2">
-                        <span className="truncate text-[15px] font-medium">{g.name}</span>
+      {/* Goal cards */}
+      {withYield.length > 0 && (
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+          {withYield.map((g) => {
+            const pct = Math.min(100, (g.balance / g.target) * 100);
+            const reached = g.target > 0 && g.balance >= g.target;
+            return (
+              <div key={g.id} className={CARD}>
+                {/* Head */}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[var(--background)] text-[20px]">{g.emoji}</span>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="truncate text-[16px] font-semibold tracking-[-0.01em]">{g.name}</span>
                         {reached && (
-                          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[var(--primary-soft)] px-2 py-0.5 text-[11px] font-medium text-[var(--primary-strong)]">
+                          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[var(--accent-soft)] px-2 py-0.5 text-[11px] font-semibold text-[var(--accent-strong)]">
                             <Check className="h-3 w-3" aria-hidden /> Reached
                           </span>
                         )}
                       </div>
+                      <div className="mt-0.5 font-mono text-[12px] tabular-nums text-[var(--muted)]">Target {usd(g.target)}</div>
                     </div>
-                    <button type="button" onClick={() => remove(g.id)} aria-label={`Delete ${g.name}`} className="grid h-7 w-7 shrink-0 place-items-center rounded-md text-[var(--faint)] transition-colors hover:bg-[var(--destructive-soft)] hover:text-[var(--destructive)]"><Trash2 className="h-4 w-4" aria-hidden /></button>
                   </div>
-                  <div className="mt-3 flex items-baseline justify-between gap-2">
-                    <span className="font-mono text-lg font-semibold tabular-nums text-[var(--primary-strong)]">{usd(g.balance)}</span>
-                    <span className="font-mono text-[13px] tabular-nums text-[var(--muted)]">of {usd(g.target)} · {Math.round(pct)}%</span>
-                  </div>
-                  <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[var(--border)]">
-                    <div className="h-full rounded-full bg-[var(--primary)] transition-[width] duration-300" style={{ width: `${pct}%` }} />
-                  </div>
-                  <div className="mt-3 flex items-center gap-1.5">
-                    {[10, 50].map((d) => (
-                      <button key={d} type="button" onClick={() => allocate(g.id, d)} disabled={unallocated <= 0} className="rounded-md border border-[var(--border-strong)] px-2.5 py-1 text-[12px] font-medium transition-colors hover:bg-[var(--background)] disabled:pointer-events-none disabled:opacity-40">+${d}</button>
-                    ))}
-                    <button type="button" onClick={() => allocate(g.id, -1e12)} disabled={g.allocated <= 0} className="rounded-md border border-[var(--border-strong)] px-2.5 py-1 text-[12px] font-medium transition-colors hover:bg-[var(--background)] disabled:pointer-events-none disabled:opacity-40">Empty</button>
-                  </div>
+                  <button type="button" onClick={() => remove(g.id)} aria-label={`Delete ${g.name}`} className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-[var(--faint)] transition-colors hover:bg-[var(--destructive-soft)] hover:text-[var(--destructive)]"><Trash2 className="h-4 w-4" aria-hidden /></button>
                 </div>
-              );
-            })}
-          </div>
-        </>
+
+                {/* Balance */}
+                <div className="mt-5 flex items-baseline justify-between gap-2">
+                  <div className="font-display text-[clamp(1.75rem,4vw,2.25rem)] font-semibold leading-none tabular-nums text-[var(--accent-strong)]">{usd(g.balance)}</div>
+                  <div className="font-mono text-[13px] tabular-nums text-[var(--faint)]">{Math.round(pct)}%</div>
+                </div>
+
+                {/* Progress */}
+                <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-[var(--border)]">
+                  <div className="h-full rounded-full bg-[var(--accent)] transition-[width] duration-300" style={{ width: `${pct}%` }} />
+                </div>
+
+                {/* Actions */}
+                <div className="mt-5 flex items-center gap-2">
+                  {[10, 50].map((d) => (
+                    <button
+                      key={d}
+                      type="button"
+                      onClick={() => allocate(g.id, d)}
+                      disabled={unallocated <= 0}
+                      className="inline-flex h-9 items-center justify-center rounded-full border border-[var(--border-strong)] px-3.5 text-[13px] font-medium tabular-nums transition-colors hover:bg-[var(--background)] disabled:pointer-events-none disabled:opacity-40"
+                    >
+                      +${d}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => allocate(g.id, -1e12)}
+                    disabled={g.allocated <= 0}
+                    className="inline-flex h-9 items-center justify-center rounded-full border border-[var(--border-strong)] px-3.5 text-[13px] font-medium transition-colors hover:bg-[var(--background)] disabled:pointer-events-none disabled:opacity-40"
+                  >
+                    Empty
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       )}
 
+      {/* Empty-vault notice */}
       {withYield.length > 0 && saved <= 0.005 && (
-        <div className="mt-3 flex items-start gap-2 rounded-xl bg-[var(--surface)] px-4 py-3 text-[13px] text-[var(--muted)]">
+        <div className="flex items-start gap-2.5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-5 py-4 text-[13px] leading-relaxed text-[var(--muted)]">
           <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--faint)]" aria-hidden />
           <span>Your vault is empty, so these goals are unfunded. Add money to your vault to fund them, or delete any you don&apos;t need.</span>
+        </div>
+      )}
+
+      {/* Empty state */}
+      {withYield.length === 0 && !adding && (
+        <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-[var(--border-strong)] px-6 py-12 text-center">
+          <span className="grid h-12 w-12 place-items-center rounded-full bg-[var(--foreground)] text-[var(--background)]"><Target className="h-5 w-5" aria-hidden /></span>
+          <div>
+            <div className="font-display text-[16px] font-semibold tracking-[-0.01em]">No goals yet</div>
+            <p className="mx-auto mt-1 max-w-xs text-[13px] leading-relaxed text-[var(--muted)]">Create a goal and allocate from your vault to watch it grow at {(apy * 100).toFixed(0)}% a year.</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setAdding(true)}
+            className="inline-flex h-10 items-center gap-2 rounded-full bg-[var(--accent)] px-5 text-[14px] font-semibold text-[var(--on-accent)] transition-opacity hover:opacity-90"
+          >
+            <TrendingUp className="h-4 w-4" aria-hidden /> Create your first goal
+          </button>
         </div>
       )}
 
       <Sheet open={adding} onClose={() => setAdding(false)} side="right" title="New goal">
         <div className="space-y-5">
           <div>
-            <span className="mb-1.5 block text-[12px] font-medium text-[var(--muted)]">Icon</span>
+            <span className="mb-2 block font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--faint)]">Icon</span>
             <div className="flex flex-wrap gap-1.5">
               {EMOJIS.map((e) => (
                 <button
@@ -259,7 +280,7 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
                   type="button"
                   aria-label={`Icon ${e}`}
                   onClick={() => setEmoji(e)}
-                  className={`grid h-9 w-9 place-items-center rounded-lg text-[18px] transition-colors ${emoji === e ? "bg-[var(--primary-soft)] ring-1 ring-inset ring-[var(--primary)]/40" : "hover:bg-[var(--surface)]"}`}
+                  className={`grid h-9 w-9 place-items-center rounded-full text-[18px] transition-colors ${emoji === e ? "bg-[var(--accent-soft)] ring-1 ring-inset ring-[var(--accent)]/40" : "hover:bg-[var(--surface)]"}`}
                 >
                   {e}
                 </button>
@@ -267,7 +288,7 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
             </div>
           </div>
           <div>
-            <label htmlFor="goal-name" className="mb-1.5 block text-[12px] font-medium text-[var(--muted)]">Goal name</label>
+            <label htmlFor="goal-name" className="mb-2 block font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--faint)]">Goal name</label>
             <input
               id="goal-name"
               value={name}
@@ -278,7 +299,7 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
             />
           </div>
           <div>
-            <label htmlFor="goal-target" className="mb-1.5 block text-[12px] font-medium text-[var(--muted)]">Target amount</label>
+            <label htmlFor="goal-target" className="mb-2 block font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--faint)]">Target amount</label>
             <div className="flex h-11 items-center rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3">
               <span className="text-[var(--muted)]">$</span>
               <input
@@ -292,7 +313,7 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
             </div>
           </div>
           <div>
-            <label htmlFor="goal-initial" className="mb-1.5 block text-[12px] font-medium text-[var(--muted)]">Allocate from vault now (optional)</label>
+            <label htmlFor="goal-initial" className="mb-2 block font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--faint)]">Allocate from vault now (optional)</label>
             <div className="flex h-11 items-center rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3">
               <span className="text-[var(--muted)]">$</span>
               <input
@@ -310,18 +331,12 @@ export function SavingsGoals({ saved, apy = 0.06 }: { saved: number; apy?: numbe
             type="button"
             onClick={addGoal}
             disabled={!name.trim()}
-            className="inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-[var(--primary)] text-[14px] font-semibold text-[var(--primary-fg)] transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-40"
+            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[var(--foreground)] text-[14px] font-semibold text-[var(--background)] transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-40"
           >
             <Plus className="h-4 w-4" aria-hidden /> Add goal
           </button>
         </div>
       </Sheet>
-
-      {withYield.length === 0 && !adding && (
-        <div className="mt-5 flex items-center gap-2 border-t border-[var(--line)] pt-5 text-[13px] text-[var(--faint)]">
-          <TrendingUp className="h-4 w-4" aria-hidden /> Create a goal and allocate from your vault to watch it grow.
-        </div>
-      )}
     </section>
   );
 }

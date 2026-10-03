@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Rocket,
   Compass,
@@ -13,9 +13,11 @@ import {
   KeyRound,
   ArrowLeft,
   ArrowRight,
+  ArrowUpRight,
   Clock,
   Check,
-  Lock,
+  Search,
+  BookOpen,
   type LucideIcon,
 } from "lucide-react";
 
@@ -47,6 +49,16 @@ const COVER: Record<Category, [string, string]> = {
   Goals: ["#3f6212", "#2f6e4a"], // olive green → brand green
   Growing: ["#2f6e4a", "#15803d"], // brand green → success green
   Security: ["#171717", "#244f36"], // charcoal → deep green
+};
+
+// One short blurb per category for the browse view.
+const CATEGORY_BLURB: Record<Category, string> = {
+  Basics: "Open your account and find your way around.",
+  Saving: "How set-asides work and how your bank connects.",
+  Vault: "Where your savings live and how to withdraw.",
+  Goals: "Split your vault into named pots.",
+  Growing: "How your USDC earns on-chain yield.",
+  Security: "Self-custody habits and verifying on-chain.",
 };
 
 // Ordered as a learning path: each guide builds on the one before it.
@@ -218,278 +230,309 @@ const ARTICLES: Article[] = [
   },
 ];
 
-const PROGRESS_KEY = "orbit.help.progress.v1";
+const CATEGORY_ORDER: Category[] = ["Basics", "Saving", "Vault", "Goals", "Growing", "Security"];
 
-function Pill({ children, dark = false }: { children: React.ReactNode; dark?: boolean }) {
+const eyebrow = "font-mono text-[12px] font-medium uppercase tracking-[0.24em] text-[var(--faint)]";
+const CARD = "rounded-2xl border border-[var(--border)] bg-[var(--surface)]";
+
+// Small gradient icon tile in the brand's black → green family, sized to taste.
+function CoverTile({ category, icon: Icon, size = "md" }: { category: Category; icon: LucideIcon; size?: "sm" | "md" | "lg" }) {
+  const [from, to] = COVER[category];
+  const box = size === "lg" ? "h-12 w-12 rounded-2xl" : size === "sm" ? "h-9 w-9 rounded-xl" : "h-11 w-11 rounded-xl";
+  const glyph = size === "lg" ? "h-6 w-6" : size === "sm" ? "h-4 w-4" : "h-5 w-5";
   return (
     <span
-      className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-[0.12em] ${
-        dark ? "bg-white/15 text-white ring-1 ring-inset ring-white/20" : "bg-[var(--background)] text-[var(--muted)] ring-1 ring-inset ring-[var(--border)]"
-      }`}
+      className={`grid shrink-0 place-items-center text-white ${box}`}
+      style={{ backgroundImage: `linear-gradient(135deg, ${from}, ${to})` }}
+      aria-hidden
     >
-      {children}
+      <Icon className={glyph} />
     </span>
   );
 }
 
-// Gradient cover art with a large translucent icon watermark.
-function Cover({ article, className = "", big = false }: { article: Article; className?: string; big?: boolean }) {
-  const [from, to] = COVER[article.category];
-  const Icon = article.icon;
+function CategoryChip({ category }: { category: Category }) {
   return (
-    <div className={`relative overflow-hidden ${className}`} style={{ backgroundImage: `linear-gradient(135deg, ${from}, ${to})` }}>
-      <Icon className={`absolute -bottom-4 -right-3 text-white/15 ${big ? "h-44 w-44" : "h-24 w-24"}`} aria-hidden />
-      <div className={`relative flex h-full items-center justify-center ${big ? "p-6" : "p-3"}`}>
-        <span className={`grid place-items-center rounded-xl bg-white/15 ring-1 ring-inset ring-white/25 ${big ? "h-12 w-12" : "h-10 w-10"}`}>
-          <Icon className={big ? "h-6 w-6 text-white" : "h-5 w-5 text-white"} aria-hidden />
-        </span>
-      </div>
-    </div>
+    <span className="inline-flex items-center rounded-full bg-[var(--accent-soft)] px-2.5 py-0.5 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--accent-strong)]">
+      {category}
+    </span>
+  );
+}
+
+function ReadTime({ read }: { read: string }) {
+  return (
+    <span className="inline-flex items-center gap-1 text-[12px] text-[var(--faint)]">
+      <Clock className="h-3 w-3" aria-hidden /> {read}
+    </span>
   );
 }
 
 function ArticleView({
   article,
-  index,
-  total,
-  isDone,
-  nextTitle,
+  prev,
+  next,
   onBack,
-  onComplete,
+  onOpen,
 }: {
   article: Article;
-  index: number;
-  total: number;
-  isDone: boolean;
-  nextTitle: string | null;
+  prev: Article | null;
+  next: Article | null;
   onBack: () => void;
-  onComplete: () => void;
+  onOpen: (id: string) => void;
 }) {
   return (
-    <div className="space-y-5">
-      <button type="button" onClick={onBack} className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[var(--muted)] transition-colors hover:text-[var(--foreground)]">
-        <ArrowLeft className="h-4 w-4" aria-hidden /> Back to path
+    <div className="mx-auto w-full max-w-3xl space-y-6">
+      <button
+        type="button"
+        onClick={onBack}
+        className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[var(--muted)] transition-colors hover:text-[var(--foreground)]"
+      >
+        <ArrowLeft className="h-4 w-4" aria-hidden /> All guides
       </button>
 
-      <article className="overflow-hidden rounded-2xl bg-[var(--surface)]">
-        <Cover article={article} className="h-44 sm:h-52" big />
-        <div className="p-6 sm:p-8">
-          <div className="flex items-center gap-2">
-            <span className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[var(--primary-strong)]">Step {index + 1} of {total}</span>
-            <span className="text-[var(--faint)]">·</span>
-            <Pill>{article.category}</Pill>
-            <span className="inline-flex items-center gap-1 text-[12px] text-[var(--faint)]"><Clock className="h-3 w-3" aria-hidden /> {article.read} read</span>
+      {/* Article header */}
+      <header className="flex items-start gap-4">
+        <CoverTile category={article.category} icon={article.icon} size="lg" />
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <CategoryChip category={article.category} />
+            <ReadTime read={article.read} />
           </div>
-          <h1 className="mt-4 font-display text-[22px] font-bold leading-tight sm:text-[26px]">{article.title}</h1>
+          <h1 className="mt-3 font-display text-[clamp(1.5rem,3.5vw,2rem)] font-semibold leading-tight tracking-[-0.02em]">
+            {article.title}
+          </h1>
+          <p className="mt-2 text-[15px] leading-relaxed text-[var(--muted)]">{article.excerpt}</p>
+        </div>
+      </header>
 
-          <div className="mt-6 max-w-2xl space-y-4">
-            {article.body.map((b, i) => {
-              if (b.t === "h") return <h2 key={i} className="pt-2 font-display text-[16px] font-bold">{b.text}</h2>;
-              if (b.t === "p") return <p key={i} className="text-[14px] leading-7 text-[var(--secondary-fg)]">{b.text}</p>;
-              if (b.t === "ul")
-                return (
-                  <ul key={i} className="space-y-2">
-                    {b.items.map((it, j) => (
-                      <li key={j} className="flex gap-2.5 text-[14px] leading-6 text-[var(--secondary-fg)]">
-                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--primary)]" aria-hidden />
-                        {it}
-                      </li>
-                    ))}
-                  </ul>
-                );
-              if (b.t === "steps")
-                return (
-                  <ol key={i} className="space-y-2.5">
-                    {b.items.map((it, j) => (
-                      <li key={j} className="flex gap-3 text-[14px] leading-6 text-[var(--secondary-fg)]">
-                        <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[var(--primary-soft)] text-[12px] font-bold text-[var(--primary-strong)]">{j + 1}</span>
-                        <span className="pt-0.5">{it}</span>
-                      </li>
-                    ))}
-                  </ol>
-                );
-              return <p key={i} className="rounded-xl bg-[var(--info-soft)] px-4 py-3 text-[13px] leading-6 text-[var(--foreground)]">{b.text}</p>;
-            })}
-          </div>
+      {/* Article body */}
+      <article className={`${CARD} space-y-4 p-6 sm:p-8`}>
+        {article.body.map((b, i) => {
+          if (b.t === "h") return <h2 key={i} className="pt-2 font-display text-[16px] font-semibold tracking-[-0.01em]">{b.text}</h2>;
+          if (b.t === "p") return <p key={i} className="text-[14px] leading-7 text-[var(--secondary-fg)]">{b.text}</p>;
+          if (b.t === "ul")
+            return (
+              <ul key={i} className="space-y-2.5">
+                {b.items.map((it, j) => (
+                  <li key={j} className="flex gap-3 text-[14px] leading-6 text-[var(--secondary-fg)]">
+                    <span className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent)]" aria-hidden />
+                    <span>{it}</span>
+                  </li>
+                ))}
+              </ul>
+            );
+          if (b.t === "steps")
+            return (
+              <ol key={i} className="space-y-3">
+                {b.items.map((it, j) => (
+                  <li key={j} className="flex gap-3 text-[14px] leading-6 text-[var(--secondary-fg)]">
+                    <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[var(--accent)] text-[12px] font-semibold text-[var(--on-accent)]">{j + 1}</span>
+                    <span className="pt-0.5">{it}</span>
+                  </li>
+                ))}
+              </ol>
+            );
+          return (
+            <div key={i} className="flex gap-3 rounded-xl border border-[var(--border)] bg-[var(--accent-soft)] px-4 py-3">
+              <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[var(--accent)] text-[var(--on-accent)]"><Check className="h-3.5 w-3.5" aria-hidden /></span>
+              <p className="text-[13px] leading-6 text-[var(--foreground)]">{b.text}</p>
+            </div>
+          );
+        })}
+      </article>
 
-          {/* Completion / continue */}
-          <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--border)] pt-5">
-            <span className="inline-flex items-center gap-1.5 text-[13px] text-[var(--muted)]">
-              {isDone ? (<><Check className="h-4 w-4 text-[var(--success)]" aria-hidden /> Completed</>) : nextTitle ? "Finish to unlock the next guide" : "Last guide in the path"}
-            </span>
+      {/* Prev / next */}
+      {(prev || next) && (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {prev ? (
             <button
               type="button"
-              onClick={onComplete}
-              className="inline-flex items-center gap-2 rounded-xl bg-[var(--primary)] px-4 py-2.5 text-[14px] font-semibold text-[var(--primary-fg)] transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/40"
+              onClick={() => onOpen(prev.id)}
+              className={`${CARD} group flex items-center gap-3 p-4 text-left transition-colors hover:border-[var(--border-strong)]`}
             >
-              {nextTitle ? (isDone ? "Next guide" : "Mark as read & continue") : isDone ? "Back to path" : "Mark as read & finish"}
-              <ArrowRight className="h-4 w-4" aria-hidden />
+              <ArrowLeft className="h-4 w-4 shrink-0 text-[var(--muted)] transition-colors group-hover:text-[var(--foreground)]" aria-hidden />
+              <span className="min-w-0">
+                <span className={`${eyebrow} block`}>Previous</span>
+                <span className="mt-1 block truncate text-[14px] font-medium">{prev.title}</span>
+              </span>
             </button>
-          </div>
+          ) : (
+            <span />
+          )}
+          {next && (
+            <button
+              type="button"
+              onClick={() => onOpen(next.id)}
+              className={`${CARD} group flex items-center justify-end gap-3 p-4 text-right transition-colors hover:border-[var(--border-strong)] sm:col-start-2`}
+            >
+              <span className="min-w-0">
+                <span className={`${eyebrow} block`}>Next</span>
+                <span className="mt-1 block truncate text-[14px] font-medium">{next.title}</span>
+              </span>
+              <ArrowRight className="h-4 w-4 shrink-0 text-[var(--muted)] transition-colors group-hover:text-[var(--foreground)]" aria-hidden />
+            </button>
+          )}
         </div>
-      </article>
+      )}
     </div>
+  );
+}
+
+function ArticleRow({ article, onOpen }: { article: Article; onOpen: (id: string) => void }) {
+  return (
+    <button
+      type="button"
+      onClick={() => onOpen(article.id)}
+      className="group flex w-full items-center gap-4 rounded-2xl p-4 text-left transition-colors hover:bg-[var(--background)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/30"
+    >
+      <CoverTile category={article.category} icon={article.icon} size="sm" />
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[15px] font-medium leading-snug text-[var(--foreground)]">{article.title}</span>
+        <span className="mt-0.5 line-clamp-1 text-[13px] leading-5 text-[var(--muted)]">{article.excerpt}</span>
+      </span>
+      <ReadTime read={article.read} />
+      <ArrowUpRight className="h-4 w-4 shrink-0 text-[var(--faint)] transition-colors group-hover:text-[var(--accent-strong)]" aria-hidden />
+    </button>
   );
 }
 
 export function HelpCenter() {
   const [openId, setOpenId] = useState<string | null>(null);
-  const [completed, setCompleted] = useState<string[]>([]);
-  const [loaded, setLoaded] = useState(false);
+  const [query, setQuery] = useState("");
+  const [active, setActive] = useState<Category | "All">("All");
 
+  // Scroll to top whenever the open article changes.
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(PROGRESS_KEY);
-      if (raw) setCompleted(JSON.parse(raw));
-    } catch {}
-    setLoaded(true);
-  }, []);
+    if (openId) window.scrollTo?.({ top: 0, behavior: "smooth" });
+  }, [openId]);
 
-  const persist = (next: string[]) => {
-    setCompleted(next);
-    try {
-      localStorage.setItem(PROGRESS_KEY, JSON.stringify(next));
-    } catch {}
-  };
+  const q = query.trim().toLowerCase();
+  const filtered = useMemo(
+    () =>
+      ARTICLES.filter((a) => {
+        const inCat = active === "All" || a.category === active;
+        if (!inCat) return false;
+        if (!q) return true;
+        return (
+          a.title.toLowerCase().includes(q) ||
+          a.excerpt.toLowerCase().includes(q) ||
+          a.category.toLowerCase().includes(q)
+        );
+      }),
+    [active, q],
+  );
 
-  const isDone = (id: string) => completed.includes(id);
-  // A step is unlocked if it's the first, or the previous step is completed.
-  const isUnlocked = (i: number) => i === 0 || isDone(ARTICLES[i - 1].id);
-  const doneCount = ARTICLES.filter((a) => isDone(a.id)).length;
-  const pct = Math.round((doneCount / ARTICLES.length) * 100);
-  // First unlocked, not-yet-completed step = where to continue.
-  const nextIdx = ARTICLES.findIndex((a, i) => isUnlocked(i) && !isDone(a.id));
-  const nextStep = nextIdx >= 0 ? ARTICLES[nextIdx] : null;
+  // Group filtered results by category, preserving the canonical order.
+  const grouped = useMemo(
+    () =>
+      CATEGORY_ORDER.map((cat) => ({ cat, items: filtered.filter((a) => a.category === cat) })).filter(
+        (g) => g.items.length > 0,
+      ),
+    [filtered],
+  );
 
   if (openId) {
     const idx = ARTICLES.findIndex((a) => a.id === openId);
     if (idx >= 0) {
-      const article = ARTICLES[idx];
-      const next = ARTICLES[idx + 1] ?? null;
       return (
         <ArticleView
-          article={article}
-          index={idx}
-          total={ARTICLES.length}
-          isDone={isDone(article.id)}
-          nextTitle={next?.title ?? null}
+          article={ARTICLES[idx]}
+          prev={ARTICLES[idx - 1] ?? null}
+          next={ARTICLES[idx + 1] ?? null}
           onBack={() => setOpenId(null)}
-          onComplete={() => {
-            if (!isDone(article.id)) persist([...completed, article.id]);
-            setOpenId(next ? next.id : null);
-          }}
+          onOpen={(id) => setOpenId(id)}
         />
       );
     }
   }
 
   return (
-    <div className="space-y-6">
-      {/* Hero — learning path progress (stays pinned while the guides scroll under it).
-         The sticky wrapper bleeds into the main scroll padding so content slides cleanly under it. */}
-      <div className="relative sticky top-0 z-20 -mx-5 bg-[var(--background)] px-5 pb-4 pt-2 before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-16 before:bg-[var(--background)] lg:-mx-8 lg:px-8">
-      <section className="overflow-hidden rounded-3xl bg-[var(--surface)] p-7 shadow-[0_10px_24px_-20px_rgba(10,10,10,0.35)] sm:p-9">
-        <span className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--primary-strong)]">Orbit learning path</span>
-        <div className="mt-3 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-          <div className="max-w-lg">
-            <h1 className="font-display text-[26px] font-extrabold leading-[1.15] sm:text-[30px]">Learn Orbit, one step at a time</h1>
-            <p className="mt-2 text-[14px] leading-6 text-[var(--muted)]">Work through the guides in order. Finish each one to unlock the next, from opening your account to keeping full control of your savings.</p>
-          </div>
-          {nextStep && (
-            <button
-              type="button"
-              onClick={() => setOpenId(nextStep.id)}
-              className="inline-flex w-fit shrink-0 items-center gap-2 rounded-xl bg-[var(--primary)] px-4 py-2.5 text-[14px] font-semibold text-[var(--primary-fg)] transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/40"
-            >
-              {doneCount === 0 ? "Start learning" : "Continue"} <ArrowRight className="h-4 w-4" aria-hidden />
-            </button>
-          )}
-        </div>
-        <div className="mt-6">
-          <div className="flex items-center justify-between text-[12px] font-medium text-[var(--muted)]">
-            <span>{doneCount} of {ARTICLES.length} completed</span>
-            <div className="flex items-center gap-3">
-              <span>{pct}%</span>
-              {doneCount > 0 && (
-                <button type="button" onClick={() => persist([])} className="text-[var(--faint)] underline-offset-2 transition-colors hover:text-[var(--foreground)] hover:underline">Reset</button>
-              )}
-            </div>
-          </div>
-          <div className="mt-2 h-2 overflow-hidden rounded-full bg-[var(--background)]">
-            <div className="h-full rounded-full bg-[var(--primary)] transition-[width] duration-500" style={{ width: `${loaded ? pct : 0}%` }} />
-          </div>
-        </div>
-      </section>
+    <div className="mx-auto w-full max-w-5xl space-y-6">
+      {/* Header */}
+      <div>
+        <span className={eyebrow}>Help center</span>
+        <h1 className="mt-1 font-display text-[clamp(1.4rem,3vw,1.9rem)] font-semibold leading-none tracking-[-0.02em]">
+          Guides &amp; answers
+        </h1>
+        <p className="mt-2 max-w-xl text-[14px] leading-6 text-[var(--muted)]">
+          Short, plain-language guides to everything Orbit does, from opening your account to keeping full control of your savings.
+        </p>
       </div>
 
-      {/* Stepped path */}
-      <ol className="space-y-3">
-        {ARTICLES.map((a, i) => {
-          const done = isDone(a.id);
-          const unlocked = isUnlocked(i);
-          const isNext = nextStep?.id === a.id;
-          const last = i === ARTICLES.length - 1;
-          return (
-            <li key={a.id} className="relative flex gap-4">
-              {/* Rail: node + connector */}
-              <div className="flex flex-col items-center pt-6">
-                <span
-                  className={`z-10 grid h-9 w-9 shrink-0 place-items-center rounded-full text-[13px] font-bold ring-4 ring-[var(--background)] ${
-                    done
-                      ? "bg-[var(--primary)] text-[var(--primary-fg)]"
-                      : unlocked
-                        ? "bg-[var(--primary-soft)] text-[var(--primary-strong)]"
-                        : "bg-[var(--surface)] text-[var(--faint)] ring-1 ring-[var(--border)]"
-                  }`}
-                >
-                  {done ? <Check className="h-4.5 w-4.5" aria-hidden /> : unlocked ? i + 1 : <Lock className="h-4 w-4" aria-hidden />}
-                </span>
-                {!last && <span className={`w-0.5 flex-1 ${done ? "bg-[var(--primary)]/40" : "bg-[var(--border)]"}`} aria-hidden />}
-              </div>
+      {/* Search */}
+      <div className="flex items-center gap-2.5 rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 focus-within:border-[var(--border-strong)]">
+        <Search className="h-4 w-4 shrink-0 text-[var(--faint)]" aria-hidden />
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search guides…"
+          aria-label="Search guides"
+          className="h-6 w-full min-w-0 bg-transparent text-[14px] text-[var(--foreground)] placeholder:text-[var(--faint)] focus:outline-none"
+        />
+      </div>
 
-              {/* Card */}
-              <div className="flex-1 pb-1">
-                <button
-                  type="button"
-                  disabled={!unlocked}
-                  onClick={() => unlocked && setOpenId(a.id)}
-                  className={`flex w-full items-stretch gap-4 overflow-hidden rounded-2xl bg-[var(--surface)] text-left transition-colors ${
-                    unlocked
-                      ? "hover:bg-[var(--background)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/30"
-                      : "cursor-not-allowed opacity-70"
-                  } ${isNext ? "ring-2 ring-[var(--primary)]/40" : ""}`}
-                >
-                  <div className="relative w-24 shrink-0 sm:w-32">
-                    <Cover article={a} className="h-full w-full" />
-                    {!unlocked && (
-                      <div className="absolute inset-0 grid place-items-center bg-[var(--surface)]/70 backdrop-grayscale">
-                        <Lock className="h-5 w-5 text-[var(--muted)]" aria-hidden />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex min-w-0 flex-1 flex-col justify-center py-4 pr-4">
-                    <div className="flex items-center gap-2">
-                      <Pill>{a.category}</Pill>
-                      {done && <span className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--success)]"><Check className="h-3 w-3" aria-hidden /> Done</span>}
-                      {isNext && !done && <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--primary-strong)]">Up next</span>}
-                      {!unlocked && <span className="inline-flex items-center gap-1 text-[11px] font-medium uppercase tracking-[0.1em] text-[var(--faint)]"><Lock className="h-3 w-3" aria-hidden /> Locked</span>}
-                    </div>
-                    <div className="mt-1.5 text-[15px] font-semibold leading-snug text-[var(--foreground)]">{a.title}</div>
-                    <div className="mt-1 line-clamp-2 text-[13px] leading-5 text-[var(--muted)]">
-                      {unlocked ? a.excerpt : `Finish "${ARTICLES[i - 1].title}" to unlock this guide.`}
-                    </div>
-                    <div className="mt-2 inline-flex items-center gap-1 text-[12px] text-[var(--faint)]"><Clock className="h-3 w-3" aria-hidden /> {a.read} read</div>
-                  </div>
-                </button>
-              </div>
-            </li>
+      {/* Category filter pills */}
+      <div className="flex flex-wrap gap-2">
+        {(["All", ...CATEGORY_ORDER] as const).map((cat) => {
+          const on = active === cat;
+          return (
+            <button
+              key={cat}
+              type="button"
+              onClick={() => setActive(cat)}
+              className={`rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors ${
+                on
+                  ? "bg-[var(--foreground)] text-[var(--background)]"
+                  : "border border-[var(--border)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:text-[var(--foreground)]"
+              }`}
+            >
+              {cat}
+            </button>
           );
         })}
-      </ol>
+      </div>
 
-      {doneCount === ARTICLES.length && (
-        <div className="flex items-center gap-2.5 rounded-2xl bg-[var(--success-soft)] px-5 py-4 text-[14px] font-medium text-[var(--success)]">
-          <Check className="h-5 w-5" aria-hidden /> You've completed the Orbit learning path. Nicely done.
+      {/* Category browse — one soft card per category, each listing its articles */}
+      {grouped.length > 0 ? (
+        <div className="space-y-5">
+          {grouped.map(({ cat, items }) => (
+            <section key={cat} className={`${CARD} overflow-hidden`}>
+              <div className="flex items-center gap-3 border-b border-[var(--border)] p-5 sm:p-6">
+                <CoverTile category={cat} icon={items[0].icon} size="md" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <h2 className="font-display text-[16px] font-semibold tracking-[-0.01em]">{cat}</h2>
+                    <span className="font-mono text-[12px] text-[var(--faint)]">
+                      {items.length} {items.length === 1 ? "guide" : "guides"}
+                    </span>
+                  </div>
+                  <p className="mt-0.5 truncate text-[13px] text-[var(--muted)]">{CATEGORY_BLURB[cat]}</p>
+                </div>
+              </div>
+              <div className="divide-y divide-[var(--border)] p-2">
+                {items.map((a) => (
+                  <ArticleRow key={a.id} article={a} onOpen={(id) => setOpenId(id)} />
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      ) : (
+        <div className={`${CARD} flex flex-col items-center gap-3 p-10 text-center`}>
+          <span className="grid h-11 w-11 place-items-center rounded-full bg-[var(--accent-soft)] text-[var(--accent-strong)]">
+            <BookOpen className="h-5 w-5" aria-hidden />
+          </span>
+          <p className="text-[14px] font-medium">No guides match &ldquo;{query}&rdquo;</p>
+          <button
+            type="button"
+            onClick={() => {
+              setQuery("");
+              setActive("All");
+            }}
+            className="rounded-full bg-[var(--foreground)] px-4 py-2 text-[13px] font-semibold text-[var(--background)] transition-opacity hover:opacity-90"
+          >
+            Clear search
+          </button>
         </div>
       )}
     </div>
