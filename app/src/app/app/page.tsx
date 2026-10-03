@@ -658,7 +658,7 @@ export default function Home() {
     }
     const cards = [
       { key: "spend", label: "Spending", icon: ShoppingBag, total: spendTotal, count: spendCount, weeks: spendW, bar: "var(--muted)", soft: "var(--surface)" },
-      { key: "saved", label: "Set aside", icon: PiggyBank, total: savedTotal, count: savedCount, weeks: savedW, bar: "var(--primary)", soft: "var(--primary-soft)" },
+      { key: "saved", label: "Set aside", icon: PiggyBank, total: savedTotal, count: savedCount, weeks: savedW, bar: "var(--accent)", soft: "var(--accent-soft)" },
       { key: "invest", label: "Invested", icon: TrendingUp, total: investTotal, count: investCount, weeks: investW, bar: "var(--success)", soft: "var(--success-soft)" },
     ];
     return { cards };
@@ -1223,225 +1223,231 @@ export default function Home() {
 
           {/* ═══════════ ACTIVITY ═══════════ */}
           {tab === "activity" && (
-            <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_320px]">
-              {/* ── MAIN: summaries + list ── */}
-              <div className="min-w-0 space-y-5">
-                <div className="flex items-center justify-between gap-3">
-                  <h2 className="font-display text-[20px] font-bold">My activity</h2>
-                  <button type="button" onClick={() => { reset(); clearActivity(); }} className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[var(--destructive)]/40 bg-transparent px-3 py-1.5 text-[13px] font-medium text-[var(--destructive)] transition-colors hover:bg-[var(--destructive-soft)]"><RotateCcw className="h-3.5 w-3.5" aria-hidden /> reset</button>
+            <div className="mx-auto w-full max-w-6xl space-y-5">
+              {/* Header */}
+              <div className="flex flex-wrap items-end justify-between gap-3">
+                <div>
+                  <div className={eyebrow}>Activity</div>
+                  <h2 className="mt-1 font-display text-[clamp(1.4rem,3vw,1.9rem)] font-semibold leading-none tracking-[-0.02em]">Everything your money did</h2>
                 </div>
+                <button type="button" onClick={() => { reset(); clearActivity(); }} className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--destructive)]/40 px-3.5 py-2 text-[13px] font-medium text-[var(--destructive)] transition-colors hover:bg-[var(--destructive-soft)]"><RotateCcw className="h-3.5 w-3.5" aria-hidden /> Reset demo</button>
+              </div>
 
-                {/* Summary cards — last 4 weeks */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                  {activityStats.cards.map((c) => {
-                    const Icon = c.icon;
-                    const max = Math.max(1, ...c.weeks);
-                    return (
-                      <div key={c.key} className="rounded-2xl bg-[var(--surface)] p-4">
-                        <div className="flex items-center gap-2">
-                          <span className="grid h-8 w-8 place-items-center rounded-lg" style={{ background: c.soft, color: c.bar }}><Icon className="h-4 w-4" aria-hidden /></span>
-                          <span className="text-[13px] font-semibold text-[var(--muted)]">{c.label}</span>
+              <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_320px]">
+                {/* ── MAIN: summary tiles + history ── */}
+                <div className="min-w-0 space-y-5">
+                  {/* Summary tiles — eyebrow + badge + figure + 4-week sparkline */}
+                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+                    {activityStats.cards.map((c) => {
+                      const Icon = c.icon;
+                      const max = Math.max(1, ...c.weeks);
+                      return (
+                        <div key={c.key} className={CARD}>
+                          <div className="flex items-center justify-between">
+                            <span className={eyebrow}>{c.label}</span>
+                            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full" style={{ background: c.soft, color: c.bar }}><Icon className="h-4 w-4" aria-hidden /></span>
+                          </div>
+                          <div className="mt-4 font-display text-[clamp(1.5rem,3.5vw,2rem)] font-semibold leading-none tabular-nums">{usd(c.total)}</div>
+                          <div className="mt-1 text-[12px] text-[var(--faint)]">{c.count} {c.count === 1 ? "item" : "items"} · last 4 weeks</div>
+                          <div className="mt-4 flex h-9 items-end gap-1.5" aria-hidden>
+                            {c.weeks.map((v, i) => (
+                              <div key={i} className="flex-1 rounded-sm transition-all" style={{ height: `${Math.max(8, (v / max) * 100)}%`, background: c.bar, opacity: i === 3 ? 1 : 0.35 }} />
+                            ))}
+                          </div>
                         </div>
-                        <div className="mt-3 font-mono text-[22px] font-bold leading-none tabular-nums">{usd(c.total)}</div>
-                        <div className="mt-1 text-[12px] text-[var(--faint)]">{c.count} {c.count === 1 ? "item" : "items"} · last 4 weeks</div>
-                        <div className="mt-3 flex h-9 items-end gap-1.5" aria-hidden>
-                          {c.weeks.map((v, i) => (
-                            <div key={i} className="flex-1 rounded-sm transition-all" style={{ height: `${Math.max(8, (v / max) * 100)}%`, background: c.bar, opacity: i === 3 ? 1 : 0.4 }} />
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* List activity */}
-                <div className="rounded-2xl bg-[var(--surface)] p-4 sm:p-5">
-                  <div className="flex items-center justify-between gap-3">
-                    <h3 className="font-display text-[16px] font-bold">List activity</h3>
-                    <div className="relative">
-                      <select
-                        value={historyTab}
-                        onChange={(e) => setHistoryTab(e.target.value)}
-                        aria-label="Filter activity by type"
-                        className="appearance-none rounded-lg border border-[var(--border-strong)] bg-[var(--background)] py-1.5 pl-3 pr-8 text-[13px] font-medium text-[var(--foreground)] transition-colors hover:bg-[var(--surface)]"
-                      >
-                        <option value="all">All types ({historyCounts.all ?? 0})</option>
-                        <option value="spending">Spending ({historyCounts.spending ?? 0})</option>
-                        <option value="deposits">Deposits ({historyCounts.deposits ?? 0})</option>
-                        <option value="withdrawals">Withdrawals ({historyCounts.withdrawals ?? 0})</option>
-                        <option value="goals">Goals ({historyCounts.goals ?? 0})</option>
-                        <option value="wallet">Wallet ({historyCounts.wallet ?? 0})</option>
-                      </select>
-                      <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted)]" aria-hidden />
-                    </div>
+                      );
+                    })}
                   </div>
 
-                  {q && <p className="mt-3 text-[13px] text-[var(--muted)]">Results for “{query}” · {filteredHistory.length} {filteredHistory.length === 1 ? "match" : "matches"}</p>}
-
-                  {filteredHistory.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-16 text-center">
-                      <ShoppingBag className="h-6 w-6 text-[var(--muted)]" aria-hidden />
-                      <p className="mt-2 text-[15px] text-[var(--muted)]">{q ? `Nothing matches “${query}”` : "Nothing here yet"}</p>
-                      <p className="mt-0.5 text-[13px] text-[var(--faint)]">Simulate a purchase or use your vault to see activity.</p>
+                  {/* History */}
+                  <div className={CARD}>
+                    <div className="flex items-center justify-between gap-3">
+                      <span className={eyebrow}>History</span>
+                      <div className="relative">
+                        <select
+                          value={historyTab}
+                          onChange={(e) => setHistoryTab(e.target.value)}
+                          aria-label="Filter activity by type"
+                          className="appearance-none rounded-full border border-[var(--border-strong)] bg-[var(--background)] py-1.5 pl-3.5 pr-8 text-[13px] font-medium text-[var(--foreground)] transition-colors hover:bg-[var(--surface)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/30"
+                        >
+                          <option value="all">All types ({historyCounts.all ?? 0})</option>
+                          <option value="spending">Spending ({historyCounts.spending ?? 0})</option>
+                          <option value="deposits">Deposits ({historyCounts.deposits ?? 0})</option>
+                          <option value="withdrawals">Withdrawals ({historyCounts.withdrawals ?? 0})</option>
+                          <option value="goals">Goals ({historyCounts.goals ?? 0})</option>
+                          <option value="wallet">Wallet ({historyCounts.wallet ?? 0})</option>
+                        </select>
+                        <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted)]" aria-hidden />
+                      </div>
                     </div>
-                  ) : (
-                    <>
-                      {/* Desktop: table */}
-                      <div className="mt-3 hidden lg:block">
-                        <table className="w-full border-separate border-spacing-y-1 text-left">
-                          <thead>
-                            <tr className="text-[11px] uppercase tracking-wide text-[var(--faint)]">
-                              <th className="pb-1 pl-3 font-semibold">Type</th>
-                              <th className="pb-1 font-semibold">Date</th>
-                              <th className="pb-1 font-semibold">Details</th>
-                              <th className="pb-1 pr-3 text-right font-semibold">Amount</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {filteredHistory.map((it, i) => {
-                              const zebra = i % 2 === 1 ? "bg-[var(--background)]" : "";
-                              if (it.type === "txn") {
-                                const t = it.t;
-                                const Icon = txnIcon(t);
+
+                    {q && <p className="mt-3 text-[13px] text-[var(--muted)]">Results for “{query}” · {filteredHistory.length} {filteredHistory.length === 1 ? "match" : "matches"}</p>}
+
+                    {filteredHistory.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center py-16 text-center">
+                        <ShoppingBag className="h-6 w-6 text-[var(--muted)]" aria-hidden />
+                        <p className="mt-2 text-[15px] text-[var(--muted)]">{q ? `Nothing matches “${query}”` : "Nothing here yet"}</p>
+                        <p className="mt-0.5 text-[13px] text-[var(--faint)]">Simulate a purchase or use your vault to see activity.</p>
+                      </div>
+                    ) : (
+                      <>
+                        {/* Desktop: table */}
+                        <div className="mt-4 hidden lg:block">
+                          <table className="w-full border-separate border-spacing-y-1 text-left">
+                            <thead>
+                              <tr className="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--faint)]">
+                                <th className="pb-2 pl-3 font-medium">Type</th>
+                                <th className="pb-2 font-medium">Date</th>
+                                <th className="pb-2 font-medium">Details</th>
+                                <th className="pb-2 pr-3 text-right font-medium">Amount</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {filteredHistory.map((it, i) => {
+                                const zebra = i % 2 === 1 ? "bg-[var(--background)]" : "";
+                                if (it.type === "txn") {
+                                  const t = it.t;
+                                  const Icon = txnIcon(t);
+                                  return (
+                                    <tr key={it.id} className={zebra}>
+                                      <td className="rounded-l-lg py-2.5 pl-3">
+                                        <div className="flex items-center gap-2.5">
+                                          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[var(--surface)] text-[var(--muted)]"><Icon className="h-4 w-4" aria-hidden /></span>
+                                          <span className="text-[13px] font-medium">Spending</span>
+                                        </div>
+                                      </td>
+                                      <td className="py-2.5 text-[13px] text-[var(--muted)]">{txnDate(t.ts)}</td>
+                                      <td className="py-2.5">
+                                        <div className="max-w-[180px] truncate text-[13px] font-medium">{t.name}</div>
+                                        <div className="text-[11px] text-[var(--muted)]">{t.category}</div>
+                                      </td>
+                                      <td className="rounded-r-lg py-2.5 pr-3 text-right">
+                                        <div className="font-mono text-[13px] tabular-nums">{usd(t.amountUsd)}</div>
+                                        {t.setAside > 0 && <div className="font-mono text-[11px] text-[var(--accent-strong)]">+{usd(t.setAside)} {t.deposited ? "invested" : "saved"}</div>}
+                                      </td>
+                                    </tr>
+                                  );
+                                }
+                                const a = it.a;
+                                const AIcon = ACTIVITY_ICON[a.kind];
+                                const money = a.kind === "deposit" || a.kind === "withdraw" || a.kind === "faucet";
                                 return (
                                   <tr key={it.id} className={zebra}>
                                     <td className="rounded-l-lg py-2.5 pl-3">
                                       <div className="flex items-center gap-2.5">
-                                        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[var(--surface)] text-[var(--muted)]"><Icon className="h-4 w-4" aria-hidden /></span>
-                                        <span className="text-[13px] font-medium">Spending</span>
+                                        <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg ${money ? "bg-[var(--accent-soft)] text-[var(--accent-strong)]" : "bg-[var(--surface)] text-[var(--muted)]"}`}><AIcon className="h-4 w-4" aria-hidden /></span>
+                                        <span className="text-[13px] font-medium capitalize">{it.cat}</span>
                                       </div>
                                     </td>
-                                    <td className="py-2.5 text-[13px] text-[var(--muted)]">{txnDate(t.ts)}</td>
-                                    <td className="py-2.5">
-                                      <div className="max-w-[180px] truncate text-[13px] font-medium">{t.name}</div>
-                                      <div className="text-[11px] text-[var(--muted)]">{t.category}</div>
-                                    </td>
-                                    <td className="rounded-r-lg py-2.5 pr-3 text-right">
-                                      <div className="font-mono text-[13px] tabular-nums">{usd(t.amountUsd)}</div>
-                                      {t.setAside > 0 && <div className="font-mono text-[11px] text-[var(--primary-strong)]">+{usd(t.setAside)} {t.deposited ? "invested" : "saved"}</div>}
-                                    </td>
+                                    <td className="py-2.5 text-[13px] text-[var(--muted)]">{txnDate(a.ts)}</td>
+                                    <td className="py-2.5"><div className="max-w-[240px] truncate text-[13px] font-medium">{a.text}</div></td>
+                                    <td className="rounded-r-lg py-2.5 pr-3 text-right font-mono text-[12px] text-[var(--faint)]">{actWhen(a.ts).split(", ").pop()}</td>
                                   </tr>
                                 );
-                              }
-                              const a = it.a;
-                              const AIcon = ACTIVITY_ICON[a.kind];
-                              const money = a.kind === "deposit" || a.kind === "withdraw" || a.kind === "faucet";
-                              return (
-                                <tr key={it.id} className={zebra}>
-                                  <td className="rounded-l-lg py-2.5 pl-3">
-                                    <div className="flex items-center gap-2.5">
-                                      <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg ${money ? "bg-[var(--primary-soft)] text-[var(--primary-strong)]" : "bg-[var(--surface)] text-[var(--muted)]"}`}><AIcon className="h-4 w-4" aria-hidden /></span>
-                                      <span className="text-[13px] font-medium capitalize">{it.cat}</span>
-                                    </div>
-                                  </td>
-                                  <td className="py-2.5 text-[13px] text-[var(--muted)]">{txnDate(a.ts)}</td>
-                                  <td className="py-2.5"><div className="max-w-[240px] truncate text-[13px] font-medium">{a.text}</div></td>
-                                  <td className="rounded-r-lg py-2.5 pr-3 text-right font-mono text-[12px] text-[var(--faint)]">{actWhen(a.ts).split(", ").pop()}</td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
 
-                      {/* Mobile: stacked list */}
-                      <ul className="mt-2 divide-y divide-[var(--border)] lg:hidden">
-                        {filteredHistory.map((it) => {
-                          if (it.type === "txn") {
-                            const t = it.t;
-                            const Icon = txnIcon(t);
+                        {/* Mobile: stacked list */}
+                        <ul className="mt-2 divide-y divide-[var(--border)] lg:hidden">
+                          {filteredHistory.map((it) => {
+                            if (it.type === "txn") {
+                              const t = it.t;
+                              const Icon = txnIcon(t);
+                              return (
+                                <li key={it.id} className="flex items-center gap-3.5 py-3.5">
+                                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--background)] text-[var(--muted)]"><Icon className="h-[18px] w-[18px]" aria-hidden /></span>
+                                  <div className="min-w-0 flex-1">
+                                    <div className="truncate text-[15px] font-medium">{t.name}</div>
+                                    <div className="text-[12px] text-[var(--muted)]">{t.category} · {txnDate(t.ts)}</div>
+                                  </div>
+                                  <div className="shrink-0 text-right">
+                                    <div className="font-mono text-[15px] tabular-nums text-[var(--foreground)]">{usd(t.amountUsd)}</div>
+                                    {t.setAside > 0 ? (
+                                      <div className="mt-1 inline-flex items-center gap-1 rounded-full bg-[var(--accent-soft)] px-2 py-0.5 text-[11px] font-medium text-[var(--accent-strong)]">
+                                        {t.deposited ? <Zap className="h-3 w-3" aria-hidden /> : <Coins className="h-3 w-3" aria-hidden />}
+                                        +{usd(t.setAside)} {t.deposited ? "invested" : "saved"}
+                                      </div>
+                                    ) : (
+                                      <div className="mt-1 text-[11px] text-[var(--faint)]">not saved</div>
+                                    )}
+                                  </div>
+                                </li>
+                              );
+                            }
+                            const a = it.a;
+                            const AIcon = ACTIVITY_ICON[a.kind];
+                            const money = a.kind === "deposit" || a.kind === "withdraw" || a.kind === "faucet";
                             return (
                               <li key={it.id} className="flex items-center gap-3.5 py-3.5">
-                                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--surface)] text-[var(--muted)]"><Icon className="h-[18px] w-[18px]" aria-hidden /></span>
-                                <div className="min-w-0 flex-1">
-                                  <div className="truncate text-[15px] font-medium">{t.name}</div>
-                                  <div className="text-[12px] text-[var(--muted)]">{t.category} · {txnDate(t.ts)}</div>
-                                </div>
-                                <div className="shrink-0 text-right">
-                                  <div className="font-mono text-[15px] tabular-nums text-[var(--foreground)]">{usd(t.amountUsd)}</div>
-                                  {t.setAside > 0 ? (
-                                    <div className="mt-1 inline-flex items-center gap-1 rounded-full bg-[var(--primary-soft)] px-2 py-0.5 text-[11px] font-medium text-[var(--primary-strong)]">
-                                      {t.deposited ? <Zap className="h-3 w-3" aria-hidden /> : <Coins className="h-3 w-3" aria-hidden />}
-                                      +{usd(t.setAside)} {t.deposited ? "invested" : "saved"}
-                                    </div>
-                                  ) : (
-                                    <div className="mt-1 text-[11px] text-[var(--faint)]">not saved</div>
-                                  )}
-                                </div>
+                                <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${money ? "bg-[var(--accent-soft)] text-[var(--accent-strong)]" : "bg-[var(--background)] text-[var(--muted)]"}`}><AIcon className="h-[18px] w-[18px]" aria-hidden /></span>
+                                <div className="min-w-0 flex-1"><div className="truncate text-[15px] font-medium">{a.text}</div></div>
+                                <div className="shrink-0 font-mono text-[12px] text-[var(--faint)]">{actWhen(a.ts)}</div>
                               </li>
                             );
-                          }
-                          const a = it.a;
-                          const AIcon = ACTIVITY_ICON[a.kind];
-                          const money = a.kind === "deposit" || a.kind === "withdraw" || a.kind === "faucet";
-                          return (
-                            <li key={it.id} className="flex items-center gap-3.5 py-3.5">
-                              <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${money ? "bg-[var(--primary-soft)] text-[var(--primary-strong)]" : "bg-[var(--surface)] text-[var(--muted)]"}`}><AIcon className="h-[18px] w-[18px]" aria-hidden /></span>
-                              <div className="min-w-0 flex-1"><div className="truncate text-[15px] font-medium">{a.text}</div></div>
-                              <div className="shrink-0 font-mono text-[12px] text-[var(--faint)]">{actWhen(a.ts)}</div>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              {/* ── SIDEBAR: monthly summary + achievements ── */}
-              <div className="space-y-5">
-                {/* Monthly summary + calendar */}
-                <div className="rounded-2xl bg-[var(--surface)] p-5">
-                  <div className="text-[12px] font-medium uppercase tracking-[0.16em] text-[var(--faint)]">Monthly summary</div>
-                  <div className="mt-3 flex items-end gap-2.5">
-                    <span className="font-mono text-[40px] font-bold leading-none tabular-nums text-[var(--primary-strong)]">{monthCal.countThisMonth}</span>
-                    <span className="pb-1 text-[13px] leading-tight text-[var(--muted)]">activities in<br />{monthCal.monthName}</span>
-                  </div>
-                  <div className="mt-4 grid grid-cols-7 gap-1 text-center">
-                    {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
-                      <div key={i} className="pb-1 text-[11px] font-semibold text-[var(--faint)]">{d}</div>
-                    ))}
-                    {Array.from({ length: monthCal.startDow }).map((_, i) => <div key={`b${i}`} />)}
-                    {Array.from({ length: monthCal.daysInMonth }).map((_, i) => {
-                      const day = i + 1;
-                      const e = monthCal.dayHas[day];
-                      const isToday = day === monthCal.today;
-                      const dot = e ? (e.invest ? "var(--success)" : e.saved ? "var(--primary)" : "var(--muted)") : null;
-                      return (
-                        <div key={day} className={`relative grid aspect-square place-items-center rounded-md text-[12px] tabular-nums ${isToday ? "bg-[var(--primary-soft)] font-bold text-[var(--primary-strong)]" : "text-[var(--foreground)]"}`}>
-                          {day}
-                          {dot && <span className="absolute bottom-1 h-1 w-1 rounded-full" style={{ background: dot }} aria-hidden />}
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <div className="mt-4 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-[var(--muted)]">
-                    <span className="inline-flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--primary)" }} /> Saved</span>
-                    <span className="inline-flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--success)" }} /> Invested</span>
-                    <span className="inline-flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--muted)" }} /> Spend</span>
+                          })}
+                        </ul>
+                      </>
+                    )}
                   </div>
                 </div>
 
-                {/* Achievements */}
-                <div className="rounded-2xl bg-[var(--surface)] p-5">
-                  <div className="text-[12px] font-medium uppercase tracking-[0.16em] text-[var(--faint)]">Achievements</div>
-                  <ul className="mt-3 space-y-3">
-                    {achievements.map((a) => {
-                      const Icon = a.icon;
-                      const soft = a.tone === "primary" ? "var(--primary-soft)" : "var(--success-soft)";
-                      const fg = a.tone === "primary" ? "var(--primary-strong)" : "var(--success)";
-                      return (
-                        <li key={a.id} className={`flex items-center gap-3 ${a.done ? "" : "opacity-45"}`}>
-                          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full" style={{ background: a.done ? soft : "var(--background)", color: a.done ? fg : "var(--faint)" }}><Icon className="h-4 w-4" aria-hidden /></span>
-                          <div className="min-w-0 flex-1">
-                            <div className="text-[13px] font-semibold">{a.label}</div>
-                            <div className="truncate text-[12px] text-[var(--muted)]">{a.desc}</div>
+                {/* ── SIDEBAR: this month + achievements ── */}
+                <div className="space-y-5">
+                  {/* This month + calendar */}
+                  <div className={CARD}>
+                    <div className={eyebrow}>This month</div>
+                    <div className="mt-3 flex items-end gap-2.5">
+                      <span className="font-display text-[40px] font-semibold leading-none tabular-nums text-[var(--accent-strong)]">{monthCal.countThisMonth}</span>
+                      <span className="pb-1 text-[13px] leading-tight text-[var(--muted)]">activities in<br />{monthCal.monthName}</span>
+                    </div>
+                    <div className="mt-5 grid grid-cols-7 gap-1 text-center">
+                      {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
+                        <div key={i} className="pb-1 text-[11px] font-semibold text-[var(--faint)]">{d}</div>
+                      ))}
+                      {Array.from({ length: monthCal.startDow }).map((_, i) => <div key={`b${i}`} />)}
+                      {Array.from({ length: monthCal.daysInMonth }).map((_, i) => {
+                        const day = i + 1;
+                        const e = monthCal.dayHas[day];
+                        const isToday = day === monthCal.today;
+                        const dot = e ? (e.invest ? "var(--success)" : e.saved ? "var(--accent)" : "var(--muted)") : null;
+                        return (
+                          <div key={day} className={`relative grid aspect-square place-items-center rounded-md text-[12px] tabular-nums ${isToday ? "bg-[var(--accent-soft)] font-bold text-[var(--accent-strong)]" : "text-[var(--foreground)]"}`}>
+                            {day}
+                            {dot && <span className="absolute bottom-1 h-1 w-1 rounded-full" style={{ background: dot }} aria-hidden />}
                           </div>
-                          {a.done && <Check className="h-4 w-4 shrink-0" style={{ color: fg }} aria-hidden />}
-                        </li>
-                      );
-                    })}
-                  </ul>
+                        );
+                      })}
+                    </div>
+                    <div className="mt-4 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-[var(--muted)]">
+                      <span className="inline-flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--accent)" }} /> Saved</span>
+                      <span className="inline-flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--success)" }} /> Invested</span>
+                      <span className="inline-flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--muted)" }} /> Spend</span>
+                    </div>
+                  </div>
+
+                  {/* Achievements */}
+                  <div className={CARD}>
+                    <div className={eyebrow}>Achievements</div>
+                    <ul className="mt-4 space-y-3">
+                      {achievements.map((a) => {
+                        const Icon = a.icon;
+                        const soft = a.tone === "success" ? "var(--success-soft)" : "var(--accent-soft)";
+                        const fg = a.tone === "success" ? "var(--success)" : "var(--accent-strong)";
+                        return (
+                          <li key={a.id} className={`flex items-center gap-3 ${a.done ? "" : "opacity-45"}`}>
+                            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full" style={{ background: a.done ? soft : "var(--background)", color: a.done ? fg : "var(--faint)" }}><Icon className="h-4 w-4" aria-hidden /></span>
+                            <div className="min-w-0 flex-1">
+                              <div className="text-[13px] font-semibold">{a.label}</div>
+                              <div className="truncate text-[12px] text-[var(--muted)]">{a.desc}</div>
+                            </div>
+                            {a.done && <Check className="h-4 w-4 shrink-0" style={{ color: fg }} aria-hidden />}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>
