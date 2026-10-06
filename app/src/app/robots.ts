@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://orbit.app";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://orbit-five-topaz.vercel.app";
 
 // Marketing pages are indexable; the signed-in app and API-ish routes are not.
 export default function robots(): MetadataRoute.Robots {

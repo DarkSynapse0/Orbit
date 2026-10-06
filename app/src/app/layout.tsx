@@ -15,7 +15,8 @@ const fontSans = Figtree({ variable: "--ff-sans", subsets: ["latin"], display: "
 const fontMono = JetBrains_Mono({ variable: "--ff-mono", subsets: ["latin"], display: "swap" });
 
 // Set NEXT_PUBLIC_SITE_URL to your production origin for correct canonical + OG URLs.
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://orbit.app";
+// The default must be the real deployed domain so share-preview (og:image) URLs resolve.
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://orbit-five-topaz.vercel.app";
 const TITLE = "Orbit — money that saves itself";
 const DESCRIPTION =
   "Orbit sets aside a little from your everyday spending and grows it with on-chain USDC yield on Solana. Self-custodial, verifiable, withdraw anytime.";
