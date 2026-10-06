@@ -71,7 +71,7 @@ export default function Landing() {
           <div className="mx-auto grid max-w-[88rem] grid-cols-[1fr_auto] items-center gap-3 md:grid-cols-[1fr_auto_1fr] md:gap-4">
             <div className="flex items-center gap-2 justify-self-start sm:gap-3">
               <Link href="/" aria-label="Orbit home">
-                <OrbitLogo className="h-8 sm:h-10" />
+                <OrbitLogo className="h-8 sm:h-10" onDark />
               </Link>
               <span className="inline-flex items-center rounded-full bg-white px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-[#0a0a0a]">demo</span>
             </div>
@@ -358,7 +358,7 @@ export default function Landing() {
         <div className="relative z-10 border-t border-white/10">
           <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-6 py-7 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <OrbitLogo className="h-7" />
+              <OrbitLogo className="h-7" onDark />
               <div className="text-[14px] text-white/70">Savings that run themselves</div>
             </div>
             <div className="flex items-center gap-6 text-[15px] text-white/70">
