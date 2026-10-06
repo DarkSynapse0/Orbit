@@ -1097,6 +1097,16 @@ export default function Home() {
                     {plaid?.env !== "production" && plaid?.configured && (
                       <button type="button" onClick={connectTestBank} disabled={busy} className="text-[12px] font-medium text-[var(--accent-strong)] transition-opacity hover:opacity-80 disabled:opacity-50">Just testing? Connect a sample bank →</button>
                     )}
+                    {plaid?.env !== "production" && plaid?.configured && (
+                      <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3.5 py-3 text-[12px] leading-relaxed">
+                        <div className="mb-1.5 font-mono text-[10px] font-medium uppercase tracking-wider text-[var(--faint)]">Sandbox test login</div>
+                        <div className="text-[var(--muted)]">In the Plaid window, skip the phone step, pick any bank (e.g. <span className="font-medium text-[var(--foreground)]">First Platypus Bank</span>), then sign in with:</div>
+                        <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 font-mono text-[var(--muted)]">
+                          <span>user&nbsp;<span className="font-medium text-[var(--accent-strong)]">user_good</span></span>
+                          <span>pass&nbsp;<span className="font-medium text-[var(--accent-strong)]">pass_good</span></span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
