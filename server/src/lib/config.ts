@@ -16,8 +16,9 @@ export const config = {
   thresholdUsd: Number(process.env.THRESHOLD_USD ?? 10),
   // Only devnet/testnet clusters may expose the faucet + SOL funding endpoints.
   isDevnet: cluster !== 'mainnet-beta' && cluster !== 'mainnet',
-  // Origins allowed to call this API. Comma-separated env override; localhost by default.
-  corsOrigins: (process.env.CORS_ORIGINS ?? 'http://localhost:3000')
+  // Origins allowed to call this API. Comma-separated env override; local dev + the
+  // deployed Vercel frontend by default.
+  corsOrigins: (process.env.CORS_ORIGINS ?? 'http://localhost:3000,https://orbit-five-topaz.vercel.app')
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean),
