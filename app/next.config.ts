@@ -14,15 +14,17 @@ const csp = [
   `form-action 'self'`,
   // 'wasm-unsafe-eval' lets the dotLottie player instantiate its WebAssembly
   // (blocked by default script-src in production) without allowing general eval.
-  `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://accounts.google.com https://apis.google.com${isDev ? " 'unsafe-eval'" : ""}`,
+  `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://accounts.google.com https://apis.google.com https://cdn.plaid.com${isDev ? " 'unsafe-eval'" : ""}`,
   `style-src 'self' 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com`,
   `img-src 'self' data: blob: https:`,
   `font-src 'self' data: https://fonts.gstatic.com`,
-  `frame-src 'self' https://accounts.google.com`,
+  // Plaid Link renders its bank-connect flow in an iframe from cdn.plaid.com.
+  `frame-src 'self' https://accounts.google.com https://cdn.plaid.com`,
   [
     `connect-src 'self'`,
     API_URL,
     `https://accounts.google.com`,
+    `https://*.plaid.com`,
     `https://*.googleusercontent.com`,
     `https://*.solana.com`,
     `https://api.devnet.solana.com`,

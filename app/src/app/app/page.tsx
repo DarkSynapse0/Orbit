@@ -365,8 +365,12 @@ export default function Home() {
 
   useEffect(() => {
     apiFetch(`/health`).then((r) => setOnline(r.ok)).catch(() => setOnline(false));
-    apiFetch(`/plaid/status`).then((r) => r.json()).then(setPlaid).catch(() => {});
   }, []);
+  // Plaid status needs a session — (re)fetch once the user is signed in.
+  useEffect(() => {
+    if (!user) return;
+    apiFetch(`/plaid/status`).then((r) => r.json()).then(setPlaid).catch(() => {});
+  }, [user]);
 
   const log = (kind: Entry["kind"], text: string) =>
     setFeed((f) => [{ id: Date.now() + Math.random(), kind, text }, ...f].slice(0, 40));
@@ -384,13 +388,14 @@ export default function Home() {
       .catch(() => {});
   }, []);
   useEffect(() => {
+    if (!user) return;
     refreshTxns();
     // Load the saved state so balances survive reloads.
     apiFetch(`/plaid/state`)
       .then((r) => r.json())
       .then((d) => d.state && setState(d.state))
       .catch(() => {});
-  }, [refreshTxns]);
+  }, [user, refreshTxns]);
 
   useEffect(() => {
     if (!connected || !owner) {
