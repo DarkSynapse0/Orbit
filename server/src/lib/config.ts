@@ -8,6 +8,8 @@ export const config = {
     clientId: process.env.PLAID_CLIENT_ID ?? '',
     secret: process.env.PLAID_SECRET ?? '',
     env: process.env.PLAID_ENV ?? 'sandbox',
+    // Public HTTPS URL Plaid posts transaction webhooks to (optional — we also sync on demand).
+    webhookUrl: process.env.PLAID_WEBHOOK_URL ?? '',
   },
   solana: {
     rpcUrl: process.env.SOLANA_RPC_URL ?? 'https://api.devnet.solana.com',

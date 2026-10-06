@@ -29,6 +29,7 @@
     "ogl": "^1.0.11",
     "react": "19.2.8",
     "react-dom": "19.2.8",
+    "react-plaid-link": "^5.0.0",
     "recharts": "^3.10.1",
     "tailwind-merge": "^3.7.0",
     "three": "^0.186.1"

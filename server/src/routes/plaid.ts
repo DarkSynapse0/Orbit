@@ -3,7 +3,17 @@ import type { Response } from 'express';
 import { computeSetAside } from '@orbit/shared';
 import { addPending, moveToInvested, getState, resetState, recordTxn, getTransactions, setSetAsidePct } from '../services/ledger.js';
 import { simulateStripeDeposit, depositToVault } from '../services/solana.js';
-import { isConfigured, hasItem, connectSandbox, syncTransactions, clearItem } from '../services/plaidClient.js';
+import {
+  isConfigured,
+  hasItem,
+  connectSandbox,
+  syncTransactions,
+  clearItem,
+  createLinkToken,
+  exchangePublicToken,
+  plaidEnv,
+  getInstitution,
+} from '../services/plaidClient.js';
 import { config } from '../lib/config.js';
 import { requireAuth } from '../lib/auth.js';
 import { parseAmount, parseAddress, BadRequest } from '../lib/validate.js';
@@ -76,9 +86,45 @@ async function runPipeline(userId: string, amountUsd: number, wallet?: string, n
   return { setAside, deposited, needsWallet, depositError, batch };
 }
 
-/** Is Plaid configured (keys present) and is a sandbox bank connected? */
-plaidRouter.get('/status', (_req, res) => {
-  res.json({ configured: isConfigured(), connected: hasItem() });
+/** Is Plaid configured (keys present), is a bank connected, and which environment? */
+plaidRouter.get('/status', requireAuth, (req, res) => {
+  const userId = req.userId!;
+  res.json({
+    configured: isConfigured(),
+    connected: hasItem(userId),
+    env: plaidEnv(),
+    institution: getInstitution(userId) ?? null,
+  });
+});
+
+/** Create a Plaid Link token for this user. The frontend opens Plaid Link with it so the
+ * user can pick their real bank and authenticate (works in sandbox and production alike). */
+plaidRouter.post('/link-token', requireAuth, async (req, res) => {
+  if (!isConfigured()) {
+    res.status(400).json({ error: 'Plaid keys not set on the server' });
+    return;
+  }
+  try {
+    const linkToken = await createLinkToken(req.userId!);
+    res.json({ link_token: linkToken });
+  } catch (e) {
+    fail(res, e);
+  }
+});
+
+/** Exchange the public_token Plaid Link returns for a stored access token (per user). */
+plaidRouter.post('/exchange', requireAuth, async (req, res) => {
+  const publicToken = req.body?.public_token;
+  if (typeof publicToken !== 'string' || !publicToken) {
+    res.status(400).json({ error: 'public_token required' });
+    return;
+  }
+  try {
+    const { institution } = await exchangePublicToken(req.userId!, publicToken);
+    res.json({ connected: true, institution: institution ?? null });
+  } catch (e) {
+    fail(res, e);
+  }
 });
 
 /** Plaid webhook (SYNC_UPDATES_AVAILABLE). For the demo we sync on demand instead. */
@@ -86,14 +132,18 @@ plaidRouter.post('/webhook', async (_req, res) => {
   res.json({ received: true });
 });
 
-/** Connect a sandbox bank via Plaid. */
-plaidRouter.post('/connect', requireAuth, async (_req, res) => {
+/** Sandbox shortcut: link Plaid's test bank without the Link UI (sandbox env only). */
+plaidRouter.post('/connect', requireAuth, async (req, res) => {
   if (!isConfigured()) {
     res.status(400).json({ error: 'Plaid keys not set in server/.env' });
     return;
   }
+  if (plaidEnv() !== 'sandbox') {
+    res.status(400).json({ error: 'Sandbox shortcut is sandbox-only — use Plaid Link to connect a real bank.' });
+    return;
+  }
   try {
-    await connectSandbox();
+    await connectSandbox(req.userId!);
     res.json({ connected: true });
   } catch (e) {
     fail(res, e);
@@ -101,8 +151,8 @@ plaidRouter.post('/connect', requireAuth, async (_req, res) => {
 });
 
 /** Disconnect the linked bank (clears the Plaid item). Keeps savings + history. */
-plaidRouter.post('/disconnect', requireAuth, (_req, res) => {
-  clearItem();
+plaidRouter.post('/disconnect', requireAuth, (req, res) => {
+  clearItem(req.userId!);
   res.json({ connected: false });
 });
 
@@ -121,7 +171,7 @@ plaidRouter.post('/sync', requireAuth, async (req, res) => {
     return;
   }
   try {
-    const purchases = await syncTransactions();
+    const purchases = await syncTransactions(userId);
     const processed = [];
     let needsWallet = false;
     for (const p of purchases) {
@@ -203,6 +253,6 @@ plaidRouter.get('/transactions', requireAuth, (req, res) => {
 /** Reset a user's earmark/bank state (demo replay). The on-chain vault is the user's own
  * money — only they can withdraw it, via the vault's Withdraw button. Reset never touches it. */
 plaidRouter.post('/reset', requireAuth, async (req, res) => {
-  clearItem();
+  clearItem(req.userId!);
   res.json({ state: resetState(req.userId!) });
 });

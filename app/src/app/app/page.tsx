@@ -41,6 +41,7 @@ import {
   ArrowLeftRight,
   Target,
 } from "lucide-react";
+import { usePlaidLink } from "react-plaid-link";
 import { useAuth } from "@/lib/auth";
 import { apiFetch } from "@/lib/api";
 import { AuthScreen } from "@/components/AuthScreen";
@@ -272,7 +273,8 @@ export default function Home() {
   const [online, setOnline] = useState<boolean | null>(null);
   const [onchain, setOnchain] = useState<OnChain | null>(null);
   const [lastSig, setLastSig] = useState<string | null>(null);
-  const [plaid, setPlaid] = useState<{ configured: boolean; connected: boolean } | null>(null);
+  const [plaid, setPlaid] = useState<{ configured: boolean; connected: boolean; env?: string; institution?: string | null } | null>(null);
+  const [linkToken, setLinkToken] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [investing, setInvesting] = useState(false);
   const [healthOpen, setHealthOpen] = useState(false);
@@ -512,14 +514,69 @@ export default function Home() {
     }
   }, [owner, refreshVault, refreshTxns]);
 
+  // Exchange the public_token Plaid Link returns for a stored (server-side) access token.
+  const onPlaidSuccess = useCallback(
+    async (publicToken: string) => {
+      setBusy(true);
+      try {
+        const d = await (
+          await apiFetch(`/plaid/exchange`, { method: "POST", body: JSON.stringify({ public_token: publicToken }) })
+        ).json();
+        if (d.connected) {
+          setPlaid((p) => ({ configured: true, connected: true, env: p?.env, institution: d.institution ?? null }));
+          log("info", `Connected ${d.institution ?? "your bank"} via Plaid`);
+          syncSpending(); // auto-pull spending right after connecting
+        } else log("none", `Plaid: ${d.error ?? "connect failed"}`);
+      } catch {
+        log("none", "Plaid connect failed");
+      } finally {
+        setBusy(false);
+        setLinkToken(null);
+      }
+    },
+    [syncSpending],
+  );
+
+  // Plaid Link widget: opens once we have a link_token and the SDK is ready.
+  const { open: openPlaid, ready: plaidReady } = usePlaidLink({
+    token: linkToken,
+    onSuccess: (publicToken) => {
+      if (publicToken) onPlaidSuccess(publicToken);
+    },
+    onExit: () => {
+      setLinkToken(null);
+      setBusy(false);
+    },
+  });
+  useEffect(() => {
+    if (linkToken && plaidReady) openPlaid();
+  }, [linkToken, plaidReady, openPlaid]);
+
+  // Connect a real bank: fetch a link_token, then the effect above opens Plaid Link.
   const connectBank = useCallback(async () => {
+    setBusy(true);
+    try {
+      const d = await (await apiFetch(`/plaid/link-token`, { method: "POST" })).json();
+      if (d.link_token) setLinkToken(d.link_token);
+      else {
+        log("none", `Plaid: ${d.error ?? "couldn't start Link"}`);
+        setBusy(false);
+      }
+    } catch {
+      log("none", "Plaid connect failed");
+      setBusy(false);
+    }
+  }, []);
+
+  // Sandbox-only convenience: link Plaid's test bank without the Link UI.
+  const connectTestBank = useCallback(async () => {
     setBusy(true);
     try {
       const d = await (await apiFetch(`/plaid/connect`, { method: "POST" })).json();
       if (d.connected) {
-        setPlaid({ configured: true, connected: true });
+        setPlaid((p) => ({ configured: true, connected: true, env: p?.env, institution: "First Platypus Bank" }));
         log("info", "Connected First Platypus Bank via Plaid sandbox");
-        syncSpending(); // auto-pull spending right after connecting
+        syncSpending();
       } else log("none", `Plaid: ${d.error ?? "connect failed"}`);
     } catch {
       log("none", "Plaid connect failed");
@@ -785,7 +842,7 @@ export default function Home() {
         <main className="w-full flex-1 px-5 py-6 lg:min-h-0 lg:overflow-y-auto lg:px-8 lg:py-6">
           {/* ═══════════ HOME ═══════════ */}
           {tab === "home" && (
-            <div className="mx-auto w-full max-w-6xl space-y-5">
+            <div className="w-full space-y-5">
               {/* Balance — a dark cosmic hero panel, mirroring the landing hero */}
               <section
                 className="dark relative isolate overflow-hidden rounded-[2rem] text-white"
@@ -956,7 +1013,7 @@ export default function Home() {
                 <button type="button" onClick={() => setTab("grow")} className="flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 text-left transition-colors hover:border-[var(--border-strong)]">
                   <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[var(--background)] text-[var(--muted)]"><Landmark className="h-5 w-5" aria-hidden /></span>
                   <div className="min-w-0 flex-1">
-                    <div className="text-[15px] font-medium">{plaid?.connected ? "First Platypus Bank" : "No bank connected"}</div>
+                    <div className="text-[15px] font-medium">{plaid?.connected ? (plaid.institution ?? "Your bank") : "No bank connected"}</div>
                     <div className="text-[13px] text-[var(--muted)]">{plaid?.connected ? "Connected · manage in Wallet" : "Connect your bank in Wallet"}</div>
                   </div>
                   <ChevronRight className="h-4 w-4 shrink-0 text-[var(--muted)]" aria-hidden />
@@ -1016,8 +1073,8 @@ export default function Home() {
                       <span className="rounded-full bg-[var(--accent-soft)] px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-[var(--accent-strong)]">Default</span>
                     </div>
                     <div className="mt-4 space-y-2.5">
-                      <div><div className="text-[11px] uppercase tracking-wide text-[var(--faint)]">Name</div><div className="text-[14px] font-medium">First Platypus Bank</div></div>
-                      <div><div className="text-[11px] uppercase tracking-wide text-[var(--faint)]">Connection</div><div className="text-[14px] font-medium">Plaid sandbox · detection only</div></div>
+                      <div><div className="text-[11px] uppercase tracking-wide text-[var(--faint)]">Name</div><div className="text-[14px] font-medium">{plaid?.institution ?? "Your bank"}</div></div>
+                      <div><div className="text-[11px] uppercase tracking-wide text-[var(--faint)]">Connection</div><div className="text-[14px] font-medium">{plaid?.env === "production" ? "Plaid · detection only" : "Plaid sandbox · detection only"}</div></div>
                       <div className="flex items-center gap-1.5 text-[12px] font-medium text-[var(--accent-strong)]"><span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" aria-hidden /> Connected</div>
                     </div>
                     <div className="mt-auto flex gap-2 pt-4">
@@ -1026,11 +1083,16 @@ export default function Home() {
                     </div>
                   </div>
                 ) : (
-                  <button type="button" onClick={connectBank} disabled={busy || !plaid?.configured} className="flex min-h-[190px] flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-[var(--border-strong)] p-5 text-center transition-colors hover:bg-[var(--surface)] disabled:opacity-50">
-                    {busy ? <Loader2 className="h-5 w-5 animate-spin" aria-hidden /> : <Plus className="h-5 w-5 text-[var(--muted)]" aria-hidden />}
-                    <span className="text-[14px] font-semibold">Connect a test bank</span>
-                    <span className="text-[12px] text-[var(--muted)]">Plaid sandbox — detection only</span>
-                  </button>
+                  <div className="flex flex-col gap-2">
+                    <button type="button" onClick={connectBank} disabled={busy || !plaid?.configured} className="flex min-h-[190px] flex-1 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-[var(--border-strong)] p-5 text-center transition-colors hover:bg-[var(--surface)] disabled:opacity-50">
+                      {busy ? <Loader2 className="h-5 w-5 animate-spin" aria-hidden /> : <Landmark className="h-5 w-5 text-[var(--muted)]" aria-hidden />}
+                      <span className="text-[14px] font-semibold">Connect your bank</span>
+                      <span className="text-[12px] text-[var(--muted)]">{plaid?.env === "production" ? "Secure login via Plaid — detection only" : "Secure login via Plaid (sandbox) — detection only"}</span>
+                    </button>
+                    {plaid?.env !== "production" && plaid?.configured && (
+                      <button type="button" onClick={connectTestBank} disabled={busy} className="text-[12px] font-medium text-[var(--accent-strong)] transition-opacity hover:opacity-80 disabled:opacity-50">Just testing? Connect a sample bank →</button>
+                    )}
+                  </div>
                 )}
               </div>
               {plaid && !plaid.configured && (

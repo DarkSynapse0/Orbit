@@ -38,6 +38,13 @@ db.exec(`
     ts          INTEGER NOT NULL
   );
   CREATE INDEX IF NOT EXISTS idx_txn_user_ts ON transactions (user_id, ts);
+  CREATE TABLE IF NOT EXISTS plaid_items (
+    user_id       TEXT PRIMARY KEY,
+    access_token  TEXT NOT NULL,
+    item_id       TEXT,
+    cursor        TEXT,
+    institution   TEXT
+  );
 `);
 
 // Migration: add set_aside_pct to savings tables created before percentage rates existed.
@@ -162,4 +169,52 @@ export function resetState(userId: string): SavingsState {
   deleteStmt.run(userId);
   deleteTxnStmt.run(userId);
   return getState(userId);
+}
+
+// --- Plaid items (one linked bank per user) ------------------------------------
+// Each user's Plaid access token + sync cursor live here, keyed by user_id, so one
+// person's linked bank never bleeds into another's. Access tokens are bearer secrets:
+// they stay server-side and are never returned to the client.
+export type PlaidItem = { accessToken: string; itemId?: string; cursor?: string; institution?: string };
+
+const selectPlaidStmt = db.prepare('SELECT * FROM plaid_items WHERE user_id = ?');
+const upsertPlaidStmt = db.prepare(
+  `INSERT INTO plaid_items (user_id, access_token, item_id, cursor, institution)
+   VALUES (?, ?, ?, ?, ?)
+   ON CONFLICT(user_id) DO UPDATE SET
+     access_token = excluded.access_token,
+     item_id = excluded.item_id,
+     cursor = excluded.cursor,
+     institution = excluded.institution`,
+);
+const updatePlaidCursorStmt = db.prepare('UPDATE plaid_items SET cursor = ? WHERE user_id = ?');
+const deletePlaidStmt = db.prepare('DELETE FROM plaid_items WHERE user_id = ?');
+
+/** The user's linked Plaid item, or null if they haven't connected a bank. */
+export function getPlaidItem(userId: string): PlaidItem | null {
+  const row = selectPlaidStmt.get(userId) as
+    | { user_id: string; access_token: string; item_id: string | null; cursor: string | null; institution: string | null }
+    | undefined;
+  if (!row) return null;
+  return {
+    accessToken: row.access_token,
+    itemId: row.item_id ?? undefined,
+    cursor: row.cursor ?? undefined,
+    institution: row.institution ?? undefined,
+  };
+}
+
+/** Store (or replace) the user's linked bank. */
+export function savePlaidItem(userId: string, item: PlaidItem): void {
+  upsertPlaidStmt.run(userId, item.accessToken, item.itemId ?? null, item.cursor ?? null, item.institution ?? null);
+}
+
+/** Advance the user's transactions-sync cursor after a successful sync. */
+export function updatePlaidCursor(userId: string, cursor: string | undefined): void {
+  updatePlaidCursorStmt.run(cursor ?? null, userId);
+}
+
+/** Forget the user's linked bank (disconnect). Savings + history are untouched. */
+export function clearPlaidItem(userId: string): void {
+  deletePlaidStmt.run(userId);
 }
