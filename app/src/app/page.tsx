@@ -3,7 +3,6 @@ import Link from "next/link";
 import {
   ArrowRight,
   ArrowUpRight,
-  ShieldCheck,
   RefreshCw,
   TrendingUp,
   Zap,
@@ -96,7 +95,7 @@ export default function Landing() {
           </Reveal>
           <Reveal delay={160}>
             <p className="mx-auto mt-5 max-w-lg text-[clamp(1rem,2.4vw,1.2rem)] leading-relaxed text-white/80">
-              Orbit puts away a little from what you spend and grows it with interest. It&rsquo;s still your money, and you can take it out whenever you like.
+              Orbit saves a slice of what you spend, then invests it in audited on-chain USDC yield &mdash; so your spare change actually earns, around 6% a year. Always yours, withdraw anytime.
             </p>
           </Reveal>
           <Reveal delay={240}>
@@ -147,7 +146,7 @@ export default function Landing() {
         <Reveal>
           <div className={`${eyebrow} text-[var(--faint)]`}>Your money at work</div>
           <h2 className="mt-4 max-w-2xl font-display text-[clamp(1.8rem,3.5vw,2.75rem)] font-semibold leading-[1.05] tracking-[-0.02em]">
-            How much your savings can grow.
+            What your savings earn, invested on-chain.
           </h2>
         </Reveal>
         {/* Chart + APY combined into one Statistics-style card */}
@@ -186,7 +185,7 @@ export default function Landing() {
             {/* divider + bottom stats (the APY, income/expenses style) */}
             <div className="mt-5 grid grid-cols-1 gap-6 border-t border-[var(--border)] pt-5 sm:grid-cols-2">
               <div>
-                <div className="text-[14px] text-[var(--muted)]">Orbit savings · per year</div>
+                <div className="text-[14px] text-[var(--muted)]">Invested on-chain · per year</div>
                 <div className="mt-2 flex items-baseline gap-3">
                   <span className="font-display text-[clamp(1.9rem,4.5vw,2.75rem)] font-semibold leading-none">
                     <CountUp value={6} decimals={1} suffix="%" />
@@ -217,9 +216,9 @@ export default function Landing() {
         <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {/* three feature tiles */}
           {[
-            { icon: Zap, t: "Automatic", d: "Set how much to save once. After that, Orbit puts a little aside from every purchase without you thinking about it.", img: "/illustrations/automatic.svg" },
-            { icon: ShieldCheck, t: "Only yours", d: "Orbit can add to your savings, but it can't take anything out or freeze it. Only you can do that.", img: "/illustrations/self-custody.svg" },
-            { icon: RefreshCw, t: "Take it out anytime", d: "Nothing's locked up. Get it all back in one tap, no fees and no minimums.", img: "/illustrations/withdraw.svg" },
+            { icon: Zap, t: "Saves automatically", d: "Set your rate once. Orbit puts a slice of every purchase aside on its own — no budgeting, no effort.", img: "/illustrations/automatic.svg" },
+            { icon: TrendingUp, t: "Invests for real yield", d: "Your savings don't sit idle — Orbit puts them to work in audited on-chain USDC lending, earning around 6% a year.", img: "/illustrations/self-custody.svg" },
+            { icon: RefreshCw, t: "Yours, and liquid", d: "Self-custody: only you can withdraw, never Orbit. Pull it all out in one tap — no lockups, no fees, no minimums.", img: "/illustrations/withdraw.svg" },
           ].map((f) => (
             <Reveal key={f.t}>
               <div className="group h-full overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] transition duration-300 hover:-translate-y-1 hover:border-[var(--border-strong)]">
@@ -250,7 +249,7 @@ export default function Landing() {
               How your money stays safe.
             </h2>
             <p className="mt-4 max-w-md text-[16px] leading-relaxed text-[var(--muted)]">
-              Your savings sit in an account only you can open. Every deposit, every bit of interest, and every withdrawal is right there in the open for you to check, any time you want.
+              Your savings sit in an on-chain vault only you can open. Every deposit, every bit of yield it earns, and every withdrawal is right there in the open for you to check, any time you want.
             </p>
           </Reveal>
           <Reveal delay={80}>
