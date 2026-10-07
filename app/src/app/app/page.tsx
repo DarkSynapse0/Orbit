@@ -976,7 +976,7 @@ export default function Home() {
 
                 {/* Try it */}
                 <div className={CARD}>
-                  <span className={eyebrow}>Try it</span>
+                  <span className={eyebrow}>Simulate a purchase</span>
                   <p className="mt-2 text-[14px] text-[var(--muted)]">Simulate a purchase and watch a slice get set aside.</p>
                   {!connected && <p className="mt-3 rounded-lg bg-[var(--accent-soft)] px-3 py-2 text-[13px] text-[var(--accent-strong)]">Open your vault in Wallet first, that&apos;s where set-asides land.</p>}
                   <div className="mt-4 flex gap-2">
@@ -1057,7 +1057,7 @@ export default function Home() {
                 <div className={CARD}>
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <span className={eyebrow}>Earning</span>
+                      <span className={eyebrow}>Current yield</span>
                       <div className="mt-3 font-display text-[clamp(1.5rem,3.5vw,2rem)] font-semibold leading-none tabular-nums text-[var(--accent-strong)]">{selectedVenue.apy.toFixed(1)}%</div>
                     </div>
                     <VenueMark venue={selectedVenue} className="h-9 w-9" />

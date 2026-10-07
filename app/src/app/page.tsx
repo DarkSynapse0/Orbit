@@ -294,7 +294,7 @@ export default function Landing() {
           {/* set-aside rule */}
           <Reveal className="lg:col-span-4">
             <div className={`${tile} flex h-full flex-col justify-between`}>
-              <div className={`${eyebrow} text-[var(--faint)]`}>The rule</div>
+              <div className={`${eyebrow} text-[var(--faint)]`}>How much you save</div>
               <div className="mt-6">
                 <div className="font-display text-[clamp(2rem,6vw,3rem)] font-semibold leading-none text-[var(--foreground)]">0.5–5%</div>
                 <p className="mt-3 text-[14px] leading-relaxed text-[var(--muted)]">of every purchase, your pick. Spend $50 at 1% → <span className="font-mono text-[var(--foreground)]">$0.50</span> set aside.</p>
@@ -342,7 +342,7 @@ export default function Landing() {
         <div className="relative z-10 mx-auto max-w-3xl px-6 py-14 text-center lg:py-16">
           <Reveal>
             <h2 className="mx-auto max-w-xl font-display text-[clamp(2rem,4.2vw,3.25rem)] font-medium leading-[1.0] tracking-[-0.03em]">
-              Put your money in orbit.
+              Put your spare change to work.
             </h2>
             <p className="mx-auto mt-4 max-w-md text-[16px] text-white/75">
               It takes about a minute to start. You won&rsquo;t need a crypto wallet, nothing gets locked up, and you can check everything yourself.
