@@ -13,6 +13,7 @@ import {
   exchangePublicToken,
   plaidEnv,
   getInstitution,
+  commitSyncCursor,
 } from '../services/plaidClient.js';
 import { config } from '../lib/config.js';
 import { requireAuth } from '../lib/auth.js';
@@ -174,7 +175,7 @@ plaidRouter.post('/sync', requireAuth, async (req, res) => {
   try {
     // Serialize per user so a concurrent sync/invest can't double-process the same funds.
     const { processed, needsWallet } = await withUserLock(userId, async () => {
-      const purchases = await syncTransactions(userId);
+      const { purchases, cursor } = await syncTransactions(userId);
       const out = [];
       let needsWalletFlag = false;
       for (const p of purchases) {
@@ -183,6 +184,8 @@ plaidRouter.post('/sync', requireAuth, async (req, res) => {
         if (r.needsWallet) needsWalletFlag = true;
         if (r.deposited) await new Promise((res) => setTimeout(res, 800)); // ease off the RPC between deposits
       }
+      // Earmarks are now durably written — safe to advance the Plaid cursor.
+      commitSyncCursor(userId, cursor);
       return { processed: out, needsWallet: needsWalletFlag };
     });
     res.json({ processed, needsWallet, state: getState(userId) });

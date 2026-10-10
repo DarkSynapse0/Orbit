@@ -101,7 +101,7 @@ export type DetectedPurchase = { amountUsd: number; name: string; date?: string 
  * spending ones (positive amount = money out). Retries briefly because freshly-linked
  * sandbox items take a moment to be ready.
  */
-export async function syncTransactions(userId: string): Promise<DetectedPurchase[]> {
+export async function syncTransactions(userId: string): Promise<{ purchases: DetectedPurchase[]; cursor: string | undefined }> {
   const item = getPlaidItem(userId);
   if (!item?.accessToken) throw new Error('No Plaid item — connect a bank first.');
 
@@ -123,12 +123,18 @@ export async function syncTransactions(userId: string): Promise<DetectedPurchase
     if (gotAny || cursor) break; // ready
     await new Promise((r) => setTimeout(r, 2000)); // item not ready yet — wait and retry
   }
-  updatePlaidCursor(userId, cursor);
+  // NOTE: cursor is NOT advanced here. The caller persists it (commitSyncCursor) only after
+  // the batch has been durably earmarked, so a crash mid-sync re-fetches rather than loses.
 
   // Only sync recent spending: transactions from the last day, not older history.
   const cutoff = Date.now() - 24 * 60 * 60 * 1000;
   const recent = all.filter((p) => !p.date || new Date(p.date).getTime() >= cutoff);
   // Cap how many run through the pipeline in one sync — each one that crosses the
   // threshold fires a real devnet deposit and the RPC rate-limits.
-  return recent.slice(0, 8);
+  return { purchases: recent.slice(0, 8), cursor };
+}
+
+/** Advance the sync cursor — call only after the batch has been durably earmarked. */
+export function commitSyncCursor(userId: string, cursor: string | undefined): void {
+  updatePlaidCursor(userId, cursor);
 }

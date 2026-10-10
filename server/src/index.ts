@@ -4,7 +4,7 @@ import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import { config } from './lib/config.js';
 import { plaidRouter } from './routes/plaid.js';
-import { getState } from './services/ledger.js';
+import { getState, closeDb } from './services/ledger.js';
 import { getVaultOnChain, getConfig, mintToAddress, fundSol } from './services/onchain.js';
 import { authRouter } from './routes/auth.js';
 import { requireAuth } from './lib/auth.js';
@@ -130,6 +130,29 @@ app.get('/venues', async (_req, res) => {
 
 app.use('/plaid', plaidRouter);
 
-app.listen(config.port, () => {
+const server = app.listen(config.port, () => {
   console.log(`Orbit server listening on :${config.port} (${config.solana.cluster})`);
 });
+// Don't let a stalled request (e.g. a hung RPC) hold a socket open forever.
+server.requestTimeout = 60_000;
+server.headersTimeout = 65_000;
+
+// Graceful shutdown: stop accepting, let in-flight requests finish, close the db cleanly.
+let shuttingDown = false;
+for (const sig of ['SIGTERM', 'SIGINT'] as const) {
+  process.on(sig, () => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    console.log(`[shutdown] ${sig} received — draining…`);
+    server.close(() => {
+      try {
+        closeDb();
+      } catch {
+        /* already closed */
+      }
+      process.exit(0);
+    });
+    // Force-exit if draining stalls (e.g. a long on-chain confirmation).
+    setTimeout(() => process.exit(1), 12_000).unref();
+  });
+}

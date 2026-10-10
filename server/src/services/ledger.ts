@@ -126,8 +126,15 @@ function toState(row: Row): SavingsState {
   return s;
 }
 
+// Money lives in REAL columns, so repeated += / -= accumulate float dust. Round to cents on
+// every write and clamp sub-cent negative pending (a flushed balance that landed at -1e-14)
+// to 0 so the threshold check and displayed balances stay clean.
+const round2 = (n: number) => Math.round(n * 100) / 100;
+
 function write(s: SavingsState) {
-  upsertStmt.run(s.userId, s.pendingUsd, s.investedUsd, clampSetAsidePct(s.setAsidePct ?? DEFAULT_SET_ASIDE_PCT), s.lastDepositSig ?? null);
+  let pending = round2(s.pendingUsd);
+  if (pending < 0 && pending > -0.01) pending = 0;
+  upsertStmt.run(s.userId, pending, round2(s.investedUsd), clampSetAsidePct(s.setAsidePct ?? DEFAULT_SET_ASIDE_PCT), s.lastDepositSig ?? null);
 }
 
 export function getState(userId: string): SavingsState {
@@ -217,4 +224,9 @@ export function updatePlaidCursor(userId: string, cursor: string | undefined): v
 /** Forget the user's linked bank (disconnect). Savings + history are untouched. */
 export function clearPlaidItem(userId: string): void {
   deletePlaidStmt.run(userId);
+}
+
+/** Flush + close the SQLite handle cleanly (called on graceful shutdown). */
+export function closeDb(): void {
+  db.close();
 }

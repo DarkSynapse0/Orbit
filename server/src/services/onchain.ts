@@ -11,6 +11,7 @@ import * as anchor from '@coral-xyz/anchor';
 const BN: any = (anchor as any).BN ?? (anchor as any).default?.BN;
 import { Connection, Keypair, PublicKey, SystemProgram, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
 import { createMint, getOrCreateAssociatedTokenAccount, mintTo, TOKEN_PROGRAM_ID } from '@solana/spl-token';
+import { withTimeout } from '../lib/timeout.js';
 import { config } from '../lib/config.js';
 
 // Real on-chain client for the orbit-vault program on devnet.
@@ -167,7 +168,7 @@ function ctx(): Promise<Ctx> {
 /** Mock Stripe hop: mint test USDC into the server's (funder's) token account. */
 export async function deliverUsdc(usd: number): Promise<void> {
   const c = await ctx();
-  await mintTo(c.connection, c.wallet, c.mint, c.funderAta, c.wallet, toBase(usd));
+  await withTimeout(mintTo(c.connection, c.wallet, c.mint, c.funderAta, c.wallet, toBase(usd)), 40_000, 'usdc mint');
 }
 
 /** Deposit USDC from the server (funder) into the user's OWN vault, routed into the yield
@@ -177,19 +178,23 @@ export async function depositOnChain(ownerAddress: string, usd: number): Promise
   const owner = new PublicKey(ownerAddress);
   await ensureVault(c, owner);
   const vault = vaultPda(c.program, owner, c.mint);
-  return c.program.methods
-    .deposit(new BN(toBase(usd)))
-    .accounts({
-      funder: c.wallet.publicKey,
-      owner,
-      vault,
-      reserve: c.reserve,
-      reserveVault: c.reserveVault,
-      mint: c.mint,
-      funderTokenAccount: c.funderAta,
-      tokenProgram: TOKEN_PROGRAM_ID,
-    })
-    .rpc();
+  return withTimeout(
+    c.program.methods
+      .deposit(new BN(toBase(usd)))
+      .accounts({
+        funder: c.wallet.publicKey,
+        owner,
+        vault,
+        reserve: c.reserve,
+        reserveVault: c.reserveVault,
+        mint: c.mint,
+        funderTokenAccount: c.funderAta,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      })
+      .rpc(),
+    45_000,
+    'on-chain deposit',
+  );
 }
 
 /** Read a user's live on-chain vault state (zeros if not opened yet). */
