@@ -37,7 +37,15 @@ app.use(express.json({ limit: '32kb' }));
 
 // Baseline rate limit on everything; tighter limits on the money/faucet routes.
 const apiLimiter = rateLimit({ windowMs: 60_000, max: 120, standardHeaders: true, legacyHeaders: false });
-const faucetLimiter = rateLimit({ windowMs: 60_000, max: 5, standardHeaders: true, legacyHeaders: false });
+// Keyed by the authenticated user (requireAuth runs first) so the cap is per-account, not
+// per-IP — a rotating-IP caller can't bypass it, and one user can't exhaust it for others.
+const faucetLimiter = rateLimit({
+  windowMs: 60_000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => req.userId ?? 'anon',
+});
 app.use(apiLimiter);
 
 // Turn thrown errors into safe responses: 400 for bad input, generic 5xx otherwise.
@@ -58,7 +66,7 @@ app.use('/auth', authRouter);
 
 // A user's own ledger balance — requires auth, reads the caller's own userId.
 app.get('/balance', requireAuth, (req, res) => res.json(getState(req.userId!)));
-app.get('/vault', async (req, res) => {
+app.get('/vault', requireAuth, async (req, res) => {
   try {
     const owner = parseAddress(req.query.owner);
     res.json(await getVaultOnChain(owner));
@@ -66,7 +74,7 @@ app.get('/vault', async (req, res) => {
     fail(res, e, 503);
   }
 });
-app.get('/config', async (_req, res) => {
+app.get('/config', requireAuth, async (_req, res) => {
   try {
     res.json(await getConfig());
   } catch (e) {
@@ -74,7 +82,7 @@ app.get('/config', async (_req, res) => {
   }
 });
 // Devnet-only test-token faucet. Requires auth + strict rate limit; capped amount.
-app.post('/faucet', faucetLimiter, requireAuth, async (req, res) => {
+app.post('/faucet', requireAuth, faucetLimiter, async (req, res) => {
   if (!config.isDevnet) {
     res.status(403).json({ error: 'faucet is devnet-only' });
     return;
@@ -94,7 +102,9 @@ app.get('/price/sol', async (_req, res) => {
   try {
     const now = Date.now();
     if (now - solPrice.at > 60_000) {
-      const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
+      const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd', {
+        signal: AbortSignal.timeout(5_000),
+      });
       const d = (await r.json()) as { solana?: { usd?: number } };
       const usd = Number(d?.solana?.usd);
       if (usd > 0) solPrice = { usd, at: now };
@@ -106,7 +116,7 @@ app.get('/price/sol', async (_req, res) => {
 });
 
 // Devnet-only gas top-up for the embedded wallet. Auth + strict rate limit.
-app.post('/fund-sol', faucetLimiter, requireAuth, async (req, res) => {
+app.post('/fund-sol', requireAuth, faucetLimiter, async (req, res) => {
   if (!config.isDevnet) {
     res.status(403).json({ error: 'fund-sol is devnet-only' });
     return;
