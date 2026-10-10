@@ -853,7 +853,7 @@ export default function Home() {
                 className="dark relative isolate overflow-hidden rounded-[2rem] text-white"
                 style={{ "--accent": "#35f0c6", "--accent-strong": "#5cf5d2", "--on-accent": "#06251c" } as React.CSSProperties}
               >
-                <div className="absolute inset-0 z-0 animate-slow-zoom bg-cover bg-center" style={{ backgroundImage: "url('/hero.png')" }} aria-hidden />
+                <div className="absolute inset-0 z-0 animate-slow-zoom bg-cover bg-center" style={{ backgroundImage: "url('/hero.webp')" }} aria-hidden />
                 <div
                   className="absolute inset-0 z-0"
                   style={{ background: "radial-gradient(120% 120% at 25% 15%, rgba(6,9,14,0.45) 0%, rgba(6,9,14,0.72) 58%, rgba(6,9,14,0.9) 100%)" }}

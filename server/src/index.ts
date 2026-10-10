@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import { config } from './lib/config.js';
 import { plaidRouter } from './routes/plaid.js';
@@ -15,6 +16,15 @@ process.on('uncaughtException', (e) => console.error('[uncaughtException]', (e a
 
 const app = express();
 app.set('trust proxy', 1);
+// gzip JSON/API responses — cheap bandwidth + latency win in production.
+app.use(compression());
+// Harden a few headers (API returns JSON; no inline content to protect).
+app.disable('x-powered-by');
+app.use((_req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  next();
+});
 // Only allow the known frontend origin(s) to call the API.
 app.use(
   cors({

@@ -54,7 +54,7 @@ export default function Landing() {
       >
         {/* background image, fading into the page background at the bottom */}
         {/* full-area background image, scaled to cover the whole hero */}
-        <div className="absolute inset-0 z-0 animate-slow-zoom bg-cover bg-center" style={{ backgroundImage: "url('/hero.png')" }} aria-hidden />
+        <div className="absolute inset-0 z-0 animate-slow-zoom bg-cover bg-center" style={{ backgroundImage: "url('/hero.webp')" }} aria-hidden />
         {/* even darken for centered-content legibility + fade the bottom into the page bg */}
         <div
           className="absolute inset-0 z-0"
@@ -225,7 +225,7 @@ export default function Landing() {
                 {/* media panel — illustration, or icon fallback */}
                 <div className="grid aspect-[4/3] place-items-center overflow-hidden border-b border-[var(--border)] bg-[var(--background)]">
                   {f.img ? (
-                    <img src={f.img} alt="" aria-hidden className="h-full w-full object-contain p-3 transition-transform duration-500 group-hover:scale-105" />
+                    <img src={f.img} alt="" aria-hidden loading="lazy" decoding="async" className="h-full w-full object-contain p-3 transition-transform duration-500 group-hover:scale-105" />
                   ) : (
                     <f.icon className="h-12 w-12 text-[var(--muted)]" aria-hidden />
                   )}
@@ -331,7 +331,7 @@ export default function Landing() {
         style={{ "--accent": "#35f0c6", "--on-accent": "#06251c" } as React.CSSProperties}
       >
         {/* cosmic background (same as the hero) + legibility scrim */}
-        <div className="absolute inset-0 z-0 bg-cover bg-center" style={{ backgroundImage: "url('/hero.png')" }} aria-hidden />
+        <div className="absolute inset-0 z-0 bg-cover bg-center" style={{ backgroundImage: "url('/hero.webp')" }} aria-hidden />
         <div
           className="absolute inset-0 z-0"
           style={{ background: "radial-gradient(120% 90% at 50% 25%, rgba(6,9,14,0.55) 0%, rgba(6,9,14,0.8) 62%, rgba(6,9,14,0.92) 100%)" }}
