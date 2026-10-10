@@ -90,7 +90,7 @@ export default function Landing() {
         <div className="mx-auto max-w-5xl text-center">
           <Reveal delay={80}>
             <h1 className="mx-auto mt-5 max-w-5xl font-display text-[clamp(2.4rem,9vw,7rem)] font-semibold leading-[1.08] tracking-[-0.03em] sm:tracking-[-0.04em]">
-              Money that saves, invests, and grows itself.
+              Money that grows itself.
             </h1>
           </Reveal>
           <Reveal delay={160}>
