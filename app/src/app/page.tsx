@@ -72,7 +72,7 @@ export default function Landing() {
               <Link href="/" aria-label="Orbit home">
                 <OrbitLogo className="h-8 sm:h-10" onDark />
               </Link>
-              <span className="inline-flex items-center rounded-full bg-white px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-[#0a0a0a]">demo</span>
+              <span className="inline-flex items-center rounded-full bg-white px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-[#0a0a0a]">beta</span>
             </div>
             <nav className="hidden items-center gap-8 md:flex md:justify-self-center">
               <a href="#deck" className="text-[16px] text-white/80 transition-colors hover:text-white">Product</a>
@@ -368,8 +368,8 @@ export default function Landing() {
           </div>
           <div className="mx-auto w-full max-w-7xl px-6 pb-7">
             <p className="text-[12px] leading-5 text-white/45">
-              This is a demo running on a test network. The savings tracking, your account, and the interest are all
-              real; only the bank-to-dollars step is faked for now. Orbit isn&rsquo;t a bank and isn&rsquo;t FDIC-insured, so
+              Orbit is in beta on Solana devnet. The savings tracking, your account, and the yield are all
+              real on-chain; only the bank-to-dollars step is simulated for now. Orbit isn&rsquo;t a bank and isn&rsquo;t FDIC-insured, so
               your balance can go up or down and nothing&rsquo;s guaranteed.
             </p>
           </div>

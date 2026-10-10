@@ -1011,7 +1011,7 @@ export default function Home() {
                       <Toggle on={paused} onClick={() => setPaused((v) => !v)} label="Pause" />
                     </div>
                   </div>
-                  <p className="mt-4 text-[12px] text-[var(--faint)]">Auto-invest and pause are a demo preview; the set-aside rate is live and used for every purchase.</p>
+                  <p className="mt-4 text-[12px] text-[var(--faint)]">Auto-invest and pause are a preview; the set-aside rate is live and used for every purchase.</p>
                 </div>
 
                 {/* Bank shortcut */}

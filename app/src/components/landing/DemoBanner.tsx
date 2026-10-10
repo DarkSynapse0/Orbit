@@ -42,8 +42,8 @@ export function DemoBanner() {
     >
       <div className="mx-auto max-w-[88rem] px-12 py-2">
         <p className="text-center text-[15px] leading-snug">
-          Heads up: Orbit is still just a demo. It runs on a test network, it&rsquo;s not a finished product yet, and no
-          real money is involved.
+          Beta &middot; Orbit runs on Solana devnet. Your vault and the yield are live on-chain; the bank-to-dollars step
+          is simulated, so no real money moves yet.
         </p>
         <button
           type="button"
