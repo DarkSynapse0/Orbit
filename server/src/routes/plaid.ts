@@ -17,6 +17,7 @@ import {
 import { config } from '../lib/config.js';
 import { requireAuth } from '../lib/auth.js';
 import { parseAmount, parseAddress, BadRequest } from '../lib/validate.js';
+import { withUserLock } from '../lib/lock.js';
 
 export const plaidRouter = Router();
 
@@ -171,15 +172,19 @@ plaidRouter.post('/sync', requireAuth, async (req, res) => {
     return;
   }
   try {
-    const purchases = await syncTransactions(userId);
-    const processed = [];
-    let needsWallet = false;
-    for (const p of purchases) {
-      const r = await runPipeline(userId, p.amountUsd, wallet, p.name, p.date ? new Date(p.date).getTime() : Date.now());
-      processed.push({ name: p.name, amountUsd: p.amountUsd, setAside: r.setAside, deposited: r.deposited, depositError: r.depositError });
-      if (r.needsWallet) needsWallet = true;
-      if (r.deposited) await new Promise((res) => setTimeout(res, 800)); // ease off the RPC between deposits
-    }
+    // Serialize per user so a concurrent sync/invest can't double-process the same funds.
+    const { processed, needsWallet } = await withUserLock(userId, async () => {
+      const purchases = await syncTransactions(userId);
+      const out = [];
+      let needsWalletFlag = false;
+      for (const p of purchases) {
+        const r = await runPipeline(userId, p.amountUsd, wallet, p.name, p.date ? new Date(p.date).getTime() : Date.now());
+        out.push({ name: p.name, amountUsd: p.amountUsd, setAside: r.setAside, deposited: r.deposited, depositError: r.depositError });
+        if (r.needsWallet) needsWalletFlag = true;
+        if (r.deposited) await new Promise((res) => setTimeout(res, 800)); // ease off the RPC between deposits
+      }
+      return { processed: out, needsWallet: needsWalletFlag };
+    });
     res.json({ processed, needsWallet, state: getState(userId) });
   } catch (e) {
     fail(res, e);
@@ -193,7 +198,7 @@ plaidRouter.post('/simulate-purchase', requireAuth, async (req, res) => {
     const amountUsd = parseAmount(req.body?.amountUsd);
     const wallet = req.body?.wallet ? parseAddress(req.body.wallet) : undefined;
     const name = (req.body?.name as string)?.slice(0, 120) || `Purchase · $${amountUsd}`;
-    const r = await runPipeline(userId, amountUsd, wallet, name);
+    const r = await withUserLock(userId, () => runPipeline(userId, amountUsd, wallet, name));
     res.json({ setAside: r.setAside, deposited: r.deposited, needsWallet: r.needsWallet, depositError: r.depositError, state: getState(userId) });
   } catch (e) {
     fail(res, e);
@@ -212,16 +217,18 @@ plaidRouter.post('/invest-now', requireAuth, async (req, res) => {
     fail(res, e);
     return;
   }
-  const batch = getState(userId).pendingUsd;
-  if (batch <= 0) {
-    res.json({ deposited: false, batch: 0, state: getState(userId) });
-    return;
-  }
   try {
-    await simulateStripeDeposit(batch);
-    const sig = await depositToVault(wallet, batch);
-    moveToInvested(userId, batch, sig);
-    res.json({ deposited: true, sig, batch, state: getState(userId) });
+    // Read the pending batch and move it in one serialized critical section, so a stale
+    // snapshot can't be deposited twice (double-charge / negative pending).
+    const result = await withUserLock(userId, async () => {
+      const batch = getState(userId).pendingUsd;
+      if (batch <= 0) return { deposited: false, batch: 0 } as const;
+      await simulateStripeDeposit(batch);
+      const sig = await depositToVault(wallet, batch);
+      moveToInvested(userId, batch, sig);
+      return { deposited: true, sig, batch } as const;
+    });
+    res.json({ ...result, state: getState(userId) });
   } catch (e) {
     // Keep the funds pending so it can be retried; don't leak the internal error.
     console.error('[plaid] invest-now deposit failed:', (e as Error)?.message ?? e);

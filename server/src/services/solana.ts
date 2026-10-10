@@ -11,12 +11,10 @@ import { deliverUsdc, depositOnChain } from './onchain.js';
  * deposited into the user's own vault.
  */
 export async function simulateStripeDeposit(amountUsd: number): Promise<void> {
-  try {
-    await deliverUsdc(amountUsd);
-    console.log(`[stripe->usdc] minted ${amountUsd} test USDC to the funder wallet on ${config.solana.cluster}`);
-  } catch (e) {
-    console.error('[stripe->usdc] on-chain mint failed (continuing):', (e as Error).message);
-  }
+  // Must THROW on failure: if the fiat->USDC delivery didn't happen, the caller has to keep
+  // the batch pending — never let the ledger mark it "invested" with no USDC behind it.
+  await deliverUsdc(amountUsd);
+  console.log(`[stripe->usdc] minted ${amountUsd} test USDC to the funder wallet on ${config.solana.cluster}`);
 }
 
 /**

@@ -1,6 +1,8 @@
 import 'dotenv/config';
 
 const cluster = process.env.SOLANA_CLUSTER ?? 'devnet';
+// Public default — only acceptable for local dev. Any deployed server must override it.
+const DEFAULT_SESSION_SECRET = 'dev-only-insecure-session-secret-change-me';
 
 export const config = {
   port: Number(process.env.PORT ?? 4000),
@@ -27,7 +29,7 @@ export const config = {
   // Google OAuth client id (must match the frontend's) for verifying ID tokens.
   googleClientId: process.env.GOOGLE_CLIENT_ID ?? process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? '',
   // Secret used to sign session tokens. MUST be set in production.
-  sessionSecret: process.env.SESSION_SECRET ?? 'dev-only-insecure-session-secret-change-me',
+  sessionSecret: process.env.SESSION_SECRET ?? DEFAULT_SESSION_SECRET,
   // Where persistent files (SQLite db, saved mint) live. On a host with a mounted
   // volume set this to that path (e.g. /data). Empty = alongside the source (local dev).
   dataDir: process.env.DATA_DIR ?? '',
@@ -35,3 +37,12 @@ export const config = {
   // Falls back to the local Solana CLI wallet when unset (local dev only).
   funderSecretKey: process.env.FUNDER_SECRET_KEY ?? '',
 };
+
+// Fail closed: a deployed/production server must never run on the public default secret
+// (anyone who read this repo could forge a session for any user). Local dev is exempt.
+if (config.sessionSecret === DEFAULT_SESSION_SECRET) {
+  if (process.env.NODE_ENV === 'production' || !config.isDevnet) {
+    throw new Error('SESSION_SECRET must be set to a strong, secret value in production — the default is public.');
+  }
+  console.warn('[config] WARNING: using the default SESSION_SECRET. Set SESSION_SECRET before deploying.');
+}

@@ -158,7 +158,9 @@ async function ensureVault(c: Ctx, owner: PublicKey) {
 }
 
 function ctx(): Promise<Ctx> {
-  if (!ctxPromise) ctxPromise = build();
+  // Don't cache a rejected build() forever — a cold-start RPC blip would otherwise brick
+  // every on-chain route until restart. Reset on failure so the next call retries.
+  if (!ctxPromise) ctxPromise = build().catch((e) => { ctxPromise = null; throw e; });
   return ctxPromise;
 }
 

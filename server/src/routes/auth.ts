@@ -36,13 +36,15 @@ authRouter.post('/google', async (req, res) => {
   }
 });
 
-/** Demo session: a shared sandbox account. Only enabled outside production
+/** Demo session: a throwaway sandbox account. Only enabled outside production
  * (devnet), so it can't be used to bypass real auth in a live deployment. */
 authRouter.post('/demo', (_req, res) => {
   if (!config.isDevnet) {
     res.status(403).json({ error: 'demo sign-in disabled' });
     return;
   }
-  const token = signSession({ userId: 'demo', email: 'alex@orbit.app', name: 'Alex Rivera' });
+  // Unique id per session so demo visitors never share a ledger or linked bank.
+  const userId = `demo:${globalThis.crypto.randomUUID()}`;
+  const token = signSession({ userId, email: 'alex@orbit.app', name: 'Alex Rivera' });
   res.json({ token, user: { name: 'Alex Rivera', email: 'alex@orbit.app' } });
 });
