@@ -23,6 +23,22 @@ of every vault's `accrued_yield` is actually backed. Consequences:
 Principal is always safe (the solvency cap guarantees it). The problem is purely the
 **yield distribution model**: it is not collectively solvent and not fair.
 
+## Guiding principle — invisible to users
+
+Shares, share-price, exchange rates, and basis points are **internal plumbing only**. A user
+never sees or thinks about them. The redesign must not make the product feel more "crypto."
+What users see stays exactly as friendly as today:
+
+- Plain dollars everywhere: **Total value $X**, **Yield earned $Y**, a simple **"~6% a year."**
+- The balance **ticks up smoothly** in real time (keep the live-yield animation) so savings
+  feel alive, even though on-chain value updates in steps.
+- Withdraw is **"Get it all back"** in one tap, or type a **dollar amount** — never "burn N
+  shares."
+- No jargon in the UI: no "shares", "exchange rate", "APY bps", "pool", "reserve". Those
+  words live in the code and this doc, not the screen.
+
+Every decision below is resolved in favor of keeping that experience.
+
 ## The model: shares, not principal + accrued
 
 Switch to the standard DeFi vault accounting (ERC‑4626 / cToken style). The reserve is a
@@ -162,18 +178,19 @@ The `Vault`/`Reserve` layouts change, so existing accounts can't be read by the 
   program id, then re-init and reset test state. Old vaults are abandoned (test only).
 - For the eventual mainnet launch this is just a clean first init.
 
-## Decisions for you
+## Resolved decisions (friendly defaults)
 
-1. **Withdraw by shares vs. by dollar amount.** Shares-based is clean and rounding-safe;
-   dollar-amount withdraw in a share model needs ceil-conversion and a payout clamp.
-   Recommend **shares-based** + a "withdraw max" path, with the backend converting a typed
-   dollar amount to shares. OK?
-2. **Yield funding cadence on devnet** — a backend cron calling `add_yield` (recommend) vs.
-   on-read lazy top-ups. Cron is simpler and auditable.
-3. **Migration** — seed-version bump (`_v2`) vs. fresh program id. Recommend seed bump
-   (keeps the same program id / upgrade authority).
-4. **Keep `target_apy_bps` on-chain** (for the UI's advertised rate) or move the target
-   entirely off-chain? Recommend keeping it, clearly labeled advisory.
+1. **Program API is shares; the UI stays dollars.** `withdraw` takes shares on-chain and the
+   program exposes a "withdraw all" (burn all shares) path. **The user only ever deals in
+   dollars** — they tap "Get it all back" (→ burn all) or type an amount, and the backend
+   converts dollars → shares (ceil the burn, clamp the payout so they never get less than
+   the dollars shown). Shares never surface in the app.
+2. **Devnet yield = a quiet backend cron** calling admin `add_yield`. Users just watch the
+   balance grow; nothing to configure or understand.
+3. **Migration = PDA seed bump (`_v2`)**, keeping the same program id + upgrade authority. No
+   user impact (devnet test state is reset).
+4. **Keep `target_apy_bps` on-chain** purely to drive the friendly "~6% a year" label;
+   clearly advisory. The real growth is whatever the pool actually earns.
 
 ## Test plan (anchor)
 
