@@ -2,7 +2,7 @@ import { config } from '../lib/config.js';
 import { deliverUsdc, depositOnChain } from './onchain.js';
 
 /**
- * HACKATHON MOCK — stands in for the one faked hop in the locked architecture:
+ * PAYMENT MOCK — stands in for the one simulated hop in the locked architecture:
  * Stripe pulling fiat from the bank, converting to USDC, and delivering it to
  * Orbit's settlement wallet (the funder). In production this becomes a real Stripe
  * call; nothing else in the pipeline changes. See doc "Money Movement Architecture".

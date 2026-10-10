@@ -2,8 +2,6 @@
 
 **A self-driving savings app on Solana.** It sets aside a slice of your daily spending and grows it through on-chain USDC yield — the Acorns habit, with DeFi's transparency and better returns.
 
-Built solo for the Colosseum Crypto World's Fair hackathon (Sept 14 – Oct 12, 2026).
-
 ## How it works
 
 ```
@@ -45,4 +43,4 @@ Node 26 · pnpm 11 · Rust 1.98 · Solana CLI (Agave) · Anchor
 
 ## Status
 
-Hackathon build. The only simulated hop is the fiat→USDC step (Stripe), mocked for the demo; the Solana vault, deposit, and yield are real on devnet.
+Running on Solana devnet. The only simulated hop is the fiat→USDC step (Stripe); the Solana vault, deposit, and yield are real on-chain. Production = swap the mock for a real Stripe call and move to mainnet.

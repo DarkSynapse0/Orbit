@@ -370,7 +370,7 @@ export default function Landing() {
             <p className="text-[12px] leading-5 text-white/45">
               This is a demo running on a test network. The savings tracking, your account, and the interest are all
               real; only the bank-to-dollars step is faked for now. Orbit isn&rsquo;t a bank and isn&rsquo;t FDIC-insured, so
-              your balance can go up or down and nothing&rsquo;s guaranteed. Built for the Colosseum Crypto World&rsquo;s Fair.
+              your balance can go up or down and nothing&rsquo;s guaranteed.
             </p>
           </div>
         </div>
