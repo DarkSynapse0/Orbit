@@ -95,7 +95,7 @@ export default function Landing() {
           </Reveal>
           <Reveal delay={160}>
             <p className="mx-auto mt-5 max-w-lg text-[clamp(1rem,2.4vw,1.2rem)] leading-relaxed text-white/80">
-              Orbit saves a slice of what you spend, then invests it in audited on-chain USDC yield &mdash; so your spare change actually earns, around 6% a year. Always yours, withdraw anytime.
+              Orbit saves a slice of what you spend, then invests it in audited on-chain USDC yield, so your spare change actually earns, around 6% a year. Always yours, withdraw anytime.
             </p>
           </Reveal>
           <Reveal delay={240}>
@@ -216,9 +216,9 @@ export default function Landing() {
         <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {/* three feature tiles */}
           {[
-            { icon: Zap, t: "Saves automatically", d: "Set your rate once. Orbit puts a slice of every purchase aside on its own — no budgeting, no effort.", img: "/illustrations/automatic.svg" },
-            { icon: TrendingUp, t: "Invests for real yield", d: "Your savings don't sit idle — Orbit puts them to work in audited on-chain USDC lending, earning around 6% a year.", img: "/illustrations/self-custody.svg" },
-            { icon: RefreshCw, t: "Yours, and liquid", d: "Self-custody: only you can withdraw, never Orbit. Pull it all out in one tap — no lockups, no fees, no minimums.", img: "/illustrations/withdraw.svg" },
+            { icon: Zap, t: "Saves automatically", d: "Set your rate once. Orbit puts a slice of every purchase aside on its own. No budgeting, no effort.", img: "/illustrations/automatic.svg" },
+            { icon: TrendingUp, t: "Invests for real yield", d: "Your savings don't sit idle. Orbit puts them to work in audited on-chain USDC lending, earning around 6% a year.", img: "/illustrations/self-custody.svg" },
+            { icon: RefreshCw, t: "Yours, and liquid", d: "Self-custody: only you can withdraw, never Orbit. Pull it all out in one tap, with no lockups, no fees, and no minimums.", img: "/illustrations/withdraw.svg" },
           ].map((f) => (
             <Reveal key={f.t}>
               <div className="group h-full overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] transition duration-300 hover:-translate-y-1 hover:border-[var(--border-strong)]">
@@ -255,7 +255,7 @@ export default function Landing() {
           <Reveal delay={80}>
             <img
               src="/illustrations/secure-payment.jpg"
-              alt="Isometric illustration of a secure on-chain vault — servers, locks, and keys protecting payments"
+              alt="Isometric illustration of a secure on-chain vault: servers, locks, and keys protecting payments"
               className="animate-float-soft mx-auto w-full max-w-[260px] sm:max-w-sm lg:max-w-lg"
               loading="lazy"
             />

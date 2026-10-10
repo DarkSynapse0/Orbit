@@ -39,7 +39,7 @@ const STEPS: Step[] = [
     n: "04",
     word: "Grow",
     title: "It earns real yield",
-    desc: "Orbit invests it in audited Solana lending — around 6% a year, day and night. Pull it all out whenever you want.",
+    desc: "Orbit invests it in audited Solana lending, around 6% a year, day and night. Pull it all out whenever you want.",
     icon: TrendingUp,
     lottie: "/lottie/step-4.json",
   },
