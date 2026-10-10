@@ -302,6 +302,10 @@ body {
 }
 .animate-float-soft { animation: float-soft 7s ease-in-out infinite; }
 
+/* Let the display face adapt its shape to size, and tighten tracking on big display
+   numbers/headings (large type reads too loose at its default spacing). */
+.font-display { font-optical-sizing: auto; letter-spacing: -0.015em; }
+
 /* Honor reduced-motion globally. */
 @media (prefers-reduced-motion: reduce) {
   *,

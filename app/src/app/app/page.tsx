@@ -42,6 +42,7 @@ import {
   Target,
 } from "lucide-react";
 import { usePlaidLink } from "react-plaid-link";
+import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { useAuth } from "@/lib/auth";
 import { apiFetch } from "@/lib/api";
 import { AuthScreen } from "@/components/AuthScreen";
@@ -187,6 +188,7 @@ function ExplorerLink({ href, children }: { href: string; children: React.ReactN
 }
 
 function Toggle({ on, onClick, label }: { on: boolean; onClick: () => void; label: string }) {
+  const reduce = useReducedMotion();
   return (
     <button
       type="button"
@@ -194,12 +196,16 @@ function Toggle({ on, onClick, label }: { on: boolean; onClick: () => void; labe
       aria-checked={on}
       aria-label={label}
       onClick={onClick}
-      className={`relative h-6 w-11 shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/50 ${
+      className={`relative h-6 w-11 shrink-0 rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/50 active:scale-95 ${
         on ? "bg-[var(--accent)]" : "bg-[var(--border-strong)]"
       }`}
     >
-      <span
-        className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-[left] duration-200 ${on ? "left-[22px]" : "left-0.5"}`}
+      {/* Thumb slides on a spring via transform (compositor-friendly), with a touch of
+          overshoot — the little tactile "snap" of an iOS switch. */}
+      <motion.span
+        className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm"
+        animate={{ x: on ? 20 : 0 }}
+        transition={reduce ? { duration: 0.12 } : { type: "spring", bounce: 0.35, duration: 0.3 }}
       />
     </button>
   );
@@ -275,6 +281,7 @@ export default function Home() {
   const [lastSig, setLastSig] = useState<string | null>(null);
   const [plaid, setPlaid] = useState<{ configured: boolean; connected: boolean; env?: string; institution?: string | null } | null>(null);
   const [linkToken, setLinkToken] = useState<string | null>(null);
+  const reduceMotion = useReducedMotion();
   const [syncing, setSyncing] = useState(false);
   const [investing, setInvesting] = useState(false);
   const [healthOpen, setHealthOpen] = useState(false);
@@ -845,6 +852,13 @@ export default function Home() {
         </header>
 
         <main className="w-full flex-1 px-5 py-6 lg:min-h-0 lg:overflow-y-auto lg:px-8 lg:py-6">
+          {/* Each tab springs in from the current state — content, not chrome, moves. */}
+          <motion.div
+            key={tab}
+            initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ type: "spring", bounce: 0, duration: 0.35 }}
+          >
           {/* ═══════════ HOME ═══════════ */}
           {tab === "home" && (
             <div className="w-full space-y-5">
@@ -1535,6 +1549,7 @@ export default function Home() {
           )}
 
           {tab === "help" && <HelpCenter />}
+          </motion.div>
         </main>
       </div>
 
@@ -1561,8 +1576,16 @@ export default function Home() {
         const next = healthSteps.find((s) => !s.done);
         return (
           <div className="fixed bottom-20 right-4 z-40 flex flex-col items-end gap-3 lg:bottom-5 lg:right-5">
+            <AnimatePresence>
             {healthOpen && (
-              <div className="w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-[0_24px_60px_-20px_rgba(10,10,10,0.35)]">
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.96 }}
+                transition={{ type: "spring", bounce: 0.12, duration: 0.3 }}
+                style={{ transformOrigin: "bottom right" }}
+                className="w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-[0_24px_60px_-20px_rgba(10,10,10,0.35)]"
+              >
                 <div className="flex items-start justify-between gap-2 border-b border-[var(--border)] px-5 py-4">
                   <div>
                     <div className={eyebrow}>What to do next</div>
@@ -1596,18 +1619,22 @@ export default function Home() {
                     </button>
                   ))}
                 </div>
-              </div>
+              </motion.div>
             )}
-            <button
+            </AnimatePresence>
+            <motion.button
               type="button"
               onClick={() => setHealthOpen((v) => !v)}
               aria-expanded={healthOpen}
-              className="group inline-flex items-center gap-2 rounded-full bg-[var(--foreground)] py-3 pl-4 pr-3 text-[14px] font-semibold text-[var(--background)] shadow-[0_16px_40px_-12px_rgba(10,10,10,0.5)] transition-transform hover:-translate-y-0.5"
+              whileTap={{ scale: 0.95 }}
+              whileHover={{ y: -2 }}
+              transition={{ type: "spring", bounce: 0.3, duration: 0.3 }}
+              className="group inline-flex items-center gap-2 rounded-full bg-[var(--foreground)] py-3 pl-4 pr-3 text-[14px] font-semibold text-[var(--background)] shadow-[0_16px_40px_-12px_rgba(10,10,10,0.5)]"
             >
               <Sparkles className="h-4 w-4" aria-hidden />
               <span className="hidden max-w-[10rem] truncate sm:inline">{healthOpen ? "Finish setup" : next?.label ?? "What to do"}</span>
               <span className="grid h-5 min-w-[1.25rem] place-items-center rounded-full bg-[var(--accent)] px-1 text-[11px] font-bold text-[var(--on-accent)]">{3 - done}</span>
-            </button>
+            </motion.button>
           </div>
         );
       })()}
