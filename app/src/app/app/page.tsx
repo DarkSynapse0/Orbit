@@ -286,8 +286,8 @@ export default function Home() {
   const [busy, setBusy] = useState(false);
   const [online, setOnline] = useState<boolean | null>(null);
   const [onchain, setOnchain] = useState<OnChain | null>(null);
-  const [vaultLoaded, setVaultLoaded] = useState(false);
   const [stateReady, setStateReady] = useState(false);
+  const [settleDone, setSettleDone] = useState(false);
   const [lastSig, setLastSig] = useState<string | null>(null);
   const [plaid, setPlaid] = useState<{ configured: boolean; connected: boolean; env?: string; institution?: string | null } | null>(null);
   const [linkToken, setLinkToken] = useState<string | null>(null);
@@ -360,8 +360,21 @@ export default function Home() {
   const liveYield = (onchain?.accruedYieldUsd ?? 0) + (principalUsd * APY * elapsed) / SECONDS_PER_YEAR;
   const total = state.pendingUsd + principalUsd + liveYield;
   // Each number stays a skeleton until its data source has answered once — no staring at $0.
-  const vaultReady = !connected || vaultLoaded;
-  const balancesReady = stateReady && vaultReady;
+  // Hold the skeleton until the real number is actually in — never flash $0 first. A
+  // value reveals the moment it's known: as soon as the vault reads non-zero, or a read
+  // confirms it's empty, or there's no wallet (nothing to load) — with a grace timeout
+  // as a safety net so nothing skeletons forever.
+  const vaultSettled = !connected || principalUsd > 0.005 || onchain?.exists === false || settleDone;
+  const showVault = vaultSettled;
+  const showTotal = stateReady && vaultSettled;
+  const showPending = stateReady;
+  // Safety net: after a few seconds, stop waiting and reveal whatever we have (so a
+  // genuinely-empty or slow-to-read vault still resolves instead of skeletoning forever).
+  useEffect(() => {
+    setSettleDone(false);
+    const t = setTimeout(() => setSettleDone(true), 6000);
+    return () => clearTimeout(t);
+  }, [user, connected]);
   const pct = Math.min(100, (state.pendingUsd / THRESHOLD) * 100);
 
   const [flash, setFlash] = useState(false);
@@ -402,8 +415,7 @@ export default function Home() {
     apiFetch(`/vault?owner=${owner}`)
       .then((r) => r.json())
       .then((v) => { if (!v.error && typeof v.principalUsd === "number") setOnchain(v); })
-      .catch(() => {})
-      .finally(() => setVaultLoaded(true));
+      .catch(() => {});
   }, [owner]);
 
   const [txns, setTxns] = useState<Txn[]>([]);
@@ -918,7 +930,7 @@ export default function Home() {
                       flash ? "text-[var(--accent-strong)]" : "text-white"
                     }`}
                   >
-                    {balancesReady ? usd(total) : <Skel w="w-64" h="h-[0.72em]" dark />}
+                    {showTotal ? usd(total) : <Skel w="w-64" h="h-[0.72em]" dark />}
                   </div>
                   <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-[15px]">
                     <span className="inline-flex items-center gap-1.5 font-medium text-[var(--accent-strong)]">
@@ -944,7 +956,7 @@ export default function Home() {
                     <span className={eyebrow}>In vault</span>
                     <span className="grid h-9 w-9 place-items-center rounded-full bg-[var(--foreground)] text-[var(--background)]"><Coins className="h-4 w-4" aria-hidden /></span>
                   </div>
-                  <div className="mt-4 font-display text-[clamp(1.75rem,4vw,2.5rem)] font-semibold leading-none tabular-nums text-[var(--accent-strong)]">{vaultReady ? usd(principalUsd) : <Skel w="w-24" />}</div>
+                  <div className="mt-4 font-display text-[clamp(1.75rem,4vw,2.5rem)] font-semibold leading-none tabular-nums text-[var(--accent-strong)]">{showVault ? usd(principalUsd) : <Skel w="w-24" />}</div>
                   <p className="mt-2 text-[13px] leading-relaxed text-[var(--muted)]">Invested on-chain and earning yield. Only you can withdraw it.</p>
                 </div>
                 <div className={CARD}>
@@ -952,7 +964,7 @@ export default function Home() {
                     <span className={eyebrow}>Set aside</span>
                     <span className="grid h-9 w-9 place-items-center rounded-full bg-[var(--foreground)] text-[var(--background)]"><Landmark className="h-4 w-4" aria-hidden /></span>
                   </div>
-                  <div className="mt-4 font-display text-[clamp(1.75rem,4vw,2.5rem)] font-semibold leading-none tabular-nums">{stateReady ? usd(state.pendingUsd) : <Skel w="w-24" />}</div>
+                  <div className="mt-4 font-display text-[clamp(1.75rem,4vw,2.5rem)] font-semibold leading-none tabular-nums">{showPending ? usd(state.pendingUsd) : <Skel w="w-24" />}</div>
                   <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-[var(--border)]">
                     <div className={`h-full rounded-full transition-[width] duration-300 ${state.pendingUsd >= THRESHOLD ? "bg-[var(--accent)]" : "bg-[var(--disabled)]"}`} style={{ width: `${pct}%` }} />
                   </div>
@@ -969,7 +981,7 @@ export default function Home() {
                 <div className="flex flex-wrap items-end justify-between gap-4">
                   <div>
                     <span className={eyebrow}>Your money over time</span>
-                    <div className="mt-3 font-display text-[clamp(1.75rem,4vw,2.5rem)] font-semibold leading-none tabular-nums">{balancesReady ? usd(total) : <Skel w="w-40" />}</div>
+                    <div className="mt-3 font-display text-[clamp(1.75rem,4vw,2.5rem)] font-semibold leading-none tabular-nums">{showTotal ? usd(total) : <Skel w="w-40" />}</div>
                   </div>
                   <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[var(--foreground)] text-[var(--background)]"><TrendingUp className="h-4 w-4" aria-hidden /></span>
                 </div>
@@ -1105,7 +1117,7 @@ export default function Home() {
                     <span className={eyebrow}>Total value</span>
                     {liveYield > 0 && <span className="inline-flex items-center gap-1 rounded-full bg-[var(--accent-soft)] px-2 py-0.5 text-[12px] font-semibold text-[var(--accent-strong)]"><ArrowUp className="h-3 w-3" aria-hidden />{usd(liveYield)}</span>}
                   </div>
-                  <div className="mt-3 font-display text-[clamp(1.5rem,3.5vw,2rem)] font-semibold leading-none tabular-nums">{balancesReady ? usd(total) : <Skel w="w-36" />}</div>
+                  <div className="mt-3 font-display text-[clamp(1.5rem,3.5vw,2rem)] font-semibold leading-none tabular-nums">{showTotal ? usd(total) : <Skel w="w-36" />}</div>
                 </div>
                 <div className={CARD}>
                   <span className={eyebrow}>Yield earned</span>
