@@ -143,12 +143,10 @@ export function AuthScreen() {
   );
 }
 
-function Feature({ icon: Icon, title, children }: { icon: React.ComponentType<{ className?: string }>; title: string; children: React.ReactNode }) {
+function Feature({ icon: Icon, title, children }: { icon: React.ComponentType<{ className?: string; strokeWidth?: number }>; title: string; children: React.ReactNode }) {
   return (
-    <li className="flex gap-3">
-      <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-white/15 bg-white/10 text-[var(--accent)]">
-        <Icon className="h-4 w-4" />
-      </span>
+    <li className="flex gap-3.5">
+      <Icon className="mt-0.5 h-7 w-7 shrink-0 text-white" strokeWidth={1.75} />
       <span className="text-white/70">
         <span className="font-medium text-white">{title}.</span> {children}
       </span>
