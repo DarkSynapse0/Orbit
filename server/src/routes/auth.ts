@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { OAuth2Client } from 'google-auth-library';
 import { config } from '../lib/config.js';
 import { signSession } from '../lib/auth.js';
+import { upsertUser } from '../services/ledger.js';
 
 export const authRouter = Router();
 
@@ -28,6 +29,8 @@ authRouter.post('/google', async (req, res) => {
     // Stable per-user id derived from the verified subject — not client-supplied.
     const userId = `google:${p.sub}`;
     const user = { name: p.name ?? 'Orbit user', email: p.email ?? '', picture: p.picture };
+    // Record the user in the registry (first sign-in creates the row; returns refresh it).
+    upsertUser(userId, user.email || null, user.name);
     const token = signSession({ userId, email: user.email, name: user.name });
     res.json({ token, user });
   } catch (e) {

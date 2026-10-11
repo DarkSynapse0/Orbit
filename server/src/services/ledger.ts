@@ -45,6 +45,14 @@ db.exec(`
     cursor        TEXT,
     institution   TEXT
   );
+  CREATE TABLE IF NOT EXISTS users (
+    user_id       TEXT PRIMARY KEY,
+    email         TEXT,
+    name          TEXT,
+    created_at    INTEGER NOT NULL,
+    last_login_at INTEGER NOT NULL,
+    token_version INTEGER NOT NULL DEFAULT 0
+  );
 `);
 
 // Migration: add set_aside_pct to savings tables created before percentage rates existed.
@@ -99,6 +107,50 @@ export function getTransactions(userId: string, limit = 500): Txn[] {
     deposited: !!r.deposited,
     ts: r.ts,
   }));
+}
+
+// ---- Users: a canonical registry, upserted on each real sign-in. Parent of the
+// savings / transactions / plaid_items rows. token_version is reserved for future
+// "sign out everywhere" revocation (bump it to invalidate a user's live tokens). ----
+export type User = {
+  userId: string;
+  email: string | null;
+  name: string | null;
+  createdAt: number;
+  lastLoginAt: number;
+  tokenVersion: number;
+};
+
+const upsertUserStmt = db.prepare(
+  `INSERT INTO users (user_id, email, name, created_at, last_login_at)
+   VALUES (?, ?, ?, ?, ?)
+   ON CONFLICT(user_id) DO UPDATE SET
+     email = excluded.email,
+     name = excluded.name,
+     last_login_at = excluded.last_login_at`,
+);
+const selectUserStmt = db.prepare('SELECT * FROM users WHERE user_id = ?');
+
+/** Create the user's row on first sign-in, or refresh name/email + last_login on return. */
+export function upsertUser(userId: string, email: string | null, name: string | null): void {
+  const now = Date.now();
+  upsertUserStmt.run(userId, email, name, now, now);
+}
+
+/** The user's registry row, or null if they've never signed in. */
+export function getUser(userId: string): User | null {
+  const r = selectUserStmt.get(userId) as
+    | { user_id: string; email: string | null; name: string | null; created_at: number; last_login_at: number; token_version: number }
+    | undefined;
+  if (!r) return null;
+  return {
+    userId: r.user_id,
+    email: r.email,
+    name: r.name,
+    createdAt: r.created_at,
+    lastLoginAt: r.last_login_at,
+    tokenVersion: r.token_version,
+  };
 }
 
 type Row = { user_id: string; pending_usd: number; invested_usd: number; set_aside_pct: number; last_deposit_sig: string | null };
