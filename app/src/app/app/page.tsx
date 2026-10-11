@@ -46,7 +46,6 @@ import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { useAuth } from "@/lib/auth";
 import { apiFetch } from "@/lib/api";
 import { AuthScreen } from "@/components/AuthScreen";
-import { DemoBanner } from "@/components/landing/DemoBanner";
 import { UserMenu, Avatar } from "@/components/UserMenu";
 import { LineArea } from "@/components/dashboard/Charts";
 import { SavingsGoals } from "@/components/dashboard/SavingsGoals";
@@ -781,6 +780,16 @@ export default function Home() {
 
         </nav>
 
+        {/* Beta/devnet notice — a card above the secondary menu */}
+        <div className="mb-4 rounded-xl border border-[var(--border)] bg-[var(--background)] p-3">
+          <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--accent-strong)]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" aria-hidden /> Beta · Devnet
+          </div>
+          <p className="mt-1.5 text-[12px] leading-snug text-[var(--muted)]">
+            Your vault and yield are live on-chain. The bank-to-dollars step is simulated, so no real money moves yet.
+          </p>
+        </div>
+
         {/* Secondary nav pinned to the bottom */}
         <div className="space-y-1 border-t border-[var(--border)] pt-4">
           {NAV_SECONDARY.map((t) => {
@@ -853,7 +862,6 @@ export default function Home() {
         </header>
 
         <main className="w-full flex-1 px-5 py-6 lg:min-h-0 lg:overflow-y-auto lg:px-8 lg:py-6">
-          <DemoBanner />
           {/* Each tab springs in from the current state — content, not chrome, moves. */}
           <motion.div
             key={tab}
