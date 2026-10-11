@@ -869,11 +869,9 @@ export default function Home() {
           {/* ═══════════ HOME ═══════════ */}
           {tab === "home" && (
             <div className="w-full space-y-5">
-              {/* Total saved (60%) + In vault (20%) + Set aside (20%), one row */}
-              <div className="grid grid-cols-1 gap-5 lg:grid-cols-5">
               {/* Balance — a dark cosmic hero panel, mirroring the landing hero */}
               <section
-                className="dark relative isolate overflow-hidden rounded-[2rem] text-white lg:col-span-3"
+                className="dark relative isolate overflow-hidden rounded-[2rem] text-white"
                 style={{ "--accent": "#35f0c6", "--accent-strong": "#5cf5d2", "--on-accent": "#06251c" } as React.CSSProperties}
               >
                 <div className="absolute inset-0 z-0 animate-slow-zoom bg-cover bg-center" style={{ backgroundImage: "url('/hero.webp')" }} aria-hidden />
@@ -915,8 +913,9 @@ export default function Home() {
                 </div>
               </section>
 
-              {/* In vault (20%) */}
-                <div className={`${CARD} lg:col-span-1`}>
+              {/* In vault + Set aside */}
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                <div className={CARD}>
                   <div className="flex items-center justify-between">
                     <span className={eyebrow}>In vault</span>
                     <span className="grid h-9 w-9 place-items-center rounded-full bg-[var(--foreground)] text-[var(--background)]"><Coins className="h-4 w-4" aria-hidden /></span>
@@ -924,7 +923,7 @@ export default function Home() {
                   <div className="mt-4 font-display text-[clamp(1.75rem,4vw,2.5rem)] font-semibold leading-none tabular-nums text-[var(--accent-strong)]">{usd(principalUsd)}</div>
                   <p className="mt-2 text-[13px] leading-relaxed text-[var(--muted)]">Invested on-chain and earning yield. Only you can withdraw it.</p>
                 </div>
-                <div className={`${CARD} lg:col-span-1`}>
+                <div className={CARD}>
                   <div className="flex items-center justify-between">
                     <span className={eyebrow}>Set aside</span>
                     <span className="grid h-9 w-9 place-items-center rounded-full bg-[var(--foreground)] text-[var(--background)]"><Landmark className="h-4 w-4" aria-hidden /></span>
