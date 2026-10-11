@@ -34,7 +34,6 @@ const tile ="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-7 t
 const LOGOS = [
   { name: "Solana", src: "/solana.svg", srcDark: "/solana-white.svg", className: "h-5 w-auto", href: "https://solana.com" },
   { name: "USDC", src: "/usdc.svg", srcDark: "/usdc-white.svg", className: "h-6 w-auto", href: "https://www.circle.com/usdc" },
-  { name: "Aave", src: "/aave.svg", srcDark: "/aave-white.svg", className: "h-5 w-auto", href: "https://aave.com" },
   { name: "Plaid", src: "/plaid.svg", srcDark: "/plaid-white.svg", className: "h-7 w-auto", href: "https://plaid.com" },
   { name: "Stripe", src: "/stripe.svg", srcDark: "/stripe-white.svg", className: "h-6 w-auto", href: "https://stripe.com" },
   { name: "Phantom", src: "/phantom.svg", srcDark: "/phantom-white.svg", className: "h-6 w-auto", href: "https://phantom.app" },
