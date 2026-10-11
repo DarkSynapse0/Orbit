@@ -212,8 +212,15 @@ export async function getVaultOnChain(ownerAddress: string) {
     accruedYieldUsd = fromBase(Number(v.accruedYield));
     lastUpdateTs = Number(v.lastUpdateTs);
     exists = true;
-  } catch {
-    /* vault not opened yet */
+  } catch (e) {
+    // Only a genuinely-missing vault (not opened yet) is a real "$0" balance. Any
+    // other failure (RPC hiccup, timeout) must NOT masquerade as 0 — otherwise the
+    // client flickers the vault to $0 on every transient read error. Re-throw those
+    // so the route returns 503 and the client keeps its last known-good value.
+    const msg = ((e as Error)?.message ?? '').toLowerCase();
+    if (!/does not exist|account does not exist|not found|could not find/.test(msg)) {
+      throw e;
+    }
   }
   return {
     exists,

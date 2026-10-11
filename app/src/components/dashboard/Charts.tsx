@@ -127,8 +127,25 @@ export function LineArea({
   const n = Math.max(1, xLabels.length);
   const x = (i: number) => L + (n <= 1 ? (W - L - R) / 2 : (i * (W - L - R)) / (n - 1));
   const y = (v: number) => T + (1 - v / max) * (H - T - B);
-  const toLine = (pts: number[]) => pts.map((v, i) => `${i ? "L" : "M"} ${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(" ");
-  const toArea = (pts: number[]) => `${toLine(pts)} L ${x(pts.length - 1).toFixed(1)} ${H - B} L ${x(0).toFixed(1)} ${H - B} Z`;
+  // Smooth the line with a Catmull-Rom spline (drawn as cubic Béziers) so growth reads
+  // as a soft curve instead of stiff straight segments.
+  const xy = (pts: number[]) => pts.map((v, i) => ({ x: x(i), y: y(v) }));
+  const smooth = (p: { x: number; y: number }[]) => {
+    if (p.length < 2) return p.length ? `M ${p[0].x.toFixed(1)} ${p[0].y.toFixed(1)}` : "";
+    let d = `M ${p[0].x.toFixed(1)} ${p[0].y.toFixed(1)}`;
+    for (let i = 0; i < p.length - 1; i++) {
+      const p0 = p[i - 1] || p[i], p1 = p[i], p2 = p[i + 1], p3 = p[i + 2] || p2;
+      const c1x = p1.x + (p2.x - p0.x) / 6, c1y = p1.y + (p2.y - p0.y) / 6;
+      const c2x = p2.x - (p3.x - p1.x) / 6, c2y = p2.y - (p3.y - p1.y) / 6;
+      d += ` C ${c1x.toFixed(1)} ${c1y.toFixed(1)} ${c2x.toFixed(1)} ${c2y.toFixed(1)} ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
+    }
+    return d;
+  };
+  const toLine = (pts: number[]) => smooth(xy(pts));
+  const toArea = (pts: number[]) => {
+    const p = xy(pts);
+    return `${smooth(p)} L ${p[p.length - 1].x.toFixed(1)} ${H - B} L ${p[0].x.toFixed(1)} ${H - B} Z`;
+  };
   const ticks = 3;
   const first = series[0];
   const lastX = first ? x(first.points.length - 1) : 0;
