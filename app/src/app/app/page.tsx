@@ -680,12 +680,13 @@ export default function Home() {
   const txnDate = (ts: number) => new Date(ts).toLocaleDateString("en-US", { month: "short", day: "numeric" });
   const actWhen = (ts: number) => new Date(ts).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 
-  // App-activity events (deposits, goals, wallet…), live.
+  // App-activity events (deposits, goals, wallet…), live. Re-fetches when the user
+  // changes (after sign-in) so history is loaded per-account from the server.
   useEffect(() => {
-    const sync = () => setActs(getActivity());
+    const sync = () => { getActivity().then(setActs); };
     sync();
     return onActivity(sync);
-  }, []);
+  }, [user]);
 
   // Header search filters your history by merchant or category.
   const q = query.trim().toLowerCase();

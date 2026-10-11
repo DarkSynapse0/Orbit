@@ -54,6 +54,14 @@ db.exec(`
     token_version INTEGER NOT NULL DEFAULT 0,
     password_hash TEXT
   );
+  CREATE TABLE IF NOT EXISTS activity (
+    id       INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id  TEXT NOT NULL,
+    kind     TEXT NOT NULL,
+    text     TEXT NOT NULL,
+    ts       INTEGER NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS idx_activity_user_ts ON activity (user_id, ts);
 `);
 
 // Migration: add set_aside_pct to savings tables created before percentage rates existed.
@@ -114,6 +122,31 @@ export function getTransactions(userId: string, limit = 500): Txn[] {
     deposited: !!r.deposited,
     ts: r.ts,
   }));
+}
+
+// ---- Activity: per-user app-event log (deposits, goals, wallet, sign-in…). The
+// server-side home for what used to live in the browser's localStorage, so a user's
+// history follows them across devices and never leaks between accounts on one browser. ----
+export type ActivityRow = { id: string; kind: string; text: string; ts: number };
+
+const insertActivityStmt = db.prepare('INSERT INTO activity (user_id, kind, text, ts) VALUES (?, ?, ?, ?)');
+const selectActivityStmt = db.prepare('SELECT id, kind, text, ts FROM activity WHERE user_id = ? ORDER BY ts DESC, id DESC LIMIT ?');
+const deleteActivityStmt = db.prepare('DELETE FROM activity WHERE user_id = ?');
+
+/** Append an app-activity event for a user. */
+export function recordActivity(userId: string, kind: string, text: string, ts = Date.now()): void {
+  insertActivityStmt.run(userId, kind, text, ts);
+}
+
+/** A user's activity, newest first. */
+export function listActivity(userId: string, limit = 200): ActivityRow[] {
+  const rows = selectActivityStmt.all(userId, limit) as { id: number; kind: string; text: string; ts: number }[];
+  return rows.map((r) => ({ id: String(r.id), kind: r.kind, text: r.text, ts: r.ts }));
+}
+
+/** Clear a user's activity log. */
+export function clearActivity(userId: string): void {
+  deleteActivityStmt.run(userId);
 }
 
 // ---- Users: a canonical registry, upserted on each real sign-in. Parent of the

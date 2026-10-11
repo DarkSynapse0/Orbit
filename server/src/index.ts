@@ -4,6 +4,7 @@ import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import { config } from './lib/config.js';
 import { plaidRouter } from './routes/plaid.js';
+import { activityRouter } from './routes/activity.js';
 import { getState, closeDb } from './services/ledger.js';
 import { getVaultOnChain, getConfig, mintToAddress, fundSol } from './services/onchain.js';
 import { authRouter } from './routes/auth.js';
@@ -139,6 +140,7 @@ app.get('/venues', async (_req, res) => {
 });
 
 app.use('/plaid', plaidRouter);
+app.use('/activity', activityRouter);
 
 const server = app.listen(config.port, () => {
   console.log(`Orbit server listening on :${config.port} (${config.solana.cluster})`);

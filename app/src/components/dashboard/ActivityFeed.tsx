@@ -35,7 +35,7 @@ export function ActivityFeed({ showTitle = true }: { showTitle?: boolean }) {
   const [filter, setFilter] = useState("all");
 
   useEffect(() => {
-    const sync = () => setEvents(getActivity());
+    const sync = () => { getActivity().then(setEvents); };
     sync();
     return onActivity(sync);
   }, []);
