@@ -41,7 +41,7 @@ export function SavingsArea({ data }: { data: { date: string; saved: number }[] 
             <ChartTooltipContent
               indicator="dot"
               labelFormatter={(value) =>
-                new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                new Date(value as string).toLocaleDateString("en-US", { month: "short", day: "numeric" })
               }
               formatter={(v) => `$${Number(v).toFixed(2)}`}
             />
