@@ -28,6 +28,9 @@ export const config = {
     .filter(Boolean),
   // Google OAuth client id (must match the frontend's) for verifying ID tokens.
   googleClientId: process.env.GOOGLE_CLIENT_ID ?? process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? '',
+  // Apple "Sign in with Apple" Services ID (the audience when verifying identity
+  // tokens). Empty = Apple sign-in disabled (button hidden, /auth/apple → 503).
+  appleClientId: process.env.APPLE_CLIENT_ID ?? process.env.NEXT_PUBLIC_APPLE_CLIENT_ID ?? '',
   // Secret used to sign session tokens. MUST be set in production.
   sessionSecret: process.env.SESSION_SECRET ?? DEFAULT_SESSION_SECRET,
   // Where persistent files (SQLite db, saved mint) live. On a host with a mounted

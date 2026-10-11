@@ -6,19 +6,35 @@ import { ArrowLeft, ShieldCheck, TrendingUp, Landmark } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { OrbitLogo } from "@/components/common/OrbitLogo";
 
+const inputClass =
+  "w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/40 outline-none transition-colors focus:border-white/40";
+
 // Full-screen sign-in / sign-up gate for the dashboard, set on the same floating
 // cosmic panel as the landing hero (hero.webp + scrim + aurora glows), dark-scoped
 // so the copy and the frosted auth card read as light-on-dark. Google OAuth covers
 // both sign-in and sign-up (Google creates the account on first continue), so there
 // is one flow, not two forms.
 export function AuthScreen() {
-  const { googleReady, error, renderGoogleButton, signInWithGoogle } = useAuth();
+  const { googleReady, hasApple, error, renderGoogleButton, signInWithGoogle, signInWithApple, signInEmail, signUpEmail } = useAuth();
   const btnRef = useRef<HTMLDivElement>(null);
   const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (googleReady && btnRef.current) renderGoogleButton(btnRef.current);
   }, [googleReady, renderGoogleButton]);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (submitting) return;
+    setSubmitting(true);
+    if (mode === "signin") await signInEmail(email.trim(), password);
+    else await signUpEmail(email.trim(), password, name.trim() || undefined);
+    setSubmitting(false);
+  }
 
   return (
     <div className="min-h-dvh bg-[var(--background)] p-2 sm:p-3">
@@ -26,17 +42,17 @@ export function AuthScreen() {
         className="dark relative isolate flex min-h-[calc(100dvh-1rem)] flex-col overflow-hidden rounded-[2rem] text-white"
         style={{ "--accent": "#35f0c6", "--accent-strong": "#5cf5d2", "--on-accent": "#06251c" } as React.CSSProperties}
       >
-        {/* same floating cosmic image as the hero */}
-        <div className="absolute inset-0 z-0 animate-slow-zoom bg-cover bg-center" style={{ backgroundImage: "url('/hero.webp')" }} aria-hidden />
+        {/* same floating cosmic image as the hero — static, no motion */}
+        <div className="absolute inset-0 z-0 bg-cover bg-center" style={{ backgroundImage: "url('/hero.webp')" }} aria-hidden />
         {/* darken for legibility */}
         <div
           className="absolute inset-0 z-0"
           style={{ background: "radial-gradient(120% 90% at 50% 40%, rgba(6,9,14,0.42) 0%, rgba(6,9,14,0.72) 55%, rgba(6,9,14,0.9) 100%)" }}
           aria-hidden
         />
-        {/* breathing aurora glows */}
-        <div className="animate-aurora-a pointer-events-none absolute -left-24 top-1/4 z-0 h-72 w-72 rounded-full bg-[var(--accent)] opacity-30 blur-[90px]" aria-hidden />
-        <div className="animate-aurora-b pointer-events-none absolute -right-20 bottom-1/4 z-0 h-80 w-80 rounded-full bg-[#5b93ef] opacity-25 blur-[100px]" aria-hidden />
+        {/* static aurora glows (no animation) */}
+        <div className="pointer-events-none absolute -left-24 top-1/4 z-0 h-72 w-72 rounded-full bg-[var(--accent)] opacity-30 blur-[90px]" aria-hidden />
+        <div className="pointer-events-none absolute -right-20 bottom-1/4 z-0 h-80 w-80 rounded-full bg-[#5b93ef] opacity-25 blur-[100px]" aria-hidden />
 
         {/* header */}
         <header className="relative z-20 flex items-center justify-between px-6 py-5 sm:px-10">
@@ -108,7 +124,59 @@ export function AuthScreen() {
                     : "Create your account, connect a vault, and start growing."}
                 </p>
 
-                <div className="mt-6">
+                {/* email + password */}
+                <form onSubmit={handleSubmit} className="mt-5 space-y-3">
+                  {mode === "signup" && (
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Name"
+                      autoComplete="name"
+                      className={inputClass}
+                    />
+                  )}
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Email"
+                    autoComplete="email"
+                    className={inputClass}
+                  />
+                  <input
+                    type="password"
+                    required
+                    minLength={mode === "signup" ? 8 : undefined}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder={mode === "signup" ? "Password (8+ characters)" : "Password"}
+                    autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                    className={inputClass}
+                  />
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="w-full rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-[#0a0a0a] transition-opacity hover:opacity-90 disabled:opacity-60"
+                  >
+                    {submitting ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}
+                  </button>
+                </form>
+
+                {error && (
+                  <p className="mt-3 rounded-lg border border-red-400/30 bg-red-500/10 px-3 py-2 text-[12px] leading-relaxed text-red-200">
+                    {error}
+                  </p>
+                )}
+
+                <div className="my-5 flex items-center gap-3 text-xs text-white/50">
+                  <span className="h-px flex-1 bg-white/15" />
+                  or
+                  <span className="h-px flex-1 bg-white/15" />
+                </div>
+
+                <div className="space-y-2.5">
                   {/* Google's own branded button, when the script is ready */}
                   <div ref={btnRef} className={googleReady ? "flex justify-center [color-scheme:light]" : "hidden"} />
                   {!googleReady && (
@@ -119,13 +187,15 @@ export function AuthScreen() {
                       <GoogleGlyph /> Continue with Google
                     </button>
                   )}
+                  {hasApple && (
+                    <button
+                      onClick={signInWithApple}
+                      className="flex w-full items-center justify-center gap-2 rounded-full bg-black px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
+                    >
+                      <AppleGlyph /> Continue with Apple
+                    </button>
+                  )}
                 </div>
-
-                {error && (
-                  <p className="mt-3 rounded-lg border border-red-400/30 bg-red-500/10 px-3 py-2 text-[12px] leading-relaxed text-red-200">
-                    {error}
-                  </p>
-                )}
 
                 <p className="mt-6 text-center text-[11px] leading-relaxed text-white/50">
                   By continuing you agree to Orbit&apos;s Terms and Privacy Policy.
@@ -163,6 +233,14 @@ function GoogleGlyph() {
       <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23Z" />
       <path fill="#FBBC05" d="M5.84 14.1a6.6 6.6 0 0 1 0-4.2V7.06H2.18a11 11 0 0 0 0 9.88l3.66-2.84Z" />
       <path fill="#EA4335" d="M12 4.75c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 1.46 14.97.5 12 .5A11 11 0 0 0 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.15 6.16-4.15Z" />
+    </svg>
+  );
+}
+
+function AppleGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden fill="currentColor">
+      <path d="M16.37 1.43c.02 1.06-.37 2.08-1.06 2.86-.72.82-1.9 1.45-2.99 1.37-.13-1.02.42-2.11 1.06-2.82.72-.8 1.98-1.4 2.99-1.41ZM20.5 17.08c-.55 1.27-.81 1.84-1.52 2.97-.98 1.57-2.37 3.53-4.09 3.54-1.52.02-1.92-.99-3.99-.98-2.07.01-2.5 1-4.03.97-1.72-.02-3.03-1.79-4.02-3.36C-.73 15.96-1.02 10.85 1.08 8.15c1.01-1.31 2.6-2.14 4.04-2.14 1.47 0 2.4.99 3.6.99 1.17 0 1.88-.99 3.6-.99 1.3 0 2.68.71 3.66 1.93-3.22 1.76-2.7 6.36.52 7.14Z" />
     </svg>
   );
 }

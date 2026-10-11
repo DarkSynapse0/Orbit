@@ -32,3 +32,21 @@ export function parseUserId(v: unknown, fallback = 'demo'): string {
   if (typeof v !== 'string' || v.length > 128 || !/^[\w.@:-]+$/.test(v)) throw new BadRequest('invalid userId');
   return v;
 }
+
+/** Validate + normalize an email address (trimmed, lowercased). */
+export function parseEmail(v: unknown): string {
+  if (typeof v !== 'string') throw new BadRequest('email is required');
+  const email = v.trim().toLowerCase();
+  if (email.length < 3 || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new BadRequest('enter a valid email address');
+  }
+  return email;
+}
+
+/** Validate a password for sign-up (length-bounded; stored only as a hash). */
+export function parsePassword(v: unknown): string {
+  if (typeof v !== 'string') throw new BadRequest('password is required');
+  if (v.length < 8) throw new BadRequest('password must be at least 8 characters');
+  if (v.length > 200) throw new BadRequest('password is too long');
+  return v;
+}

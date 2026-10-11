@@ -51,13 +51,20 @@ db.exec(`
     name          TEXT,
     created_at    INTEGER NOT NULL,
     last_login_at INTEGER NOT NULL,
-    token_version INTEGER NOT NULL DEFAULT 0
+    token_version INTEGER NOT NULL DEFAULT 0,
+    password_hash TEXT
   );
 `);
 
 // Migration: add set_aside_pct to savings tables created before percentage rates existed.
 try {
   db.exec(`ALTER TABLE savings ADD COLUMN set_aside_pct REAL NOT NULL DEFAULT ${DEFAULT_SET_ASIDE_PCT}`);
+} catch {
+  // column already exists — fine.
+}
+// Migration: add password_hash to users tables created before email/password auth.
+try {
+  db.exec('ALTER TABLE users ADD COLUMN password_hash TEXT');
 } catch {
   // column already exists — fine.
 }
@@ -119,6 +126,7 @@ export type User = {
   createdAt: number;
   lastLoginAt: number;
   tokenVersion: number;
+  passwordHash: string | null; // set only for email/password accounts; null for OAuth
 };
 
 const upsertUserStmt = db.prepare(
@@ -129,18 +137,39 @@ const upsertUserStmt = db.prepare(
      name = excluded.name,
      last_login_at = excluded.last_login_at`,
 );
+const insertLocalUserStmt = db.prepare(
+  `INSERT INTO users (user_id, email, name, created_at, last_login_at, password_hash)
+   VALUES (?, ?, ?, ?, ?, ?)`,
+);
+const touchLoginStmt = db.prepare('UPDATE users SET last_login_at = ? WHERE user_id = ?');
 const selectUserStmt = db.prepare('SELECT * FROM users WHERE user_id = ?');
 
-/** Create the user's row on first sign-in, or refresh name/email + last_login on return. */
+/** Create the user's row on first OAuth sign-in, or refresh name/email + last_login on return. */
 export function upsertUser(userId: string, email: string | null, name: string | null): void {
   const now = Date.now();
   upsertUserStmt.run(userId, email, name, now, now);
 }
 
+/** Create an email/password account. Returns false if the user_id already exists. */
+export function registerLocalUser(userId: string, email: string, name: string, passwordHash: string): boolean {
+  const now = Date.now();
+  try {
+    insertLocalUserStmt.run(userId, email, name, now, now, passwordHash);
+    return true;
+  } catch {
+    return false; // UNIQUE constraint — account already exists
+  }
+}
+
+/** Stamp a successful sign-in. */
+export function touchLogin(userId: string): void {
+  touchLoginStmt.run(Date.now(), userId);
+}
+
 /** The user's registry row, or null if they've never signed in. */
 export function getUser(userId: string): User | null {
   const r = selectUserStmt.get(userId) as
-    | { user_id: string; email: string | null; name: string | null; created_at: number; last_login_at: number; token_version: number }
+    | { user_id: string; email: string | null; name: string | null; created_at: number; last_login_at: number; token_version: number; password_hash: string | null }
     | undefined;
   if (!r) return null;
   return {
@@ -150,6 +179,7 @@ export function getUser(userId: string): User | null {
     createdAt: r.created_at,
     lastLoginAt: r.last_login_at,
     tokenVersion: r.token_version,
+    passwordHash: r.password_hash ?? null,
   };
 }
 
