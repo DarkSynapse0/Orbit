@@ -26,10 +26,10 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function VaultBars() {
+export function VaultBars({ data = chartData }: { data?: { month: string; balance: number }[] }) {
   return (
     <ChartContainer config={chartConfig} className="aspect-auto h-[240px] w-full">
-      <BarChart accessibilityLayer data={chartData} margin={{ top: 24 }}>
+      <BarChart accessibilityLayer data={data} margin={{ top: 24 }}>
         <CartesianGrid vertical={false} />
         <XAxis
           dataKey="month"
