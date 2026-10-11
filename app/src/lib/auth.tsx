@@ -16,7 +16,6 @@ type AuthCtx = {
   error: string | null;
   renderGoogleButton: (el: HTMLElement, opts?: Record<string, unknown>) => void;
   signInWithGoogle: () => void;
-  signInDemo: () => void;
   signOut: () => void;
 };
 
@@ -118,31 +117,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     document.body.appendChild(s);
   }, [exchangeGoogle]);
 
-  const signInDemo = useCallback(async () => {
-    setError(null);
-    try {
-      const r = await fetch(`${API}/auth/demo`, { method: "POST" });
-      if (!r.ok) throw new Error(`demo ${r.status}`);
-      const d = (await r.json()) as { token: string; user: OrbitUser };
-      setToken(d.token);
-      persist(d.user);
-    } catch (e) {
-      console.error("[auth] demo sign-in failed:", (e as Error).message);
-      setError(`Couldn't reach the Orbit API at ${API}. Is the backend running?`);
-    }
-  }, [persist]);
-
   const signInWithGoogle = useCallback(() => {
     const g = (window as unknown as { google?: any }).google;
     if (CLIENT_ID && g?.accounts?.id && gsiReady.current) {
-      // Google One Tap / prompt. Falls back to demo if it can't be shown.
+      // Google One Tap / prompt. If it can't be shown, point the user at the
+      // branded Google button instead.
       g.accounts.id.prompt((n: { isNotDisplayed: () => boolean; isSkippedMoment: () => boolean }) => {
-        if (n.isNotDisplayed?.() || n.isSkippedMoment?.()) signInDemo();
+        if (n.isNotDisplayed?.() || n.isSkippedMoment?.()) {
+          setError("Couldn't open Google sign-in. Please use the Google button above.");
+        }
       });
     } else {
-      signInDemo();
+      setError("Google sign-in isn't ready yet. Please refresh and try again.");
     }
-  }, [signInDemo]);
+  }, []);
 
   const renderGoogleButton = useCallback((el: HTMLElement, opts?: Record<string, unknown>) => {
     const g = (window as unknown as { google?: any }).google;
@@ -171,7 +159,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [persist]);
 
   return (
-    <Ctx.Provider value={{ user, ready, hasGoogle: !!CLIENT_ID, googleReady, error, renderGoogleButton, signInWithGoogle, signInDemo, signOut }}>
+    <Ctx.Provider value={{ user, ready, hasGoogle: !!CLIENT_ID, googleReady, error, renderGoogleButton, signInWithGoogle, signOut }}>
       {children}
     </Ctx.Provider>
   );

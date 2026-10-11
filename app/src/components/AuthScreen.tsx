@@ -11,9 +11,9 @@ import { ThemeToggle } from "@/components/common/ThemeToggle";
 // Full-screen sign-in / sign-up gate for the dashboard. Google OAuth covers both
 // (Google creates the account on first continue), so there is one flow, not two
 // forms. We render Google's own branded button when GSI is ready; otherwise a
-// token-styled fallback that still signs in (demo account when no client id).
+// token-styled fallback that triggers the same Google flow.
 export function AuthScreen() {
-  const { googleReady, hasGoogle, error, renderGoogleButton, signInWithGoogle, signInDemo } = useAuth();
+  const { googleReady, error, renderGoogleButton, signInWithGoogle } = useAuth();
   const btnRef = useRef<HTMLDivElement>(null);
   const [mode, setMode] = useState<"signin" | "signup">("signin");
 
@@ -110,25 +110,8 @@ export function AuthScreen() {
                 </p>
               )}
 
-              <div className="my-5 flex items-center gap-3 text-xs text-[var(--muted)]">
-                <span className="h-px flex-1 bg-[var(--border)]" />
-                or
-                <span className="h-px flex-1 bg-[var(--border)]" />
-              </div>
-
-              <button
-                onClick={signInDemo}
-                className="w-full rounded-full bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-[var(--on-accent)] transition-opacity hover:opacity-90"
-              >
-                Continue with a demo account
-              </button>
-              <p className="mt-2 text-center text-xs text-[var(--muted)]">
-                Explore the full dashboard, no sign-up needed.
-              </p>
-
               <p className="mt-6 text-center text-[11px] leading-relaxed text-[var(--muted)]">
                 By continuing you agree to Orbit&apos;s Terms and Privacy Policy.
-                {!hasGoogle && " Google sign-in is not configured, so the demo account is used."}
               </p>
             </div>
 
