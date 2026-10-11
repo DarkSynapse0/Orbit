@@ -16,7 +16,7 @@ const inputClass =
 // both sign-in and sign-up (Google creates the account on first continue), so there
 // is one flow, not two forms.
 export function AuthScreen() {
-  const { googleReady, hasApple, error, renderGoogleButton, signInWithGoogle, signInWithApple, signInEmail, signUpEmail } = useAuth();
+  const { googleReady, hasApple, error, renderGoogleButton, signInWithGoogle, signInWithApple, signInEmail, signUpEmail, signInDemo } = useAuth();
   const btnRef = useRef<HTMLDivElement>(null);
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [name, setName] = useState("");
@@ -197,9 +197,16 @@ export function AuthScreen() {
                       <AppleGlyph /> Continue with Apple
                     </button>
                   )}
+                  <button
+                    onClick={signInDemo}
+                    className="flex w-full items-center justify-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2.5 text-sm font-medium text-white/90 transition-colors hover:bg-white/10"
+                  >
+                    Continue with a demo account
+                  </button>
                 </div>
+                <p className="mt-2 text-center text-[11px] text-white/45">Demo: explore the full dashboard, no sign-up needed.</p>
 
-                <p className="mt-6 text-center text-[11px] leading-relaxed text-white/50">
+                <p className="mt-5 text-center text-[11px] leading-relaxed text-white/50">
                   By continuing you agree to Orbit&apos;s Terms and Privacy Policy.
                 </p>
               </div>

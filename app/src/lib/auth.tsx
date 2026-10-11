@@ -20,6 +20,7 @@ type AuthCtx = {
   signInWithApple: () => void;
   signInEmail: (email: string, password: string) => Promise<boolean>;
   signUpEmail: (email: string, password: string, name?: string) => Promise<boolean>;
+  signInDemo: () => Promise<boolean>;
   signOut: () => void;
 };
 
@@ -129,6 +130,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     (email: string, password: string) => postAuth("/auth/login", { email, password }),
     [postAuth],
   );
+  // Throwaway demo session (devnet-only on the server). Lets anyone explore the full
+  // dashboard without signing up.
+  const signInDemo = useCallback(() => postAuth("/auth/demo", {}), [postAuth]);
 
   const signInWithApple = useCallback(async () => {
     setError(null);
@@ -266,6 +270,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signInWithApple,
         signInEmail,
         signUpEmail,
+        signInDemo,
         signOut,
       }}
     >
