@@ -227,6 +227,7 @@ export default function Home() {
   const [query, setQuery] = useState("");
   const [historyTab, setHistoryTab] = useState<string>("all");
   const [actPage, setActPage] = useState(1);
+  const [openActId, setOpenActId] = useState<string | null>(null);
   const [acts, setActs] = useState<ActivityEvent[]>([]);
   const firstNavPersist = useRef(true);
 
@@ -740,6 +741,8 @@ export default function Home() {
     for (const it of historyItems) c[it.cat] = (c[it.cat] ?? 0) + 1;
     return c;
   }, [historyItems]);
+  // The activity opened in the detail view (looked up from the full, unfiltered history).
+  const openAct = openActId != null ? historyItems.find((x) => x.id === openActId) ?? null : null;
   const filteredHistory = historyItems.filter((it) => {
     if (historyTab !== "all" && it.cat !== historyTab) return false;
     if (q) return (it.type === "txn" ? `${it.t.name} ${it.t.category}` : it.a.text).toLowerCase().includes(q);
@@ -1310,7 +1313,47 @@ export default function Home() {
           )}
 
           {/* ═══════════ ACTIVITY ═══════════ */}
-          {tab === "activity" && (
+          {tab === "activity" && (openAct ? (
+            <div className="w-full max-w-2xl space-y-5">
+              <button type="button" onClick={() => setOpenActId(null)} className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[var(--muted)] transition-colors hover:text-[var(--foreground)]">
+                <ChevronLeft className="h-4 w-4" aria-hidden /> All activity
+              </button>
+              {(() => {
+                const it = openAct;
+                const isTxn = it.type === "txn";
+                const Icon = isTxn ? txnIcon(it.t) : ACTIVITY_ICON[it.a.kind];
+                const title = isTxn ? it.t.name : it.a.text;
+                let status = "Logged";
+                let tone: "invest" | "save" | "neutral" = "neutral";
+                if (isTxn) { if (it.t.deposited) { status = "Invested"; tone = "invest"; } else if (it.t.setAside > 0) { status = "Saved"; tone = "save"; } else { status = "Spent"; } }
+                else { const k = it.a.kind; if (k === "deposit") { status = "Invested"; tone = "invest"; } else if (k === "withdraw") { status = "Withdrawn"; tone = "save"; } else if (k === "faucet") { status = "Funded"; tone = "save"; } }
+                const pill = { invest: "bg-[var(--success-soft)] text-[var(--success)]", save: "bg-[var(--accent-soft)] text-[var(--accent-strong)]", neutral: "border border-[var(--border-strong)] text-[var(--muted)]" }[tone];
+                const dt = new Date(it.ts).toLocaleString("en-US", { weekday: "short", month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" });
+                const rows: [string, string][] = isTxn
+                  ? [["Amount", usd(it.t.amountUsd)], ["Set aside", usd(it.t.setAside)], ["Category", it.t.category], ["Moved to vault", it.t.deposited ? "Yes" : "Not yet"]]
+                  : [["Type", it.a.kind.replace(/_/g, " ")], ["Details", it.a.text]];
+                return (
+                  <div className={CARD}>
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex min-w-0 items-center gap-3">
+                        <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[var(--background)] text-[var(--foreground)] ring-1 ring-inset ring-[var(--border)]"><Icon className="h-5 w-5" aria-hidden /></span>
+                        <div className="min-w-0"><div className="truncate text-[17px] font-semibold">{title}</div><div className="mt-0.5 text-[13px] text-[var(--muted)]">{dt}</div></div>
+                      </div>
+                      <span className={`inline-flex shrink-0 items-center rounded-full px-3 py-1 text-[12px] font-medium ${pill}`}>{status}</span>
+                    </div>
+                    <div className="mt-5 border-t border-[var(--border)]">
+                      {rows.map(([k, v]) => (
+                        <div key={k} className="flex items-start justify-between gap-4 border-b border-[var(--border)] py-3 last:border-0">
+                          <span className="text-[13px] text-[var(--muted)]">{k}</span>
+                          <span className="max-w-[62%] text-right text-[14px] font-medium capitalize text-[var(--foreground)]">{v}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          ) : (
             <div className="w-full space-y-5">
               {/* Header */}
               <div className="flex flex-wrap items-end justify-between gap-3">
@@ -1446,7 +1489,7 @@ export default function Home() {
                                 const Icon = isTxn ? txnIcon(it.t) : ACTIVITY_ICON[it.a.kind];
                                 const title = isTxn ? it.t.name : it.a.text;
                                 return (
-                                  <tr key={it.id} className="border-b border-[var(--border)] transition-colors last:border-0 hover:bg-[var(--background)]">
+                                  <tr key={it.id} onClick={() => setOpenActId(it.id)} className="cursor-pointer border-b border-[var(--border)] last:border-0">
                                     <td className="py-3 pr-3">
                                       <div className="flex items-center gap-2.5">
                                         <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[var(--background)] text-[var(--muted)]"><Icon className="h-4 w-4" aria-hidden /></span>
@@ -1474,7 +1517,7 @@ export default function Home() {
                             const Icon = isTxn ? txnIcon(it.t) : ACTIVITY_ICON[it.a.kind];
                             const title = isTxn ? it.t.name : it.a.text;
                             return (
-                              <li key={it.id} className="flex items-center gap-3.5 py-3.5">
+                              <li key={it.id} onClick={() => setOpenActId(it.id)} className="flex cursor-pointer items-center gap-3.5 py-3.5">
                                 <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--background)] text-[var(--muted)]"><Icon className="h-[18px] w-[18px]" aria-hidden /></span>
                                 <div className="min-w-0 flex-1">
                                   <div className="truncate text-[15px] font-medium">{title}</div>
@@ -1515,7 +1558,7 @@ export default function Home() {
                 )}
               </div>
             </div>
-          )}
+          ))}
 
           {/* ═══════════ ACCOUNT ═══════════ */}
           {tab === "account" && (

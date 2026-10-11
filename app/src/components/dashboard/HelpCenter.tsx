@@ -391,27 +391,18 @@ function ArticleCard({ article, onOpen }: { article: Article; onOpen: (id: strin
 
 // Big "start here" banner for the default browse view — the first guide, featured.
 function FeaturedCard({ article, onOpen }: { article: Article; onOpen: (id: string) => void }) {
-  const [from, to] = COVER[article.category];
-  const Icon = article.icon;
   return (
     <button
       type="button"
       onClick={() => onOpen(article.id)}
-      className="group grid w-full grid-cols-1 overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] text-left transition-all duration-200 hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-soft)] sm:grid-cols-[minmax(0,13rem)_1fr]"
+      className="group flex w-full flex-col rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-6 text-left transition-all duration-200 hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-soft)] sm:p-8"
     >
-      <div className="relative min-h-[8.5rem] w-full" style={{ backgroundImage: `linear-gradient(135deg, ${from}, ${to})` }} aria-hidden>
-        <span className="absolute left-6 top-6 grid h-14 w-14 place-items-center rounded-2xl bg-white/15 text-white backdrop-blur-sm">
-          <Icon className="h-7 w-7" />
-        </span>
-      </div>
-      <div className="flex flex-col justify-center p-6 sm:p-7">
-        <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--accent-strong)]">New to Orbit? Start here</span>
-        <h3 className="mt-2 font-display text-[clamp(1.2rem,2.4vw,1.5rem)] font-semibold leading-tight tracking-[-0.02em]">{article.title}</h3>
-        <p className="mt-1.5 max-w-lg text-[14px] leading-6 text-[var(--muted)]">{article.excerpt}</p>
-        <span className="mt-4 inline-flex w-fit items-center gap-1.5 rounded-full bg-[var(--foreground)] px-4 py-2 text-[13px] font-semibold text-[var(--background)] transition-opacity group-hover:opacity-90">
-          Start reading <ArrowRight className="h-3.5 w-3.5" aria-hidden />
-        </span>
-      </div>
+      <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--accent-strong)]">New to Orbit? Start here</span>
+      <h3 className="mt-2 font-display text-[clamp(1.2rem,2.4vw,1.5rem)] font-semibold leading-tight tracking-[-0.02em]">{article.title}</h3>
+      <p className="mt-1.5 max-w-lg text-[14px] leading-6 text-[var(--muted)]">{article.excerpt}</p>
+      <span className="mt-4 inline-flex w-fit items-center gap-1.5 rounded-full bg-[var(--foreground)] px-4 py-2 text-[13px] font-semibold text-[var(--background)] transition-opacity group-hover:opacity-90">
+        Start reading <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+      </span>
     </button>
   );
 }
@@ -492,7 +483,7 @@ export function HelpCenter() {
       {featured && <FeaturedCard article={featured} onOpen={(id) => setOpenId(id)} />}
 
       {/* ── Category filter pills ── */}
-      <div className="flex flex-wrap justify-center gap-2">
+      <div className="flex flex-wrap justify-start gap-2">
         {(["All", ...CATEGORY_ORDER] as const).map((cat) => {
           const on = active === cat;
           return (
