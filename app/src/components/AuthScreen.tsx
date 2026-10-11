@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, ShieldCheck, TrendingUp, Landmark } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { OrbitLogo } from "@/components/common/OrbitLogo";
+import { DemoBanner } from "@/components/landing/DemoBanner";
 
 const inputClass =
   "w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/40 outline-none transition-colors focus:border-white/40";
@@ -37,9 +38,10 @@ export function AuthScreen() {
   }
 
   return (
-    <div className="min-h-dvh bg-[var(--background)] p-2 sm:p-3">
+    <div className="flex min-h-dvh flex-col bg-[var(--background)] p-2 sm:p-3">
+      <DemoBanner />
       <section
-        className="dark relative isolate flex min-h-[calc(100dvh-1rem)] flex-col overflow-hidden rounded-[2rem] text-white"
+        className="dark relative isolate flex min-h-[calc(100dvh-1rem)] flex-1 flex-col overflow-hidden rounded-[2rem] text-white"
         style={{ "--accent": "#35f0c6", "--accent-strong": "#5cf5d2", "--on-accent": "#06251c" } as React.CSSProperties}
       >
         {/* same floating cosmic image as the hero — static, no motion */}

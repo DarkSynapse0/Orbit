@@ -46,6 +46,7 @@ import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { useAuth } from "@/lib/auth";
 import { apiFetch } from "@/lib/api";
 import { AuthScreen } from "@/components/AuthScreen";
+import { DemoBanner } from "@/components/landing/DemoBanner";
 import { UserMenu, Avatar } from "@/components/UserMenu";
 import { LineArea } from "@/components/dashboard/Charts";
 import { SavingsGoals } from "@/components/dashboard/SavingsGoals";
@@ -852,6 +853,7 @@ export default function Home() {
         </header>
 
         <main className="w-full flex-1 px-5 py-6 lg:min-h-0 lg:overflow-y-auto lg:px-8 lg:py-6">
+          <DemoBanner />
           {/* Each tab springs in from the current state — content, not chrome, moves. */}
           <motion.div
             key={tab}
