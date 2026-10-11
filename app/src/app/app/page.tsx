@@ -397,7 +397,13 @@ export default function Home() {
 
   const refreshVault = useCallback(() => {
     if (!owner) return;
-    apiFetch(`/vault?owner=${owner}`).then((r) => r.json()).then((v) => { if (!v.error) setOnchain(v); }).catch(() => {}).finally(() => setVaultLoaded(true));
+    // Only accept a real vault reading. A 503/error body or a transient on-chain read
+    // failure must never overwrite a good balance with 0 (that was the $1000 ↔ $0.3 flicker).
+    apiFetch(`/vault?owner=${owner}`)
+      .then((r) => r.json())
+      .then((v) => { if (!v.error && typeof v.principalUsd === "number") setOnchain(v); })
+      .catch(() => {})
+      .finally(() => setVaultLoaded(true));
   }, [owner]);
 
   const [txns, setTxns] = useState<Txn[]>([]);
@@ -419,10 +425,10 @@ export default function Home() {
   }, [user, refreshTxns]);
 
   useEffect(() => {
-    if (!connected || !owner) {
-      setOnchain(null);
-      return;
-    }
+    // Don't null the vault when the wallet momentarily drops (adapters flicker
+    // connected↔disconnected on reconnect) — keep the last known value so the balance
+    // doesn't flash to $0. We just stop polling until a wallet is present again.
+    if (!connected || !owner) return;
     refreshVault();
     const t = setInterval(refreshVault, 6000);
     return () => clearInterval(t);
