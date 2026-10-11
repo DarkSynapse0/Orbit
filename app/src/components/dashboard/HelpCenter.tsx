@@ -51,16 +51,6 @@ const COVER: Record<Category, [string, string]> = {
   Security: ["#171717", "#244f36"], // charcoal → deep green
 };
 
-// One short blurb per category for the browse view.
-const CATEGORY_BLURB: Record<Category, string> = {
-  Basics: "Open your account and find your way around.",
-  Saving: "How set-asides work and how your bank connects.",
-  Vault: "Where your savings live and how to withdraw.",
-  Goals: "Split your vault into named pots.",
-  Growing: "How your USDC earns on-chain yield.",
-  Security: "Self-custody habits and verifying on-chain.",
-};
-
 // Ordered as a learning path: each guide builds on the one before it.
 const ARTICLES: Article[] = [
   {
@@ -378,20 +368,59 @@ function ArticleView({
   );
 }
 
-function ArticleRow({ article, onOpen }: { article: Article; onOpen: (id: string) => void }) {
+// Magazine-style article card: a gradient cover with the glyph, then the copy.
+function ArticleCard({ article, onOpen }: { article: Article; onOpen: (id: string) => void }) {
+  const [from, to] = COVER[article.category];
+  const Icon = article.icon;
   return (
     <button
       type="button"
       onClick={() => onOpen(article.id)}
-      className="group flex w-full items-center gap-4 rounded-2xl p-4 text-left transition-colors hover:bg-[var(--background)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/30"
+      className="group flex flex-col overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/30"
     >
-      <CoverTile category={article.category} icon={article.icon} size="sm" />
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-[15px] font-medium leading-snug text-[var(--foreground)]">{article.title}</span>
-        <span className="mt-0.5 line-clamp-1 text-[13px] leading-5 text-[var(--muted)]">{article.excerpt}</span>
-      </span>
-      <ReadTime read={article.read} />
-      <ArrowUpRight className="h-4 w-4 shrink-0 text-[var(--faint)] transition-colors group-hover:text-[var(--accent-strong)]" aria-hidden />
+      <div className="relative h-20 w-full" style={{ backgroundImage: `linear-gradient(135deg, ${from}, ${to})` }} aria-hidden>
+        <span className="absolute left-5 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-2xl bg-white/15 text-white backdrop-blur-sm">
+          <Icon className="h-5 w-5" />
+        </span>
+      </div>
+      <div className="flex flex-1 flex-col p-5">
+        <div className="flex items-center gap-2">
+          <CategoryChip category={article.category} />
+          <ReadTime read={article.read} />
+        </div>
+        <h3 className="mt-2.5 font-display text-[15.5px] font-semibold leading-snug tracking-[-0.01em]">{article.title}</h3>
+        <p className="mt-1 line-clamp-2 flex-1 text-[13px] leading-6 text-[var(--muted)]">{article.excerpt}</p>
+        <span className="mt-3.5 inline-flex items-center gap-1 text-[13px] font-semibold text-[var(--accent-strong)]">
+          Read guide <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden />
+        </span>
+      </div>
+    </button>
+  );
+}
+
+// Big "start here" banner for the default browse view — the first guide, featured.
+function FeaturedCard({ article, onOpen }: { article: Article; onOpen: (id: string) => void }) {
+  const [from, to] = COVER[article.category];
+  const Icon = article.icon;
+  return (
+    <button
+      type="button"
+      onClick={() => onOpen(article.id)}
+      className="group grid w-full grid-cols-1 overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] text-left transition-all duration-200 hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-soft)] sm:grid-cols-[minmax(0,13rem)_1fr]"
+    >
+      <div className="relative min-h-[8.5rem] w-full" style={{ backgroundImage: `linear-gradient(135deg, ${from}, ${to})` }} aria-hidden>
+        <span className="absolute left-6 top-6 grid h-14 w-14 place-items-center rounded-2xl bg-white/15 text-white backdrop-blur-sm">
+          <Icon className="h-7 w-7" />
+        </span>
+      </div>
+      <div className="flex flex-col justify-center p-6 sm:p-7">
+        <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--accent-strong)]">New to Orbit? Start here</span>
+        <h3 className="mt-2 font-display text-[clamp(1.2rem,2.4vw,1.5rem)] font-semibold leading-tight tracking-[-0.02em]">{article.title}</h3>
+        <p className="mt-1.5 max-w-lg text-[14px] leading-6 text-[var(--muted)]">{article.excerpt}</p>
+        <span className="mt-4 inline-flex w-fit items-center gap-1.5 rounded-full bg-[var(--foreground)] px-4 py-2 text-[13px] font-semibold text-[var(--background)] transition-opacity group-hover:opacity-90">
+          Start reading <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+        </span>
+      </div>
     </button>
   );
 }
@@ -422,14 +451,11 @@ export function HelpCenter() {
     [active, q],
   );
 
-  // Group filtered results by category, preserving the canonical order.
-  const grouped = useMemo(
-    () =>
-      CATEGORY_ORDER.map((cat) => ({ cat, items: filtered.filter((a) => a.category === cat) })).filter(
-        (g) => g.items.length > 0,
-      ),
-    [filtered],
-  );
+  // The default view features the first guide and grids the rest; filtering/searching
+  // just grids whatever matches.
+  const isDefault = !q && active === "All";
+  const featured = isDefault ? ARTICLES.find((a) => a.id === "getting-started") ?? null : null;
+  const gridArticles = featured ? filtered.filter((a) => a.id !== featured.id) : filtered;
 
   if (openId) {
     const idx = ARTICLES.findIndex((a) => a.id === openId);
@@ -447,32 +473,35 @@ export function HelpCenter() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6">
-      {/* Header */}
-      <div>
-        <span className={eyebrow}>Help center</span>
-        <h1 className="mt-1 font-display text-[clamp(1.4rem,3vw,1.9rem)] font-semibold leading-none tracking-[-0.02em]">
-          Guides &amp; answers
+    <div className="mx-auto w-full max-w-5xl space-y-8">
+      {/* ── Hero with a prominent search ── */}
+      <div className="pt-2 text-center">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--accent-soft)] px-3 py-1 font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--accent-strong)]">
+          <BookOpen className="h-3.5 w-3.5" aria-hidden /> Help center
+        </span>
+        <h1 className="mt-4 font-display text-[clamp(1.8rem,4vw,2.6rem)] font-semibold leading-tight tracking-[-0.02em]">
+          How can we help?
         </h1>
-        <p className="mt-2 max-w-xl text-[14px] leading-6 text-[var(--muted)]">
-          Short, plain-language guides to everything Orbit does, from opening your account to keeping full control of your savings.
+        <p className="mx-auto mt-2.5 max-w-lg text-[14.5px] leading-6 text-[var(--muted)]">
+          Short, plain-language guides to everything Orbit does — from opening your account to keeping full control of your savings.
         </p>
+        <div className="mx-auto mt-6 flex max-w-xl items-center gap-2.5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-5 py-3.5 shadow-[var(--shadow-soft)] transition-colors focus-within:border-[var(--border-strong)]">
+          <Search className="h-5 w-5 shrink-0 text-[var(--faint)]" aria-hidden />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search guides…"
+            aria-label="Search guides"
+            className="h-6 w-full min-w-0 bg-transparent text-[15px] text-[var(--foreground)] placeholder:text-[var(--faint)] focus:outline-none"
+          />
+        </div>
       </div>
 
-      {/* Search */}
-      <div className="flex items-center gap-2.5 rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 focus-within:border-[var(--border-strong)]">
-        <Search className="h-4 w-4 shrink-0 text-[var(--faint)]" aria-hidden />
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search guides…"
-          aria-label="Search guides"
-          className="h-6 w-full min-w-0 bg-transparent text-[14px] text-[var(--foreground)] placeholder:text-[var(--faint)] focus:outline-none"
-        />
-      </div>
+      {/* ── Featured "start here" (default view only) ── */}
+      {featured && <FeaturedCard article={featured} onOpen={(id) => setOpenId(id)} />}
 
-      {/* Category filter pills */}
-      <div className="flex flex-wrap gap-2">
+      {/* ── Category filter pills ── */}
+      <div className="flex flex-wrap justify-center gap-2">
         {(["All", ...CATEGORY_ORDER] as const).map((cat) => {
           const on = active === cat;
           return (
@@ -480,7 +509,7 @@ export function HelpCenter() {
               key={cat}
               type="button"
               onClick={() => setActive(cat)}
-              className={`rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors ${
+              className={`rounded-full px-4 py-1.5 text-[13px] font-medium transition-colors ${
                 on
                   ? "bg-[var(--foreground)] text-[var(--background)]"
                   : "border border-[var(--border)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:text-[var(--foreground)]"
@@ -492,48 +521,32 @@ export function HelpCenter() {
         })}
       </div>
 
-      {/* Category browse — one soft card per category, each listing its articles */}
-      {grouped.length > 0 ? (
-        <div className="space-y-5">
-          {grouped.map(({ cat, items }) => (
-            <section key={cat} className={`${CARD} overflow-hidden`}>
-              <div className="flex items-center gap-3 border-b border-[var(--border)] p-5 sm:p-6">
-                <CoverTile category={cat} icon={items[0].icon} size="md" />
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <h2 className="font-display text-[16px] font-semibold tracking-[-0.01em]">{cat}</h2>
-                    <span className="font-mono text-[12px] text-[var(--faint)]">
-                      {items.length} {items.length === 1 ? "guide" : "guides"}
-                    </span>
-                  </div>
-                  <p className="mt-0.5 truncate text-[13px] text-[var(--muted)]">{CATEGORY_BLURB[cat]}</p>
-                </div>
-              </div>
-              <div className="divide-y divide-[var(--border)] p-2">
-                {items.map((a) => (
-                  <ArticleRow key={a.id} article={a} onOpen={(id) => setOpenId(id)} />
-                ))}
-              </div>
-            </section>
+      {/* ── Article grid ── */}
+      {gridArticles.length > 0 ? (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {gridArticles.map((a) => (
+            <ArticleCard key={a.id} article={a} onOpen={(id) => setOpenId(id)} />
           ))}
         </div>
       ) : (
-        <div className={`${CARD} flex flex-col items-center gap-3 p-10 text-center`}>
-          <span className="grid h-11 w-11 place-items-center rounded-full bg-[var(--accent-soft)] text-[var(--accent-strong)]">
-            <BookOpen className="h-5 w-5" aria-hidden />
-          </span>
-          <p className="text-[14px] font-medium">No guides match &ldquo;{query}&rdquo;</p>
-          <button
-            type="button"
-            onClick={() => {
-              setQuery("");
-              setActive("All");
-            }}
-            className="rounded-full bg-[var(--foreground)] px-4 py-2 text-[13px] font-semibold text-[var(--background)] transition-opacity hover:opacity-90"
-          >
-            Clear search
-          </button>
-        </div>
+        !featured && (
+          <div className={`${CARD} flex flex-col items-center gap-3 p-10 text-center`}>
+            <span className="grid h-11 w-11 place-items-center rounded-full bg-[var(--accent-soft)] text-[var(--accent-strong)]">
+              <BookOpen className="h-5 w-5" aria-hidden />
+            </span>
+            <p className="text-[14px] font-medium">No guides match &ldquo;{query}&rdquo;</p>
+            <button
+              type="button"
+              onClick={() => {
+                setQuery("");
+                setActive("All");
+              }}
+              className="rounded-full bg-[var(--foreground)] px-4 py-2 text-[13px] font-semibold text-[var(--background)] transition-opacity hover:opacity-90"
+            >
+              Clear search
+            </button>
+          </div>
+        )
       )}
     </div>
   );
