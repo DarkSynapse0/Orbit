@@ -38,10 +38,10 @@ export function AuthScreen() {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col bg-[var(--background)] p-2 sm:p-3">
+    <div className="flex min-h-[100svh] flex-col bg-[var(--background)]">
       <DemoBanner />
       <section
-        className="dark relative isolate flex min-h-[calc(100dvh-1rem)] flex-1 flex-col overflow-hidden rounded-[2rem] text-white"
+        className="dark relative isolate mx-2 mb-3 mt-3 flex flex-1 flex-col overflow-hidden rounded-[2rem] text-white sm:mx-3"
         style={{ "--accent": "#35f0c6", "--accent-strong": "#5cf5d2", "--on-accent": "#06251c" } as React.CSSProperties}
       >
         {/* same floating cosmic image as the hero — static, no motion */}
