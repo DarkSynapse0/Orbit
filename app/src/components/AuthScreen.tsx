@@ -21,11 +21,11 @@ export function AuthScreen() {
   }, [googleReady, renderGoogleButton]);
 
   return (
-    <div
-      className="dark min-h-dvh bg-[#06090e] p-2 text-white sm:p-3"
-      style={{ "--accent": "#35f0c6", "--accent-strong": "#5cf5d2", "--on-accent": "#06251c" } as React.CSSProperties}
-    >
-      <section className="relative isolate flex min-h-[calc(100dvh-1rem)] flex-col overflow-hidden rounded-[2rem]">
+    <div className="min-h-dvh bg-[var(--background)] p-2 sm:p-3">
+      <section
+        className="dark relative isolate flex min-h-[calc(100dvh-1rem)] flex-col overflow-hidden rounded-[2rem] text-white"
+        style={{ "--accent": "#35f0c6", "--accent-strong": "#5cf5d2", "--on-accent": "#06251c" } as React.CSSProperties}
+      >
         {/* same floating cosmic image as the hero */}
         <div className="absolute inset-0 z-0 animate-slow-zoom bg-cover bg-center" style={{ backgroundImage: "url('/hero.webp')" }} aria-hidden />
         {/* darken for legibility */}
