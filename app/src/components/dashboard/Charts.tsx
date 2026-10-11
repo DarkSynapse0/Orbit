@@ -109,6 +109,69 @@ export function GroupedBars({
   );
 }
 
+// Single-series column chart for "savings over time": ascending rounded bars with an
+// accent gradient, a light value grid, and a value axis. Reads as clear, dynamic growth
+// (and never as a near-straight line the way a cumulative line chart can).
+export function SavingsBars({
+  points,
+  xLabels,
+  fmtY = (v) => (v >= 1000 ? `$${Math.round(v / 1000)}k` : `$${Math.round(v)}`),
+}: {
+  points: number[];
+  xLabels: string[];
+  fmtY?: (v: number) => string;
+}) {
+  const max = Math.max(1, ...points);
+  const ticks = 3;
+  const labelStep = Math.max(1, Math.ceil(Math.max(1, xLabels.length) / 7));
+  return (
+    <div className="flex h-full flex-col">
+      <div className="flex min-h-0 flex-1 gap-2">
+        {/* value axis */}
+        <div className="flex w-9 shrink-0 flex-col justify-between py-0 text-right font-mono text-[9px] text-[var(--chart-axis)]">
+          {Array.from({ length: ticks + 1 }, (_, i) => {
+            const v = (max * (ticks - i)) / ticks;
+            return <span key={i}>{fmtY(v)}</span>;
+          })}
+        </div>
+        {/* plot */}
+        <div className="relative min-w-0 flex-1">
+          <div className="absolute inset-0 flex flex-col justify-between">
+            {Array.from({ length: ticks + 1 }, (_, i) => (
+              <span key={i} className="h-px w-full bg-[var(--chart-grid)]" />
+            ))}
+          </div>
+          <div className="relative flex h-full items-end gap-[3px] sm:gap-1.5">
+            {points.map((v, i) => (
+              <div key={i} className="flex h-full flex-1 items-end">
+                <div
+                  className="w-full rounded-t-[4px] transition-[height] duration-500"
+                  style={{
+                    height: `${Math.max(1.5, (v / max) * 100)}%`,
+                    background: "linear-gradient(to top, color-mix(in srgb, var(--accent) 30%, transparent), var(--accent))",
+                  }}
+                  title={fmtY(v)}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      {/* x labels, aligned under the plot */}
+      <div className="mt-1.5 flex gap-2">
+        <div className="w-9 shrink-0" />
+        <div className="flex min-w-0 flex-1 justify-between">
+          {xLabels.map((lbl, i) => (
+            <span key={i} className="flex-1 text-center font-mono text-[10px] text-[var(--faint)]">
+              {i % labelStep === 0 || i === xLabels.length - 1 ? lbl : ""}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Multi-series line chart: first series gets a filled area, others render as dashed lines.
 export function LineArea({
   series,

@@ -170,7 +170,7 @@ export function SecurityCenter({
   const short = owner ? `${owner.slice(0, 4)}…${owner.slice(-4)}` : "Not connected";
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6">
+    <div className="w-full space-y-6">
       {/* ── Hero: the one promise that matters ── */}
       <section
         className="dark relative isolate overflow-hidden rounded-[2rem] p-7 text-white sm:p-9"

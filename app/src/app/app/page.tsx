@@ -47,7 +47,7 @@ import { useAuth } from "@/lib/auth";
 import { apiFetch } from "@/lib/api";
 import { AuthScreen } from "@/components/AuthScreen";
 import { UserMenu, Avatar } from "@/components/UserMenu";
-import { LineArea } from "@/components/dashboard/Charts";
+import { SavingsBars } from "@/components/dashboard/Charts";
 import { SavingsGoals } from "@/components/dashboard/SavingsGoals";
 import { SecurityCenter } from "@/components/dashboard/SecurityCenter";
 import { HelpCenter } from "@/components/dashboard/HelpCenter";
@@ -987,9 +987,8 @@ export default function Home() {
                 </div>
                 <div className="mt-5 h-[260px] lg:h-[300px]">
                   {analytics.hasData ? (
-                    <LineArea
-                      fill
-                      series={[{ label: "Saved", points: analytics.savingsLine }]}
+                    <SavingsBars
+                      points={analytics.savingsLine}
                       xLabels={analytics.savingsLabels}
                       fmtY={(v) => `$${v >= 1000 ? `${Math.round(v / 1000)}k` : Math.round(v)}`}
                     />

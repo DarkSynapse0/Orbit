@@ -368,32 +368,23 @@ function ArticleView({
   );
 }
 
-// Magazine-style article card: a gradient cover with the glyph, then the copy.
+// Text-only article card (no cover image).
 function ArticleCard({ article, onOpen }: { article: Article; onOpen: (id: string) => void }) {
-  const [from, to] = COVER[article.category];
-  const Icon = article.icon;
   return (
     <button
       type="button"
       onClick={() => onOpen(article.id)}
-      className="group flex flex-col overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/30"
+      className="group flex flex-col rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/30"
     >
-      <div className="relative h-20 w-full" style={{ backgroundImage: `linear-gradient(135deg, ${from}, ${to})` }} aria-hidden>
-        <span className="absolute left-5 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-2xl bg-white/15 text-white backdrop-blur-sm">
-          <Icon className="h-5 w-5" />
-        </span>
+      <div className="flex items-center gap-2">
+        <CategoryChip category={article.category} />
+        <ReadTime read={article.read} />
       </div>
-      <div className="flex flex-1 flex-col p-5">
-        <div className="flex items-center gap-2">
-          <CategoryChip category={article.category} />
-          <ReadTime read={article.read} />
-        </div>
-        <h3 className="mt-2.5 font-display text-[15.5px] font-semibold leading-snug tracking-[-0.01em]">{article.title}</h3>
-        <p className="mt-1 line-clamp-2 flex-1 text-[13px] leading-6 text-[var(--muted)]">{article.excerpt}</p>
-        <span className="mt-3.5 inline-flex items-center gap-1 text-[13px] font-semibold text-[var(--accent-strong)]">
-          Read guide <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden />
-        </span>
-      </div>
+      <h3 className="mt-2.5 font-display text-[15.5px] font-semibold leading-snug tracking-[-0.01em]">{article.title}</h3>
+      <p className="mt-1 line-clamp-2 flex-1 text-[13px] leading-6 text-[var(--muted)]">{article.excerpt}</p>
+      <span className="mt-3.5 inline-flex items-center gap-1 text-[13px] font-semibold text-[var(--accent-strong)]">
+        Read guide <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden />
+      </span>
     </button>
   );
 }
@@ -473,7 +464,7 @@ export function HelpCenter() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-8">
+    <div className="w-full space-y-8">
       {/* ── Hero with a prominent search ── */}
       <div className="pt-2 text-center">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--accent-soft)] px-3 py-1 font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--accent-strong)]">
