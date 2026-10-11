@@ -47,7 +47,7 @@ import { useAuth } from "@/lib/auth";
 import { apiFetch } from "@/lib/api";
 import { AuthScreen } from "@/components/AuthScreen";
 import { UserMenu, Avatar } from "@/components/UserMenu";
-import { VaultBars } from "@/components/landing/VaultBars";
+import { SavingsArea } from "@/components/dashboard/SavingsArea";
 import { SavingsGoals } from "@/components/dashboard/SavingsGoals";
 import { SecurityCenter } from "@/components/dashboard/SecurityCenter";
 import { HelpCenter } from "@/components/dashboard/HelpCenter";
@@ -685,18 +685,20 @@ export default function Home() {
       cum += t.setAside;
       return { ts: t.ts, cum };
     });
-    const recent = pts.slice(-10);
+    const recent = pts.slice(-30);
     const savingsLine = recent.map((p) => Math.round(p.cum));
     const savingsLabels = recent.map((p) =>
       new Date(p.ts).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
     );
+    // Area-chart series: cumulative saved, keyed by date.
+    const savingsSeries = recent.map((p) => ({ date: new Date(p.ts).toISOString(), saved: Math.round(p.cum) }));
     const catMap: Record<string, number> = {};
     for (const t of txns) catMap[t.category] = (catMap[t.category] ?? 0) + t.setAside;
     const categories = Object.entries(catMap)
       .map(([label, v]) => ({ label, v: Math.round(v) }))
       .sort((a, b) => b.v - a.v)
       .slice(0, 5);
-    return { hasData: txns.length > 0, savingsLine, savingsLabels, categories, totalSaved: Math.round(cum) };
+    return { hasData: txns.length > 0, savingsLine, savingsLabels, savingsSeries, categories, totalSaved: Math.round(cum) };
   }, [txns]);
 
   const activeNav = [...NAV, ...NAV_SECONDARY, ...MOBILE_NAV].find((n) => n.id === navId) ?? NAV[0];
@@ -979,65 +981,25 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Savings over time (left) + setup/health tasks (right) */}
-              <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-                <div className={`${CARD} lg:col-span-2`}>
-                  <div className="flex flex-wrap items-end justify-between gap-4">
-                    <div>
-                      <span className={eyebrow}>Your money over time</span>
-                      <div className="mt-3 font-display text-[clamp(1.75rem,4vw,2.5rem)] font-semibold leading-none tabular-nums">{showTotal ? usd(total) : <Skel w="w-40" />}</div>
-                    </div>
-                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[var(--foreground)] text-[var(--background)]"><TrendingUp className="h-4 w-4" aria-hidden /></span>
+              {/* Savings over time — interactive area chart */}
+              <div className={CARD}>
+                <div className="flex flex-wrap items-end justify-between gap-4">
+                  <div>
+                    <span className={eyebrow}>Your money over time</span>
+                    <div className="mt-3 font-display text-[clamp(1.75rem,4vw,2.5rem)] font-semibold leading-none tabular-nums">{showTotal ? usd(total) : <Skel w="w-40" />}</div>
                   </div>
-                  <div className="mt-5">
-                    {analytics.hasData ? (
-                      <VaultBars data={analytics.savingsLabels.map((lbl, i) => ({ month: lbl.split(" ")[1] ?? lbl, balance: analytics.savingsLine[i] }))} />
-                    ) : (
-                      <div className="flex h-[240px] flex-col items-center justify-center rounded-xl border border-dashed border-[var(--border)] px-6 text-center">
-                        <TrendingUp className="h-7 w-7 text-[var(--faint)]" aria-hidden />
-                        <p className="mt-3 text-[14px] font-medium text-[var(--muted)]">No savings yet</p>
-                        <p className="mt-1 max-w-[20rem] text-[13px] text-[var(--faint)]">Your growth chart appears here once Orbit starts setting money aside from your spending.</p>
-                      </div>
-                    )}
-                  </div>
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[var(--foreground)] text-[var(--background)]"><TrendingUp className="h-4 w-4" aria-hidden /></span>
                 </div>
-
-                {/* Setup / savings-health checklist */}
-                <div className={`${CARD} lg:col-span-1 flex flex-col`}>
-                  {(() => {
-                    const done = healthSteps.filter((s) => s.done).length;
-                    const allDone = done === healthSteps.length;
-                    return (
-                      <>
-                        <div className="flex items-center justify-between">
-                          <span className={eyebrow}>{allDone ? "Savings health" : "Finish setup"}</span>
-                          <span className="text-[12px] font-medium text-[var(--muted)]">{done}/{healthSteps.length}</span>
-                        </div>
-                        <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-[var(--border)]">
-                          <div className="h-full rounded-full bg-[var(--accent)] transition-[width] duration-500" style={{ width: `${(done / healthSteps.length) * 100}%` }} />
-                        </div>
-                        <div className="mt-4 flex-1 space-y-1">
-                          {healthSteps.map((s, i) => (
-                            <button key={i} type="button" onClick={() => setTab(s.go)} className="flex w-full items-start gap-3 rounded-xl p-2.5 text-left transition-colors hover:bg-[var(--background)]">
-                              <span className={`mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full ${s.done ? "bg-[var(--accent)] text-[var(--on-accent)]" : "border border-[var(--border-strong)] text-[var(--faint)]"}`}>
-                                {s.done ? <Check className="h-3.5 w-3.5" aria-hidden /> : <span className="text-[11px] font-semibold">{i + 1}</span>}
-                              </span>
-                              <span className="min-w-0 flex-1">
-                                <span className={`block text-[14px] font-medium ${s.done ? "text-[var(--muted)] line-through" : "text-[var(--foreground)]"}`}>{s.label}</span>
-                                <span className="block text-[12px] leading-snug text-[var(--faint)]">{s.desc}</span>
-                              </span>
-                              {!s.done && <ChevronRight className="mt-1.5 h-4 w-4 shrink-0 text-[var(--faint)]" aria-hidden />}
-                            </button>
-                          ))}
-                        </div>
-                        {allDone && (
-                          <div className="mt-3 flex items-center gap-2 rounded-xl bg-[var(--accent-soft)] px-3 py-2.5 text-[13px] font-medium text-[var(--accent-strong)]">
-                            <Check className="h-4 w-4 shrink-0" aria-hidden /> All set — Orbit is saving on its own.
-                          </div>
-                        )}
-                      </>
-                    );
-                  })()}
+                <div className="mt-5">
+                  {analytics.hasData ? (
+                    <SavingsArea data={analytics.savingsSeries} />
+                  ) : (
+                    <div className="flex h-[250px] flex-col items-center justify-center rounded-xl border border-dashed border-[var(--border)] px-6 text-center">
+                      <TrendingUp className="h-7 w-7 text-[var(--faint)]" aria-hidden />
+                      <p className="mt-3 text-[14px] font-medium text-[var(--muted)]">No savings yet</p>
+                      <p className="mt-1 max-w-[20rem] text-[13px] text-[var(--faint)]">Your growth chart appears here once Orbit starts setting money aside from your spending.</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
