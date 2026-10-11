@@ -102,9 +102,6 @@ const truncate = (a: string, n = 4) => (a.length <= n * 2 + 1 ? a : `${a.slice(0
 const solTx = (s: string) => `https://solscan.io/tx/${s}?cluster=devnet`;
 const solAcct = (a: string) => `https://solscan.io/account/${a}?cluster=devnet`;
 
-// Placeholder shown only until there are real transactions (fresh account).
-const SAMPLE_LINE = [15, 25, 30, 45, 55, 75, 90, 110, 130, 160];
-const SAMPLE_LINE_LABELS = ["", "", "", "", "", "", "", "", "", "now"];
 // Landing-matched building blocks: a mono uppercase eyebrow + a soft surface card.
 const eyebrow = "font-mono text-[12px] font-medium uppercase tracking-[0.24em] text-[var(--faint)]";
 const CARD = "rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-7";
@@ -872,9 +869,11 @@ export default function Home() {
           {/* ═══════════ HOME ═══════════ */}
           {tab === "home" && (
             <div className="w-full space-y-5">
+              {/* Total saved (60%) + In vault (20%) + Set aside (20%), one row */}
+              <div className="grid grid-cols-1 gap-5 lg:grid-cols-5">
               {/* Balance — a dark cosmic hero panel, mirroring the landing hero */}
               <section
-                className="dark relative isolate overflow-hidden rounded-[2rem] text-white"
+                className="dark relative isolate overflow-hidden rounded-[2rem] text-white lg:col-span-3"
                 style={{ "--accent": "#35f0c6", "--accent-strong": "#5cf5d2", "--on-accent": "#06251c" } as React.CSSProperties}
               >
                 <div className="absolute inset-0 z-0 animate-slow-zoom bg-cover bg-center" style={{ backgroundImage: "url('/hero.webp')" }} aria-hidden />
@@ -916,9 +915,8 @@ export default function Home() {
                 </div>
               </section>
 
-              {/* In vault + Set aside */}
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                <div className={CARD}>
+              {/* In vault (20%) */}
+                <div className={`${CARD} lg:col-span-1`}>
                   <div className="flex items-center justify-between">
                     <span className={eyebrow}>In vault</span>
                     <span className="grid h-9 w-9 place-items-center rounded-full bg-[var(--foreground)] text-[var(--background)]"><Coins className="h-4 w-4" aria-hidden /></span>
@@ -926,7 +924,7 @@ export default function Home() {
                   <div className="mt-4 font-display text-[clamp(1.75rem,4vw,2.5rem)] font-semibold leading-none tabular-nums text-[var(--accent-strong)]">{usd(principalUsd)}</div>
                   <p className="mt-2 text-[13px] leading-relaxed text-[var(--muted)]">Invested on-chain and earning yield. Only you can withdraw it.</p>
                 </div>
-                <div className={CARD}>
+                <div className={`${CARD} lg:col-span-1`}>
                   <div className="flex items-center justify-between">
                     <span className={eyebrow}>Set aside</span>
                     <span className="grid h-9 w-9 place-items-center rounded-full bg-[var(--foreground)] text-[var(--background)]"><Landmark className="h-4 w-4" aria-hidden /></span>
@@ -953,16 +951,28 @@ export default function Home() {
                   <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[var(--foreground)] text-[var(--background)]"><TrendingUp className="h-4 w-4" aria-hidden /></span>
                 </div>
                 <div className="mt-5 h-[260px] lg:h-[300px]">
-                  <LineArea
-                    fill
-                    series={[{ label: "Saved", points: analytics.hasData ? analytics.savingsLine : SAMPLE_LINE }]}
-                    xLabels={analytics.hasData ? analytics.savingsLabels : SAMPLE_LINE_LABELS}
-                    fmtY={(v) => `$${v >= 1000 ? `${Math.round(v / 1000)}k` : Math.round(v)}`}
-                  />
+                  {analytics.hasData ? (
+                    <LineArea
+                      fill
+                      series={[{ label: "Saved", points: analytics.savingsLine }]}
+                      xLabels={analytics.savingsLabels}
+                      fmtY={(v) => `$${v >= 1000 ? `${Math.round(v / 1000)}k` : Math.round(v)}`}
+                    />
+                  ) : (
+                    <div className="flex h-full flex-col items-center justify-center rounded-xl border border-dashed border-[var(--border)] px-6 text-center">
+                      <TrendingUp className="h-7 w-7 text-[var(--faint)]" aria-hidden />
+                      <p className="mt-3 text-[14px] font-medium text-[var(--muted)]">No savings yet</p>
+                      <p className="mt-1 max-w-[20rem] text-[13px] text-[var(--faint)]">
+                        Your growth curve appears here once Orbit starts setting money aside from your spending.
+                      </p>
+                    </div>
+                  )}
                 </div>
-                <div className="mt-2 flex items-center gap-2 text-[13px] text-[var(--muted)]">
-                  <span className="h-3 w-3 rounded-[3px] bg-[var(--accent)]" aria-hidden /> {analytics.hasData ? "Your savings, building up over time" : "Sample — your real curve appears once you start saving"}
-                </div>
+                {analytics.hasData && (
+                  <div className="mt-2 flex items-center gap-2 text-[13px] text-[var(--muted)]">
+                    <span className="h-3 w-3 rounded-[3px] bg-[var(--accent)]" aria-hidden /> Your savings, building up over time
+                  </div>
+                )}
               </div>
             </div>
           )}
