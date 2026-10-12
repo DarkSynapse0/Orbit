@@ -10,7 +10,8 @@ import { Wallet, Coins, ArrowDownToLine, ArrowUpFromLine, Copy, Check, ExternalL
 import { PhantomMark } from "@/components/landing/BrandMarks";
 import { InfoDot } from "@/components/ui/info-dot";
 import idl from "@/idl/orbit_vault.json";
-import { OrbitWalletName } from "@/lib/orbitWallet";
+import { OrbitWalletName, setPassphraseProvider } from "@/lib/orbitWallet";
+import { PassphraseModal, type PphRequest } from "@/components/PassphraseModal";
 import { apiFetch } from "@/lib/api";
 import { logActivity } from "@/lib/activity";
 
@@ -41,17 +42,35 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
+  // The embedded wallet asks for a passphrase through this modal (not window.prompt, which
+  // browsers block when it's fired from a deferred effect instead of a direct click).
+  const [pphReq, setPphReq] = useState<PphRequest | null>(null);
+  useEffect(() => {
+    setPassphraseProvider(
+      (mode) =>
+        new Promise<string | null>((resolve) =>
+          setPphReq({ mode, resolve: (v) => { setPphReq(null); resolve(v); } }),
+        ),
+    );
+  }, []);
+
   // Non-crypto onboarding: create an in-app embedded wallet and connect it. select() switches
   // the active adapter; we connect once it's the Orbit one.
   const [creating, setCreating] = useState(false);
   const createAccount = useCallback(() => {
+    setStatus(null);
     setCreating(true);
     select(OrbitWalletName);
   }, [select]);
   useEffect(() => {
     if (creating && activeWallet?.adapter.name === OrbitWalletName && !connected && !connecting) {
       connect()
-        .catch(() => {})
+        .catch((e) => {
+          // Surface the failure instead of leaving the button looking dead. Cancelling the
+          // passphrase dialog is a quiet no-op; anything else gets shown.
+          const msg = (e as Error)?.message ?? "";
+          if (msg !== "Passphrase required") setStatus(`Couldn't create your account: ${msg || "please try again."}`);
+        })
         .finally(() => setCreating(false));
     }
   }, [creating, activeWallet, connected, connecting, connect]);
@@ -245,6 +264,7 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
 
   return (
     <section className="mt-6">
+      <PassphraseModal req={pphReq} />
       <div className="rounded-2xl bg-[var(--surface)] p-5">
         <div className="mb-4 flex items-center gap-1.5 font-display text-[16px] font-bold">
           <ShieldCheck className="h-4 w-4 text-[var(--primary-strong)]" aria-hidden /> Your vault
@@ -271,6 +291,7 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
               Create an account
             </button>
             <div className="text-[12px] text-[var(--muted)]">No wallet, no seed phrase — Orbit makes one for you.</div>
+            {status && <div className="w-full rounded-lg bg-[var(--accent-soft)] px-3 py-2 text-[12px] text-[var(--accent-strong)]">{status}</div>}
             <div className="flex w-full items-center gap-3 text-[10px] uppercase tracking-wide text-[var(--faint)]">
               <span className="h-px flex-1 bg-[var(--border)]" /> or <span className="h-px flex-1 bg-[var(--border)]" />
             </div>
