@@ -10,7 +10,7 @@ import { Wallet, Coins, ArrowDownToLine, ArrowUpFromLine, Copy, Check, ExternalL
 import { PhantomMark } from "@/components/landing/BrandMarks";
 import { InfoDot } from "@/components/ui/info-dot";
 import idl from "@/idl/orbit_vault.json";
-import { OrbitWalletName, setPassphraseProvider } from "@/lib/orbitWallet";
+import { OrbitWalletName, setPassphraseProvider, hasEmbeddedAccount, forgetEmbeddedAccount } from "@/lib/orbitWallet";
 import { PassphraseModal, type PphRequest } from "@/components/PassphraseModal";
 import { apiFetch } from "@/lib/api";
 import { logActivity } from "@/lib/activity";
@@ -55,13 +55,22 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
   }, []);
 
   // Non-crypto onboarding: create an in-app embedded wallet and connect it. select() switches
-  // the active adapter; we connect once it's the Orbit one.
+  // the active adapter; we connect once it's the Orbit one. If a stored account already
+  // exists in this browser, this flow unlocks it instead of creating a new one.
   const [creating, setCreating] = useState(false);
+  const [hasAccount, setHasAccount] = useState(false);
+  useEffect(() => setHasAccount(hasEmbeddedAccount()), []);
   const createAccount = useCallback(() => {
     setStatus(null);
     setCreating(true);
     select(OrbitWalletName);
   }, [select]);
+  // Lost-passphrase escape hatch: wipe the stored account so a fresh one can be made.
+  const startOver = useCallback(() => {
+    forgetEmbeddedAccount();
+    setHasAccount(false);
+    setStatus(null);
+  }, []);
   useEffect(() => {
     if (creating && activeWallet?.adapter.name === OrbitWalletName && !connected && !connecting) {
       connect()
@@ -69,7 +78,9 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
           // Surface the failure instead of leaving the button looking dead. Cancelling the
           // passphrase dialog is a quiet no-op; anything else gets shown.
           const msg = (e as Error)?.message ?? "";
-          if (msg !== "Passphrase required") setStatus(`Couldn't create your account: ${msg || "please try again."}`);
+          if (msg === "Passphrase required") return;
+          if (msg === "Incorrect passphrase") setStatus("Incorrect passphrase. Try again, or start over to make a new account.");
+          else setStatus(`Couldn't open your account: ${msg || "please try again."}`);
         })
         .finally(() => setCreating(false));
     }
@@ -278,8 +289,8 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
               <Wallet className="h-5 w-5" aria-hidden />
             </span>
             <div>
-              <div className="text-[16px] font-semibold">Open your vault</div>
-              <div className="mt-1 text-[14px] leading-relaxed text-[var(--muted)]">One vault, fully yours. Orbit funds it automatically; only you can withdraw.</div>
+              <div className="text-[16px] font-semibold">{hasAccount ? "Unlock your vault" : "Open your vault"}</div>
+              <div className="mt-1 text-[14px] leading-relaxed text-[var(--muted)]">{hasAccount ? "You already have an Orbit account on this device. Enter its passphrase to unlock it." : "One vault, fully yours. Orbit funds it automatically; only you can withdraw."}</div>
             </div>
             <button
               type="button"
@@ -288,9 +299,14 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
               className="mt-1 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--accent)] text-sm font-semibold text-[var(--on-accent)] transition-opacity hover:opacity-90 active:scale-[0.99] disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/50"
             >
               {creating || connecting ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <UserPlus className="h-4 w-4" aria-hidden />}
-              Create an account
+              {hasAccount ? "Unlock your account" : "Create an account"}
             </button>
-            <div className="text-[12px] text-[var(--muted)]">No wallet, no seed phrase — Orbit makes one for you.</div>
+            <div className="text-[12px] text-[var(--muted)]">{hasAccount ? "Forgot your passphrase? It can't be recovered — start over to make a new account." : "No wallet, no seed phrase — Orbit makes one for you."}</div>
+            {hasAccount && (
+              <button type="button" onClick={startOver} className="text-[12px] font-medium text-[var(--accent-strong)] underline-offset-2 hover:underline">
+                Start over with a new account
+              </button>
+            )}
             {status && <div className="w-full rounded-lg bg-[var(--accent-soft)] px-3 py-2 text-[12px] text-[var(--accent-strong)]">{status}</div>}
             <div className="flex w-full items-center gap-3 text-[10px] uppercase tracking-wide text-[var(--faint)]">
               <span className="h-px flex-1 bg-[var(--border)]" /> or <span className="h-px flex-1 bg-[var(--border)]" />

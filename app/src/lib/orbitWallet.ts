@@ -112,6 +112,18 @@ export function hasEmbeddedAccount(): boolean {
   return typeof window !== "undefined" && (!!window.localStorage.getItem(LS_V2) || !!window.localStorage.getItem(LS_V1));
 }
 
+/**
+ * Wipe the stored embedded account from this browser so a fresh one can be created.
+ * Used when a passphrase is lost — on devnet the funds are test-only, so starting over
+ * is safe. (Production custody is server-side, where this becomes an account recovery flow.)
+ */
+export function forgetEmbeddedAccount(): void {
+  if (typeof window === "undefined") return;
+  window.localStorage.removeItem(LS_V2);
+  window.localStorage.removeItem(LS_V1);
+  window.sessionStorage.removeItem(SS_KEY);
+}
+
 export class OrbitWalletAdapter extends BaseSignerWalletAdapter {
   name = OrbitWalletName;
   url = "https://orbit.savings";
