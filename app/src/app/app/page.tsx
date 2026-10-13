@@ -48,6 +48,7 @@ import { apiFetch } from "@/lib/api";
 import { AuthScreen } from "@/components/AuthScreen";
 import { UserMenu, Avatar } from "@/components/UserMenu";
 import { SavingsArea } from "@/components/dashboard/SavingsArea";
+import { OnboardingFlow } from "@/components/dashboard/OnboardingFlow";
 import { SavingsGoals } from "@/components/dashboard/SavingsGoals";
 import { SecurityCenter } from "@/components/dashboard/SecurityCenter";
 import { HelpCenter } from "@/components/dashboard/HelpCenter";
@@ -224,6 +225,17 @@ export default function Home() {
   const [tab, setTab] = useState<TabId>("home");
   const [navId, setNavId] = useState<string>("dashboard");
   const [invited, setInvited] = useState(false);
+  // First-run onboarding: dismissible, and remembered so it doesn't nag on every visit.
+  const [onboardDismissed, setOnboardDismissed] = useState(false);
+  useEffect(() => {
+    setOnboardDismissed(typeof window !== "undefined" && localStorage.getItem("orbit.onboarding.dismissed") === "1");
+  }, []);
+  const dismissOnboarding = () => {
+    setOnboardDismissed(true);
+    try {
+      localStorage.setItem("orbit.onboarding.dismissed", "1");
+    } catch {}
+  };
   const [query, setQuery] = useState("");
   const [historyTab, setHistoryTab] = useState<string>("all");
   const [actPage, setActPage] = useState(1);
@@ -910,6 +922,16 @@ export default function Home() {
           {/* ═══════════ HOME ═══════════ */}
           {tab === "home" && (
             <div className="w-full space-y-5">
+              {/* First-run onboarding: directional create-vault -> connect-bank flow */}
+              {!onboardDismissed && !(connected && !!plaid?.connected) && (
+                <OnboardingFlow
+                  vaultDone={connected}
+                  bankDone={!!plaid?.connected}
+                  onGoVault={() => setTab("grow")}
+                  onGoBank={() => setTab("grow")}
+                  onDismiss={dismissOnboarding}
+                />
+              )}
               {/* Balance — a dark cosmic hero panel, mirroring the landing hero */}
               <section
                 className="dark relative isolate overflow-hidden rounded-[2rem] text-white"
