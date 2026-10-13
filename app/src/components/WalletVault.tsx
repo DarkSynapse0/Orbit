@@ -12,6 +12,7 @@ import { InfoDot } from "@/components/ui/info-dot";
 import idl from "@/idl/orbit_vault.json";
 import { OrbitWalletName, setPassphraseProvider, hasEmbeddedAccount, forgetEmbeddedAccount } from "@/lib/orbitWallet";
 import { PassphraseModal, type PphRequest } from "@/components/PassphraseModal";
+import { WithdrawSuccessDialog } from "@/components/WithdrawSuccessDialog";
 import { apiFetch } from "@/lib/api";
 import { logActivity } from "@/lib/activity";
 
@@ -37,6 +38,8 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
   const [status, setStatus] = useState<string | null>(null);
   const [lastSig, setLastSig] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  // Shown as a success dialog when a withdrawal confirms on-chain (with a verify link).
+  const [withdrawDone, setWithdrawDone] = useState<{ amount: number; sig: string } | null>(null);
   // Wallet state isn't known during SSR; render the card only after mount to avoid a
   // hydration mismatch inside WalletMultiButton.
   const [mounted, setMounted] = useState(false);
@@ -271,11 +274,16 @@ export function WalletVault({ onChanged }: { onChanged?: () => void }) {
       await new Promise((r) => setTimeout(r, 1300));
       setStatus(`$${amt.toFixed(2)} on its way to your bank 🎉`);
       logActivity("withdraw", `Withdrew $${amt.toFixed(2)} to your bank`);
+      // Pop a success dialog with a link to verify the real on-chain withdrawal.
+      setWithdrawDone({ amount: amt, sig });
     });
 
   return (
     <section className="mt-6">
       <PassphraseModal req={pphReq} />
+      {withdrawDone && (
+        <WithdrawSuccessDialog amount={withdrawDone.amount} sig={withdrawDone.sig} onClose={() => setWithdrawDone(null)} />
+      )}
       <div className="rounded-2xl bg-[var(--surface)] p-5">
         <div className="mb-4 flex items-center gap-1.5 font-display text-[16px] font-bold">
           <ShieldCheck className="h-4 w-4 text-[var(--primary-strong)]" aria-hidden /> Your vault
