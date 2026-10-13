@@ -74,26 +74,26 @@ function AddressRow({ label, address }: { label: string; address: string }) {
     });
   };
   return (
-    <div className="flex items-center justify-between gap-3 rounded-xl bg-black/20 px-3.5 py-2.5">
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-[var(--border)] bg-[var(--background)] px-3.5 py-2.5">
       <div className="min-w-0">
-        <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/45">{label}</div>
-        <div className="mt-0.5 truncate font-mono text-[13px] text-white/90">{short}</div>
+        <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--faint)]">{label}</div>
+        <div className="mt-0.5 truncate font-mono text-[13px] text-[var(--foreground)]">{short}</div>
       </div>
       <div className="flex shrink-0 items-center gap-1.5">
         <button
           type="button"
           onClick={copy}
           aria-label={`Copy ${label} address`}
-          className="grid h-8 w-8 place-items-center rounded-lg text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+          className="grid h-8 w-8 place-items-center rounded-lg text-[var(--muted)] transition-colors hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
         >
-          {copied ? <Check className="h-4 w-4 text-[#35f0c6]" aria-hidden /> : <Copy className="h-3.5 w-3.5" aria-hidden />}
+          {copied ? <Check className="h-4 w-4 text-[var(--accent-strong)]" aria-hidden /> : <Copy className="h-3.5 w-3.5" aria-hidden />}
         </button>
         <a
           href={solAcct(address)}
           target="_blank"
           rel="noreferrer"
           aria-label={`Open ${label} on Solscan`}
-          className="grid h-8 w-8 place-items-center rounded-lg text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+          className="grid h-8 w-8 place-items-center rounded-lg text-[var(--muted)] transition-colors hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
         >
           <ExternalLink className="h-3.5 w-3.5" aria-hidden />
         </a>
@@ -172,22 +172,17 @@ export function SecurityCenter({
   return (
     <div className="w-full space-y-6">
       {/* ── Hero: the one promise that matters ── */}
-      <section
-        className="dark relative isolate overflow-hidden rounded-[2rem] p-7 text-white sm:p-9"
-        style={{ "--accent": "#35f0c6" } as React.CSSProperties}
-      >
-        <div className="absolute inset-0 -z-10 bg-[#0b1411]" aria-hidden />
-        <div className="pointer-events-none absolute -right-10 -top-16 -z-10 h-64 w-64 rounded-full bg-[var(--accent)] opacity-20 blur-[90px]" aria-hidden />
+      <section className="relative isolate overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-7 sm:p-9">
         <div className="flex items-start gap-4">
-          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white/10 text-[var(--accent)] backdrop-blur">
+          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)]">
             <ShieldCheck className="h-7 w-7" aria-hidden />
           </span>
           <div className="min-w-0">
-            <div className="font-mono text-[12px] uppercase tracking-[0.24em] text-white/50">Security</div>
+            <div className="font-mono text-[12px] uppercase tracking-[0.24em] text-[var(--faint)]">Security</div>
             <h2 className="mt-1.5 font-display text-[clamp(1.5rem,3.4vw,2.1rem)] font-semibold leading-tight tracking-[-0.02em]">
               Your money is yours. Always.
             </h2>
-            <p className="mt-2 max-w-xl text-[13.5px] leading-relaxed text-white/70">
+            <p className="mt-2 max-w-xl text-[13.5px] leading-relaxed text-[var(--muted)]">
               Orbit is fully self-custodial. Your savings live in an on-chain vault only you can open, your bank login
               never touches our servers, and every balance is public on Solana for you to verify.
             </p>
@@ -225,20 +220,17 @@ export function SecurityCenter({
       </div>
 
       {/* ── Verify it yourself ── */}
-      <section
-        className="dark relative overflow-hidden rounded-3xl bg-[#0b1411] p-6 text-white sm:p-7"
-        style={{ "--accent": "#35f0c6" } as React.CSSProperties}
-      >
+      <section className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-7">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h3 className="font-display text-[16px] font-semibold tracking-[-0.01em]">Don&apos;t trust. Verify.</h3>
-            <p className="mt-1 max-w-md text-[13px] leading-relaxed text-white/60">
+            <p className="mt-1 max-w-md text-[13px] leading-relaxed text-[var(--muted)]">
               Your vault and the program that controls it are public. Inspect them on the Solana explorer, or copy the
               addresses and check for yourself.
             </p>
           </div>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-[12px] font-medium text-[var(--accent)]">
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" aria-hidden /> Solana devnet
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--accent-soft)] px-3 py-1 text-[12px] font-medium text-[var(--accent-strong)]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent-strong)]" aria-hidden /> Solana devnet
           </span>
         </div>
         <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
@@ -246,7 +238,7 @@ export function SecurityCenter({
           {vaultAccount ? (
             <AddressRow label="Your vault account" address={vaultAccount} />
           ) : (
-            <div className="flex items-center rounded-xl bg-black/20 px-3.5 py-2.5 text-[12px] text-white/45">
+            <div className="flex items-center rounded-xl border border-[var(--border)] bg-[var(--background)] px-3.5 py-2.5 text-[12px] text-[var(--faint)]">
               Your vault account appears here after your first deposit.
             </div>
           )}
