@@ -2,20 +2,29 @@
 
 import { CheckCircle2, ExternalLink, X } from "lucide-react";
 
-// Success dialog shown after a withdrawal confirms on-chain. Instead of dumping a raw
-// signature, it links straight to the transaction on Solana Explorer (and Solscan) so
-// anyone can verify the withdrawal themselves.
-export function WithdrawSuccessDialog({
+// Success dialog shown after a deposit or withdrawal confirms on-chain. Instead of dumping
+// a raw signature, it links straight to the transaction on Solana Explorer (and Solscan)
+// so anyone can verify the real on-chain move themselves.
+export type TxKind = "deposit" | "withdraw";
+
+export function TxSuccessDialog({
+  kind,
   amount,
   sig,
   onClose,
 }: {
+  kind: TxKind;
   amount: number;
   sig: string;
   onClose: () => void;
 }) {
   const explorer = `https://explorer.solana.com/tx/${sig}?cluster=devnet`;
   const solscan = `https://solscan.io/tx/${sig}?cluster=devnet`;
+  const title = kind === "withdraw" ? "Withdrawal on its way" : "Deposit confirmed";
+  const message =
+    kind === "withdraw"
+      ? "is heading back to your bank. The on-chain withdrawal is confirmed and public, so you can verify it yourself."
+      : "is now in your vault, earning yield on-chain. The deposit is confirmed and public, so you can verify it yourself.";
 
   return (
     <div
@@ -42,10 +51,9 @@ export function WithdrawSuccessDialog({
           <CheckCircle2 className="h-7 w-7" aria-hidden />
         </span>
 
-        <div className="mt-4 font-display text-[18px] font-bold">Withdrawal on its way</div>
+        <div className="mt-4 font-display text-[18px] font-bold">{title}</div>
         <p className="mt-1.5 text-[13px] leading-relaxed text-[var(--muted)]">
-          <span className="font-semibold text-[var(--foreground)]">${amount.toFixed(2)}</span> is heading back to your bank. The
-          on-chain withdrawal is confirmed and public, so you can verify it yourself.
+          <span className="font-semibold text-[var(--foreground)]">${amount.toFixed(2)}</span> {message}
         </p>
 
         <a
